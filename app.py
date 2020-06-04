@@ -144,17 +144,17 @@ def create_post():
 
     blocks = request.blocks
     # more stuff needed
-    block_objs = []
+    block_ids = []
     for b in blocks:
         block_obj = Block(user_obj, post_obj, b) # TODO check b
-        blocks_objs.append(block_obj)
+        blocks_ids.append(block_obj.id)
         block_data = blocks_objs.__dict__
         blocks.insert_one(block_data)
 
-    post_obj.blocks = blocks_objs
+    post_obj.blocks = blocks_ids
     post_data = post_objs.__dict__
 
-    user_obj.history.append(post_obj)
+    user_obj.history.append(post_obj.id)
     # may need to resave?
 
     posts.insert_one(post_data)
