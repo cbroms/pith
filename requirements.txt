@@ -4,3 +4,4 @@
 # <pkg>
 # <pkg> == <ver>
 
+flask-socketio
