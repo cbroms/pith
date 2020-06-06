@@ -1,3 +1,8 @@
+"""
+Peruse following for more efficient updates:
+https://stackoverflow.com/questions/4372797/how-do-i-update-a-mongo-document-after-inserting-it
+"""
+
 from pymongo import MongoClient 
 from user import User
 from post import Post
@@ -5,12 +10,10 @@ from block import Block
 
 
 client = MongoClient('mongodb://localhost:27017')
-"""
 try:
     client.drop_database("db")
 except Exception:
     print("New database")
-"""
 db = client["db"]
 users = db["users"]
 posts = db["posts"]
@@ -41,6 +44,11 @@ def insert_user(user_obj):
     users.insert_one(user_data)
 
 
+def update_user(user_obj):
+    user_data = user_obj.__dict__
+    users.replace_one({"_id" : user_data["_id"]}, user_data)
+
+
 def get_posts():
     post_cursor = posts.find()
     post_list = []
@@ -65,6 +73,11 @@ def insert_post(post_obj):
     posts.insert_one(post_data)
 
 
+def update_post(post_obj):
+    post_data = post_obj.__dict__
+    posts.replace_one({"_id" : post_data["_id"]}, post_data)
+
+
 def get_blocks():
     block_cursor = blocks.find()
     block_list = []
@@ -87,3 +100,8 @@ def get_block_obj(block_id):
 def insert_block(block_obj):
     block_data = block_obj.__dict__
     blocks.insert_one(block_data)
+
+
+def update_block(block_obj):
+    block_data = block_obj.__dict__
+    blocks.replace_one({"_id" : block_data["_id"]}, block_data)
