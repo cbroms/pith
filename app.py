@@ -1,74 +1,38 @@
 from flask import Flask, jsonify
-from flask_socketio import SocketIO
-from pymongo import MongoClient
-import uuid
+from flask_socketio import SocketIO, send
+import utils
+from user import User
+from post import Post
+from block import Block
 
 
 app = Flask(__name__)
 socketio = SocketIO(app)
-client = MongoClient('mongodb://localhost:27017')
-db = client[db]
-users = db["users"]
-posts = db["posts"]
-blocks = db["blocks"]
-
-
-class User(Document):
-    def __init__(self, ip, **entries):
-        if entries:
-            self.__dict__.update(entries)
-        else:
-            self.id = ip
-            self.library = {}
-            self.library["posts"] = [] # saved posts
-            self.library["blocks"] = [] # saved blocks
-            self.history = {} # list of posts
-
-class Block(Document):
-    def __init__(self, user, post, body, **entries):
-        if entries:
-            self.__dict__.update(entries)
-        else:
-            self.id = uuid.getnode()
-            self.user = user
-            self.post = post
-            self.tags = []
-            self.body = body
-
-class Post(Document):
-    def __init__(self, user, blocks=None, **entries):
-        if entries:
-            self.__dict__.update(entries)
-        else:
-            self.id = uuid.getnode()
-            self.user = user
-            self.tags = []
-            self.blocks = blocks
 
 
 #@app.route('/user', methods=["GET"])
 @socketio.on('get_users')
 def get_users(json):
-    return users.find()
+    return utils.get_users()
 
 
 #@app.route('/post', methods=["GET"])
 @socketio.on('get_posts')
 def get_posts(json):
-    return posts.find()
+    return utils.get_posts()
 
 
 #@app.route('/block', methods=["GET"])
 @socketio.on('get_blocks')
 def get_blocks(json):
-    return blocks.find()
+    return utils.get_blocks()
 
 
 #@app.route('/user/<:user>', methods=["GET"])
 @socketio.on('get_user')
 def get_user(json):
     user_id = json.user_id
-    user_data = users.find_one({ 'id': user_id }})
+    user_data = utils.get_user(user_id) 
     return user_data
 
 
@@ -76,7 +40,7 @@ def get_user(json):
 @socketio.on('get_post')
 def get_post(json):
     post_id = json.post_id
-    post_data = posts.find_one({ 'id': post_id }})
+    post_data = utils.get_post(post_id) 
     return post_data
 
 
@@ -84,26 +48,8 @@ def get_post(json):
 @socketio.on('get_block')
 def get_block(json):
     block_id = json.block_id
-    block_data = blocks.find_one({ 'id': block_id }})
+    block_data = utils.get_block(block_id)
     return block_data
-
-
-def get_user_obj(user_id):
-    user_data = get_user(user_id)
-    user_obj = User(**user_data)
-    return user_obj
-
-
-def get_post_obj(post_id):
-    post_data = get_post(post_id)
-    post_obj = Post(**post_data)
-    return post_obj
-
-
-def get_block_obj(block_id):
-    block_data = get_block(block_id)
-    block_obj = Block(**block_data)
-    return block_obj
 
 
 #@app.route('/user/<:user>/post/save', methods=["POST"])
@@ -112,8 +58,7 @@ def save_post(json):
     post_id = json.post
     user_obj = get_user_obj(user_id)
     user_obj.library["posts"].append(post_id)
-    user_data = user_obj.__dict__
-    users.insert_one(user_data)
+    utils.insert_user(user_obj)
 
 
 #@app.route('/user/<:user>/block/save', methods=["POST"])
@@ -122,8 +67,7 @@ def save_block(json):
     block_id = json.block
     user_obj = get_user_obj(user_id)
     user_obj.library["blocks"].append(block_id)
-    user_data = user_obj.__dict__
-    users.insert_one(user_data)
+    utils.insert_user(user_obj)
 
 
 #@app.route('/posts/<:post>/tag/create', methods=["POST"])
@@ -133,8 +77,7 @@ def post_add_tag(json):
     tag = json.tag
     post_obj = get_post_obj(post_id)
     post_obj.tags.append(tag)
-    post_data = post_obj.__dict__
-    posts.insert_one(post_data)
+    utils.insert_post(post_obj)
 
 
 #@app.route('/blocks/<:block>/tag/create', methods=["PUT"])
@@ -144,8 +87,7 @@ def block_add_tag(json):
     tag = json.tag
     block_obj = get_block_obj(block_id)
     block_obj.tags.append(tag)
-    block_data = block_obj.__dict__
-    blocks.insert_one(block_data)
+    utils.insert_block(block_obj)
 
 
 #@app.route('/user/<:user>', methods=["POST"])
@@ -153,8 +95,7 @@ def block_add_tag(json):
 def create_user(json):
     ip = json.ip
     user_obj = User(ip)
-    user_data = user_obj.__dict__
-    users.insert_one(user_data)
+    utils.insert_user(user_obj)
 
 
 #@app.route('/user/<:user>/post/create', methods=["POST"])
@@ -163,26 +104,24 @@ def create_post(json):
     user_id = json.user_id
     user_obj = get_user_obj(user_id)
 
-    post_obj = Post(user_obj)
+    post_obj = Post(user_obj._id)
 
     blocks = json.blocks
     # TODO more processing needed?
     block_ids = []
     for b in blocks:
-        block_obj = Block(user_obj, post_obj, b) # TODO b 
-        blocks_ids.append(block_obj.id)
-        block_data = blocks_obj.__dict__
-        blocks.insert_one(block_data)
+        block_obj = Block(user_obj._id, post_obj._id, b) # TODO b 
+        blocks_ids.append(block_obj._id)
+        utils.insert_block(block_obj)
 
     post_obj.blocks = blocks_ids
-    post_data = post_objs.__dict__
+    utils.insert_post(post_obj)
 
-    user_obj.history.append(post_obj.id)
-    user_data = user_obj.__dict__
-    users.insert_one(user_data)
+    user_obj.history.append(post_obj._id)
+    utils.insert_user(user_obj)
 
-    posts.insert_one(post_data)
-    return jsonify(**post_data)
+    post_data = post_obj.__dict__
+    return send(post_data, json=True)
 
 
 if __name__ == '__main__':
