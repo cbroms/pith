@@ -5,10 +5,12 @@ from block import Block
 
 
 client = MongoClient('mongodb://localhost:27017')
+"""
 try:
     client.drop_database("db")
 except Exception:
     print("New database")
+"""
 db = client["db"]
 users = db["users"]
 posts = db["posts"]

@@ -1,7 +1,6 @@
 """
 sudo service mongodb start
 -------------------------------
-sudo service mongodb restart
 sudo service mongodb stop
 """
 import sys
