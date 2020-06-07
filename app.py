@@ -33,38 +33,56 @@ def test_disconnect():
 
 @socketio.on('get_users')
 def get_users(json):
-    emit('~get_users', dumps(utils.get_users(), cls=UUIDEncoder))
+    on_event = '~get_users'
+    if "event_instance" in json:
+        on_event = on_event + ':' + json["event_instance"]
+    emit(on_event, dumps(utils.get_users(), cls=UUIDEncoder))
 
 
 @socketio.on('get_posts')
 def get_posts(json):
-    emit('~get_posts', dumps(utils.get_posts(), cls=UUIDEncoder))
+    on_event = '~get_posts'
+    if "event_instance" in json:
+        on_event = on_event + ':' + json["event_instance"]
+    emit(on_event, dumps(utils.get_posts(), cls=UUIDEncoder))
 
 
 @socketio.on('get_blocks')
 def get_blocks(json):
-    emit('~get_blocks', dumps(utils.get_blocks(), cls=UUIDEncoder))
+    on_event = '~get_blocks'
+    if "event_instance" in json:
+        on_event = on_event + ':' + json["event_instance"]
+    emit(on_event, dumps(utils.get_blocks(), cls=UUIDEncoder))
 
 
 @socketio.on('get_user')
 def get_user(json):
     user_id = json["user_id"]
     user_data = utils.get_user(user_id) 
-    emit('~get_user', dumps(user_data, cls=UUIDEncoder))
+    on_event = '~get_user'
+    if "event_instance" in json:
+        on_event = on_event + ':' + json["event_instance"]
+    emit(on_event, dumps(user_data, cls=UUIDEncoder))
 
 
 @socketio.on('get_post')
 def get_post(json):
     post_id = json["post_id"]
     post_data = utils.get_post(post_id) 
-    emit('~get_post', dumps(post_data, cls=UUIDEncoder))
+    on_event = '~get_post'
+    if "event_instance" in json:
+        on_event = on_event + ':' + json["event_instance"]
+    emit(on_event, dumps(post_data, cls=UUIDEncoder))
 
 
 @socketio.on('get_block')
 def get_block(json):
     block_id = json["block_id"]
     block_data = utils.get_block(block_id)
-    emit('~get_block', dumps(block_data, cls=UUIDEncoder))
+    on_event = '~get_block'
+    if "event_instance" in json:
+        on_event = on_event + ':' + json["event_instance"]
+    emit(on_event, dumps(block_data, cls=UUIDEncoder))
 
 
 @socketio.on('save_post')
@@ -75,7 +93,10 @@ def save_post(json):
     user_obj.library["posts"].append(post_id)
     utils.update_user(user_obj)
     user_data = user_obj.__dict__
-    emit('~save_post', dumps(user_data, cls=UUIDEncoder))
+    on_event = '~save_post'
+    if "event_instance" in json:
+        on_event = on_event + ':' + json["event_instance"]
+    emit(on_event, dumps(user_data, cls=UUIDEncoder))
 
 
 @socketio.on('save_block')
@@ -86,7 +107,10 @@ def save_block(json):
     user_obj.library["blocks"].append(block_id)
     utils.update_user(user_obj)
     user_data = user_obj.__dict__
-    emit('~save_block', dumps(user_data, cls=UUIDEncoder))
+    on_event = '~save_block'
+    if "event_instance" in json:
+        on_event = on_event + ':' + json["event_instance"]
+    emit(on_event, dumps(user_data, cls=UUIDEncoder))
 
 
 @socketio.on('post_add_tag')
@@ -97,7 +121,10 @@ def post_add_tag(json):
     post_obj.tags.append(tag)
     utils.update_post(post_obj)
     post_data = post_obj.__dict__
-    emit('~post_add_tag', dumps(post_data, cls=UUIDEncoder))
+    on_event = '~post_add_tag'
+    if "event_instance" in json:
+        on_event = on_event + ':' + json["event_instance"]
+    emit(on_event, dumps(post_data, cls=UUIDEncoder))
 
 
 @socketio.on('block_add_tag')
@@ -108,7 +135,10 @@ def block_add_tag(json):
     block_obj.tags.append(tag)
     utils.update_block(block_obj)
     block_data = block_obj.__dict__
-    emit('~block_add_tag', dumps(block_data, cls=UUIDEncoder))
+    on_event = '~block_add_tag'
+    if "event_instance" in json:
+        on_event = on_event + ':' + json["event_instance"]
+    emit(on_event, dumps(block_data, cls=UUIDEncoder))
 
 
 @socketio.on('create_user')
@@ -117,7 +147,10 @@ def create_user(json):
     user_obj = User(ip)
     utils.insert_user(user_obj)
     user_data = user_obj.__dict__
-    emit('~create_user', dumps(user_data, cls=UUIDEncoder))
+    on_event = '~create_user'
+    if "event_instance" in json:
+        on_event = on_event + ':' + json["event_instance"]
+    emit(on_event, dumps(user_data, cls=UUIDEncoder))
 
 
 @socketio.on('create_post')
@@ -141,7 +174,10 @@ def create_post(json):
     utils.update_user(user_obj)
 
     post_data = post_obj.__dict__
-    emit('~create_post', dumps(post_data, cls=UUIDEncoder))
+    on_event = '~create_post'
+    if "event_instance" in json:
+        on_event = on_event + ':' + json["event_instance"]
+    emit(on_event, dumps(post_data, cls=UUIDEncoder))
 
 
 if __name__ == '__main__':

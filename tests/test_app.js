@@ -8,9 +8,13 @@ function simulate(head, fun_list) {
   args = head["args"]; // req
   apply_state = head["apply_state"]; // opt
   if (!apply_state) apply_state = identity;
+  event_instance = args["event_instance"];
+  on_event = '~' + fun;
+  if (event_instance) 
+    on_event = on_event + ':' + event_instance;
 
-  socket.emit(fun, args, function(data){});
-  socket.on('~'+fun, function(data){
+  socket.emit(fun, args);
+  socket.on(on_event, function(data){
     console.log('test_'+fun, data);
     fun_con(apply_state(data, fun_list));
   });
@@ -37,6 +41,9 @@ function identity(state, fun_list) {
 function give_user_id(state, fun_list) {
   var json = JSON.parse(state);
   for (var i = 0; i < fun_list.length; i++) {
+    // check if will be replaced
+    if (fun_list[i]["apply_state"] &&
+      fun_list[i]["apply_state"].name.includes("user_id")) break;
     fun_list[i]["args"]["user_id"] = json._id;
   }
   return fun_list;
@@ -46,6 +53,9 @@ function give_user_id(state, fun_list) {
 function give_first_post_id(state, fun_list) {
   var json = JSON.parse(state);
   for (var i = 0; i < fun_list.length; i++) {
+    // check if will be replaced
+    if (fun_list[i]["apply_state"] &&
+      fun_list[i]["apply_state"].name.includes("post_id")) break;
     fun_list[i]["args"]["post_id"] = json.history[0];
   }
   return fun_list;
@@ -55,6 +65,9 @@ function give_first_post_id(state, fun_list) {
 function give_first_block_id(state, fun_list) {
   var json = JSON.parse(state);
   for (var i = 0; i < fun_list.length; i++) {
+    // check if will be replaced
+    if (fun_list[i]["apply_state"] &&
+      fun_list[i]["apply_state"].name.includes("block_id")) break;
     fun_list[i]["args"]["block_id"] = json.blocks[0];
   }
   return fun_list;
@@ -67,12 +80,20 @@ function give_first_block_id(state, fun_list) {
 
 function main() {
   var ip_val = 12345;
-  /* 
-   * Due to the fact that the on-listener repeats, and information is
-   * not preserved outside of the on-listener, avoid testing the same 
-   * function twice in a sequence. :/
-   */
+  var ip_val2 = 67890;
   fun_con([
+    {
+      "fun": "get_users",
+      "args": {}
+    },
+    {
+      "fun": "get_posts",
+      "args": {}
+    },
+    {
+      "fun": "get_blocks",
+      "args": {}
+    },
     {
       "fun": "create_user", 
       "args": {user_id : ip_val},
@@ -80,7 +101,7 @@ function main() {
     },
     {
       "fun": "create_post",
-      "args": {blocks : ["hi", "bye", "yes", "no"]}
+      "args": {blocks : ["yes", "no"]}
     },
     {
       "fun": "get_user",
@@ -114,15 +135,54 @@ function main() {
     },
     {
       "fun": "get_users",
-      "args": {}
+      "args": {event_instance : "2"}
     },
     {
       "fun": "get_posts",
-      "args": {}
+      "args": {event_instance : "2"}
     },
     {
       "fun": "get_blocks",
-      "args": {}
+      "args": {event_instance : "2"}
+    },
+    {
+      "fun": "create_user", 
+      "args": {event_instance: "2", user_id : ip_val2},
+      "apply_state": give_user_id
+    },
+    {
+      "fun": "create_post",
+      "args": {event_instance: "2", blocks : ["hi", "bye"]}
+    },
+    {
+      "fun": "get_user",
+      "args": {event_instance: "2"},
+      "apply_state": give_first_post_id
+    },
+    {
+      "fun": "get_post",
+      "args": {event_instance: "2"},
+      "apply_state": give_first_block_id
+    },
+    {
+      "fun": "get_block",
+      "args": {event_instance: "2"}
+    },
+    {
+      "fun": "block_add_tag",
+      "args": {event_instance: "2", tag : "youreablock"}
+    },
+    {
+      "fun": "post_add_tag",
+      "args": {event_instance: "2", tag : "youreapost"}
+    },
+    {
+      "fun": "save_post",
+      "args": {event_instance: "2"}
+    },
+    {
+      "fun": "save_block",
+      "args": {event_instance: "2"}
     },
   ]);
 }
