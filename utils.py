@@ -4,9 +4,9 @@ https://stackoverflow.com/questions/4372797/how-do-i-update-a-mongo-document-aft
 """
 
 from pymongo import MongoClient 
-from user import User
-from post import Post
-from block import Block
+from models.user import User
+from models.post import Post
+from models.block import Block
 
 
 client = MongoClient('mongodb://localhost:27017')
@@ -19,6 +19,10 @@ users = db["users"]
 posts = db["posts"]
 blocks = db["blocks"]
 
+
+"""
+User getters and setters 
+"""
 
 def get_users():
     user_cursor = users.find()
@@ -48,6 +52,9 @@ def update_user(user_obj):
     user_data = user_obj.__dict__
     users.replace_one({"_id" : user_data["_id"]}, user_data)
 
+"""
+Post getters and setters 
+"""
 
 def get_posts():
     post_cursor = posts.find()
@@ -77,6 +84,10 @@ def update_post(post_obj):
     post_data = post_obj.__dict__
     posts.replace_one({"_id" : post_data["_id"]}, post_data)
 
+
+"""
+Block getters and setters 
+"""
 
 def get_blocks():
     block_cursor = blocks.find()
