@@ -100,18 +100,31 @@ def get_block(json):
 #     emit(on_event, dumps(user_data, cls=UUIDEncoder))
 
 
-# @socketio.on('save_block')
-# def save_block(json):
-#     block_id = json["block_id"]
-#     user_id = json["user_id"]
-#     user_obj = utils.get_user_obj(user_id)
-#     user_obj.library["blocks"].append(block_id)
-#     utils.update_user(user_obj)
-#     user_data = user_obj.__dict__
-#     on_event = '~save_block'
-#     if "event_instance" in json:
-#         on_event = on_event + ':' + json["event_instance"]
-#     emit(on_event, dumps(user_data, cls=UUIDEncoder))
+@socketio.on('save_block')
+def save_block(json):
+    block_id = json["block_id"]
+    user_id = json["user_id"]
+    user_obj = utils.get_user_obj(user_id)
+    user_obj.library["blocks"].append(block_id)
+    utils.update_user(user_obj)
+    
+    block_data = utils.get_block(block_id)
+
+    serialized = dumps(block_data, cls=UUIDEncoder)
+
+    # emit the event for the user that just added the block
+    emit("block_saved", serialized)
+    return serialized
+
+
+@socketio.on('get_saved_blocks')
+def get_saved_blocks(json):
+    user_id = json["user_id"]
+    user_obj = utils.get_user_obj(user_id)
+    blocks = user_obj.library["blocks"]
+    print(blocks)
+    return dumps(blocks, cls=UUIDEncoder)
+
 
 
 # @socketio.on('post_add_tag')
