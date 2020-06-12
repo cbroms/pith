@@ -2,6 +2,9 @@ import sys
 sys.path.append("..")
 
 import utils
+
+sys.path.append("../models/")
+
 from user import User
 from post import Post
 from block import Block

@@ -43,6 +43,12 @@ def get_posts():
     return dumps(utils.get_posts(), cls=UUIDEncoder)
 
 
+# get a list of all blocks for a given discussion
+@socketio.on('get_blocks')
+def get_blocks():
+    return dumps(utils.get_blocks(), cls=UUIDEncoder)
+
+
 # get a specific user with ID (IP address in base64)
 @socketio.on('get_user')
 def get_user(json):
@@ -57,26 +63,21 @@ def create_user(json):
     ip = json["user_id"]
 
     # try getting the user first
-    res = utils.get_user(ip)
+    user_data = utils.get_user(ip)
 
-    if res == None:
+    if user_data == None:
         user_obj = User(ip)
         utils.insert_user(user_obj)
         user_data = user_obj.__dict__
-        return dumps(user_data, cls=UUIDEncoder)
-    else:
-        return dumps(res, cls=UUIDEncoder)
+
+    return dumps(user_data, cls=UUIDEncoder)
 
 
-
-# @socketio.on('get_post')
-# def get_post(json):
-#     post_id = json["post_id"]
-#     post_data = utils.get_post(post_id) 
-#     on_event = '~get_post'
-#     if "event_instance" in json:
-#         on_event = on_event + ':' + json["event_instance"]
-#     emit(on_event, dumps(post_data, cls=UUIDEncoder))
+@socketio.on('get_post')
+def get_post(json):
+    post_id = json["post_id"]
+    post_data = utils.get_post(post_id) 
+    return dumps(post_data, cls=UUIDEncoder)
 
 
 @socketio.on('get_block')
@@ -86,18 +87,20 @@ def get_block(json):
     return dumps(block_data, cls=UUIDEncoder)
 
 
-# @socketio.on('save_post')
-# def save_post(json):
-#     post_id = json["post_id"]
-#     user_id = json["user_id"]
-#     user_obj = utils.get_user_obj(user_id)
-#     user_obj.library["posts"].append(post_id)
-#     utils.update_user(user_obj)
-#     user_data = user_obj.__dict__
-#     on_event = '~save_post'
-#     if "event_instance" in json:
-#         on_event = on_event + ':' + json["event_instance"]
-#     emit(on_event, dumps(user_data, cls=UUIDEncoder))
+@socketio.on('save_post')
+def save_post(json):
+    post_id = json["post_id"]
+    user_id = json["user_id"]
+    user_obj = utils.get_user_obj(user_id)
+    user_obj.library["posts"].append(post_id)
+    utils.update_user(user_obj)
+
+    post_data = utils.get_post(post_id)
+    serialized = dumps(post_data, cls=UUIDEncoder)
+
+    # emit the event for the user that just added the block
+    emit("post_saved", serialized)
+    return serialized
 
 
 @socketio.on('save_block')
@@ -109,7 +112,6 @@ def save_block(json):
     utils.update_user(user_obj)
     
     block_data = utils.get_block(block_id)
-
     serialized = dumps(block_data, cls=UUIDEncoder)
 
     # emit the event for the user that just added the block
@@ -117,14 +119,20 @@ def save_block(json):
     return serialized
 
 
+@socketio.on('get_saved_posts')
+def get_saved_posts(json):
+    user_id = json["user_id"]
+    user_obj = utils.get_user_obj(user_id)
+    posts = user_obj.library["posts"]
+    return dumps(posts, cls=UUIDEncoder)
+
+
 @socketio.on('get_saved_blocks')
 def get_saved_blocks(json):
     user_id = json["user_id"]
     user_obj = utils.get_user_obj(user_id)
     blocks = user_obj.library["blocks"]
-    print(blocks)
     return dumps(blocks, cls=UUIDEncoder)
-
 
 
 # @socketio.on('post_add_tag')
@@ -153,7 +161,6 @@ def get_saved_blocks(json):
 #     if "event_instance" in json:
 #         on_event = on_event + ':' + json["event_instance"]
 #     emit(on_event, dumps(block_data, cls=UUIDEncoder))
-
 
 
 @socketio.on('create_post')
