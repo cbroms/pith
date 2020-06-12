@@ -8,6 +8,7 @@ from models.post import Post
 from models.block import Block
 
 import utils
+import database
 
 
 app = Flask(__name__)
@@ -34,26 +35,26 @@ def test_disconnect():
 # get a list of all user IDs 
 @socketio.on('get_users')
 def get_users():
-    return dumps(utils.get_users(), cls=UUIDEncoder)
+    return dumps(database.get_users(), cls=UUIDEncoder)
 
 
 # get a list of all posts for a given discussion
 @socketio.on('get_posts')
 def get_posts():
-    return dumps(utils.get_posts(), cls=UUIDEncoder)
+    return dumps(database.get_posts(), cls=UUIDEncoder)
 
 
 # get a list of all blocks for a given discussion
 @socketio.on('get_blocks')
 def get_blocks():
-    return dumps(utils.get_blocks(), cls=UUIDEncoder)
+    return dumps(database.get_blocks(), cls=UUIDEncoder)
 
 
 # get a specific user with ID (IP address in base64)
 @socketio.on('get_user')
 def get_user(json):
     user_id = json["user_id"]
-    user_data = utils.get_user(user_id) 
+    user_data = database.get_user(user_id) 
     return dumps(user_data, cls=UUIDEncoder)
 
 
@@ -63,11 +64,11 @@ def create_user(json):
     ip = json["user_id"]
 
     # try getting the user first
-    user_data = utils.get_user(ip)
+    user_data = database.get_user(ip)
 
     if user_data == None:
         user_obj = User(ip)
-        utils.insert_user(user_obj)
+        database.insert_user(user_obj)
         user_data = user_obj.__dict__
 
     return dumps(user_data, cls=UUIDEncoder)
@@ -76,14 +77,14 @@ def create_user(json):
 @socketio.on('get_post')
 def get_post(json):
     post_id = json["post_id"]
-    post_data = utils.get_post(post_id) 
+    post_data = database.get_post(post_id) 
     return dumps(post_data, cls=UUIDEncoder)
 
 
 @socketio.on('get_block')
 def get_block(json):
     block_id = json["block_id"]
-    block_data = utils.get_block(block_id)
+    block_data = database.get_block(block_id)
     return dumps(block_data, cls=UUIDEncoder)
 
 
@@ -91,11 +92,11 @@ def get_block(json):
 def save_post(json):
     post_id = json["post_id"]
     user_id = json["user_id"]
-    user_obj = utils.get_user_obj(user_id)
+    user_obj = database.get_user_obj(user_id)
     user_obj.library["posts"].append(post_id)
-    utils.update_user(user_obj)
+    database.update_user(user_obj)
 
-    post_data = utils.get_post(post_id)
+    post_data = database.get_post(post_id)
     serialized = dumps(post_data, cls=UUIDEncoder)
 
     # emit the event for the user that just added the block
@@ -107,11 +108,11 @@ def save_post(json):
 def save_block(json):
     block_id = json["block_id"]
     user_id = json["user_id"]
-    user_obj = utils.get_user_obj(user_id)
+    user_obj = database.get_user_obj(user_id)
     user_obj.library["blocks"].append(block_id)
-    utils.update_user(user_obj)
+    database.update_user(user_obj)
     
-    block_data = utils.get_block(block_id)
+    block_data = database.get_block(block_id)
     serialized = dumps(block_data, cls=UUIDEncoder)
 
     # emit the event for the user that just added the block
@@ -122,7 +123,7 @@ def save_block(json):
 @socketio.on('get_saved_posts')
 def get_saved_posts(json):
     user_id = json["user_id"]
-    user_obj = utils.get_user_obj(user_id)
+    user_obj = database.get_user_obj(user_id)
     posts = user_obj.library["posts"]
     return dumps(posts, cls=UUIDEncoder)
 
@@ -130,7 +131,7 @@ def get_saved_posts(json):
 @socketio.on('get_saved_blocks')
 def get_saved_blocks(json):
     user_id = json["user_id"]
-    user_obj = utils.get_user_obj(user_id)
+    user_obj = database.get_user_obj(user_id)
     blocks = user_obj.library["blocks"]
     return dumps(blocks, cls=UUIDEncoder)
 
@@ -139,9 +140,9 @@ def get_saved_blocks(json):
 # def post_add_tag(json): 
 #     post_id = json["post_id"]
 #     tag = json["tag"]
-#     post_obj = utils.get_post_obj(post_id)
+#     post_obj = database.get_post_obj(post_id)
 #     post_obj.tags.append(tag)
-#     utils.update_post(post_obj)
+#     database.update_post(post_obj)
 #     post_data = post_obj.__dict__
 #     on_event = '~post_add_tag'
 #     if "event_instance" in json:
@@ -153,9 +154,9 @@ def get_saved_blocks(json):
 # def block_add_tag(json): 
 #     block_id = json["block_id"]
 #     tag = json["tag"]
-#     block_obj = utils.get_block_obj(block_id)
+#     block_obj = database.get_block_obj(block_id)
 #     block_obj.tags.append(tag)
-#     utils.update_block(block_obj)
+#     database.update_block(block_obj)
 #     block_data = block_obj.__dict__
 #     on_event = '~block_add_tag'
 #     if "event_instance" in json:
@@ -170,21 +171,25 @@ def create_post(json):
     # add discussion ID here too
     # discussion_id = json["discussion_id"]
 
-    user_obj = utils.get_user_obj(user_id)
+    user_obj = database.get_user_obj(user_id)
     post_obj = Post(user_obj._id)
 
     blocks = json["blocks"]
     block_ids = []
+    freq_dicts = []
     for b in blocks:
         block_obj = Block(user_obj._id, post_obj._id, b)
+        freq_dicts.append(block_obj.freq_dict)
         block_ids.append(block_obj._id)
-        utils.insert_block(block_obj)
+        database.insert_block(block_obj)
 
     post_obj.blocks = block_ids
-    utils.insert_post(post_obj)
+    post_freq_dict = utils.sum_dicts(freq_dicts)
+    post_obj.freq_dict = post_freq_dict
+    database.insert_post(post_obj)
 
     user_obj.history.append(post_obj._id)
-    utils.update_user(user_obj)
+    database.update_user(user_obj)
     post_data = post_obj.__dict__
 
     serialized = dumps(post_data, cls=UUIDEncoder)
