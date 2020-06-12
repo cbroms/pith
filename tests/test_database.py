@@ -1,13 +1,11 @@
 import sys
-sys.path.append("..")
+sys.path.append('.')
 
 import database
 
-sys.path.append("../models/")
-
-from user import User
-from post import Post
-from block import Block
+from models.user import User
+from models.post import Post
+from models.block import Block
 
 
 test_user = User(0)

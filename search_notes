@@ -22,3 +22,5 @@ servers, and so on.  How efficient would it be to update it every so often?
 Maybe the object can be updated in the background and copied to the foreground
 to be used.
 
+Create this index with nodes and such somewhere...make sure to 
+update it when create_post (update_dict?).

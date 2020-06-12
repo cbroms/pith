@@ -7,8 +7,9 @@ from models.user import User
 from models.post import Post
 from models.block import Block
 
-import utils
+from basic_search import basic_search
 import database
+import utils
 
 
 app = Flask(__name__)
@@ -203,6 +204,16 @@ def create_post(json):
     #emit a new event for all listening clients 
     emit("post_created", serialized, broadcast=True)
 
+    return serialized
+
+
+@socketio.on('search')
+def search(json):
+    query = json["query"]
+    tokens = utils.text_tokens(query)
+    block_ids, post_ids = basic_search(tokens)
+    result = {"blocks": block_ids, "posts": post_ids}
+    serialized = dumps(result, cls=UUIDEncoder)
     return serialized
 
 

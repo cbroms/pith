@@ -1,5 +1,5 @@
 import sys
-sys.path.append("..")
+sys.path.append('.')
 
 import pandas as pd
 from basic_search import basic_search

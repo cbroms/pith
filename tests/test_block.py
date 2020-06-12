@@ -1,7 +1,8 @@
 import sys
-sys.path.append("../models/")
+sys.path.append('.')
 
-from block import Block
+
+from models.block import Block
 
 
 body = "I am so excited about this! I love whales! "\
