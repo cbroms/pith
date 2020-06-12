@@ -92,9 +92,8 @@ def get_block(json):
 def save_post(json):
     post_id = json["post_id"]
     user_id = json["user_id"]
-    user_obj = database.get_user_obj(user_id)
-    user_obj.library["posts"].append(post_id)
-    database.update_user(user_obj)
+
+    database.save_post(post_id, user_id)
 
     post_data = database.get_post(post_id)
     serialized = dumps(post_data, cls=UUIDEncoder)
@@ -108,9 +107,8 @@ def save_post(json):
 def save_block(json):
     block_id = json["block_id"]
     user_id = json["user_id"]
-    user_obj = database.get_user_obj(user_id)
-    user_obj.library["blocks"].append(block_id)
-    database.update_user(user_obj)
+
+    database.save_block(block_id, user_id)
     
     block_data = database.get_block(block_id)
     serialized = dumps(block_data, cls=UUIDEncoder)
@@ -136,32 +134,36 @@ def get_saved_blocks(json):
     return dumps(blocks, cls=UUIDEncoder)
 
 
-# @socketio.on('post_add_tag')
-# def post_add_tag(json): 
-#     post_id = json["post_id"]
-#     tag = json["tag"]
-#     post_obj = database.get_post_obj(post_id)
-#     post_obj.tags.append(tag)
-#     database.update_post(post_obj)
-#     post_data = post_obj.__dict__
-#     on_event = '~post_add_tag'
-#     if "event_instance" in json:
-#         on_event = on_event + ':' + json["event_instance"]
-#     emit(on_event, dumps(post_data, cls=UUIDEncoder))
+@socketio.on('post_add_tag')
+def post_add_tag(json): 
+    post_id = json["post_id"]
+    tag = json["tag"]
+    
+    database.post_add_tag(post_id, tag)
+
+    post_data = database.get_post(post_id)
+
+    serialized = dumps(post_data, cls=UUIDEncoder)
+
+    # emit the event for the user that just added the post
+    emit("post_add_tag", serialized)
+    return serialized
 
 
-# @socketio.on('block_add_tag')
-# def block_add_tag(json): 
-#     block_id = json["block_id"]
-#     tag = json["tag"]
-#     block_obj = database.get_block_obj(block_id)
-#     block_obj.tags.append(tag)
-#     database.update_block(block_obj)
-#     block_data = block_obj.__dict__
-#     on_event = '~block_add_tag'
-#     if "event_instance" in json:
-#         on_event = on_event + ':' + json["event_instance"]
-#     emit(on_event, dumps(block_data, cls=UUIDEncoder))
+@socketio.on('block_add_tag')
+def block_add_tag(json): 
+    block_id = json["block_id"]
+    tag = json["tag"]
+    
+    database.block_add_tag(block_id, tag)
+
+    block_data = database.get_block(block_id)
+
+    serialized = dumps(block_data, cls=UUIDEncoder)
+
+    # emit the event for the user that just added the block
+    emit("block_add_tag", serialized)
+    return serialized
 
 
 @socketio.on('create_post')
@@ -171,14 +173,13 @@ def create_post(json):
     # add discussion ID here too
     # discussion_id = json["discussion_id"]
 
-    user_obj = database.get_user_obj(user_id)
     post_obj = Post(user_obj._id)
 
     blocks = json["blocks"]
     block_ids = []
     freq_dicts = []
     for b in blocks:
-        block_obj = Block(user_obj._id, post_obj._id, b)
+        block_obj = Block(user_id, post_obj._id, b)
         freq_dicts.append(block_obj.freq_dict)
         block_ids.append(block_obj._id)
         database.insert_block(block_obj)
@@ -188,8 +189,13 @@ def create_post(json):
     post_obj.freq_dict = post_freq_dict
     database.insert_post(post_obj)
 
+    """
+    user_obj = database.get_user_obj(user_id)
     user_obj.history.append(post_obj._id)
     database.update_user(user_obj)
+    """
+    database.insert_post_history(user_id, post_id)
+
     post_data = post_obj.__dict__
 
     serialized = dumps(post_data, cls=UUIDEncoder)

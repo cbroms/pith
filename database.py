@@ -1,6 +1,7 @@
 """
 Peruse following for more efficient updates:
 https://stackoverflow.com/questions/4372797/how-do-i-update-a-mongo-document-after-inserting-it
+!!! https://stackoverflow.com/questions/33189258/append-item-to-mongodb-document-array-in-pymongo-without-re-insertion
 """
 
 from pymongo import MongoClient 
@@ -52,6 +53,12 @@ def update_user(user_obj):
     user_data = user_obj.__dict__
     users.replace_one({"_id" : user_data["_id"]}, user_data)
 
+
+def insert_post_history(user_id, post_id):
+    users.update_one({"_id" : user_id}, {"$push": {"history" : post_id}})
+
+
+
 """
 Post getters and setters 
 """
@@ -80,9 +87,18 @@ def insert_post(post_obj):
     posts.insert_one(post_data)
 
 
+# AVOID
 def update_post(post_obj):
     post_data = post_obj.__dict__
     posts.replace_one({"_id" : post_data["_id"]}, post_data)
+
+
+def save_post(post_id, user_id):
+    users.update_one({"_id" : user_id}, {"$push" : {"library.posts" : post_id}})
+
+
+def post_add_tag(post_id, tag):
+    posts.update_one({"_id" : post_id}, {"$push": {"tags" : tag}})
 
 
 """
@@ -116,3 +132,11 @@ def insert_block(block_obj):
 def update_block(block_obj):
     block_data = block_obj.__dict__
     blocks.replace_one({"_id" : block_data["_id"]}, block_data)
+
+
+def save_block(block_id, user_id):
+    users.update_one({"_id" : user_id}, {"$push" : {"library.blocks" : block_id}})
+
+
+def block_add_tag(block_id, tag):
+    blocks.update_one({"_id" : block_id}, {"$push": {"tags" : tag}})

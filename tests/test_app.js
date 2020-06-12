@@ -140,6 +140,14 @@ function main() {
       "args": {}
     },
     {
+      "fun": "block_add_tag",
+      "args": {tag : "imablock"}
+    },
+    {
+      "fun": "post_add_tag",
+      "args": {tag : "imapost"}
+    },
+    {
       "fun": "get_users",
       "args": null
     },
@@ -190,18 +198,16 @@ function main() {
       "fun": "get_saved_blocks",
       "args": {}
     },
-  ]);
-}
-/*
     {
       "fun": "block_add_tag",
-      "args": {event_instance: "2", tag : "youreablock"}
+      "args": {tag : "youreablock"}
     },
     {
       "fun": "post_add_tag",
-      "args": {event_instance: "2", tag : "youreapost"}
+      "args": {tag : "youreapost"}
     },
- */
+  ]);
+}
 
 /* SETUP */
 var socket = io('http://localhost:5000');

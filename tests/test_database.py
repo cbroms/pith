@@ -44,14 +44,16 @@ print("get_block_obj: {}".format(
 ))
 print()
 
-test_post.blocks = [test_block._id]
-test_user.history.append(test_post._id)
-
 print("update_post...")
-database.update_post(test_post)
-print("update_user...")
-database.update_user(test_user)
-# no block for now
+database.post_add_tag(test_post._id, "post_tag")
+print("update_block...")
+database.block_add_tag(test_block._id, "block_tag")
+print("save post...")
+database.save_post(test_post._id, test_user._id)
+print("save block...")
+database.save_block(test_block._id, test_user._id)
+print("post to history...")
+database.insert_post_history(test_user._id, test_post._id)
 print()
 
 print("get_users: {}".format(
