@@ -66,6 +66,7 @@ def create_user(json):
 
     # try getting the user first
     user_data = database.get_user(ip)
+    print(user_data )
 
     if user_data == None:
         user_obj = User(ip)
@@ -172,9 +173,10 @@ def create_post(json):
     print(json)
     user_id = json["user_id"]
     # add discussion ID here too
-    # discussion_id = json["discussion_id"]
-
+    # discussion_id = json["discussion_id"]    """
+    user_obj = database.get_user_obj(user_id)
     post_obj = Post(user_obj._id)
+    user_obj.history.append(post_obj._id)
 
     blocks = json["blocks"]
     block_ids = []
@@ -188,14 +190,11 @@ def create_post(json):
     post_obj.blocks = block_ids
     post_freq_dict = utils.sum_dicts(freq_dicts)
     post_obj.freq_dict = post_freq_dict
+    
     database.insert_post(post_obj)
-
-    """
-    user_obj = database.get_user_obj(user_id)
-    user_obj.history.append(post_obj._id)
     database.update_user(user_obj)
-    """
-    database.insert_post_history(user_id, post_id)
+
+    database.insert_post_history(user_id, post_obj._id)
 
     post_data = post_obj.__dict__
 

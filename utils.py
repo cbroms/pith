@@ -1,5 +1,8 @@
 from functools import reduce
 from operator import or_
+from nltk.stem import PorterStemmer
+from collections import Counter
+import string
 
 
 ps = PorterStemmer()
