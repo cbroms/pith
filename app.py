@@ -190,11 +190,6 @@ def create_post(json):
     post_obj.freq_dict = post_freq_dict
     database.insert_post(post_obj)
 
-    """
-    user_obj = database.get_user_obj(user_id)
-    user_obj.history.append(post_obj._id)
-    database.update_user(user_obj)
-    """
     database.insert_post_history(user_id, post_id)
 
     post_data = post_obj.__dict__
