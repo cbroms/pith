@@ -1,10 +1,15 @@
+import pandas as pd
 import sys
 sys.path.append('.')
 
-import pandas as pd
 from basic_search import basic_search
+import database
 
 
+
+print("Block Search\n{}\nPost Search\n{}\n".format(block_search, post_search))
+
+"""
 block_data = {
     "block_id":["104", "205", "504", "209"],
     "post_id":["34", "26", "34", "17"],
@@ -43,3 +48,4 @@ block_search, post_search = basic_search(
 )
 
 print("Block Search\n{}\nPost Search\n{}\n".format(block_search, post_search))
+"""

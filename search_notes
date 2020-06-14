@@ -24,3 +24,9 @@ to be used.
 
 Create this index with nodes and such somewhere...make sure to 
 update it when create_post (update_dict?).
+
+Can put in new mongo database and have functions for it.  The search is done
+per query, but with lots of precalculation.
+keyword_add_block => if database, probs don't need to worry about concurrency
+  if add to a map
+get_keyword => 

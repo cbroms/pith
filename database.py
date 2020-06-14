@@ -1,13 +1,14 @@
 """
 Peruse following for more efficient updates:
-https://stackoverflow.com/questions/4372797/how-do-i-update-a-mongo-document-after-inserting-it
-!!! https://stackoverflow.com/questions/33189258/append-item-to-mongodb-document-array-in-pymongo-without-re-insertion
+- https://stackoverflow.com/questions/4372797/how-do-i-update-a-mongo-document-after-inserting-it
+- https://stackoverflow.com/questions/33189258/append-item-to-mongodb-document-array-in-pymongo-without-re-insertion
 """
 
 from pymongo import MongoClient 
 from models.user import User
 from models.post import Post
 from models.block import Block
+from models.keyword import Keyword
 
 
 client = MongoClient('mongodb://localhost:27017')
@@ -19,6 +20,7 @@ db = client["db"]
 users = db["users"]
 posts = db["posts"]
 blocks = db["blocks"]
+keywords = db["keywords"]
 
 
 """
@@ -49,6 +51,7 @@ def insert_user(user_obj):
     users.insert_one(user_data)
 
 
+# AVOID
 def update_user(user_obj):
     user_data = user_obj.__dict__
     users.replace_one({"_id" : user_data["_id"]}, user_data)
@@ -129,6 +132,7 @@ def insert_block(block_obj):
     blocks.insert_one(block_data)
 
 
+# AVOID
 def update_block(block_obj):
     block_data = block_obj.__dict__
     blocks.replace_one({"_id" : block_data["_id"]}, block_data)
@@ -140,3 +144,48 @@ def save_block(block_id, user_id):
 
 def block_add_tag(block_id, tag):
     blocks.update_one({"_id" : block_id}, {"$push": {"tags" : tag}})
+
+
+"""
+Keywords getters and setters 
+"""
+
+def get_keyword_blocks(keyword):
+    keyword_data = keywords.find_one({ "_id" : keyword })
+    if not keyword_data: return {}
+    blocks = keyword_data["blocks"]
+    return blocks
+
+
+def add_keyword_block(keyword, block_id, freq):
+    keywords.update_one(
+        {"_id" : keyword},
+        {"$set": {"blocks" : {block_id : {"freq" : freq}}}},
+        upsert=True
+    )
+
+
+def index_block(block_id, freq_dict):
+    for k,f in freq_dict.items():
+        add_keyword_block(k, block_id, f)
+
+
+def get_keyword_posts(keyword):
+    keyword_data = keywords.find_one({ "_id" : keyword })
+    if not keyword_data: return {}
+    posts = keyword_data["posts"]
+    return posts
+
+
+def add_keyword_post(keyword, post_id, freq):
+    keywords.update_one(
+        {"_id" : keyword},
+        {"$set": {"posts" : {post_id : {"freq" : freq}}}},
+        upsert=True
+    )
+
+
+def index_post(post_id, freq_dict):
+    for k,f in freq_dict.items():
+        add_keyword_post(k, post_id, f)
+
