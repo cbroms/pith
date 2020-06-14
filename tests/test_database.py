@@ -10,7 +10,7 @@ from models.block import Block
 
 test_user = User(0)
 test_post = Post(test_user._id)
-test_block = Block(test_user._id, test_post._id, "Test message.")
+test_block = Block(test_user._id, test_post._id, "Test message for you to you.")
 
 print("insert_user...")
 database.insert_user(test_user)
@@ -64,3 +64,14 @@ print("get_blocks: {}".format(
     database.get_blocks()
 ))
 print()
+
+test_post.freq_dict = test_block.freq_dict.copy()
+
+print("indexing block...") 
+database.index_block(test_block._id, test_block.freq_dict)
+print("indexing post...")
+database.index_post(test_post._id, test_post.freq_dict)
+print()
+
+print("blocks with 'you'", database.get_keyword_blocks("you"))
+print("posts with 'you'", database.get_keyword_posts("you"))

@@ -107,7 +107,10 @@ function main() {
     },
     {
       "fun": "create_post",
-      "args": {blocks : ["yes", "no"]}
+      "args": {blocks : [
+        "Whales are great!  I love them!",
+        "Whales are my friends. Monkeys are my enemies."
+      ]}
     },
     {
       "fun": "get_user",
@@ -166,7 +169,10 @@ function main() {
     },
     {
       "fun": "create_post",
-      "args": {blocks : ["hi", "bye"]}
+      "args": {blocks : [
+        "Monkeys are great. Better than whales.",
+        "Whales suck.  Monkeys rule."
+      ]}
     },
     {
       "fun": "get_user",
@@ -205,6 +211,18 @@ function main() {
     {
       "fun": "post_add_tag",
       "args": {tag : "youreapost"}
+    },
+    {
+      "fun": "search",
+      "args": {query : "love the sick whales"}
+    },
+    {
+      "fun": "get_posts",
+      "args": null
+    },
+    {
+      "fun": "get_blocks",
+      "args": null
     },
   ]);
 }

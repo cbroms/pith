@@ -185,6 +185,7 @@ def create_post(json):
         freq_dicts.append(block_obj.freq_dict)
         block_ids.append(block_obj._id)
         database.insert_block(block_obj)
+        database.index_block(block_obj._id, block_obj.freq_dict)
 
     post_obj.blocks = block_ids
     post_freq_dict = utils.sum_dicts(freq_dicts)
@@ -194,6 +195,7 @@ def create_post(json):
     database.update_user(user_obj)
 
     database.insert_post_history(user_id, post_obj._id)
+    database.index_post(post_obj._id, post_obj.freq_dict)
 
     post_data = post_obj.__dict__
 
@@ -210,6 +212,8 @@ def search(json):
     query = json["query"]
     tokens = utils.text_tokens(query)
     block_ids, post_ids = basic_search(tokens)
+    block_ids = [b for b,f in block_ids]
+    post_ids = [p for p,f in post_ids]
     result = {"blocks": block_ids, "posts": post_ids}
     serialized = dumps(result, cls=UUIDEncoder)
     return serialized
