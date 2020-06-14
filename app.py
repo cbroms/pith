@@ -136,20 +136,20 @@ def get_saved_blocks(json):
     return dumps(blocks, cls=UUIDEncoder)
 
 
-@socketio.on('post_add_tag')
-def post_add_tag(json): 
-    post_id = json["post_id"]
-    tag = json["tag"]
+# @socketio.on('post_add_tag')
+# def post_add_tag(json): 
+#     post_id = json["post_id"]
+#     tag = json["tag"]
     
-    database.post_add_tag(post_id, tag)
+#     database.post_add_tag(post_id, tag)
 
-    post_data = database.get_post(post_id)
+#     post_data = database.get_post(post_id)
 
-    serialized = dumps(post_data, cls=UUIDEncoder)
+#     serialized = dumps(post_data, cls=UUIDEncoder)
 
-    # emit the event for the user that just added the post
-    emit("post_add_tag", serialized)
-    return serialized
+#     # emit the event for the user that just added the post
+#     emit("post_add_tag", serialized)
+#     return serialized
 
 
 @socketio.on('block_add_tag')
@@ -160,11 +160,10 @@ def block_add_tag(json):
     database.block_add_tag(block_id, tag)
 
     block_data = database.get_block(block_id)
-
     serialized = dumps(block_data, cls=UUIDEncoder)
 
-    # emit the event for the user that just added the block
-    emit("block_add_tag", serialized)
+    # emit the event for all listening clients
+    emit("updated_block", serialized, broadcast=True)
     return serialized
 
 
