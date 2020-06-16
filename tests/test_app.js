@@ -224,6 +224,22 @@ function main() {
       "fun": "get_blocks",
       "args": null
     },
+    {
+      "fun": "block_remove_tag",
+      "args": {tag : "youreablock"}
+    },
+    {
+      "fun": "post_remove_tag",
+      "args": {tag : "youreapost"}
+    },
+    {
+      "fun": "get_post",
+      "args": {},
+    },
+    {
+      "fun": "get_block",
+      "args": {}
+    },
   ]);
 }
 

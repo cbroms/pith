@@ -12,8 +12,10 @@ from models.keyword import Keyword
 
 
 client = MongoClient('mongodb://localhost:27017')
+print("Created client")
 try:
     client.drop_database("db")
+    print("Refreshing database")
 except Exception:
     print("New database")
 db = client["db"]
@@ -104,6 +106,10 @@ def post_add_tag(post_id, tag):
     posts.update_one({"_id" : post_id}, {"$push": {"tags" : tag}})
 
 
+def post_remove_tag(post_id, tag):
+    posts.update_one({"_id" : post_id}, {"$pull": {"tags" : tag}})
+
+
 """
 Block getters and setters 
 """
@@ -144,6 +150,10 @@ def save_block(block_id, user_id):
 
 def block_add_tag(block_id, tag):
     blocks.update_one({"_id" : block_id}, {"$push": {"tags" : tag}})
+
+
+def block_remove_tag(block_id, tag):
+    blocks.update_one({"_id" : block_id}, {"$pull": {"tags" : tag}})
 
 
 """

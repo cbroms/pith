@@ -42,9 +42,9 @@ print("get_block_obj: {}".format(
 ))
 print()
 
-print("update_post...")
+print("add tag to post...")
 database.post_add_tag(test_post._id, "post_tag")
-print("update_block...")
+print("add tag to block...")
 database.block_add_tag(test_block._id, "block_tag")
 print("save post...")
 database.save_post(test_post._id, test_user._id)
@@ -75,3 +75,16 @@ print()
 
 print("blocks with 'you'", database.get_keyword_blocks("you"))
 print("posts with 'you'", database.get_keyword_posts("you"))
+
+print("remove tag from post...")
+database.post_remove_tag(test_post._id, "post_tag")
+print("remove tag from block...")
+database.block_remove_tag(test_block._id, "block_tag")
+
+print("get_posts: {}".format(
+    database.get_post(test_post._id)
+))
+print("get_blocks: {}".format(
+    database.get_block(test_block._id)
+))
+print()

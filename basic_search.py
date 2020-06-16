@@ -79,22 +79,3 @@ def basic_search(key_word_list):
     posts_order.sort(key=itemgetter(1), reverse=True)
 
     return blocks_order, posts_order
-
-    """
-    search_block_df = block_df.copy()
-    search_post_df = post_df.copy()
-
-    # block search
-    search_block_df["block_score"] = search_block_df.apply(metric, axis = 1)
-    search_block_df = search_block_df.sort_values("block_score", ascending=False)
-    search_block_df = search_block_df[search_block_df["block_score"] > 0]
-    block_results = search_block_df["block_id"].tolist() 
-
-    # post search
-    search_post_df["post_score"] = search_post_df.apply(metric, axis = 1)
-    search_post_df = search_post_df.sort_values("post_score", ascending=False)
-    search_post_df = search_post_df[search_post_df["post_score"] > 0]
-    post_results = search_post_df["post_id"].tolist() 
-
-    return block_results, post_results 
-    """

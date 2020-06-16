@@ -147,7 +147,6 @@ def post_add_tag(json):
 
     serialized = dumps(post_data, cls=UUIDEncoder)
 
-    # emit the event for the user that just added the post
     emit("post_add_tag", serialized)
     return serialized
 
@@ -163,8 +162,37 @@ def block_add_tag(json):
 
     serialized = dumps(block_data, cls=UUIDEncoder)
 
-    # emit the event for the user that just added the block
     emit("block_add_tag", serialized)
+    return serialized
+
+
+@socketio.on('post_remove_tag')
+def post_remove_tag(json): 
+    post_id = json["post_id"]
+    tag = json["tag"]
+    
+    database.post_remove_tag(post_id, tag)
+
+    post_data = database.get_post(post_id)
+
+    serialized = dumps(post_data, cls=UUIDEncoder)
+
+    emit("post_remove_tag", serialized)
+    return serialized
+
+
+@socketio.on('block_remove_tag')
+def block_remove_tag(json): 
+    block_id = json["block_id"]
+    tag = json["tag"]
+    
+    database.block_remove_tag(block_id, tag)
+
+    block_data = database.get_block(block_id)
+
+    serialized = dumps(block_data, cls=UUIDEncoder)
+
+    emit("block_remove_tag", serialized)
     return serialized
 
 
