@@ -146,7 +146,6 @@ def post_add_tag(json):
     post_data = database.get_post(post_id)
 
     serialized = dumps(post_data, cls=UUIDEncoder)
-
     emit("post_add_tag", serialized)
     return serialized
 
@@ -161,7 +160,6 @@ def block_add_tag(json):
     block_data = database.get_block(block_id)
 
     serialized = dumps(block_data, cls=UUIDEncoder)
-
     emit("block_add_tag", serialized)
     return serialized
 
