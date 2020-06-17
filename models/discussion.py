@@ -1,8 +1,10 @@
 import uuid
 
+import utils
 
-class Post():
-    def __init__(self, user, discussion, blocks=None, freq_dict=None, **entries):
+
+class Discussion():
+    def __init__(self, **entries):
         if "_id" in entries:
             self._id = entries["_id"]
         else:
@@ -11,7 +13,5 @@ class Post():
             self.tags = entries["tags"]
         else:
             self.tags = []
-        self.user = user
-        self.blocks = blocks
-        self.discussion = discussion
-        self.freq_dict = freq_dict
+        self.users = []
+        self.history = []

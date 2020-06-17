@@ -3,6 +3,7 @@ from flask_socketio import SocketIO, emit
 from json import dumps, JSONEncoder
 from uuid import UUID
 
+from models.discussion import Discussion
 from models.user import User
 from models.post import Post
 from models.block import Block
@@ -33,22 +34,42 @@ def test_disconnect():
     print('Client disconnected')
 
 
-# get a list of all user IDs 
+# get a list of all discussions
+@socketio.on('get_discussions')
+def get_discussions():
+    return dumps(database.get_discussions(), cls=UUIDEncoder)
+
+
+# get a list of all users
 @socketio.on('get_users')
-def get_users():
+def get_users(json):
     return dumps(database.get_users(), cls=UUIDEncoder)
 
 
-# get a list of all posts for a given discussion
+# get a list of all posts
 @socketio.on('get_posts')
-def get_posts():
+def get_posts(json):
     return dumps(database.get_posts(), cls=UUIDEncoder)
 
 
-# get a list of all blocks for a given discussion
+# get a list of all blocks
 @socketio.on('get_blocks')
-def get_blocks():
+def get_blocks(json):
     return dumps(database.get_blocks(), cls=UUIDEncoder)
+
+
+# get a list of all users for the discussion
+@socketio.on('get_discussion_users')
+def get_discussion_users(json):
+    discussion_id = json["discussion_id"]
+    return dumps(database.get_discussion_users(discussion_id), cls=UUIDEncoder)
+
+
+# get a list of all posts for the discussion
+@socketio.on('get_discussion_posts')
+def get_discussion_posts(json):
+    discussion_id = json["discussion_id"]
+    return dumps(database.get_discussion_posts(discussion_id), cls=UUIDEncoder)
 
 
 # get a specific user with ID (IP address in base64)
@@ -76,6 +97,13 @@ def create_user(json):
     return dumps(user_data, cls=UUIDEncoder)
 
 
+@socketio.on('get_discussion')
+def get_discussion(json):
+    discussion_id = json["discussion_id"]
+    discussion_data = database.get_discussion(discussion_id) 
+    return dumps(discussion_data, cls=UUIDEncoder)
+
+
 @socketio.on('get_post')
 def get_post(json):
     post_id = json["post_id"]
@@ -88,6 +116,21 @@ def get_block(json):
     block_id = json["block_id"]
     block_data = database.get_block(block_id)
     return dumps(block_data, cls=UUIDEncoder)
+
+
+@socketio.on('save_discussion')
+def save_discussion(json):
+    discussion_id = json["discussion_id"]
+    user_id = json["user_id"]
+
+    database.save_discussion(discussion_id, user_id)
+
+    discussion_data = database.get_discussion(discussion_id)
+    serialized = dumps(discussion_data, cls=UUIDEncoder)
+
+    # emit the event for the user that just added the block
+    emit("discussion_saved", serialized)
+    return serialized
 
 
 @socketio.on('save_post')
@@ -120,19 +163,24 @@ def save_block(json):
     return serialized
 
 
+@socketio.on('get_saved_discussions')
+def get_saved_discussions(json):
+    user_id = json["user_id"]
+    discussions = database.get_user_saved_discussions(user_id)
+    return dumps(discussions, cls=UUIDEncoder)
+
+
 @socketio.on('get_saved_posts')
 def get_saved_posts(json):
     user_id = json["user_id"]
-    user_obj = database.get_user_obj(user_id)
-    posts = user_obj.library["posts"]
+    posts = database.get_user_saved_posts(user_id)
     return dumps(posts, cls=UUIDEncoder)
 
 
 @socketio.on('get_saved_blocks')
 def get_saved_blocks(json):
     user_id = json["user_id"]
-    user_obj = database.get_user_obj(user_id)
-    blocks = user_obj.library["blocks"]
+    blocks = database.get_user_saved_blocks(user_id)
     return dumps(blocks, cls=UUIDEncoder)
 
 
@@ -194,21 +242,66 @@ def block_remove_tag(json):
     return serialized
 
 
+@socketio.on('create_discussion')
+def create_discussion(json):
+    discussion_obj = Discussion()
+    database.insert_discussion(discussion_obj)
+
+    discussion_data = discussion_obj.__dict__
+
+    serialized = dumps(discussion_data, cls=UUIDEncoder)
+
+    #emit a new event for all listening clients 
+    emit("discussion_created", serialized, broadcast=True)
+
+    return serialized
+
+
+@socketio.on('join_discussion')
+def join_discussion(json):
+    user_id = json["user_id"]
+    discussion_id = json["discussion_id"]
+    database.join_discussion(discussion_id, user_id)
+
+    discussion_data = database.get_discussion(discussion_id)
+
+    serialized = dumps(discussion_data, cls=UUIDEncoder)
+
+    #emit a new event for all listening clients 
+    emit("join_discussion", serialized, broadcast=True)
+
+    return serialized
+
+
+@socketio.on('leave_discussion')
+def leave_discussion(json):
+    user_id = json["user_id"]
+    discussion_id = json["discussion_id"]
+    database.leave_discussion(discussion_id, user_id)
+
+    discussion_data = database.get_discussion(discussion_id)
+
+    serialized = dumps(discussion_data, cls=UUIDEncoder)
+
+    #emit a new event for all listening clients 
+    emit("leave_discussion", serialized, broadcast=True)
+
+    return serialized
+
+
 @socketio.on('create_post')
 def create_post(json):
-    print(json)
     user_id = json["user_id"]
-    # add discussion ID here too
-    # discussion_id = json["discussion_id"]    """
-    user_obj = database.get_user_obj(user_id)
-    post_obj = Post(user_obj._id)
-    user_obj.history.append(post_obj._id)
+    discussion_id = json["discussion_id"]
+    post_obj = Post(user_id, discussion_id)
+    database.insert_post_user_history(user_id, post_obj._id)
+    database.insert_post_discussion_history(discussion_id, post_obj._id)
 
     blocks = json["blocks"]
     block_ids = []
     freq_dicts = []
     for b in blocks:
-        block_obj = Block(user_id, post_obj._id, b)
+        block_obj = Block(user_id, post_obj._id, b, discussion_id)
         freq_dicts.append(block_obj.freq_dict)
         block_ids.append(block_obj._id)
         database.insert_block(block_obj)
@@ -217,11 +310,8 @@ def create_post(json):
     post_obj.blocks = block_ids
     post_freq_dict = utils.sum_dicts(freq_dicts)
     post_obj.freq_dict = post_freq_dict
-    
     database.insert_post(post_obj)
-    database.update_user(user_obj)
 
-    database.insert_post_history(user_id, post_obj._id)
     database.index_post(post_obj._id, post_obj.freq_dict)
 
     post_data = post_obj.__dict__

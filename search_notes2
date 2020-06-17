@@ -28,6 +28,6 @@ also be given its own indexing.  Or, it could have a cache of keywords/tags
 commonly used (later).
 
 STEPS:
-1. Implement discussion abstraction.
+X1. Implement discussion abstraction. Have scope gets (all, discussion, saved).
 2. Implement filtering for discussion/saved scope on the keywords/tags.
 3. Input to main search algorithm.
