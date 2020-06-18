@@ -222,7 +222,7 @@ def block_add_tag(json):
     block_data = database.get_block(block_id)
 
     serialized = dumps(block_data, cls=UUIDEncoder)
-    emit("block_add_tag", serialized)
+    emit("updated_block", serialized)
     return serialized
 
 
@@ -252,7 +252,7 @@ def post_remove_tag(json):
 
     serialized = dumps(post_data, cls=UUIDEncoder)
 
-    emit("post_remove_tag", serialized)
+    emit("updated_post", serialized)
     return serialized
 
 
@@ -267,7 +267,7 @@ def block_remove_tag(json):
 
     serialized = dumps(block_data, cls=UUIDEncoder)
 
-    emit("block_remove_tag", serialized)
+    emit("updated_block", serialized)
     return serialized
 
 
