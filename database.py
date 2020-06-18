@@ -131,7 +131,7 @@ def get_blocks():
 
 def get_discussion_blocks(discussion_id):
     discussion_data = get_discussion(discussion_id)
-    history = discussion_data["history"]
+    history = discussion_data["history_blocks"]
     return history
 
 
@@ -245,7 +245,7 @@ def insert_post_discussion_history(discussion_id, post_id):
 
 
 def insert_block_discussion_history(discussion_id, block_id):
-    discussions.update_one({"_id" : discussion_id}, {"$push": {"history" : block_id}})
+    discussions.update_one({"_id" : discussion_id}, {"$push": {"history_blocks" : block_id}})
 
 
 def discussion_add_tag(discussion_id, tag):

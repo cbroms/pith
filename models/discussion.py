@@ -13,6 +13,15 @@ class Discussion():
             self.tags = entries["tags"]
         else:
             self.tags = []
-        self.users = []
-        self.history = []
-        self.history_blocks = []
+        if "users" in entries:
+            self.users = entries["users"]
+        else:
+            self.users = []
+        if "history" in entries:
+            self.history = entries["history"]
+        else:
+            self.history = []
+        if "history_blocks" in entries:
+            self.history_blocks = entries["history_blocks"]
+        else:
+            self.history_blocks = []

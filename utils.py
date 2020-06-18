@@ -1,7 +1,7 @@
 from functools import reduce
 from operator import or_
 from nltk.stem import PorterStemmer
-from collections import Counter
+from collections import Counter, defaultdict
 import string
 
 
@@ -25,4 +25,4 @@ def make_freq_dict(text):
 # combine a list of dicts into one dict (includes all keys)
 def sum_dicts(dL):
   keys = reduce(or_, [set(d) for d in dL])
-  return {k:sum([d.get(k,0) for d in dL]) for k in keys}
+  return defaultdict(lambda:0, {k:sum([d.get(k,0) for d in dL]) for k in keys})

@@ -1,6 +1,9 @@
 class User():
     def __init__(self, _id, **entries):
-        self._id = _id
+        if "_id" in entries:
+            self._id = entries["_id"]
+        else:
+            self._id = _id
         if "library" in entries:
             self.library = entries["library"]
         else:

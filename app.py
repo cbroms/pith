@@ -1,3 +1,4 @@
+from collections import defaultdict
 from flask import Flask
 from flask_socketio import SocketIO, emit
 from json import dumps, JSONEncoder
@@ -8,7 +9,11 @@ from models.user import User
 from models.post import Post
 from models.block import Block
 
-from basic_search import basic_search
+from basic_search import (
+    all_scope_search,
+    discussion_scope_search,
+    user_saved_scope_search,
+)
 import database
 import utils
 
@@ -70,6 +75,13 @@ def get_discussion_users(json):
 def get_discussion_posts(json):
     discussion_id = json["discussion_id"]
     return dumps(database.get_discussion_posts(discussion_id), cls=UUIDEncoder)
+
+
+# get a list of all blocks for the discussion
+@socketio.on('get_discussion_blocks')
+def get_discussion_blocks(json):
+    discussion_id = json["discussion_id"]
+    return dumps(database.get_discussion_blocks(discussion_id), cls=UUIDEncoder)
 
 
 # get a specific user with ID (IP address in base64)
@@ -330,7 +342,7 @@ def create_post(json):
     block_ids = []
     freq_dicts = []
     for b in blocks:
-        block_obj = Block(user_id, post_obj._id, b, discussion_id)
+        block_obj = Block(user_id, discussion_id, post_obj._id, b)
         freq_dicts.append(block_obj.freq_dict)
         block_ids.append(block_obj._id)
         database.insert_block_discussion_history(discussion_id, block_obj._id)
@@ -339,7 +351,7 @@ def create_post(json):
 
     post_obj.blocks = block_ids
     post_freq_dict = utils.sum_dicts(freq_dicts)
-    post_obj.freq_dict = post_freq_dict
+    post_obj.freq_dict = defaultdict(lambda:0, post_freq_dict)
     database.insert_post(post_obj)
 
     database.index_post(post_obj._id, post_obj.freq_dict)

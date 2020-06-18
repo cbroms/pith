@@ -7,6 +7,8 @@ import pandas as pd
 from threading import Lock
 
 import database
+from models.post import Post
+from models.block import Block
 
 
 nltk.download('averaged_perceptron_tagger')
@@ -89,12 +91,16 @@ def all_scope_search(key_word_list):
 def discussion_scope_search(key_word_list, discussion_id):
     post_ids = database.get_discussion_posts(discussion_id)
     block_ids = database.get_discussion_blocks(discussion_id)
+    print(post_ids, [database.get_post(p) for p in post_ids], database.get_posts())
+
+    posts_obj = {p:Post(**database.get_post(p)) for p in post_ids}
+    blocks_obj = {b:Block(**database.get_block(b)) for b in block_ids}
 
     blocks = []
     posts = []
     for k in key_word_list:
-        blocks += [(b,k,f[k]) for b in block_ids] 
-        posts += [(p,k,f[k]) for p in post_ids] 
+        blocks += [(b,k,blocks_obj[b].freq_dict[k]) for b in block_ids] 
+        posts += [(p,k,posts_obj[p].freq_dict[k]) for p in post_ids] 
 
     return basic_search(key_word_list, blocks, posts)
 
@@ -104,10 +110,13 @@ def user_saved_scope_search(key_word_list, user_id):
     post_ids = database.get_user_saved_posts(user_id)
     block_ids = database.get_user_saved_blocks(user_id)
 
+    posts_obj = {p:Post(**database.get_post(p)) for p in post_ids}
+    blocks_obj = {b:Block(**database.get_block(b)) for b in block_ids}
+
     blocks = []
     posts = []
     for k in key_word_list:
-        blocks += [(b,k,f[k]) for b in block_ids] 
-        posts += [(p,k,f[k]) for p in post_ids] 
+        blocks += [(b,k,blocks_obj[b].freq_dict[k]) for b in block_ids] 
+        posts += [(p,k,posts_obj[p].freq_dict[k]) for p in post_ids] 
 
     return basic_search(key_word_list, blocks, posts)

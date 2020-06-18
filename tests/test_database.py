@@ -15,7 +15,7 @@ test_post = Post(test_user._id, test_discussion._id)
 test_block = Block(test_user._id, test_discussion._id, test_post._id, 
     "Test message for you to you.")
 test_post.blocks = [test_block._id]
-test_post.freq_dict = test_block.freq_dict.copy()
+test_post.freq_dict = test_block.freq_dict.copy() # should be defaultdict
 
 print("insert_discussion...")
 database.insert_discussion(test_discussion)
@@ -92,6 +92,7 @@ print()
 
 print("blocks with 'you'", database.get_keyword_blocks("you"))
 print("posts with 'you'", database.get_keyword_posts("you"))
+print()
 
 print("remove tag from discussion...")
 database.discussion_remove_tag(test_discussion._id, "discussion_tag")
@@ -101,6 +102,7 @@ print("remove tag from block...")
 database.block_remove_tag(test_block._id, "block_tag")
 print("leave discussion...")
 database.leave_discussion(test_discussion._id, test_user._id)
+print()
 
 print("get_discussion: {}".format(
     database.get_discussion(test_discussion._id)
