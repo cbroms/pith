@@ -129,6 +129,12 @@ def get_blocks():
     return block_list
 
 
+def get_discussion_blocks(discussion_id):
+    discussion_data = get_discussion(discussion_id)
+    history = discussion_data["history"]
+    return history
+
+
 def get_user_saved_blocks(user_id):
     user_data = get_user(user_id)
     saved = user_data["library"]["blocks"]
@@ -236,3 +242,15 @@ def insert_discussion(discussion_obj):
 
 def insert_post_discussion_history(discussion_id, post_id):
     discussions.update_one({"_id" : discussion_id}, {"$push": {"history" : post_id}})
+
+
+def insert_block_discussion_history(discussion_id, block_id):
+    discussions.update_one({"_id" : discussion_id}, {"$push": {"history" : block_id}})
+
+
+def discussion_add_tag(discussion_id, tag):
+    discussions.update_one({"_id" : discussion_id}, {"$push": {"tags" : tag}})
+
+
+def discussion_remove_tag(discussion_id, tag):
+    discussions.update_one({"_id" : discussion_id}, {"$pull": {"tags" : tag}})

@@ -184,6 +184,20 @@ def get_saved_blocks(json):
     return dumps(blocks, cls=UUIDEncoder)
 
 
+@socketio.on('discussion_add_tag')
+def discussion_add_tag(json): 
+    discussion_id = json["discussion_id"]
+    tag = json["tag"]
+    
+    database.discussion_add_tag(discussion_id, tag)
+
+    discussion_data = database.get_discussion(discussion_id)
+
+    serialized = dumps(discussion_data, cls=UUIDEncoder)
+    emit("discussion_add_tag", serialized)
+    return serialized
+
+
 @socketio.on('post_add_tag')
 def post_add_tag(json): 
     post_id = json["post_id"]
@@ -209,6 +223,21 @@ def block_add_tag(json):
 
     serialized = dumps(block_data, cls=UUIDEncoder)
     emit("block_add_tag", serialized)
+    return serialized
+
+
+@socketio.on('discussion_remove_tag')
+def discussion_remove_tag(json): 
+    discussion_id = json["discussion_id"]
+    tag = json["tag"]
+    
+    database.discussion_remove_tag(discussion_id, tag)
+
+    discussion_data = database.get_discussion(discussion_id)
+
+    serialized = dumps(discussion_data, cls=UUIDEncoder)
+
+    emit("discussion_remove_tag", serialized)
     return serialized
 
 
@@ -304,6 +333,7 @@ def create_post(json):
         block_obj = Block(user_id, post_obj._id, b, discussion_id)
         freq_dicts.append(block_obj.freq_dict)
         block_ids.append(block_obj._id)
+        database.insert_block_discussion_history(discussion_id, block_obj._id)
         database.insert_block(block_obj)
         database.index_block(block_obj._id, block_obj.freq_dict)
 
@@ -324,11 +354,37 @@ def create_post(json):
     return serialized
 
 
-@socketio.on('search')
-def search(json):
+@socketio.on('search_all')
+def search_all(json):
     query = json["query"]
     tokens = utils.text_tokens(query)
-    block_ids, post_ids = basic_search(tokens)
+    block_ids, post_ids = all_scope_search(tokens)
+    block_ids = [b for b,f in block_ids]
+    post_ids = [p for p,f in post_ids]
+    result = {"blocks": block_ids, "posts": post_ids}
+    serialized = dumps(result, cls=UUIDEncoder)
+    return serialized
+
+
+@socketio.on('search_discussion')
+def search_discussion(json):
+    query = json["query"]
+    discussion_id = json["discussion_id"]
+    tokens = utils.text_tokens(query)
+    block_ids, post_ids = discussion_scope_search(tokens, discussion_id)
+    block_ids = [b for b,f in block_ids]
+    post_ids = [p for p,f in post_ids]
+    result = {"blocks": block_ids, "posts": post_ids}
+    serialized = dumps(result, cls=UUIDEncoder)
+    return serialized
+
+
+@socketio.on('search_user_saved')
+def search_user_saved(json):
+    query = json["query"]
+    user_id = json["user_id"]
+    tokens = utils.text_tokens(query)
+    block_ids, post_ids = saved_user_scope_search(tokens, user_id)
     block_ids = [b for b,f in block_ids]
     post_ids = [p for p,f in post_ids]
     result = {"blocks": block_ids, "posts": post_ids}

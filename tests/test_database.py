@@ -43,6 +43,8 @@ print("get_block: {}".format(
 ))
 print()
 
+print("add tag to discussion...")
+database.discussion_add_tag(test_discussion._id, "discussion_tag")
 print("add tag to post...")
 database.post_add_tag(test_post._id, "post_tag")
 print("add tag to block...")
@@ -68,6 +70,9 @@ print("get_discussion_users: {}".format(
 print("get_discussion_posts: {}".format(
     database.get_discussion_posts(test_discussion._id)
 ))
+print("get_discussion_blocks: {}".format(
+    database.get_discussion_blocks(test_discussion._id)
+))
 print("get_user_saved_discussions: {}".format(
     database.get_user_saved_discussions(test_user._id)
 ))
@@ -88,6 +93,8 @@ print()
 print("blocks with 'you'", database.get_keyword_blocks("you"))
 print("posts with 'you'", database.get_keyword_posts("you"))
 
+print("remove tag from discussion...")
+database.discussion_remove_tag(test_discussion._id, "discussion_tag")
 print("remove tag from post...")
 database.post_remove_tag(test_post._id, "post_tag")
 print("remove tag from block...")

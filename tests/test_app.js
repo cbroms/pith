@@ -119,6 +119,10 @@ function main() {
       "args": {}
     },
     {
+      "fun": "get_discussion_blocks",
+      "args": {}
+    },
+    {
       "fun": "create_user", 
       "args": {user_id : ip_val},
       "apply_state": give_user_id
@@ -177,6 +181,10 @@ function main() {
       "args": {}
     },
     {
+      "fun": "search_user_saved",
+      "args": {query : "whales"}
+    },
+    {
       "fun": "block_add_tag",
       "args": {tag : "imablock"}
     },
@@ -198,6 +206,10 @@ function main() {
     },
     {
       "fun": "get_discussion_posts",
+      "args": {}
+    },
+    {
+      "fun": "get_discussion_blocks",
       "args": {}
     },
     {
@@ -259,6 +271,10 @@ function main() {
       "args": {}
     },
     {
+      "fun": "discussion_add_tag",
+      "args": {tag : "youreadiscussion"}
+    },
+    {
       "fun": "block_add_tag",
       "args": {tag : "youreablock"}
     },
@@ -267,8 +283,12 @@ function main() {
       "args": {tag : "youreapost"}
     },
     {
-      "fun": "search",
+      "fun": "search_all",
       "args": {query : "love the sick whales"}
+    },
+    {
+      "fun": "discussion_remove_tag",
+      "args": {tag : "youreadiscussion"}
     },
     {
       "fun": "block_remove_tag",
@@ -281,6 +301,10 @@ function main() {
     {
       "fun": "leave_discussion",
       "args": {}
+    },
+    {
+      "fun": "search_discussion",
+      "args": {query : "whales"}
     },
     {
       "fun": "get_discussion",

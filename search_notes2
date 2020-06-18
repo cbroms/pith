@@ -29,5 +29,7 @@ commonly used (later).
 
 STEPS:
 X1. Implement discussion abstraction. Have scope gets (all, discussion, saved).
+Add tagging to disc.
+Add a tag object to make this more reasonable.
 2. Implement filtering for discussion/saved scope on the keywords/tags.
 3. Input to main search algorithm.

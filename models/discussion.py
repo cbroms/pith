@@ -15,3 +15,4 @@ class Discussion():
             self.tags = []
         self.users = []
         self.history = []
+        self.history_blocks = []
