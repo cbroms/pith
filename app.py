@@ -47,19 +47,19 @@ def get_discussions():
 
 # get a list of all users
 @socketio.on('get_users')
-def get_users(json):
+def get_users():
     return dumps(database.get_users(), cls=UUIDEncoder)
 
 
 # get a list of all posts
 @socketio.on('get_posts')
-def get_posts(json):
+def get_posts():
     return dumps(database.get_posts(), cls=UUIDEncoder)
 
 
 # get a list of all blocks
 @socketio.on('get_blocks')
-def get_blocks(json):
+def get_blocks():
     return dumps(database.get_blocks(), cls=UUIDEncoder)
 
 

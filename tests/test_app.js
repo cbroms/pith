@@ -312,15 +312,15 @@ function main() {
     },
     {
       "fun": "get_users",
-      "args": {},
+      "args": null,
     },
     {
       "fun": "get_posts",
-      "args": {},
+      "args": null,
     },
     {
       "fun": "get_blocks",
-      "args": {}
+      "args": null
     },
   ]);
 }
