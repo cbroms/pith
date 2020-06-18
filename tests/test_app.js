@@ -41,6 +41,19 @@ function identity(state, fun_list) {
 }
 
 
+function give_discussion_id(state, fun_list) {
+  var json = JSON.parse(state);
+  for (var i = 0; i < fun_list.length; i++) {
+    // check if will be replaced
+    if (fun_list[i]["apply_state"] &&
+      fun_list[i]["apply_state"].name.includes("discussion_id")) break;
+    if (!fun_list[i]["args"]) continue;
+    fun_list[i]["args"]["discussion_id"] = json._id;
+  }
+  return fun_list;
+}
+
+
 function give_user_id(state, fun_list) {
   var json = JSON.parse(state);
   for (var i = 0; i < fun_list.length; i++) {
@@ -89,16 +102,25 @@ function main() {
   var ip_val2 = 67890;
   fun_con([
     {
-      "fun": "get_users",
-      "args": null
+      "fun": "get_discussions",
+      "args": null 
     },
     {
-      "fun": "get_posts",
-      "args": null
+      "fun": "create_discussion",
+      "args": {},
+      "apply_state": give_discussion_id
     },
     {
-      "fun": "get_blocks",
-      "args": null
+      "fun": "get_discussion_users",
+      "args": {}
+    },
+    {
+      "fun": "get_discussion_posts",
+      "args": {}
+    },
+    {
+      "fun": "get_discussion_blocks",
+      "args": {}
     },
     {
       "fun": "create_user", 
@@ -106,11 +128,19 @@ function main() {
       "apply_state": give_user_id
     },
     {
+      "fun": "join_discussion",
+      "args": {}
+    },
+    {
       "fun": "create_post",
       "args": {blocks : [
         "Whales are great!  I love them!",
         "Whales are my friends. Monkeys are my enemies."
       ]}
+    },
+    {
+      "fun": "get_discussion",
+      "args": {},
     },
     {
       "fun": "get_user",
@@ -127,11 +157,19 @@ function main() {
       "args": {}
     },
     {
+      "fun": "save_discussion",
+      "args": {}
+    },
+    {
       "fun": "save_post",
       "args": {}
     },
     {
       "fun": "save_block",
+      "args": {}
+    },
+    {
+      "fun": "get_saved_discussions",
       "args": {}
     },
     {
@@ -141,6 +179,10 @@ function main() {
     {
       "fun": "get_saved_blocks",
       "args": {}
+    },
+    {
+      "fun": "search_user_saved",
+      "args": {query : "whales"}
     },
     {
       "fun": "block_add_tag",
@@ -151,16 +193,24 @@ function main() {
       "args": {tag : "imapost"}
     },
     {
-      "fun": "get_users",
+      "fun": "leave_discussion",
+      "args": {}
+    },
+    {
+      "fun": "get_discussions",
       "args": null
     },
     {
-      "fun": "get_posts",
-      "args": null
+      "fun": "get_discussion_users",
+      "args": {}
     },
     {
-      "fun": "get_blocks",
-      "args": null
+      "fun": "get_discussion_posts",
+      "args": {}
+    },
+    {
+      "fun": "get_discussion_blocks",
+      "args": {}
     },
     {
       "fun": "create_user", 
@@ -168,11 +218,19 @@ function main() {
       "apply_state": give_user_id
     },
     {
+      "fun": "join_discussion",
+      "args": {}
+    },
+    {
       "fun": "create_post",
       "args": {blocks : [
         "Monkeys are great. Better than whales.",
         "Whales suck.  Monkeys rule."
       ]}
+    },
+    {
+      "fun": "get_discussion",
+      "args": {},
     },
     {
       "fun": "get_user",
@@ -189,11 +247,19 @@ function main() {
       "args": {}
     },
     {
+      "fun": "save_discussion",
+      "args": {}
+    },
+    {
       "fun": "save_post",
       "args": {}
     },
     {
       "fun": "save_block",
+      "args": {}
+    },
+    {
+      "fun": "get_saved_discussions",
       "args": {}
     },
     {
@@ -205,6 +271,10 @@ function main() {
       "args": {}
     },
     {
+      "fun": "discussion_add_tag",
+      "args": {tag : "youreadiscussion"}
+    },
+    {
       "fun": "block_add_tag",
       "args": {tag : "youreablock"}
     },
@@ -213,16 +283,12 @@ function main() {
       "args": {tag : "youreapost"}
     },
     {
-      "fun": "search",
+      "fun": "search_all",
       "args": {query : "love the sick whales"}
     },
     {
-      "fun": "get_posts",
-      "args": null
-    },
-    {
-      "fun": "get_blocks",
-      "args": null
+      "fun": "discussion_remove_tag",
+      "args": {tag : "youreadiscussion"}
     },
     {
       "fun": "block_remove_tag",
@@ -233,11 +299,27 @@ function main() {
       "args": {tag : "youreapost"}
     },
     {
-      "fun": "get_post",
+      "fun": "leave_discussion",
+      "args": {}
+    },
+    {
+      "fun": "search_discussion",
+      "args": {query : "whales"}
+    },
+    {
+      "fun": "get_discussion",
       "args": {},
     },
     {
-      "fun": "get_block",
+      "fun": "get_users",
+      "args": {},
+    },
+    {
+      "fun": "get_posts",
+      "args": {},
+    },
+    {
+      "fun": "get_blocks",
       "args": {}
     },
   ]);

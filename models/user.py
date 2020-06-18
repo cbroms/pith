@@ -5,9 +5,14 @@ class User():
             self.library = entries["library"]
         else:
             self.library = {}
+            self.library["discussions"] = [] # saved discussions
             self.library["posts"] = [] # saved posts
             self.library["blocks"] = [] # saved blocks
         if "history" in entries:
             self.history = entries["history"]
         else:
             self.history = [] # list of posts
+        if "discussions" in entries:
+            self.discussions = entries["discussions"]
+        else:
+            self.discussions = [] # list of discussions user is in

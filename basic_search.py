@@ -45,18 +45,10 @@ def make_metric(key_word_list):
     return metric
 
 
-def basic_search(key_word_list): 
+def basic_search(key_word_list, blocks, posts): 
     key_word_list = list(set(key_word_list))
 
     metric = make_metric(key_word_list)
-
-    blocks = []
-    posts = []
-    for k in key_word_list:
-        blocks += [(b,k,f["freq"]) \
-            for b,f in database.get_keyword_blocks(k).items()] 
-        posts += [(p,k,f["freq"]) \
-            for p,f in database.get_keyword_posts(k).items()] 
 
     blocks_freq = {}
     for b,k,f in blocks:
@@ -79,3 +71,43 @@ def basic_search(key_word_list):
     posts_order.sort(key=itemgetter(1), reverse=True)
 
     return blocks_order, posts_order
+
+
+def all_scope_search(key_word_list):
+    blocks = []
+    posts = []
+    for k in key_word_list:
+        blocks += [(b,k,f["freq"]) \
+            for b,f in database.get_keyword_blocks(k).items()] 
+        posts += [(p,k,f["freq"]) \
+            for p,f in database.get_keyword_posts(k).items()] 
+
+    return basic_search(key_word_list, blocks, posts)
+
+
+# can filter by user here (later)
+def discussion_scope_search(key_word_list, discussion_id):
+    post_ids = database.get_discussion_posts(discussion_id)
+    block_ids = database.get_discussion_blocks(discussion_id)
+
+    blocks = []
+    posts = []
+    for k in key_word_list:
+        blocks += [(b,k,f[k]) for b in block_ids] 
+        posts += [(p,k,f[k]) for p in post_ids] 
+
+    return basic_search(key_word_list, blocks, posts)
+
+
+# can filter by discussion here (later)
+def user_saved_scope_search(key_word_list, user_id):
+    post_ids = database.get_user_saved_posts(user_id)
+    block_ids = database.get_user_saved_blocks(user_id)
+
+    blocks = []
+    posts = []
+    for k in key_word_list:
+        blocks += [(b,k,f[k]) for b in block_ids] 
+        posts += [(p,k,f[k]) for p in post_ids] 
+
+    return basic_search(key_word_list, blocks, posts)
