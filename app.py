@@ -384,7 +384,7 @@ def search_user_saved(json):
     query = json["query"]
     user_id = json["user_id"]
     tokens = utils.text_tokens(query)
-    block_ids, post_ids = saved_user_scope_search(tokens, user_id)
+    block_ids, post_ids = user_saved_scope_search(tokens, user_id)
     block_ids = [b for b,f in block_ids]
     post_ids = [p for p,f in post_ids]
     result = {"blocks": block_ids, "posts": post_ids}
