@@ -99,7 +99,7 @@ def create_user(json):
 
     # try getting the user first
     user_data = database.get_user(ip)
-    print(user_data )
+    print(user_data)
 
     if user_data == None:
         user_obj = User(ip)
@@ -369,8 +369,7 @@ def create_post(json):
 @socketio.on('search_all')
 def search_all(json):
     query = json["query"]
-    tokens = utils.text_tokens(query)
-    block_ids, post_ids = all_scope_search(tokens)
+    block_ids, post_ids = all_scope_search(query)
     block_ids = [b for b,f in block_ids]
     post_ids = [p for p,f in post_ids]
     result = {"blocks": block_ids, "posts": post_ids}
@@ -382,8 +381,7 @@ def search_all(json):
 def search_discussion(json):
     query = json["query"]
     discussion_id = json["discussion_id"]
-    tokens = utils.text_tokens(query)
-    block_ids, post_ids = discussion_scope_search(tokens, discussion_id)
+    block_ids, post_ids = discussion_scope_search(query, discussion_id)
     block_ids = [b for b,f in block_ids]
     post_ids = [p for p,f in post_ids]
     result = {"blocks": block_ids, "posts": post_ids}
@@ -395,8 +393,7 @@ def search_discussion(json):
 def search_user_saved(json):
     query = json["query"]
     user_id = json["user_id"]
-    tokens = utils.text_tokens(query)
-    block_ids, post_ids = user_saved_scope_search(tokens, user_id)
+    block_ids, post_ids = user_saved_scope_search(query, user_id)
     block_ids = [b for b,f in block_ids]
     post_ids = [p for p,f in post_ids]
     result = {"blocks": block_ids, "posts": post_ids}

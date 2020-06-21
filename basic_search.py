@@ -6,19 +6,15 @@ from operator import itemgetter
 import pandas as pd
 from threading import Lock
 
-import database
 from models.post import Post
 from models.block import Block
+
+import database
+import utils
 
 
 nltk.download('averaged_perceptron_tagger')
 ps = PorterStemmer()
-block_df_lock = Lock()
-post_df_lock = Lock()
-df_lock = {
-    "block": block_df_lock,
-    "post": post_df_lock
-}
 
 
 # very rudimentary and misses things like pronouns and adverbs
@@ -45,6 +41,19 @@ def make_metric(key_word_list):
         return sum(word_score)
 
     return metric
+
+
+def get_freqs(key_word_list, post_ids, block_ids):
+    posts_obj = {p:Post(**database.get_post(p)) for p in post_ids}
+    blocks_obj = {b:Block(**database.get_block(b)) for b in block_ids}
+
+    blocks = []
+    posts = []
+    for k in key_word_list:
+        blocks += [(b,k,blocks_obj[b].freq_dict[k]) for b in block_ids] 
+        posts += [(p,k,posts_obj[p].freq_dict[k]) for p in post_ids] 
+
+    return blocks, posts
 
 
 def basic_search(key_word_list, blocks, posts): 
@@ -75,7 +84,9 @@ def basic_search(key_word_list, blocks, posts):
     return blocks_order, posts_order
 
 
-def all_scope_search(key_word_list):
+def all_scope_search(query):
+    key_word_list = utils.text_tokens(query)
+
     blocks = []
     posts = []
     for k in key_word_list:
@@ -87,36 +98,21 @@ def all_scope_search(key_word_list):
     return basic_search(key_word_list, blocks, posts)
 
 
-# can filter by user here (later)
-def discussion_scope_search(key_word_list, discussion_id):
+def discussion_scope_search(query, discussion_id):
+    key_word_list = utils.text_tokens(query)
+
     post_ids = database.get_discussion_posts(discussion_id)
     block_ids = database.get_discussion_blocks(discussion_id)
-    print(post_ids, [database.get_post(p) for p in post_ids], database.get_posts())
-
-    posts_obj = {p:Post(**database.get_post(p)) for p in post_ids}
-    blocks_obj = {b:Block(**database.get_block(b)) for b in block_ids}
-
-    blocks = []
-    posts = []
-    for k in key_word_list:
-        blocks += [(b,k,blocks_obj[b].freq_dict[k]) for b in block_ids] 
-        posts += [(p,k,posts_obj[p].freq_dict[k]) for p in post_ids] 
+    blocks, posts = get_freqs(key_word_list, post_ids, block_ids) 
 
     return basic_search(key_word_list, blocks, posts)
 
 
-# can filter by discussion here (later)
-def user_saved_scope_search(key_word_list, user_id):
+def user_saved_scope_search(query, user_id):
+    key_word_list = utils.text_tokens(query)
+
     post_ids = database.get_user_saved_posts(user_id)
     block_ids = database.get_user_saved_blocks(user_id)
-
-    posts_obj = {p:Post(**database.get_post(p)) for p in post_ids}
-    blocks_obj = {b:Block(**database.get_block(b)) for b in block_ids}
-
-    blocks = []
-    posts = []
-    for k in key_word_list:
-        blocks += [(b,k,blocks_obj[b].freq_dict[k]) for b in block_ids] 
-        posts += [(p,k,posts_obj[p].freq_dict[k]) for p in post_ids] 
+    blocks, posts = get_freqs(key_word_list, post_ids, block_ids) 
 
     return basic_search(key_word_list, blocks, posts)

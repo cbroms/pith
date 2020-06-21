@@ -1,12 +1,17 @@
 import sys
 sys.path.append('.')
 
-import database
-
 from models.discussion import Discussion
 from models.user import User
 from models.post import Post
 from models.block import Block
+
+from basic_search import (
+    all_scope_search,
+    discussion_scope_search,
+    user_saved_scope_search,
+)
+import database
 
 
 test_user = User(0)
@@ -27,6 +32,14 @@ print("insert_block...")
 database.insert_block(test_block)
 print("join discussion...")
 database.join_discussion(test_discussion._id, test_user._id)
+print()
+
+print("post to user history...")
+database.insert_post_user_history(test_user._id, test_post._id)
+print("post to discussion history...")
+database.insert_post_discussion_history(test_discussion._id, test_post._id)
+print("block to discussion history...")
+database.insert_block_discussion_history(test_discussion._id, test_block._id)
 print()
 
 print("get_discussion: {}".format(
@@ -55,10 +68,6 @@ print("save post...")
 database.save_post(test_post._id, test_user._id)
 print("save block...")
 database.save_block(test_block._id, test_user._id)
-print("post to user history...")
-database.insert_post_user_history(test_user._id, test_post._id)
-print("post to discussion history...")
-database.insert_post_discussion_history(test_discussion._id, test_post._id)
 print()
 
 print("get_discussions: {}".format(
@@ -115,5 +124,22 @@ print("get_posts: {}".format(
 ))
 print("get_blocks: {}".format(
     database.get_blocks()
+))
+print()
+
+print("all_scope_search\n\tmessage: {}\n\tmessage\\n: {}\n\t'': {}".format(
+    all_scope_search("message"),
+    all_scope_search("message\n"),
+    all_scope_search("")
+))
+print("discussion_scope_search\n\tmessage: {}\n\tmessage\\n: {}\n\t'': {}".format(
+    discussion_scope_search("message", test_discussion._id),
+    discussion_scope_search("message\n", test_discussion._id),
+    discussion_scope_search("\n", test_discussion._id)
+))
+print("user_saved_scope_search\n\tmessage: {}\n\tmessage\\n: {}\n\t'': {}".format(
+    user_saved_scope_search("message", test_user._id),
+    user_saved_scope_search("message\n", test_user._id),
+    user_saved_scope_search("", test_user._id)
 ))
 print()

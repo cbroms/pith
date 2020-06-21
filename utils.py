@@ -13,6 +13,8 @@ def text_tokens(text):
   lower_case = text.lower()
   no_punc = lower_case.translate(table)
   word_list = no_punc.split(" ")
+  word_list = [w.strip() for w in word_list]
+  word_list = [w for w in word_list if w != ""]
   stemmed = [ps.stem(w) for w in word_list]
   return stemmed
 

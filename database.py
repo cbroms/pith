@@ -13,7 +13,6 @@ from models.discussion import Discussion
 from models.user import User
 from models.post import Post
 from models.block import Block
-#from models.keyword import Keyword
 
 
 client = MongoClient('mongodb://localhost:27017')
