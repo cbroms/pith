@@ -2,8 +2,8 @@ from collections import defaultdict
 from datetime import datetime
 import uuid
 
-
-date_time_fmt = "%d/%m/%Y %H:%M:%S" 
+# using ISO so this can be easily parsed in js with Date()
+date_time_fmt = "%Y-%m-%dT%H:%M:%SZ" 
 
 
 class Post():
@@ -35,5 +35,5 @@ class Post():
         if "created_at" in entries:
             self.created_at = entries["created_at"]
         else:
-            self.created_at = datetime.now().strftime(date_time_fmt)
+            self.created_at = datetime.utcnow().strftime(date_time_fmt)
             # convert back: datetime.strptime(self.created_at, date_time_fmt)
