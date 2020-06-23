@@ -125,7 +125,12 @@ def get_post(json):
 @socketio.on('get_block')
 def get_block(json):
     block_id = json["block_id"]
+    user_id = json["user_id"]
     block_data = database.get_block(block_id)
+    saved_blocks = database.get_user_saved_blocks(user_id)
+    # if the block is in the user's list of saved blocks, add that to the obj
+    if block_id in saved_blocks:
+        block_data["saved"] = True
     return dumps(block_data, cls=UUIDEncoder)
 
 
@@ -167,10 +172,24 @@ def save_block(json):
     database.save_block(block_id, user_id)
     
     block_data = database.get_block(block_id)
+    block_data["saved"] = True
     serialized = dumps(block_data, cls=UUIDEncoder)
-
     # emit the event for the user that just added the block
-    emit("block_saved", serialized)
+    emit("updated_block", serialized)
+    return serialized
+
+@socketio.on('unsave_block')
+def unsave_block(json):
+    block_id = json["block_id"]
+    user_id = json["user_id"]
+
+    database.unsave_block(block_id, user_id)
+    
+    block_data = database.get_block(block_id)
+    block_data["saved"] = False
+    serialized = dumps(block_data, cls=UUIDEncoder)
+    # emit the event for the user that just added the block
+    emit("updated_block", serialized)
     return serialized
 
 
@@ -233,7 +252,7 @@ def block_add_tag(json):
     block_data = database.get_block(block_id)
 
     serialized = dumps(block_data, cls=UUIDEncoder)
-    emit("updated_block", serialized)
+    emit("updated_block", serialized, broadcast=True)
     return serialized
 
 
@@ -278,7 +297,7 @@ def block_remove_tag(json):
 
     serialized = dumps(block_data, cls=UUIDEncoder)
 
-    emit("updated_block", serialized)
+    emit("updated_block", serialized, broadcast=True)
     return serialized
 
 
