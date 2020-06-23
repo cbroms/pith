@@ -176,7 +176,7 @@ def get_keyword_blocks(keyword):
 def add_keyword_block(keyword, block_id, freq):
     keywords.update_one(
         {"_id" : keyword},
-        {"$set": {"blocks" : {block_id : {"freq" : freq}}}},
+        {"$set": {"blocks.{}".format(block_id) : {"freq" : freq}}},
         upsert=True
     )
 
@@ -184,6 +184,7 @@ def add_keyword_block(keyword, block_id, freq):
 def index_block(block_id, freq_dict):
     for k,f in freq_dict.items():
         add_keyword_block(k, block_id, f)
+    print(keywords.find_one({ "_id" : "hi" }))
 
 
 def get_keyword_posts(keyword):
@@ -196,7 +197,7 @@ def get_keyword_posts(keyword):
 def add_keyword_post(keyword, post_id, freq):
     keywords.update_one(
         {"_id" : keyword},
-        {"$set": {"posts" : {post_id : {"freq" : freq}}}},
+        {"$set": {"posts.{}".format(post_id) : {"freq" : freq}}},
         upsert=True
     )
 

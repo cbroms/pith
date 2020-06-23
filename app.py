@@ -99,7 +99,6 @@ def create_user(json):
 
     # try getting the user first
     user_data = database.get_user(ip)
-    print(user_data)
 
     if user_data == None:
         user_obj = User(ip)
@@ -372,6 +371,7 @@ def search_all(json):
     block_ids, post_ids = all_scope_search(query)
     block_ids = [b for b,f in block_ids]
     post_ids = [p for p,f in post_ids]
+    print("search_all", block_ids)
     result = {"blocks": block_ids, "posts": post_ids}
     serialized = dumps(result, cls=UUIDEncoder)
     return serialized
