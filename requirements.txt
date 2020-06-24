@@ -1,4 +1,3 @@
-fastapi
 flask
 flask-cors
 flask-socketio
@@ -6,5 +5,3 @@ nltk
 pandas
 pymongo
 pytest
-uvicorn
-wheel
