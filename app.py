@@ -388,9 +388,6 @@ def create_post(json):
 def search_all(json):
     query = json["query"]
     block_ids, post_ids = all_scope_search(query)
-    block_ids = [b for b,f in block_ids]
-    post_ids = [p for p,f in post_ids]
-    print("search_all", block_ids)
     result = {"blocks": block_ids, "posts": post_ids}
     serialized = dumps(result, cls=UUIDEncoder)
     return serialized
@@ -401,8 +398,6 @@ def search_discussion(json):
     query = json["query"]
     discussion_id = json["discussion_id"]
     block_ids, post_ids = discussion_scope_search(query, discussion_id)
-    block_ids = [b for b,f in block_ids]
-    post_ids = [p for p,f in post_ids]
     result = {"blocks": block_ids, "posts": post_ids}
     serialized = dumps(result, cls=UUIDEncoder)
     return serialized
@@ -413,8 +408,6 @@ def search_user_saved(json):
     query = json["query"]
     user_id = json["user_id"]
     block_ids, post_ids = user_saved_scope_search(query, user_id)
-    block_ids = [b for b,f in block_ids]
-    post_ids = [p for p,f in post_ids]
     result = {"blocks": block_ids, "posts": post_ids}
     serialized = dumps(result, cls=UUIDEncoder)
     return serialized

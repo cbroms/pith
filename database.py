@@ -186,7 +186,6 @@ def add_keyword_block(keyword, block_id, freq):
 def index_block(block_id, freq_dict):
     for k,f in freq_dict.items():
         add_keyword_block(k, block_id, f)
-    print(keywords.find_one({ "_id" : "hi" }))
 
 
 def get_keyword_posts(keyword):

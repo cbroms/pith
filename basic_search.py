@@ -1,3 +1,4 @@
+from datetime import datetime
 import math
 import nltk
 from nltk import pos_tag
@@ -6,7 +7,7 @@ from operator import itemgetter
 import pandas as pd
 from threading import Lock
 
-from models.post import Post
+from models.post import Post, date_time_fmt
 from models.block import Block
 
 import database
@@ -19,11 +20,17 @@ ps = PorterStemmer()
 
 # very rudimentary and misses things like pronouns and adverbs
 def assign_pos_weight(cat):
-    if "JJ" in cat: # adjective
+    if cat.find("JJ") > -1: # adjective
         return 1
-    elif "NN" in cat: # noun
+    elif cat.find("NN") > -1: # noun
         return 1
-    elif "VB" in cat: # verb
+    elif cat.find("VB") > -1: # verb
+        return 1
+    elif cat.find("CD") > -1: # cardinal number
+        return 1
+    elif cat.find("PRP") > -1: # personal pronoun
+        return 1
+    elif cat.find("RB") > -1: # adverb
         return 1
     else:
         return 0
@@ -73,13 +80,29 @@ def basic_search(key_word_list, blocks, posts):
 
     blocks_order = []
     for b,F in blocks_freq.items():
-        blocks_order.append((b, metric(F)))
-    blocks_order.sort(key=itemgetter(1), reverse=True)
+        blocks_order.append((
+            metric(F),
+            datetime.strptime(
+                database.get_post(database.get_block(b)["post"])["created_at"], 
+                date_time_fmt
+            ),
+            b 
+        ))
+    blocks_order.sort(reverse=True)
 
     posts_order = []
     for p,F in posts_freq.items():
-        posts_order.append((p, metric(F)))
-    posts_order.sort(key=itemgetter(1), reverse=True)
+        posts_order.append((
+            metric(F),
+            datetime.strptime(database.get_post(p)["created_at"], 
+                date_time_fmt
+            ),
+            p 
+        ))
+    posts_order.sort(reverse=True)
+
+    blocks_order = [b for f,t,b in blocks_order if f > 0]
+    posts_order = [p for f,t,p in posts_order if f > 0]
 
     return blocks_order, posts_order
 
