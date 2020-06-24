@@ -98,10 +98,9 @@ def get_user(json):
 @socketio.on('create_user')
 def create_user(json):
     ip = json["user_id"]
-
+   
     # try getting the user first
     user_data = database.get_user(ip)
-
     if user_data == None:
         user_obj = User(ip)
         database.insert_user(user_obj)
@@ -130,6 +129,8 @@ def get_block(json):
     user_id = json["user_id"]
     block_data = database.get_block(block_id)
     saved_blocks = database.get_user_saved_blocks(user_id)
+    # print(user_id)
+    # print(saved_blocks)
     # if the block is in the user's list of saved blocks, add that to the obj
     if block_id in saved_blocks:
         block_data["saved"] = True
@@ -174,6 +175,8 @@ def save_block(json):
     database.save_block(block_id, user_id)
     
     block_data = database.get_block(block_id)
+    saved_blocks = database.get_user_saved_blocks(user_id)
+    
     block_data["saved"] = True
     serialized = dumps(block_data, cls=UUIDEncoder)
     # emit the event for the user that just added the block
@@ -247,11 +250,17 @@ def post_add_tag(json):
 @socketio.on('block_add_tag')
 def block_add_tag(json): 
     block_id = json["block_id"]
+    user_id = json["user_id"]
     tag = json["tag"]
     
     database.block_add_tag(block_id, tag)
 
     block_data = database.get_block(block_id)
+    saved_blocks = database.get_user_saved_blocks(user_id)
+   # print(saved_blocks)
+    # # if the block is in the user's list of saved blocks, add that to the obj
+    if block_id in saved_blocks:
+        block_data["saved"] = True
 
     serialized = dumps(block_data, cls=UUIDEncoder)
     emit("updated_block", serialized, broadcast=True)
@@ -291,11 +300,17 @@ def post_remove_tag(json):
 @socketio.on('block_remove_tag')
 def block_remove_tag(json): 
     block_id = json["block_id"]
+    user_id= json["user_id"]
     tag = json["tag"]
     
     database.block_remove_tag(block_id, tag)
 
     block_data = database.get_block(block_id)
+    saved_blocks = database.get_user_saved_blocks(user_id)
+    # # if the block is in the user's list of saved blocks, add that to the obj
+    if block_id in saved_blocks:
+        block_data["saved"] = True
+
 
     serialized = dumps(block_data, cls=UUIDEncoder)
 
