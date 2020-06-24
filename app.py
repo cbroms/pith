@@ -1,5 +1,6 @@
 from collections import defaultdict
-from flask import Flask
+#from flask import Flask
+from fastapi import FastAPI
 from flask_socketio import SocketIO, emit
 from json import dumps, JSONEncoder
 from uuid import UUID
@@ -18,7 +19,8 @@ import database
 import utils
 
 
-app = Flask(__name__)
+#app = Flask(__name__)
+app = FastAPI()
 socketio = SocketIO(app, cors_allowed_origins='*')
 
 

@@ -153,8 +153,10 @@ def insert_block(block_obj):
 def save_block(block_id, user_id):
     users.update_one({"_id" : user_id}, {"$push" : {"library.blocks" : block_id}})
 
+
 def unsave_block(block_id, user_id):
     users.update_one({"_id" : user_id}, {"$pull" : {"library.blocks" : block_id}})
+
 
 def block_add_tag(block_id, tag):
     blocks.update_one({"_id" : block_id}, {"$push": {"tags" : tag}})
