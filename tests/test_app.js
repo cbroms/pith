@@ -1,6 +1,17 @@
 /*
 test: python -m http.server
 main: python3 app.py
+
+Test Case:
+- create users, disconnect, join, see if state
+  preserved
+- discussion leave/join 
+- making posts/blocks
+- tagging
+- saving
+- searching
+
+
 */
 
 function simulate(head, fun_list) {

@@ -13,6 +13,38 @@ from basic_search import (
 )
 import database
 
+# Discussion Abstraction
+"""
+    join/leave discussion
+    make post/blocks
+    get blocks/posts in discussion
+"""
+
+# Post/Block
+"""
+    create and get post/block
+"""
+
+# Tags
+"""
+    add tag to post/block
+    remove tag from post/block
+"""
+
+# Save
+"""
+    save post/block
+    get post/block
+    unsave post/block
+    get post/block
+"""
+
+# Keyword
+"""
+    make post/blocks
+    get by keyword
+"""
+
 
 test_user = User(0)
 test_discussion = Discussion()
