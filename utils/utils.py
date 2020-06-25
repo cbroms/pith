@@ -1,12 +1,12 @@
+from collections import Counter, defaultdict
 from functools import reduce
 from operator import or_
 from nltk.stem import PorterStemmer
-from collections import Counter, defaultdict
 import string
 
 
 ps = PorterStemmer()
-table = str.maketrans("", "", string.punctuation)
+table = str.maketrans(string.punctuation, ' '*len(string.punctuation))
 
 
 def text_tokens(text):

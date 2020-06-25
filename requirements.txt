@@ -5,3 +5,4 @@ nltk
 pandas
 pymongo
 pytest
+test-utils
