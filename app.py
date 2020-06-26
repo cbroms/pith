@@ -1,6 +1,9 @@
+
+import socketio
+
 from collections import defaultdict
-from flask import Flask
-from flask_socketio import SocketIO, emit
+# from flask import Flask
+# from flask_socketio import SocketIO, emit
 from json import dumps, JSONEncoder
 from uuid import UUID
 
@@ -18,8 +21,11 @@ import database
 import utils
 
 
-app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins='*')
+# app = Flask(__name__)
+# socketio = SocketIO(app, cors_allowed_origins='*')
+
+sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins=["http://localhost:3000", "https://dev1.pith.rainflame.com"])
+app = socketio.ASGIApp(sio)
 
 
 class UUIDEncoder(JSONEncoder):
@@ -29,72 +35,72 @@ class UUIDEncoder(JSONEncoder):
         return JSONEncoder.default(self, obj)
 
 
-@socketio.on('connect')
-def test_connect():
+@sio.on('connect')
+async def test_connect(sid, json):
     print('Client connected')
 
 
-@socketio.on('disconnect')
-def test_disconnect():
+@sio.on('disconnect')
+async def test_disconnect(sid):
     print('Client disconnected')
 
 
 # get a list of all discussions
-@socketio.on('get_discussions')
-def get_discussions():
+@sio.on('get_discussions')
+async def get_discussions(sid, json):
     return dumps(database.get_discussions(), cls=UUIDEncoder)
 
 
 # get a list of all users
-@socketio.on('get_users')
-def get_users():
+@sio.on('get_users')
+async def get_users(sid):
     return dumps(database.get_users(), cls=UUIDEncoder)
 
 
 # get a list of all posts
-@socketio.on('get_posts')
-def get_posts():
+@sio.on('get_posts')
+async def get_posts(sid):
     return dumps(database.get_posts(), cls=UUIDEncoder)
 
 
 # get a list of all blocks
-@socketio.on('get_blocks')
-def get_blocks():
+@sio.on('get_blocks')
+async def get_blocks(sid):
     return dumps(database.get_blocks(), cls=UUIDEncoder)
 
 
 # get a list of all users for the discussion
-@socketio.on('get_discussion_users')
-def get_discussion_users(json):
+@sio.on('get_discussion_users')
+async def get_discussion_users(sid, json):
     discussion_id = json["discussion_id"]
     return dumps(database.get_discussion_users(discussion_id), cls=UUIDEncoder)
 
 
 # get a list of all posts for the discussion
-@socketio.on('get_discussion_posts')
-def get_discussion_posts(json):
+@sio.on('get_discussion_posts')
+async def get_discussion_posts(sid, json):
     discussion_id = json["discussion_id"]
     return dumps(database.get_discussion_posts(discussion_id), cls=UUIDEncoder)
 
 
 # get a list of all blocks for the discussion
-@socketio.on('get_discussion_blocks')
-def get_discussion_blocks(json):
+@sio.on('get_discussion_blocks')
+async def get_discussion_blocks(sid, json):
     discussion_id = json["discussion_id"]
     return dumps(database.get_discussion_blocks(discussion_id), cls=UUIDEncoder)
 
 
 # get a specific user with ID (IP address in base64)
-@socketio.on('get_user')
-def get_user(json):
+@sio.on('get_user')
+async def get_user(sid, json):
     user_id = json["user_id"]
     user_data = database.get_user(user_id) 
     return dumps(user_data, cls=UUIDEncoder)
 
 
 # check if a user exists, then add a new one if not
-@socketio.on('create_user')
-def create_user(json):
+@sio.on('create_user')
+async def create_user(sid, json):
     ip = json["user_id"]
    
     # try getting the user first
@@ -107,22 +113,22 @@ def create_user(json):
     return dumps(user_data, cls=UUIDEncoder)
 
 
-@socketio.on('get_discussion')
-def get_discussion(json):
+@sio.on('get_discussion')
+async def get_discussion(sid, json):
     discussion_id = json["discussion_id"]
     discussion_data = database.get_discussion(discussion_id) 
     return dumps(discussion_data, cls=UUIDEncoder)
 
 
-@socketio.on('get_post')
-def get_post(json):
+@sio.on('get_post')
+async def get_post(sid, json):
     post_id = json["post_id"]
     post_data = database.get_post(post_id) 
     return dumps(post_data, cls=UUIDEncoder)
 
 
-@socketio.on('get_block')
-def get_block(json):
+@sio.on('get_block')
+async def get_block(sid, json):
     block_id = json["block_id"]
     user_id = json["user_id"]
     block_data = database.get_block(block_id)
@@ -135,8 +141,8 @@ def get_block(json):
     return dumps(block_data, cls=UUIDEncoder)
 
 
-@socketio.on('save_discussion')
-def save_discussion(json):
+@sio.on('save_discussion')
+async def save_discussion(sid, json):
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
 
@@ -146,12 +152,12 @@ def save_discussion(json):
     serialized = dumps(discussion_data, cls=UUIDEncoder)
 
     # emit the event for the user that just added the block
-    emit("discussion_saved", serialized)
+    await sio.emit("discussion_saved", serialized, to=sid)
     return serialized
 
 
-@socketio.on('save_post')
-def save_post(json):
+@sio.on('save_post')
+async def save_post(sid, json):
     post_id = json["post_id"]
     user_id = json["user_id"]
 
@@ -161,12 +167,12 @@ def save_post(json):
     serialized = dumps(post_data, cls=UUIDEncoder)
 
     # emit the event for the user that just added the block
-    emit("post_saved", serialized)
+    await sio.emit("post_saved", serialized, to=sid)
     return serialized
 
 
-@socketio.on('save_block')
-def save_block(json):
+@sio.on('save_block')
+async def save_block(sid, json):
     block_id = json["block_id"]
     user_id = json["user_id"]
 
@@ -178,11 +184,11 @@ def save_block(json):
     block_data["saved"] = True
     serialized = dumps(block_data, cls=UUIDEncoder)
     # emit the event for the user that just added the block
-    emit("updated_block", serialized)
+    await sio.emit("updated_block", serialized, to=sid)
     return serialized
 
-@socketio.on('unsave_block')
-def unsave_block(json):
+@sio.on('unsave_block')
+async def unsave_block(sid, json):
     block_id = json["block_id"]
     user_id = json["user_id"]
 
@@ -192,33 +198,33 @@ def unsave_block(json):
     block_data["saved"] = False
     serialized = dumps(block_data, cls=UUIDEncoder)
     # emit the event for the user that just added the block
-    emit("updated_block", serialized)
+    await sio.emit("updated_block", serialized, to=sid)
     return serialized
 
 
-@socketio.on('get_saved_discussions')
-def get_saved_discussions(json):
+@sio.on('get_saved_discussions')
+async def get_saved_discussions(sid, json):
     user_id = json["user_id"]
     discussions = database.get_user_saved_discussions(user_id)
     return dumps(discussions, cls=UUIDEncoder)
 
 
-@socketio.on('get_saved_posts')
-def get_saved_posts(json):
+@sio.on('get_saved_posts')
+async def get_saved_posts(sid, json):
     user_id = json["user_id"]
     posts = database.get_user_saved_posts(user_id)
     return dumps(posts, cls=UUIDEncoder)
 
 
-@socketio.on('get_saved_blocks')
-def get_saved_blocks(json):
+@sio.on('get_saved_blocks')
+async def get_saved_blocks(sid, json):
     user_id = json["user_id"]
     blocks = database.get_user_saved_blocks(user_id)
     return dumps(blocks, cls=UUIDEncoder)
 
 
-@socketio.on('discussion_add_tag')
-def discussion_add_tag(json): 
+@sio.on('discussion_add_tag')
+async def discussion_add_tag(sid, json): 
     discussion_id = json["discussion_id"]
     tag = json["tag"]
     
@@ -227,12 +233,12 @@ def discussion_add_tag(json):
     discussion_data = database.get_discussion(discussion_id)
 
     serialized = dumps(discussion_data, cls=UUIDEncoder)
-    emit("discussion_add_tag", serialized)
+    await sio.emit("discussion_add_tag", serializedm, to=sid)
     return serialized
 
 
-@socketio.on('post_add_tag')
-def post_add_tag(json): 
+@sio.on('post_add_tag')
+async def post_add_tag(sid, json): 
     post_id = json["post_id"]
     tag = json["tag"]
     
@@ -241,12 +247,12 @@ def post_add_tag(json):
     post_data = database.get_post(post_id)
 
     serialized = dumps(post_data, cls=UUIDEncoder)
-    emit("post_add_tag", serialized)
+    await sio.emit("post_add_tag", serialized, to=sid)
     return serialized
 
 
-@socketio.on('block_add_tag')
-def block_add_tag(json): 
+@sio.on('block_add_tag')
+async def block_add_tag(sid, json): 
     block_id = json["block_id"]
     user_id = json["user_id"]
     tag = json["tag"]
@@ -261,12 +267,12 @@ def block_add_tag(json):
         block_data["saved"] = True
 
     serialized = dumps(block_data, cls=UUIDEncoder)
-    emit("updated_block", serialized, broadcast=True)
+    await sio.emit("updated_block", serialized)
     return serialized
 
 
-@socketio.on('discussion_remove_tag')
-def discussion_remove_tag(json): 
+@sio.on('discussion_remove_tag')
+async def discussion_remove_tag(sid, json): 
     discussion_id = json["discussion_id"]
     tag = json["tag"]
     
@@ -276,12 +282,12 @@ def discussion_remove_tag(json):
 
     serialized = dumps(discussion_data, cls=UUIDEncoder)
 
-    emit("discussion_remove_tag", serialized)
+    await sio.emit("discussion_remove_tag", serialized, to=sid)
     return serialized
 
 
-@socketio.on('post_remove_tag')
-def post_remove_tag(json): 
+@sio.on('post_remove_tag')
+async def post_remove_tag(sid, json): 
     post_id = json["post_id"]
     tag = json["tag"]
     
@@ -291,12 +297,12 @@ def post_remove_tag(json):
 
     serialized = dumps(post_data, cls=UUIDEncoder)
 
-    emit("updated_post", serialized)
+    await sio.emit("updated_post", serialized, to=sid)
     return serialized
 
 
-@socketio.on('block_remove_tag')
-def block_remove_tag(json): 
+@sio.on('block_remove_tag')
+async def block_remove_tag(sid, json): 
     block_id = json["block_id"]
     user_id= json["user_id"]
     tag = json["tag"]
@@ -312,12 +318,12 @@ def block_remove_tag(json):
 
     serialized = dumps(block_data, cls=UUIDEncoder)
 
-    emit("updated_block", serialized, broadcast=True)
+    await sio.emit("updated_block", serialized)
     return serialized
 
 
-@socketio.on('create_discussion')
-def create_discussion(json):
+@sio.on('create_discussion')
+async def create_discussion(sid, json):
     discussion_obj = Discussion()
     database.insert_discussion(discussion_obj)
 
@@ -326,13 +332,13 @@ def create_discussion(json):
     serialized = dumps(discussion_data, cls=UUIDEncoder)
 
     #emit a new event for all listening clients 
-    emit("discussion_created", serialized, broadcast=True)
+    await sio.emit("discussion_created", serialized)
 
     return serialized
 
 
-@socketio.on('join_discussion')
-def join_discussion(json):
+@sio.on('join_discussion')
+async def join_discussion(sid, json):
     user_id = json["user_id"]
     discussion_id = json["discussion_id"]
     database.join_discussion(discussion_id, user_id)
@@ -342,13 +348,13 @@ def join_discussion(json):
     serialized = dumps(discussion_data, cls=UUIDEncoder)
 
     #emit a new event for all listening clients 
-    emit("join_discussion", serialized, broadcast=True)
+    await sio.emit("join_discussion", serialized)
 
     return serialized
 
 
-@socketio.on('leave_discussion')
-def leave_discussion(json):
+@sio.on('leave_discussion')
+async def leave_discussion(sid, json):
     user_id = json["user_id"]
     discussion_id = json["discussion_id"]
     database.leave_discussion(discussion_id, user_id)
@@ -358,13 +364,13 @@ def leave_discussion(json):
     serialized = dumps(discussion_data, cls=UUIDEncoder)
 
     #emit a new event for all listening clients 
-    emit("leave_discussion", serialized, broadcast=True)
+    await sio.emit("leave_discussion", serialized)
 
     return serialized
 
 
-@socketio.on('create_post')
-def create_post(json):
+@sio.on('create_post')
+async def create_post(sid, json):
     user_id = json["user_id"]
     discussion_id = json["discussion_id"]
     post_obj = Post(user_id, discussion_id)
@@ -394,13 +400,13 @@ def create_post(json):
     serialized = dumps(post_data, cls=UUIDEncoder)
 
     #emit a new event for all listening clients 
-    emit("post_created", serialized, broadcast=True)
+    await sio.emit("post_created", serialized)
 
     return serialized
 
 
-@socketio.on('search_all')
-def search_all(json):
+@sio.on('search_all')
+async def search_all(sid, json):
     query = json["query"]
     block_ids, post_ids = all_scope_search(query)
     result = {"blocks": block_ids, "posts": post_ids}
@@ -408,8 +414,8 @@ def search_all(json):
     return serialized
 
 
-@socketio.on('search_discussion')
-def search_discussion(json):
+@sio.on('search_discussion')
+async def search_discussion(sid, json):
     query = json["query"]
     discussion_id = json["discussion_id"]
     block_ids, post_ids = discussion_scope_search(query, discussion_id)
@@ -418,8 +424,8 @@ def search_discussion(json):
     return serialized
 
 
-@socketio.on('search_user_saved')
-def search_user_saved(json):
+@sio.on('search_user_saved')
+async def search_user_saved(sid, json):
     query = json["query"]
     user_id = json["user_id"]
     block_ids, post_ids = user_saved_scope_search(query, user_id)
