@@ -54,6 +54,7 @@ def discussion_add_tag(discussion_id, tag):
 def discussion_remove_tag(discussion_id, tag):
     discussions.update_one({"_id" : discussion_id}, {"$pull": {"tags" : tag}})
 
+
 def join_discussion(discussion_id, user_id): 
     discussions.update_one({"_id" : discussion_id}, {"$push": {"users" : user_id}})
 
