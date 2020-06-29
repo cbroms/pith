@@ -4,20 +4,21 @@ from flask_socketio import SocketIO, emit
 from json import dumps, JSONEncoder
 from uuid import UUID
 
-from models.discussion import Discussion
-from models.user import User
-from models.post import Post
-from models.block import Block
+from features.discussion
+from features.total
 
-from basic_search import (
+from search.basic_search import (
     all_scope_search,
     discussion_scope_search,
     user_saved_scope_search,
 )
+
 import database
-import utils
+from utils import utils
 
 
+# TODO: How to move server functions to different file and still have
+# them recognized by app?
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins='*')
 
@@ -29,34 +30,40 @@ class UUIDEncoder(JSONEncoder):
         return JSONEncoder.default(self, obj)
 
 
+# TODO is this used
 @socketio.on('connect')
 def test_connect():
     print('Client connected')
 
 
+# TODO is this used
 @socketio.on('disconnect')
 def test_disconnect():
     print('Client disconnected')
 
 
+# TODO: is this used?
 # get a list of all discussions
 @socketio.on('get_discussions')
 def get_discussions():
     return dumps(database.get_discussions(), cls=UUIDEncoder)
 
 
+# TODO: is this used?
 # get a list of all users
 @socketio.on('get_users')
 def get_users():
     return dumps(database.get_users(), cls=UUIDEncoder)
 
 
+# TODO: is this used?
 # get a list of all posts
 @socketio.on('get_posts')
 def get_posts():
     return dumps(database.get_posts(), cls=UUIDEncoder)
 
 
+# TODO: is this used?
 # get a list of all blocks
 @socketio.on('get_blocks')
 def get_blocks():
@@ -70,6 +77,7 @@ def get_discussion_users(json):
     return dumps(database.get_discussion_users(discussion_id), cls=UUIDEncoder)
 
 
+# TODO: is this used?
 # get a list of all posts for the discussion
 @socketio.on('get_discussion_posts')
 def get_discussion_posts(json):
@@ -77,6 +85,7 @@ def get_discussion_posts(json):
     return dumps(database.get_discussion_posts(discussion_id), cls=UUIDEncoder)
 
 
+# TODO: is this used?
 # get a list of all blocks for the discussion
 @socketio.on('get_discussion_blocks')
 def get_discussion_blocks(json):
@@ -96,14 +105,7 @@ def get_user(json):
 @socketio.on('create_user')
 def create_user(json):
     ip = json["user_id"]
-   
-    # try getting the user first
-    user_data = database.get_user(ip)
-    if user_data == None:
-        user_obj = User(ip)
-        database.insert_user(user_obj)
-        user_data = user_obj.__dict__
-
+    user_data = other.create_user(ip)
     return dumps(user_data, cls=UUIDEncoder)
 
 
@@ -126,12 +128,11 @@ def get_block(json):
     block_id = json["block_id"]
     user_id = json["user_id"]
     block_data = database.get_block(block_id)
+    ############################################# what is this
     saved_blocks = database.get_user_saved_blocks(user_id)
-    # print(user_id)
-    # print(saved_blocks)
-    # if the block is in the user's list of saved blocks, add that to the obj
     if block_id in saved_blocks:
         block_data["saved"] = True
+    #############################################
     return dumps(block_data, cls=UUIDEncoder)
 
 
@@ -139,14 +140,9 @@ def get_block(json):
 def save_discussion(json):
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
-
-    database.save_discussion(discussion_id, user_id)
-
-    discussion_data = database.get_discussion(discussion_id)
+    discussion_data = other.save_discussion(discussion_id, user_id)
     serialized = dumps(discussion_data, cls=UUIDEncoder)
-
-    # emit the event for the user that just added the block
-    emit("discussion_saved", serialized)
+    emit("discussion_saved", serialized) # TODO remove, combine above and below
     return serialized
 
 
@@ -154,14 +150,9 @@ def save_discussion(json):
 def save_post(json):
     post_id = json["post_id"]
     user_id = json["user_id"]
-
-    database.save_post(post_id, user_id)
-
-    post_data = database.get_post(post_id)
+    post_data = other.save_post(post_id, user_id)
     serialized = dumps(post_data, cls=UUIDEncoder)
-
-    # emit the event for the user that just added the block
-    emit("post_saved", serialized)
+    emit("post_saved", serialized) # TODO remove, combine above and below 
     return serialized
 
 
@@ -171,14 +162,14 @@ def save_block(json):
     user_id = json["user_id"]
 
     database.save_block(block_id, user_id)
-    
     block_data = database.get_block(block_id)
+    ############################################# what is this
     saved_blocks = database.get_user_saved_blocks(user_id)
-    
     block_data["saved"] = True
+    ############################################# what is this
+
     serialized = dumps(block_data, cls=UUIDEncoder)
-    # emit the event for the user that just added the block
-    emit("updated_block", serialized)
+    emit("updated_block", serialized) # TODO remove, combine above and below
     return serialized
 
 @socketio.on('unsave_block')
@@ -188,11 +179,12 @@ def unsave_block(json):
 
     database.unsave_block(block_id, user_id)
     
+    ############################################# what is this
     block_data = database.get_block(block_id)
     block_data["saved"] = False
     serialized = dumps(block_data, cls=UUIDEncoder)
-    # emit the event for the user that just added the block
-    emit("updated_block", serialized)
+    ############################################# what is this
+    emit("updated_block", serialized) # TODO remove, combine above and below
     return serialized
 
 
@@ -206,42 +198,34 @@ def get_saved_discussions(json):
 @socketio.on('get_saved_posts')
 def get_saved_posts(json):
     user_id = json["user_id"]
-    posts = database.get_user_saved_posts(user_id)
-    return dumps(posts, cls=UUIDEncoder)
+    posts_data = database.get_user_saved_posts(user_id)
+    return dumps(posts_data, cls=UUIDEncoder)
 
 
 @socketio.on('get_saved_blocks')
 def get_saved_blocks(json):
     user_id = json["user_id"]
-    blocks = database.get_user_saved_blocks(user_id)
-    return dumps(blocks, cls=UUIDEncoder)
+    blocks_data = database.get_user_saved_blocks(user_id)
+    return dumps(blocks_data, cls=UUIDEncoder)
 
 
 @socketio.on('discussion_add_tag')
 def discussion_add_tag(json): 
     discussion_id = json["discussion_id"]
     tag = json["tag"]
-    
-    database.discussion_add_tag(discussion_id, tag)
-
-    discussion_data = database.get_discussion(discussion_id)
-
+    discussion_data = discussions_add_tag(discussion_id, tag)    
     serialized = dumps(discussion_data, cls=UUIDEncoder)
-    emit("discussion_add_tag", serialized)
+    emit("discussion_add_tag", serialized) # TODO remove, combine above and below
     return serialized
 
 
 @socketio.on('post_add_tag')
 def post_add_tag(json): 
     post_id = json["post_id"]
-    tag = json["tag"]
-    
-    database.post_add_tag(post_id, tag)
-
-    post_data = database.get_post(post_id)
-
+    tag = json["tag"] 
+    post_data = other.post_add_tag(post_id, tag)
     serialized = dumps(post_data, cls=UUIDEncoder)
-    emit("post_add_tag", serialized)
+    emit("post_add_tag", serialized) # TODO remove, combine above and below
     return serialized
 
 
@@ -251,17 +235,16 @@ def block_add_tag(json):
     user_id = json["user_id"]
     tag = json["tag"]
     
-    database.block_add_tag(block_id, tag)
-
-    block_data = database.get_block(block_id)
+    ############################################# what is this
     saved_blocks = database.get_user_saved_blocks(user_id)
    # print(saved_blocks)
     # # if the block is in the user's list of saved blocks, add that to the obj
     if block_id in saved_blocks:
         block_data["saved"] = True
+    ############################################# what is this
 
     serialized = dumps(block_data, cls=UUIDEncoder)
-    emit("updated_block", serialized, broadcast=True)
+    emit("updated_block", serialized, broadcast=True) # TODO remove, combine above and below
     return serialized
 
 
@@ -269,14 +252,9 @@ def block_add_tag(json):
 def discussion_remove_tag(json): 
     discussion_id = json["discussion_id"]
     tag = json["tag"]
-    
-    database.discussion_remove_tag(discussion_id, tag)
-
-    discussion_data = database.get_discussion(discussion_id)
-
+    discussion_data = other.discussion_remove_tag(discussion_id, tag)
     serialized = dumps(discussion_data, cls=UUIDEncoder)
-
-    emit("discussion_remove_tag", serialized)
+    emit("discussion_remove_tag", serialized) # TODO remove, combine above and below
     return serialized
 
 
@@ -284,14 +262,9 @@ def discussion_remove_tag(json):
 def post_remove_tag(json): 
     post_id = json["post_id"]
     tag = json["tag"]
-    
-    database.post_remove_tag(post_id, tag)
-
-    post_data = database.get_post(post_id)
-
+    post_data = other.post_remove_tag(post_id, tag)
     serialized = dumps(post_data, cls=UUIDEncoder)
-
-    emit("updated_post", serialized)
+    emit("updated_post", serialized) # TODO remove, combine above and below
     return serialized
 
 
@@ -300,34 +273,23 @@ def block_remove_tag(json):
     block_id = json["block_id"]
     user_id= json["user_id"]
     tag = json["tag"]
-    
-    database.block_remove_tag(block_id, tag)
-
-    block_data = database.get_block(block_id)
+    block_data = other.block_remove_tag(block_id, tag)
+    ############################################# what is this
     saved_blocks = database.get_user_saved_blocks(user_id)
     # # if the block is in the user's list of saved blocks, add that to the obj
     if block_id in saved_blocks:
         block_data["saved"] = True
-
-
+    ############################################# what is this
     serialized = dumps(block_data, cls=UUIDEncoder)
-
-    emit("updated_block", serialized, broadcast=True)
+    emit("updated_block", serialized, broadcast=True) # TODO remove, combine above and below
     return serialized
 
 
 @socketio.on('create_discussion')
 def create_discussion(json):
-    discussion_obj = Discussion()
-    database.insert_discussion(discussion_obj)
-
-    discussion_data = discussion_obj.__dict__
-
+    discussion_data = other.create_discussion()
     serialized = dumps(discussion_data, cls=UUIDEncoder)
-
-    #emit a new event for all listening clients 
-    emit("discussion_created", serialized, broadcast=True)
-
+    emit("discussion_created", serialized, broadcast=True) # TODO remove, combine above and below
     return serialized
 
 
@@ -335,15 +297,9 @@ def create_discussion(json):
 def join_discussion(json):
     user_id = json["user_id"]
     discussion_id = json["discussion_id"]
-    database.join_discussion(discussion_id, user_id)
-
-    discussion_data = database.get_discussion(discussion_id)
-
+    discussion_data = other.join_discussion(discussion_id, user_id)
     serialized = dumps(discussion_data, cls=UUIDEncoder)
-
-    #emit a new event for all listening clients 
-    emit("join_discussion", serialized, broadcast=True)
-
+    emit("join_discussion", serialized, broadcast=True) # TODO remove, combine above and below
     return serialized
 
 
@@ -351,15 +307,9 @@ def join_discussion(json):
 def leave_discussion(json):
     user_id = json["user_id"]
     discussion_id = json["discussion_id"]
-    database.leave_discussion(discussion_id, user_id)
-
-    discussion_data = database.get_discussion(discussion_id)
-
+    discussion_data = other.leave_discussion(discussion_id, user_id)
     serialized = dumps(discussion_data, cls=UUIDEncoder)
-
-    #emit a new event for all listening clients 
-    emit("leave_discussion", serialized, broadcast=True)
-
+    emit("leave_discussion", serialized, broadcast=True) # TODO remove, combine above and below
     return serialized
 
 
@@ -367,43 +317,16 @@ def leave_discussion(json):
 def create_post(json):
     user_id = json["user_id"]
     discussion_id = json["discussion_id"]
-    post_obj = Post(user_id, discussion_id)
-    database.insert_post_user_history(user_id, post_obj._id)
-    database.insert_post_discussion_history(discussion_id, post_obj._id)
-
-    blocks = json["blocks"]
-    block_ids = []
-    freq_dicts = []
-    for b in blocks:
-        block_obj = Block(user_id, discussion_id, post_obj._id, b)
-        freq_dicts.append(block_obj.freq_dict)
-        block_ids.append(block_obj._id)
-        database.insert_block_discussion_history(discussion_id, block_obj._id)
-        database.insert_block(block_obj)
-        database.index_block(block_obj._id, block_obj.freq_dict)
-
-    post_obj.blocks = block_ids
-    post_freq_dict = utils.sum_dicts(freq_dicts)
-    post_obj.freq_dict = defaultdict(lambda:0, post_freq_dict)
-    database.insert_post(post_obj)
-
-    database.index_post(post_obj._id, post_obj.freq_dict)
-
-    post_data = post_obj.__dict__
-
+    post_data = other.create_post(discussion_id, user_id)
     serialized = dumps(post_data, cls=UUIDEncoder)
-
-    #emit a new event for all listening clients 
-    emit("post_created", serialized, broadcast=True)
-
+    emit("post_created", serialized, broadcast=True) # TODO remove, combine above and below
     return serialized
 
 
 @socketio.on('search_all')
 def search_all(json):
     query = json["query"]
-    block_ids, post_ids = all_scope_search(query)
-    result = {"blocks": block_ids, "posts": post_ids}
+    result  = all_scope_search(query)
     serialized = dumps(result, cls=UUIDEncoder)
     return serialized
 
@@ -412,8 +335,7 @@ def search_all(json):
 def search_discussion(json):
     query = json["query"]
     discussion_id = json["discussion_id"]
-    block_ids, post_ids = discussion_scope_search(query, discussion_id)
-    result = {"blocks": block_ids, "posts": post_ids}
+    result = discussion_scope_search(query, discussion_id)
     serialized = dumps(result, cls=UUIDEncoder)
     return serialized
 
@@ -422,8 +344,7 @@ def search_discussion(json):
 def search_user_saved(json):
     query = json["query"]
     user_id = json["user_id"]
-    block_ids, post_ids = user_saved_scope_search(query, user_id)
-    result = {"blocks": block_ids, "posts": post_ids}
+    result = user_saved_scope_search(query, user_id)
     serialized = dumps(result, cls=UUIDEncoder)
     return serialized
 

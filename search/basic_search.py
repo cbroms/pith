@@ -50,7 +50,10 @@ def make_metric(key_word_list):
     return metric
 
 
-def get_freqs(key_word_list, post_ids, block_ids):
+# TODO make more elegant
+def basic_search(key_word_list, block_ids, post_ids): 
+    key_word_list = utils.text_tokens(query)
+
     posts_obj = {p:Post(**database.get_post(p)) for p in post_ids}
     blocks_obj = {b:Block(**database.get_block(b)) for b in block_ids}
 
@@ -60,10 +63,7 @@ def get_freqs(key_word_list, post_ids, block_ids):
         blocks += [(b,k,blocks_obj[b].freq_dict[k]) for b in block_ids] 
         posts += [(p,k,posts_obj[p].freq_dict[k]) for p in post_ids] 
 
-    return blocks, posts
-
-
-def basic_search(key_word_list, blocks, posts): 
+    ############################## key_word_list, blocks, posts
     key_word_list = list(set(key_word_list))
 
     metric = make_metric(key_word_list)
@@ -103,10 +103,14 @@ def basic_search(key_word_list, blocks, posts):
 
     blocks_order = [b for f,t,b in blocks_order if f > 0]
     posts_order = [p for f,t,p in posts_order if f > 0]
+    #return blocks_order, posts_order
+    ##############################
 
-    return blocks_order, posts_order
+    result = {"blocks": block_ids, "posts": post_ids}
+    return results
 
-
+# TODO don't need
+"""
 def all_scope_search(query):
     key_word_list = utils.text_tokens(query)
 
@@ -118,24 +122,8 @@ def all_scope_search(query):
         posts += [(p,k,f["freq"]) \
             for p,f in database.get_keyword_posts(k).items()] 
 
-    return basic_search(key_word_list, blocks, posts)
+    block_ids, post_ids = basic_search(key_word_list, blocks, posts)
+    result = {"blocks": block_ids, "posts": post_ids}
+    return result 
+"""
 
-
-def discussion_scope_search(query, discussion_id):
-    key_word_list = utils.text_tokens(query)
-
-    post_ids = database.get_discussion_posts(discussion_id)
-    block_ids = database.get_discussion_blocks(discussion_id)
-    blocks, posts = get_freqs(key_word_list, post_ids, block_ids) 
-
-    return basic_search(key_word_list, blocks, posts)
-
-
-def user_saved_scope_search(query, user_id):
-    key_word_list = utils.text_tokens(query)
-
-    post_ids = database.get_user_saved_posts(user_id)
-    block_ids = database.get_user_saved_blocks(user_id)
-    blocks, posts = get_freqs(key_word_list, post_ids, block_ids) 
-
-    return basic_search(key_word_list, blocks, posts)

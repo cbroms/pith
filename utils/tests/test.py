@@ -1,8 +1,6 @@
 import unittest
 
-import sys
-sys.path.append('.')
-import utils
+from utils import utils
 
 
 class TestUtils(unittest.TestCase):
