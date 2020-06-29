@@ -4,7 +4,7 @@ discussion are naturally externally to the discussion.
 
 Need to think about what is the "base" thing that is being manipulated.
 The mongo entries or the abstract objects.  
-This determines if we use a struct/method model or an object model.
+=> This determines if we use a struct/method model or an object model.
 Furthermore, should database methods pertaining to an entity be within the
 entity's model/feature file?
 

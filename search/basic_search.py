@@ -63,7 +63,6 @@ def basic_search(key_word_list, block_ids, post_ids):
         blocks += [(b,k,blocks_obj[b].freq_dict[k]) for b in block_ids] 
         posts += [(p,k,posts_obj[p].freq_dict[k]) for p in post_ids] 
 
-    ############################## key_word_list, blocks, posts
     key_word_list = list(set(key_word_list))
 
     metric = make_metric(key_word_list)
@@ -103,27 +102,6 @@ def basic_search(key_word_list, block_ids, post_ids):
 
     blocks_order = [b for f,t,b in blocks_order if f > 0]
     posts_order = [p for f,t,p in posts_order if f > 0]
-    #return blocks_order, posts_order
-    ##############################
 
     result = {"blocks": block_ids, "posts": post_ids}
     return results
-
-# TODO don't need
-"""
-def all_scope_search(query):
-    key_word_list = utils.text_tokens(query)
-
-    blocks = []
-    posts = []
-    for k in key_word_list:
-        blocks += [(b,k,f["freq"]) \
-            for b,f in database.get_keyword_blocks(k).items()] 
-        posts += [(p,k,f["freq"]) \
-            for p,f in database.get_keyword_posts(k).items()] 
-
-    block_ids, post_ids = basic_search(key_word_list, blocks, posts)
-    result = {"blocks": block_ids, "posts": post_ids}
-    return result 
-"""
-

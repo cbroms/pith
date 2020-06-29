@@ -21,24 +21,3 @@ class Post():
             self.tags = []
             self.created_at = datetime.utcnow().strftime(date_time_fmt)
             # convert back: datetime.strptime(self.created_at, date_time_fmt)
-
-def get_posts(self):
-    post_cursor = posts.find()
-    post_list = []
-    for u in post_cursor:
-        post_list.append(u)
-    return post_list
-
-def get_post(self, post_id):
-    post_data = posts.find_one({ "_id" : post_id })
-    return post_data
-
-def insert_post(self, post_obj):
-    post_data = post_obj.__dict__
-    posts.insert_one(post_data)
-
-def post_add_tag(self, post_id, tag):
-    posts.update_one({"_id" : post_id}, {"$push": {"tags" : tag}})
-
-def post_remove_tag(self, post_id, tag):
-    posts.update_one({"_id" : post_id}, {"$pull": {"tags" : tag}})

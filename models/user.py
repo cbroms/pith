@@ -14,30 +14,16 @@ class User():
             self.history = [] # list of posts
             self.discussions = [] # list of discussions user is in
 
-def get_users(self):
-    user_cursor = users.find()
-    user_list = []
-    for u in user_cursor:
-        user_list.append(u)
-    return user_list
-
-def get_user(self, user_id):
-    user_data = users.find_one({ "_id" : user_id })
-    return user_data
-
-def insert_user(self, user_obj):
-    user_data = user_obj.__dict__
-    users.insert_one(user_data)
-
-def insert_post_user_history(self, user_id, post_id):
-    users.update_one({"_id" : user_id}, {"$push": {"history" : post_id}})
-
 def save_discussion(self, discussion_id, user_id):
     users.update_one({"_id" : user_id}, 
         {"$push" : {"library.discussions" : discussion_id}})
 
 def unsave_discussion(self, discussion_id, user_id):
     users.update_one({"_id" : user_id}, {"$pull" : {"library.discussions" : discussion_id}})
+
+# TODO in discussion scope
+def insert_post_user_history(self, user_id, post_id):
+    users.update_one({"_id" : user_id}, {"$push": {"history" : post_id}})
 
 # TODO in discussion scope, have a "save" state in post
 def save_post(self, post_id, user_id):
@@ -55,6 +41,7 @@ def save_block(self, block_id, user_id):
 def unsave_block(self, block_id, user_id):
     users.update_one({"_id" : user_id}, {"$pull" : {"library.blocks" : block_id}})
 
+# TODO in discussion scope, have a "save" state in post
 def user_saved_scope_search(query, user_id):
     post_ids = database.get_user_saved_posts(user_id)
     block_ids = database.get_user_saved_blocks(user_id)
