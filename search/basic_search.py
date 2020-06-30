@@ -10,7 +10,6 @@ from threading import Lock
 from models.post import Post, date_time_fmt
 from models.block import Block
 
-import database
 import utils
 
 
@@ -50,57 +49,33 @@ def make_metric(key_word_list):
     return metric
 
 
-# TODO make more elegant
-def basic_search(key_word_list, block_ids, post_ids): 
+def basic_search(key_word_list, block_objs, post_objs): 
     key_word_list = utils.text_tokens(query)
-
-    posts_obj = {p:Post(**database.get_post(p)) for p in post_ids}
-    blocks_obj = {b:Block(**database.get_block(b)) for b in block_ids}
-
-    blocks = []
-    posts = []
-    for k in key_word_list:
-        blocks += [(b,k,blocks_obj[b].freq_dict[k]) for b in block_ids] 
-        posts += [(p,k,posts_obj[p].freq_dict[k]) for p in post_ids] 
-
     key_word_list = list(set(key_word_list))
-
     metric = make_metric(key_word_list)
 
-    blocks_freq = {}
-    for b,k,f in blocks:
-        if b not in blocks_freq: blocks_freq[b] = {}
-        blocks_freq[b][k] = f
-
-    posts_freq = {}
-    for p,k,f in posts:
-        if p not in posts_freq: posts_freq[p] = {}
-        posts_freq[p][k] = f
-
     blocks_order = []
-    for b,F in blocks_freq.items():
+    for b in block_objs:
         blocks_order.append((
-            metric(F),
-            datetime.strptime(
-                database.get_post(database.get_block(b)["post"])["created_at"], 
+            metric(b.freq_dict),
+            datetime.strptime(database.get_block(b)["created_at"], 
                 date_time_fmt
             ),
-            b 
+            b._id
         ))
     blocks_order.sort(reverse=True)
+    blocks_order = [b for f,t,b in blocks_order if f > 0]
 
     posts_order = []
-    for p,F in posts_freq.items():
+    for p in post_objs:
         posts_order.append((
-            metric(F),
+            metric(p.freq_dict),
             datetime.strptime(database.get_post(p)["created_at"], 
                 date_time_fmt
             ),
-            p 
+            p._id 
         ))
     posts_order.sort(reverse=True)
-
-    blocks_order = [b for f,t,b in blocks_order if f > 0]
     posts_order = [p for f,t,p in posts_order if f > 0]
 
     result = {"blocks": block_ids, "posts": post_ids}

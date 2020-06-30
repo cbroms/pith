@@ -127,4 +127,12 @@ class UserManager:
     def user_saved_scope_search(self, user_id, discussion_id, query):
         post_ids = self.get_user_saved_posts(user_id, discussion_id)
         block_ids = self.get_user_saved_blocks(user_id, discussion_id)
+        posts_obj = {
+            p: Post(**discussion_manager.get_post(discussion_id, p)) \
+            for p in post_ids
+        }
+        blocks_obj = {
+            b: Block(**discussion_manager.get_block(discussion_id, b)) \
+            for b in block_ids
+        }
         return basic_search(query, block_ids, post_ids)
