@@ -1,10 +1,14 @@
-# TODO if this should exist, it should be on a global basis
-
+"""
+A tag that only exists within the discussion scope.
+"""
 import uuid
 
 import utils
 
 
 class Tag():
-    def __init__(self, _id, **entries):
-
+    def __init__(self, user, tag, **entries):
+        if "_id" in entries:
+            self.__dict__ = entries
+        else:
+            self._id = tag 

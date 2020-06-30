@@ -28,3 +28,10 @@ def make_freq_dict(text):
 def sum_dicts(dL):
   keys = reduce(or_, [set(d) for d in dL])
   return defaultdict(lambda:0, {k:sum([d.get(k,0) for d in dL]) for k in keys})
+
+
+class UUIDEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, UUID):
+            return obj.hex
+        return JSONEncoder.default(self, obj)
