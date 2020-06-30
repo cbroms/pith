@@ -4,7 +4,6 @@ A block only exists within the discussion scope.
 from collections import defaultdict
 import uuid
 
-from database import blocks
 from utils import utils
 
 

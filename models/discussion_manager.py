@@ -101,7 +101,7 @@ class DiscussionManager:
         # convert from ids to objects
         for i in range(len(history)):
             history[i]["blocks"] = [self.get_block(b) \
-                for b in [history[i]["blocks"]]
+                for b in [history[i]["blocks"]]]
         return history
 
     def get_post(self, discussion_id, post_id):

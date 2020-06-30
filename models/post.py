@@ -5,7 +5,6 @@ from collections import defaultdict
 from datetime import datetime
 import uuid
 
-from database import posts
 
 # using ISO so this can be easily parsed in js with Date()
 date_time_fmt = "%Y-%m-%dT%H:%M:%SZ" 

@@ -2,6 +2,7 @@ from collections import Counter, defaultdict
 from functools import reduce
 from operator import or_
 from nltk.stem import PorterStemmer
+from json import dumps, JSONEncoder
 import string
 
 
