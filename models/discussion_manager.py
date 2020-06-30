@@ -194,4 +194,12 @@ class DiscussionManager:
     def discussion_scope_search(self, discussion_id, query):
         post_ids = self.get_posts(discussion_id)
         block_ids = self.get_blocks(discussion_id)
+        posts_obj = {
+            p: Post(**self.get_post(discussion_id, p)) \
+            for p in post_ids
+        }
+        blocks_obj = {
+            b: Block(**self.get_block(discussion_id, b)) \
+            for b in block_ids
+        }
         return basic_search(query, block_ids, post_ids)
