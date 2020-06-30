@@ -1,5 +1,5 @@
-from flask import Flask
-from flask_socketio import SocketIO, emit
+import socketio
+
 from json import dumps, JSONEncoder
 from pymongo import MongoClient 
 from uuid import UUID
@@ -7,8 +7,14 @@ from uuid import UUID
 from models.user_manager import UserManager
 from models.discussion_manager import DiscussionManager
 
-app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins='*')
+app = socketio.ASGIApp(sio)
+socketio = socketio.AsyncServer(
+    async_mode='asgi',
+    cors_allowed_origins=[
+        "http://localhost:3000",
+        "https://dev1.pith.rainflame.com"
+    ]
+)
 
 client = MongoClient('mongodb://localhost:27017')
 try:
