@@ -1,6 +1,4 @@
 import socketio
-
-from json import dumps, JSONEncoder
 from pymongo import MongoClient 
 from uuid import UUID
 
@@ -20,7 +18,7 @@ client = MongoClient('mongodb://localhost:27017')
 try:
     client.drop_database("db")
 except Exception:
-db = client["db"]
+	db = client["db"]
 
 discussion_manager = DiscussionManager(db)
 user_manager = UserManager(db)
