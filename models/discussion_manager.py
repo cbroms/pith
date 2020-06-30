@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from constants import user_manager
+from globals import user_manager
 
 from models.block import Block
 from models.discussion import Discussion

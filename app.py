@@ -7,7 +7,7 @@ If things go wonky, try:
 sudo rm /var/lib/mongodb/mongod.lock
 sudo service mongodb start
 """
-from constants import (
+from globals import (
     app,
     discussion_manager,
     socketio,
