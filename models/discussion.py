@@ -3,7 +3,6 @@ Discussion struct.
 """
 import uuid
 
-from database import discussions
 from search.basic_search import basic_search
 from utils import utils
 

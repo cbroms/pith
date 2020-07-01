@@ -7,27 +7,19 @@ If things go wonky, try:
 sudo rm /var/lib/mongodb/mongod.lock
 sudo service mongodb start
 """
-from globals import (
-    app,
-    discussion_manager,
-    user_manager,
-    db
-)
-from utils.utils import UUIDEncoder
-
-
 import socketio
 from uuid import UUID
 
-
-sio = socketio.AsyncServer(
-    async_mode='asgi',
-    cors_allowed_origins=[
-        "http://localhost:3000",
-        "https://dev1.pith.rainflame.com"
-    ]
+from constants import (
+    sio,
 )
+from discussion_constants import discussion_manager
+from user_constants import user_manager
+from utils.utils import UUIDEncoder
+
+
 app = socketio.ASGIApp(sio)
+
 
 @sio.on('get_posts')
 async def get_posts(sid, json):
