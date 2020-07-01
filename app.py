@@ -13,6 +13,7 @@ from uuid import UUID
 from constants import (
     sio,
 )
+from json import dumps
 from discussion_constants import discussion_manager
 from user_constants import user_manager
 from utils.utils import UUIDEncoder
