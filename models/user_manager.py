@@ -37,7 +37,7 @@ class UserManager:
     def create(self, ip):
         if not self._is_user(ip):
             user_obj = User(ip)
-            self._insert_user(user_obj)
+            self._insert(user_obj)
             user_data = user_obj.__dict__
         else:
             user_data = self.get(ip)
