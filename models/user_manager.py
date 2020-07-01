@@ -1,7 +1,10 @@
 """
 API relating to the user.
 """
+from constants import db
 from models.user import User
+
+from search.basic_search import basic_search
 
 
 class UserManager:
@@ -12,18 +15,6 @@ class UserManager:
     """
     Of users.
     """
-
-    def get_all(self):
-        user_cursor = self.users.find()
-        user_list = []
-        for u in user_cursor:
-            user_list.append(u)
-        return user_list
-
-    def get(self, user_id):
-        user_data = self.users.find_one({ "_id" : user_id })
-        return user_data
-
     def _insert(self, user_obj):
         user_data = user_obj.__dict__
         self.users.insert_one(user_data)
@@ -32,12 +23,24 @@ class UserManager:
         user_data = self.get(user_id)
         return not (user_data is None)
 
+    def get(self, user_id):
+        user_data = self.users.find_one({ "_id" : user_id })
+        return user_data
+
+    def get_all(self):
+        user_cursor = self.users.find()
+        user_list = []
+        for u in user_cursor:
+            user_list.append(u)
+        return user_list
+
     def create(self, ip):
-        user_data = self.get(ip)
-        if not self.is_user(ip):
+        if not self._is_user(ip):
             user_obj = User(ip)
             self._insert_user(user_obj)
             user_data = user_obj.__dict__
+        else:
+            user_data = self.get(ip)
         return user_data
 
     """
@@ -56,7 +59,7 @@ class UserManager:
         1) not made,
         2) not active.
         """
-        if discussion_id not in user_data["discussions"]: return True
+        if discussion_id not in user_data["discussions"]: return False
         return user_data["discussions"][discussion_id]["active"]
 
     def join_discussion(self, user_id, discussion_id):
@@ -106,7 +109,7 @@ class UserManager:
         user_data = self.get(user_id)
         return user_data["discussions"][discussion_id]["library"]["posts"]
 
-    def is_saved_block(self, user_id, discussion_id, block_id):
+    def _is_saved_block(self, user_id, discussion_id, block_id):
         user_data = self.get(user_id)
         return block_id in user_data["discussions"][discussion_id]["library"]["blocks"]
 
@@ -127,12 +130,12 @@ class UserManager:
     def user_saved_scope_search(self, user_id, discussion_id, query):
         post_ids = self.get_user_saved_posts(user_id, discussion_id)
         block_ids = self.get_user_saved_blocks(user_id, discussion_id)
-        posts_obj = {
-            p: Post(**discussion_manager.get_post(discussion_id, p)) \
+        posts_data = {
+            p: discussion_manager.get_post(discussion_id, p) \
             for p in post_ids
         }
-        blocks_obj = {
-            b: Block(**discussion_manager.get_block(discussion_id, b)) \
+        blocks_data = {
+            b: discussion_manager.get_block(discussion_id, b) \
             for b in block_ids
         }
-        return basic_search(query, block_ids, post_ids)
+        return basic_search(query, blocks_data, posts_data)

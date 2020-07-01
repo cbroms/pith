@@ -1,7 +1,6 @@
 """
 A post only exists within the discussion scope.
 """
-from collections import defaultdict
 from datetime import datetime
 import uuid
 

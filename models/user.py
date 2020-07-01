@@ -1,7 +1,6 @@
 """
 User struct.
 """
-from search.basic_search import basic_search
 
 
 class User():

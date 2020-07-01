@@ -10,7 +10,4 @@ sio = socketio.AsyncServer(
 )
 
 client = MongoClient('mongodb://localhost:27017')
-#try:
-#    client.drop_database("db")
-#except Exception:
 db = client["db"]

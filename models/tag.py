@@ -7,7 +7,7 @@ import utils
 
 
 class Tag():
-    def __init__(self, user, tag, **entries):
+    def __init__(self, tag, **entries):
         if "_id" in entries:
             self.__dict__ = entries
         else:

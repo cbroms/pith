@@ -1,13 +1,10 @@
-from collections import defaultdict
-
-from user_constants import user_manager
-
 from models.block import Block
 from models.discussion import Discussion
 from models.post import Post
 from models.tag import Tag
 
 from search.basic_search import basic_search
+from user_constants import user_manager
 
 
 class DiscussionManager:
@@ -18,6 +15,13 @@ class DiscussionManager:
     """
     Of discussions.
     """
+    def _insert(self, discussion_obj):
+        discussion_data = discussion_obj.__dict__
+        self.discussions.insert_one(discussion_data)
+
+    def get(self, discussion_id):
+        discussion_data = self.discussions.find_one({ "_id" : discussion_id })
+        return discussion_data
 
     def get_all(self):
         discussion_cursor = self.discussions.find()
@@ -25,14 +29,6 @@ class DiscussionManager:
         for u in discussion_cursor:
             discussion_list.append(u["_id"])
         return discussion_list
-
-    def get(self, discussion_id):
-        discussion_data = self.discussions.find_one({ "_id" : discussion_id })
-        return discussion_data
-
-    def _insert(self, discussion_obj):
-        discussion_data = discussion_obj.__dict__
-        self.discussions.insert_one(discussion_data)
 
     def create(self):
         discussion_obj = Discussion()
@@ -47,7 +43,7 @@ class DiscussionManager:
 
     def _is_user(self, discussion_id, user_id):
         discussion_data = self.get(discussion_id)
-        return user_id in discussion_data["user"]
+        return user_id in discussion_data["users"]
 
     def join(self, discussion_id, user_id):
         if not self._is_user(discussion_id, user_id):
@@ -67,8 +63,8 @@ class DiscussionManager:
 
     def get_users(self, discussion_id):
         discussion_data = self.get(discussion_id)
-        users = discussion_data["users"]
-        return users
+        user_ids = discussion_data["users"]
+        return user_ids
 
     def create_post(self, discussion_id, user_id, blocks):
         post_obj = Post(user_id)
@@ -87,7 +83,6 @@ class DiscussionManager:
 
         post_obj.blocks = block_ids
         post_freq_dict = utils.sum_dicts(freq_dicts)
-        post_obj.freq_dict = defaultdict(lambda:0, post_freq_dict)
         post_data = post_obj.__dict__
         self.discussions.update_one({"_id" : discussion_id}, \
             {"$set": {"history.{}".format(post_id) : post_data}})
@@ -95,29 +90,25 @@ class DiscussionManager:
 
         return post_data
 
-    def get_posts(self, discussion_id):
-        discussion_data = self.get(discussion_id)
-        history = discussion_data["history"]
-        # convert from ids to objects
-        for i in range(len(history)):
-            history[i]["blocks"] = [self.get_block(b) \
-                for b in [history[i]["blocks"]]]
-        return history
-
     def get_post(self, discussion_id, post_id):
         discussion_data = self.get(discussion_id)
         post_data = discussion_data["history"][post_id]
         return post_data
 
-    def get_blocks(self, discussion_id):
+    def get_posts(self, discussion_id):
         discussion_data = self.get(discussion_id)
-        history_blocks = discussion_data["history_blocks"]
-        return history_blocks
+        history = discussion_data["history"]
+        return history.values() # give data
 
     def get_block(self, discussion_id, block_id):
         discussion_data = self.get(discussion_id)
         block_data = discussion_data["history_blocks"][block_id]
         return block_data
+
+    def get_blocks(self, discussion_id):
+        discussion_data = self.get(discussion_id)
+        history_blocks = discussion_data["history_blocks"]
+        return history_blocks.values() # give data
 
     def _is_tag(self, discussion_id, tag):
         discussion_data = self.get(discussion_id)
@@ -147,6 +138,8 @@ class DiscussionManager:
             tag_data = tag_obj.__dict__
             self.discussions.update_one({"_id" : discussion_id}, \
                 {"$set": {"internal_tags.{}".format(tag) : tag_data}})
+        else:
+            tag_data = self._get_tag(discussion_id, tag)
         return tag_data
 
     def _is_tag_post(self, discussion_id, post_id, tag):
@@ -194,12 +187,12 @@ class DiscussionManager:
     def discussion_scope_search(self, discussion_id, query):
         post_ids = self.get_posts(discussion_id)
         block_ids = self.get_blocks(discussion_id)
-        posts_obj = {
-            p: Post(**self.get_post(discussion_id, p)) \
+        posts_data = {
+            p: discussion_manager.get_post(discussion_id, p) \
             for p in post_ids
         }
-        blocks_obj = {
-            b: Block(**self.get_block(discussion_id, b)) \
+        blocks_data = {
+            b: discussion_manager.get_block(discussion_id, b) \
             for b in block_ids
         }
-        return basic_search(query, block_ids, post_ids)
+        return basic_search(query, blocks_data, posts_data)

@@ -3,9 +3,6 @@ import math
 import nltk
 from nltk import pos_tag
 from nltk.stem import PorterStemmer
-from operator import itemgetter
-import pandas as pd
-from threading import Lock
 
 from models.post import Post, date_time_fmt
 from models.block import Block
@@ -49,34 +46,29 @@ def make_metric(key_word_list):
     return metric
 
 
-def basic_search(key_word_list, block_objs, post_objs): 
-    key_word_list = utils.text_tokens(query)
-    key_word_list = list(set(key_word_list))
+def basic_search(query, blocks_data, posts_data): 
+    key_word_list = list(set(utils.text_tokens(query)))
     metric = make_metric(key_word_list)
 
-    blocks_order = []
-    for b in block_objs:
-        blocks_order.append((
-            metric(b.freq_dict),
-            datetime.strptime(database.get_block(b)["created_at"], 
-                date_time_fmt
-            ),
-            b._id
-        ))
+    blocks_order = [(
+        metric(b["freq_dict"]),
+        datetime.strptime(b["created_at"], 
+            date_time_fmt
+        ),
+        b["_id"]
+    ) for b in blocks_data]
     blocks_order.sort(reverse=True)
-    blocks_order = [b for f,t,b in blocks_order if f > 0]
+    block_ids = [b for f,t,b in blocks_order if f > 0]
 
-    posts_order = []
-    for p in post_objs:
-        posts_order.append((
-            metric(p.freq_dict),
-            datetime.strptime(database.get_post(p)["created_at"], 
-                date_time_fmt
-            ),
-            p._id 
-        ))
+    posts_order = [(
+        metric(p["freq_dict"]),
+        datetime.strptime(p["created_at"], 
+            date_time_fmt
+        ),
+        p["_id"]
+    ) for p in posts_data]
     posts_order.sort(reverse=True)
-    posts_order = [p for f,t,p in posts_order if f > 0]
+    post_ids = [p for f,t,p in posts_order if f > 0]
 
     result = {"blocks": block_ids, "posts": post_ids}
     return results
