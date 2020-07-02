@@ -10,9 +10,7 @@ sudo service mongodb start
 import socketio
 from uuid import UUID
 
-from constants import (
-    sio,
-)
+from constants import sio
 from json import dumps
 from discussion_constants import discussion_manager
 from user_constants import user_manager
@@ -131,7 +129,7 @@ async def post_add_tag(sid, json):
 
 
 @sio.on('post_remove_tag')
-async def post_remove_tag(sio, json): 
+async def post_remove_tag(sid, json): 
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
     post_id = json["post_id"]
@@ -144,7 +142,7 @@ async def post_remove_tag(sio, json):
 
 
 @sio.on('block_add_tag')
-async def block_add_tag(sio, json): 
+async def block_add_tag(sid, json): 
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
     block_id = json["block_id"]
@@ -157,7 +155,7 @@ async def block_add_tag(sio, json):
 
 
 @sio.on('block_remove_tag')
-async def block_remove_tag(sio, json): 
+async def block_remove_tag(sid, json): 
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
     block_id = json["block_id"]
@@ -170,7 +168,7 @@ async def block_remove_tag(sio, json):
 
 
 @sio.on('create_discussion')
-async def create_discussion(sio, json):
+async def create_discussion(sid, json):
     discussion_data = discussion_manager.create()
     serialized = dumps(discussion_data, cls=UUIDEncoder)
     await sio.emit("created_discussion", serialized)
@@ -178,7 +176,7 @@ async def create_discussion(sio, json):
 
 
 @sio.on('join_discussion')
-async def join_discussion(sio, json):
+async def join_discussion(sid, json):
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
     discussion_data = discussion_manager.join(discussion_id, user_id)
@@ -188,7 +186,7 @@ async def join_discussion(sio, json):
 
 
 @sio.on('leave_discussion')
-async def leave_discussion(sio, json):
+async def leave_discussion(sid, json):
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
     discussion_data = discussion_manager.leave(discussion_id, user_id)
@@ -198,7 +196,7 @@ async def leave_discussion(sio, json):
 
 
 @sio.on('create_post')
-async def create_post(sio, json):
+async def create_post(sid, json):
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
     blocks = json["blocks"]
@@ -209,7 +207,7 @@ async def create_post(sio, json):
 
 
 @sio.on('search_discussion')
-async def search_discussion(sio, json):
+async def search_discussion(sid, json):
     discussion_id = json["discussion_id"]
     query = json["query"]
     result = discussion_manager.discussion_scope_search(discussion_id, query)
@@ -218,7 +216,7 @@ async def search_discussion(sio, json):
 
 
 @sio.on('search_user_saved')
-async def search_user_saved(sio, json):
+async def search_user_saved(sid, json):
     user_id = json["user_id"]
     query = json["query"]
     result = user_manager.user_saved_scope_search(user_id, query)
