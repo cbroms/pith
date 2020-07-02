@@ -22,6 +22,11 @@ from utils.utils import UUIDEncoder
 app = socketio.ASGIApp(sio)
 
 
+@sio.on('get_discussions')
+async def get_discussions(sid):
+    discussions_data = discussion_manager.get_discussions()
+    return dumps(discussions_data, cls=UUIDEncoder)
+
 @sio.on('get_posts')
 async def get_posts(sid, json):
     discussion_id = json["discussion_id"]
