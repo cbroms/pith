@@ -59,6 +59,7 @@ class UserManager:
         1) not made,
         2) not active.
         """
+        user_data = self.get(user_id)
         if discussion_id not in user_data["discussions"]: return False
         return user_data["discussions"][discussion_id]["active"]
 
