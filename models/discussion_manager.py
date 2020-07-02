@@ -98,7 +98,7 @@ class DiscussionManager:
     def get_posts(self, discussion_id):
         discussion_data = self.get(discussion_id)
         history = discussion_data["history"]
-        return history.values() # give data
+        return list(history.values()) # give data
 
     def get_block(self, discussion_id, block_id):
         discussion_data = self.get(discussion_id)
