@@ -24,8 +24,16 @@ app = socketio.ASGIApp(sio)
 
 @sio.on('get_discussions')
 async def get_discussions(sid):
-    discussions_data = discussion_manager.get_discussions()
+    discussions_data = discussion_manager.get_all()
     return dumps(discussions_data, cls=UUIDEncoder)
+
+
+@sio.on('get_discussion')
+async def get_discussion(sid, json):
+    discussion_id = json["discussion_id"]
+    discussion_data = discussion_manager.get(discussion_id)
+    return dumps(discussion_data, cls=UUIDEncoder)
+
 
 @sio.on('get_posts')
 async def get_posts(sid, json):
