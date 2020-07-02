@@ -4,7 +4,7 @@ from operator import or_
 from nltk.stem import PorterStemmer
 from json import dumps, JSONEncoder
 import string
-
+from uuid import UUID
 
 ps = PorterStemmer()
 table = str.maketrans(string.punctuation, ' '*len(string.punctuation))
