@@ -153,6 +153,7 @@ class DiscussionManager:
         return tag in post_data["tags"]
 
     def post_add_tag(self, discussion_id, user_id, post_id, tag):
+        self._create_tag(discussion_id, tag)
         if not self._is_tag_post(discussion_id, post_id, tag):
             self.discussions.update_one({"_id" : discussion_id}, \
                 {"$set": {"history.{}.tags.{}".format(post_id, tag) : \
@@ -173,6 +174,7 @@ class DiscussionManager:
         return tag in block_data["tags"]
 
     def block_add_tag(self, discussion_id, user_id, block_id, tag):
+        self._create_tag(discussion_id, tag)
         if not self._is_tag_block(discussion_id, block_id, tag):
             self.discussions.update_one({"_id" : discussion_id}, \
                 {"$set": {"history.{}.tags.{}".format(block_id, tag) : \
