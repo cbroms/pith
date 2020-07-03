@@ -9,6 +9,7 @@ sudo service mongodb start
 """
 import socketio
 from uuid import UUID
+from pprint import pprint
 
 from constants import sio
 from json import dumps
@@ -37,6 +38,7 @@ async def get_discussion(sid, json):
 async def get_posts(sid, json):
     discussion_id = json["discussion_id"]
     posts_data = discussion_manager.get_posts(discussion_id)
+    pprint(dumps(posts_data, cls=UUIDEncoder))
     return dumps(posts_data, cls=UUIDEncoder)
 
 

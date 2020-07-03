@@ -88,7 +88,7 @@ class DiscussionManager:
         post_data = post_obj.__dict__
         self.discussions.update_one({"_id" : discussion_id}, \
             {"$set": {"history.{}".format(post_id) : post_data}})
-        user_manager.insert_post_user_history(user_id, post_id)
+        user_manager.insert_post_user_history(user_id, discussion_id, post_id)
 
         return post_data
 
@@ -103,6 +103,7 @@ class DiscussionManager:
         return list(history.values()) # give data
 
     def get_block(self, discussion_id, block_id):
+        print(discussion_id, block_id)
         discussion_data = self.get(discussion_id)
         block_data = discussion_data["history_blocks"][block_id]
         return block_data
@@ -136,7 +137,7 @@ class DiscussionManager:
 
     def _create_tag(self, discussion_id, tag):
         if not self._is_tag(discussion_id, tag):
-            tag_obj = Tag()
+            tag_obj = Tag(tag)
             tag_data = tag_obj.__dict__
             self.discussions.update_one({"_id" : discussion_id}, \
                 {"$set": {"internal_tags.{}".format(tag) : tag_data}})
@@ -174,7 +175,7 @@ class DiscussionManager:
         return tag in block_data["tags"]
 
     def block_add_tag(self, discussion_id, user_id, block_id, tag):
-        tag_data = self._create_tag(discussion_id, user_id, tag)
+        tag_data = self._create_tag(discussion_id, tag)
         if not self._is_tag_block(discussion_id, block_id, tag):
             self.discussions.update_one({"_id" : discussion_id}, \
                 {"$set": {"history.{}.tags.{}".format(block_id, tag) : \
