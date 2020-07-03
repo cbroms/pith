@@ -178,14 +178,14 @@ class DiscussionManager:
         self._create_tag(discussion_id, tag)
         if not self._is_tag_block(discussion_id, block_id, tag):
             self.discussions.update_one({"_id" : discussion_id}, \
-                {"$set": {"history.{}.tags.{}".format(block_id, tag) : \
+                {"$set": {"history_blocks.{}.tags.{}".format(block_id, tag) : \
                 {"owner": user_id}}})
 
     def block_remove_tag(self, discussion_id, user_id, block_id, tag):
         if self._is_tag_block(discussion_id, block_id, tag):
             if self._is_tag_owner_block(discussion_id, user_id, block_id, tag):
                 self.discussions.update_one({"_id" : discussion_id}, \
-                    {"$unset": {"history.{}.tags".format(block_id) : tag}})
+                    {"$unset": {"history_blocks.{}.tags".format(block_id) : tag}})
 
     def discussion_scope_search(self, discussion_id, query):
         post_ids = self.get_posts(discussion_id)
