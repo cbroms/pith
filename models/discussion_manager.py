@@ -1,3 +1,5 @@
+from utils import utils
+
 from models.block import Block
 from models.discussion import Discussion
 from models.post import Post
