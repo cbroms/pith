@@ -84,7 +84,7 @@ class DiscussionManager:
                 {"$set": {"history_blocks.{}".format(block_id) : block_data}})
 
         post_obj.blocks = block_ids
-        post_freq_dict = utils.sum_dicts(freq_dicts)
+        post_obj.freq_dict = utils.sum_dicts(freq_dicts)
         post_data = post_obj.__dict__
         self.discussions.update_one({"_id" : discussion_id}, \
             {"$set": {"history.{}".format(post_id) : post_data}})
@@ -153,7 +153,6 @@ class DiscussionManager:
         return tag in post_data["tags"]
 
     def post_add_tag(self, discussion_id, user_id, post_id, tag):
-        tag_data = self._create_tag(discussion_id, tag)
         if not self._is_tag_post(discussion_id, post_id, tag):
             self.discussions.update_one({"_id" : discussion_id}, \
                 {"$set": {"history.{}.tags.{}".format(post_id, tag) : \
@@ -174,7 +173,6 @@ class DiscussionManager:
         return tag in block_data["tags"]
 
     def block_add_tag(self, discussion_id, user_id, block_id, tag):
-        tag_data = self._create_tag(discussion_id, user_id, tag)
         if not self._is_tag_block(discussion_id, block_id, tag):
             self.discussions.update_one({"_id" : discussion_id}, \
                 {"$set": {"history.{}.tags.{}".format(block_id, tag) : \
