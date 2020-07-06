@@ -111,7 +111,7 @@ class DiscussionManager:
     def get_blocks(self, discussion_id):
         discussion_data = self.get(discussion_id)
         history_blocks = discussion_data["history_blocks"]
-        return history_blocks.values() # give data
+        return list(history_blocks.values()) # give data
 
     def _is_tag(self, discussion_id, tag):
         discussion_data = self.get(discussion_id)
@@ -162,9 +162,9 @@ class DiscussionManager:
 
     def post_remove_tag(self, discussion_id, user_id, post_id, tag):
         if self._is_tag_post(discussion_id, post_id, tag):
-            if self._is_tag_owner_post(discussion_id, user_id, block_id, tag):
+            if self._is_tag_owner_post(discussion_id, user_id, post_id, tag):
                 self.discussions.update_one({"_id" : discussion_id}, \
-                    {"$unset": {"history.{}.tags".format(post_id) : tag}})
+                    {"$unset": {"history.{}.tags.{}".format(post_id, tag) : 0}})
 
     def _is_tag_block(self, discussion_id, block_id, tag):
         """
@@ -185,7 +185,7 @@ class DiscussionManager:
         if self._is_tag_block(discussion_id, block_id, tag):
             if self._is_tag_owner_block(discussion_id, user_id, block_id, tag):
                 self.discussions.update_one({"_id" : discussion_id}, \
-                    {"$unset": {"history_blocks.{}.tags".format(block_id) : tag}})
+                    {"$unset": {"history_blocks.{}.tags.{}".format(block_id, tag) : 0}})
 
     def discussion_scope_search(self, discussion_id, query):
         post_ids = self.get_posts(discussion_id)

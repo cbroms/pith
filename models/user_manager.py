@@ -15,6 +15,7 @@ class UserManager:
     """
     Of users.
     """
+
     def _insert(self, user_obj):
         user_data = user_obj.__dict__
         self.users.insert_one(user_data)
@@ -68,25 +69,28 @@ class UserManager:
         Discussion should check we are not in, or active.
         """
         assert(not self._is_active_discussion(user_id, discussion_id))
-        user_data = self.get(user_id)
         if self._is_discussion_user(user_id, discussion_id): # rejoin
-            user_data["discussions"][discussion_id]["active"] = True
+            self.users.update_one({"_id" : user_id}, {"$set": \
+                {"discussions.{}.active".format(discussion_id) : True}})
         else:
-            user_data["discussions"][discussion_id] = {
-                "active": True,
-                "library": {
-                    "posts": [],
-                    "blocks": [],
-                } 
-            }
+            self.users.update_one({"_id" : user_id}, {"$set": \
+                {"discussions.{}".format(discussion_id) : { 
+                    "active": True,
+                    "history": [],
+                    "library": {
+                        "posts": {},
+                        "blocks": {},
+                    } 
+                }
+            }})
 
     def leave_discussion(self, user_id, discussion_id):
         """
         Discussion should check we are in, or active.
         """
         assert(self._is_active_discussion(user_id, discussion_id))
-        user_data = self.get(user_id)
-        user_data["discussions"][discussion_id]["active"] = False
+        self.users.update_one({"_id" : user_id}, {"$set": \
+            {"discussions.{}.active".format(discussion_id) : False}})
 
     def insert_post_user_history(self, user_id, discussion_id, post_id):
         self.users.update_one({"_id" : user_id}, {"$push": \
@@ -98,17 +102,17 @@ class UserManager:
 
     def save_post(self, user_id, discussion_id, post_id):
         if not self._is_saved_post(user_id, discussion_id, post_id):
-            self.users.update_one({"_id" : user_id}, {"$push" : \
-                {"discussions.{}.library.posts".format(discussion_id) : post_id}})
+            self.users.update_one({"_id" : user_id}, {"$set" : \
+                {"discussions.{}.library.posts.{}".format(discussion_id, post_id) : 0}})
 
     def unsave_post(self, user_id, discussion_id, post_id):
         if self._is_saved_post(user_id, discussion_id, post_id):
-            self.users.update_one({"_id" : user_id}, {"$pull" : \
-                {"discussions.{}.library.posts".format(discussion_id) : post_id}})
+            self.users.update_one({"_id" : user_id}, {"$unset" : \
+                {"discussions.{}.library.posts.{}".format(discussion_id, post_id): 0}})
 
     def get_user_saved_posts(self, user_id, discussion_id):
         user_data = self.get(user_id)
-        return user_data["discussions"][discussion_id]["library"]["posts"]
+        return list(user_data["discussions"][discussion_id]["library"]["posts"].keys())
 
     def _is_saved_block(self, user_id, discussion_id, block_id):
         user_data = self.get(user_id)
@@ -117,16 +121,16 @@ class UserManager:
     def save_block(self, user_id, discussion_id, block_id):
         if not self._is_saved_block(user_id, discussion_id, block_id):
             self.users.update_one({"_id" : user_id}, {"$push" : \
-                {"discussions.{}.library.blocks".format(discussion_id) : block_id}})
+                {"discussions.{}.library.blocks.{}".format(discussion_id, block_id) : 0}})
 
     def unsave_block(self, user_id, discussion_id, block_id):
         if self._is_saved_block(user_id, discussion_id, block_id):
-            self.users.update_one({"_id" : user_id}, {"$pull" : \
-                {"discussions.{}.library.blocks".format(discussion_id) : block_id}})
+            self.users.update_one({"_id" : user_id}, {"$unset" : \
+                {"discussions.{}.library.blocks.{}".format(discussion_id, block_id) : 0}})
 
     def get_user_saved_blocks(self, user_id, discussion_id):
         user_data = self.get(user_id)
-        return user_data["discussions"][discussion_id]["library"]["blocks"]
+        return list(user_data["discussions"][discussion_id]["library"]["blocks"].keys())
 
     def user_saved_scope_search(self, user_id, discussion_id, query):
         post_ids = self.get_user_saved_posts(user_id, discussion_id)

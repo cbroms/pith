@@ -1,5 +1,4 @@
 #!/bin/bash
 
 pip install -r requirements.txt
-PWD=$(pwd)
-export PYTHONPATH=$PYTHONPATH+":"+PWD
+export PYTHONPATH=$(pwd):$PYTHONPATH
