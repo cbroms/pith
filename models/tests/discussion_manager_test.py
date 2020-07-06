@@ -4,12 +4,8 @@ import unittest
 import uuid
 
 from models.discussion_manager import DiscussionManager
-from models.user_manager import UserManager
-from models.discussion import Discussion
-from models.user import User
-from models.post import Post
-from models.block import Block
 
+# using this for this test
 from user_constants import user_manager
 
 
@@ -21,8 +17,6 @@ class DiscussionManagerTest(unittest.TestCase):
         db = client["db"]
         self.log = logging.getLogger("DiscussionManagerTest")
         self.discussion_manager = DiscussionManager(db)
-        # user_manager = UserManager(db)
-        # use this instead of constants user_manager
 
     def test_create_get(self):
         discussion_data = self.discussion_manager.create()
