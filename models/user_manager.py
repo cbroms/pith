@@ -4,7 +4,9 @@ API relating to the user.
 from constants import db
 from models.user import User
 
+from discussion_constants import discussion_manager
 from search.basic_search import basic_search
+from search.tag_search import tag_search
 
 
 class UserManager:
@@ -144,3 +146,16 @@ class UserManager:
             for b in block_ids
         }
         return basic_search(query, blocks_data, posts_data)
+
+    def user_saved_tag_search(self, user_id, discussion_id, tags):
+        post_ids = self.get_user_saved_posts(user_id, discussion_id)
+        block_ids = self.get_user_saved_blocks(user_id, discussion_id)
+        posts_data = {
+            p: discussion_manager.get_post(discussion_id, p) \
+            for p in post_ids
+        }
+        blocks_data = {
+            b: discussion_manager.get_block(discussion_id, b) \
+            for b in block_ids
+        }
+        return tag_search(tags, blocks_data, posts_data)

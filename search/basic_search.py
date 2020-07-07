@@ -4,10 +4,9 @@ import nltk
 from nltk import pos_tag
 from nltk.stem import PorterStemmer
 
-from models.post import Post, date_time_fmt
-from models.block import Block
+from models.post import date_time_fmt
 
-import utils
+from utils import utils
 
 
 nltk.download('averaged_perceptron_tagger')
@@ -71,4 +70,4 @@ def basic_search(query, blocks_data, posts_data):
     post_ids = [p for f,t,p in posts_order if f > 0]
 
     result = {"blocks": block_ids, "posts": post_ids}
-    return results
+    return result

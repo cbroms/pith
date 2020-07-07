@@ -128,6 +128,7 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.leave(discussion_id, ip2)
 
     def test_search(self):
+        # for now just test manually
         #self.discussion_manager.discussion_scope_search(self, discussion_id, query)
         pass
 

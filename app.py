@@ -224,3 +224,20 @@ async def search_user_saved(sid, json):
     result = user_manager.user_saved_scope_search(user_id, query)
     serialized = dumps(result, cls=UUIDEncoder, to=sid)
     return serialized
+
+@sio.on('search_discussion_tags')
+async def search_discussion_tags(sid, json):
+    discussion_id = json["discussion_id"]
+    tags = json["tags"]
+    result = discussion_manager.discussion_tag_search(discussion_id, tags)
+    serialized = dumps(result, cls=UUIDEncoder, to=sid)
+    return serialized
+
+
+@sio.on('search_user_saved_tags')
+async def search_user_saved_tags(sid, json):
+    user_id = json["user_id"]
+    tags = json["tags"]
+    result = user_manager.user_saved_tag_search(user_id, tags)
+    serialized = dumps(result, cls=UUIDEncoder, to=sid)
+    return serialized
