@@ -108,11 +108,6 @@ class UserManagerTest(unittest.TestCase):
 
         self.user_manager.leave_discussion(ip, discussion_id)
 
-    def test_search(self):
-        # for now just test manually
-        #self.user_manager.user_saved_scope_search(user_id, discussion_id, query)
-        pass
-
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stderr)

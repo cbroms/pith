@@ -129,7 +129,10 @@ class DiscussionManagerTest(unittest.TestCase):
 
     def test_search(self):
         # for now just test manually
-        #self.discussion_manager.discussion_scope_search(self, discussion_id, query)
+        #self.discussion_manager.discussion_scope_search(discussion_id, query)
+        #self.discussion_manager.user_saved_scope_search(discussion_id, user_id, query)
+        #self.discussion_manager.discussion_tag_search(discussion_id, tags)
+        #self.discussion_manager.user_saved_tag_search(discussion_id, user_id, tags)
         pass
 
 

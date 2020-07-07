@@ -192,11 +192,11 @@ class DiscussionManager:
         post_ids = self.get_posts(discussion_id)
         block_ids = self.get_blocks(discussion_id)
         posts_data = {
-            p: discussion_manager.get_post(discussion_id, p) \
+            p: self.get_post(discussion_id, p) \
             for p in post_ids
         }
         blocks_data = {
-            b: discussion_manager.get_block(discussion_id, b) \
+            b: self.get_block(discussion_id, b) \
             for b in block_ids
         }
         return basic_search(query, blocks_data, posts_data)
@@ -205,11 +205,37 @@ class DiscussionManager:
         post_ids = self.get_posts(discussion_id)
         block_ids = self.get_blocks(discussion_id)
         posts_data = {
-            p: discussion_manager.get_post(discussion_id, p) \
+            p: self.get_post(discussion_id, p) \
             for p in post_ids
         }
         blocks_data = {
-            b: discussion_manager.get_block(discussion_id, b) \
+            b: self.get_block(discussion_id, b) \
+            for b in block_ids
+        }
+        return tag_search(tags, blocks_data, posts_data)
+
+    def user_saved_scope_search(self, discussion_id, user_id, query):
+        post_ids = user_manager.get_user_saved_posts(user_id, discussion_id)
+        block_ids = user_manager.get_user_saved_blocks(user_id, discussion_id)
+        posts_data = {
+            p: self.get_post(discussion_id, p) \
+            for p in post_ids
+        }
+        blocks_data = {
+            b: self.get_block(discussion_id, b) \
+            for b in block_ids
+        }
+        return basic_search(query, blocks_data, posts_data)
+
+    def user_saved_tag_search(self, discussion_id, user_id, tags):
+        post_ids = user_manager.get_user_saved_posts(user_id, discussion_id)
+        block_ids = user_manager.get_user_saved_blocks(user_id, discussion_id)
+        posts_data = {
+            p: self.get_post(discussion_id, p) \
+            for p in post_ids
+        }
+        blocks_data = {
+            b: self.get_block(discussion_id, b) \
             for b in block_ids
         }
         return tag_search(tags, blocks_data, posts_data)

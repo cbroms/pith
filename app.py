@@ -62,8 +62,8 @@ async def save_post(sid, json):
     user_id = json["user_id"]
     discussion_id = json["discussion_id"]
     post_id = json["post_id"]
-    post_data = user_manager.save_post(user_id, discussion_id, post_id)
-    serialized = dumps(post_data, cls=UUIDEncoder)
+    user_manager.save_post(user_id, discussion_id, post_id)
+    serialized = dumps({"post_id": post_id}, cls=UUIDEncoder)
     await sio.emit("saved_post", serialized, to=sid) 
     return serialized
 
@@ -73,8 +73,8 @@ async def unsave_post(sid, json):
     user_id = json["user_id"]
     discussion_id = json["discussion_id"]
     post_id = json["post_id"]
-    post_data = user_manager.unsave_post(user_id, discussion_id, post_id)
-    serialized = dumps(post_data, cls=UUIDEncoder)
+    user_manager.unsave_post(user_id, discussion_id, post_id)
+    serialized = dumps({"post_id": post_id}, cls=UUIDEncoder)
     await sio.emit("unsaved_post", serialized, to=sid) 
     return serialized
 
@@ -84,8 +84,8 @@ async def save_block(sid, json):
     user_id = json["user_id"]
     discussion_id = json["discussion_id"]
     block_id = json["block_id"]
-    block_data = user_manager.save_block(user_id, discussion_id, block_id)
-    serialized = dumps(block_data, cls=UUIDEncoder)
+    user_manager.save_block(user_id, discussion_id, block_id)
+    serialized = dumps({"block_id": block_id}, cls=UUIDEncoder)
     await sio.emit("saved_block", serialized, to=sid) 
     return serialized
 
@@ -95,8 +95,8 @@ async def unsave_block(sid, json):
     user_id = json["user_id"]
     discussion_id = json["discussion_id"]
     block_id = json["block_id"]
-    block_data = user_manager.unsave_block(user_id, discussion_id, block_id)
-    serialized = dumps(block_data, cls=UUIDEncoder)
+    user_manager.unsave_block(user_id, discussion_id, block_id)
+    serialized = dumps({"block_id": block_id}, cls=UUIDEncoder)
     await sio.emit("unsaved_block", serialized, to=sid)
     return serialized
 
@@ -217,14 +217,6 @@ async def search_discussion(sid, json):
     return serialized
 
 
-@sio.on('search_user_saved')
-async def search_user_saved(sid, json):
-    user_id = json["user_id"]
-    query = json["query"]
-    result = user_manager.user_saved_scope_search(user_id, query)
-    serialized = dumps(result, cls=UUIDEncoder, to=sid)
-    return serialized
-
 @sio.on('search_discussion_tags')
 async def search_discussion_tags(sid, json):
     discussion_id = json["discussion_id"]
@@ -234,10 +226,21 @@ async def search_discussion_tags(sid, json):
     return serialized
 
 
+@sio.on('search_user_saved')
+async def search_user_saved(sid, json):
+    discussion_id = json["discussion_id"]
+    user_id = json["user_id"]
+    query = json["query"]
+    result = discussion_manager.user_saved_scope_search(discussion_id, user_id, query)
+    serialized = dumps(result, cls=UUIDEncoder, to=sid)
+    return serialized
+
+
 @sio.on('search_user_saved_tags')
 async def search_user_saved_tags(sid, json):
+    discussion_id = json["discussion_id"]
     user_id = json["user_id"]
     tags = json["tags"]
-    result = user_manager.user_saved_tag_search(user_id, tags)
+    result = discussion_manager.user_saved_tag_search(discussion_id, user_id, tags)
     serialized = dumps(result, cls=UUIDEncoder, to=sid)
     return serialized
