@@ -38,15 +38,16 @@ class UserManagerTest(unittest.TestCase):
     def test_in_discussion(self):
         ip = "12345"
         discussion_id = "in_discussion" + str(uuid.uuid4().hex)
+        name = "hello"
         self.user_manager.create(ip)
 
-        # joining
-        self.user_manager.join_discussion(ip, discussion_id)
+        # joining (only user-side)
+        self.user_manager.join_discussion(ip, discussion_id, name)
         user_data = self.user_manager.get(ip)
         self.assertTrue(discussion_id in user_data["discussions"])
         self.assertTrue(user_data["discussions"][discussion_id]["active"])
 
-        # posting
+        # posting (only user-side)
         post_obj1 = Post(ip)
         post_id1 = post_obj1._id
         self.user_manager.insert_post_user_history(ip, discussion_id, post_id1)
@@ -64,7 +65,7 @@ class UserManagerTest(unittest.TestCase):
                 == [post_id1, post_id2]
         )        
 
-        # leaving
+        # leaving (only user-side)
         self.user_manager.leave_discussion(ip, discussion_id)
         user_data = self.user_manager.get(ip)
         # still keep discussion in those that we visited
@@ -74,9 +75,10 @@ class UserManagerTest(unittest.TestCase):
     def test_saving_post(self):
         ip = "12345"
         ip2 = "67890"
+        name = "hello"
         discussion_id = "saving_post" + str(uuid.uuid4().hex)
         self.user_manager.create(ip)
-        self.user_manager.join_discussion(ip, discussion_id)
+        self.user_manager.join_discussion(ip, discussion_id, name)
 
         post_obj = Post(ip2)
         post_id = post_obj._id
@@ -92,9 +94,10 @@ class UserManagerTest(unittest.TestCase):
     def test_saving_block(self):
         ip = "12345"
         ip2 = "67890"
+        name = "hello"
         discussion_id = "saving_block" + str(uuid.uuid4().hex)
         self.user_manager.create(ip)
-        self.user_manager.join_discussion(ip, discussion_id)
+        self.user_manager.join_discussion(ip, discussion_id, name)
 
         post_obj = Post(ip2)
         block_obj = Block(ip2, post_obj._id, "test")
