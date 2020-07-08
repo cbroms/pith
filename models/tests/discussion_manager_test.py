@@ -28,13 +28,45 @@ class DiscussionManagerTest(unittest.TestCase):
 
     def test_join_leave(self):
         ip = "12345"
+        ip2 = "67890"
+        name = "hello"
+        name2 = "goodbye"
         user_manager.create(ip)
+        user_manager.create(ip2)
         discussion_data = self.discussion_manager.create()
         discussion_id = discussion_data["_id"]
-        self.discussion_manager.join(discussion_id, ip)
-        user_ids = self.discussion_manager.get_users(discussion_id)
-        self.assertTrue(ip in user_ids)
 
+        # test joining
+        self.discussion_manager.join(discussion_id, ip, name)
+        user_ids = self.discussion_manager.get_users(discussion_id)
+        names = self.discussion_manager.get_names(discussion_id)
+        self.assertTrue(ip in user_ids)
+        self.assertEqual(len(user_ids), 1) 
+        self.assertEqual(len(names), 1)
+
+        # cannot join with existing name
+        self.discussion_manager.join(discussion_id, ip2, name)
+        user_ids = self.discussion_manager.get_users(discussion_id)
+        names = self.discussion_manager.get_names(discussion_id)
+        self.assertTrue(ip in user_ids)
+        self.assertFalse(ip2 in user_ids)
+        self.assertEqual(len(user_ids), 1) 
+        self.assertTrue(name in names)
+        self.assertFalse(name2 in names)
+        self.assertEqual(len(names), 1)
+
+        # join with different name
+        self.discussion_manager.join(discussion_id, ip2, name2)
+        user_ids = self.discussion_manager.get_users(discussion_id)
+        names = self.discussion_manager.get_names(discussion_id)
+        self.assertTrue(ip in user_ids)
+        self.assertTrue(ip2 in user_ids)
+        self.assertEqual(len(user_ids), 2) 
+        self.assertTrue(name in names)
+        self.assertTrue(name2 in names)
+        self.assertEqual(len(names), 2)
+
+        # test leaving
         self.discussion_manager.leave(discussion_id, ip)
         user_ids = self.discussion_manager.get_users(discussion_id)
         self.assertFalse(ip in user_ids)
@@ -42,12 +74,14 @@ class DiscussionManagerTest(unittest.TestCase):
     def test_post_block(self):
         ip1 = "12345"
         ip2 = "67890"
+        name1 = "hello"
+        name2 = "goodbye"
         user_manager.create(ip1)
         user_manager.create(ip2)
         discussion_data = self.discussion_manager.create()
         discussion_id = discussion_data["_id"]
-        self.discussion_manager.join(discussion_id, ip1)
-        self.discussion_manager.join(discussion_id, ip2)
+        self.discussion_manager.join(discussion_id, ip1, name1)
+        self.discussion_manager.join(discussion_id, ip2, name2)
 
         blocks1 = ["I am Fred.", "You are Fred.", "We are Fred."]
         blocks2 = ["She is Lee.", "They are Lee."]
@@ -80,12 +114,14 @@ class DiscussionManagerTest(unittest.TestCase):
     def test_tag_post(self):
         ip1 = "12345"
         ip2 = "67890"
+        name1 = "hello"
+        name2 = "goodbye"
         user_manager.create(ip1)
         user_manager.create(ip2)
         discussion_data = self.discussion_manager.create()
         discussion_id = discussion_data["_id"]
-        self.discussion_manager.join(discussion_id, ip1)
-        self.discussion_manager.join(discussion_id, ip2)
+        self.discussion_manager.join(discussion_id, ip1, name1)
+        self.discussion_manager.join(discussion_id, ip2, name2)
 
         blocks = ["im a post"]
         post_data1 = self.discussion_manager.create_post(discussion_id, ip1, blocks)
@@ -105,12 +141,14 @@ class DiscussionManagerTest(unittest.TestCase):
     def test_tag_block(self):
         ip1 = "12345"
         ip2 = "67890"
+        name1 = "hello"
+        name2 = "goodbye"
         user_manager.create(ip1)
         user_manager.create(ip2)
         discussion_data = self.discussion_manager.create()
         discussion_id = discussion_data["_id"]
-        self.discussion_manager.join(discussion_id, ip1)
-        self.discussion_manager.join(discussion_id, ip2)
+        self.discussion_manager.join(discussion_id, ip1, name1)
+        self.discussion_manager.join(discussion_id, ip2, name2)
 
         blocks = ["im a post"]
         post_data1 = self.discussion_manager.create_post(discussion_id, ip1, blocks)

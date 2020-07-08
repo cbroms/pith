@@ -48,11 +48,18 @@ class DiscussionManager:
         discussion_data = self.get(discussion_id)
         return user_id in discussion_data["users"]
 
-    def join(self, discussion_id, user_id):
+    def _name_exists(self, discussion_id, name):
+        discussion_data = self.get(discussion_id)
+        return name in list(
+            [u["name"] for u in discussion_data["users"].values()]
+        )
+
+    def join(self, discussion_id, user_id, name):
         if not self._is_user(discussion_id, user_id):
-            user_manager.join_discussion(user_id, discussion_id)
-            self.discussions.update_one({"_id" : discussion_id}, \
-                {"$push": {"users" : user_id}})
+            if not self._name_exists(discussion_id, name):
+                user_manager.join_discussion(user_id, discussion_id, name)
+                self.discussions.update_one({"_id" : discussion_id}, \
+                    {"$set": {"users.{}".format(user_id) : {"name": name}}})
         discussion_data = self.get(discussion_id)
         return discussion_data
 
@@ -60,14 +67,19 @@ class DiscussionManager:
         user_manager.leave_discussion(user_id, discussion_id)
         if self._is_user(discussion_id, user_id):
             self.discussions.update_one({"_id" : discussion_id}, \
-                {"$pull": {"users" : user_id}})
+                {"$unset": {"users.{}".format(user_id) : 0}})
         discussion_data = self.get(discussion_id)
         return discussion_data
 
     def get_users(self, discussion_id):
         discussion_data = self.get(discussion_id)
-        user_ids = discussion_data["users"]
+        user_ids = list(discussion_data["users"].keys())
         return user_ids
+
+    def get_names(self, discussion_id):
+        discussion_data = self.get(discussion_id)
+        names = list([u["name"] for u in discussion_data["users"].values()])
+        return names
 
     def create_post(self, discussion_id, user_id, blocks):
         post_obj = Post(user_id)

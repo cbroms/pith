@@ -65,7 +65,7 @@ class UserManager:
         if discussion_id not in user_data["discussions"]: return False
         return user_data["discussions"][discussion_id]["active"]
 
-    def join_discussion(self, user_id, discussion_id):
+    def join_discussion(self, user_id, discussion_id, name):
         """
         Discussion should check we are not in, or active.
         """
@@ -77,6 +77,7 @@ class UserManager:
             self.users.update_one({"_id" : user_id}, {"$set": \
                 {"discussions.{}".format(discussion_id) : { 
                     "active": True,
+                    "name": name,
                     "history": [],
                     "library": {
                         "posts": {},

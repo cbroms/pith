@@ -12,7 +12,7 @@ class Discussion():
             self.__dict__ = entries
         else:
             self._id = uuid.uuid4().hex
-            self.users = [] # user ids
+            self.users = {} # user ids with dict with name as value
             """
             The discussion stores the objects pertaining to it by id.
             """

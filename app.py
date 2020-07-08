@@ -33,6 +33,11 @@ async def get_discussion(sid, json):
     discussion_data = discussion_manager.get(discussion_id)
     return dumps(discussion_data, cls=UUIDEncoder)
 
+@sio.on('get_discussion_names')
+async def get_discussion_names(sid, json):
+    discussion_id = json["discussion_id"]
+    names = discussion_manager.get_names(discussion_id)
+    return dumps(names, cls=UUIDEncoder)
 
 @sio.on('get_posts')
 async def get_posts(sid, json):
@@ -181,7 +186,8 @@ async def create_discussion(sid, json):
 async def join_discussion(sid, json):
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
-    discussion_data = discussion_manager.join(discussion_id, user_id)
+    name = json["name"]
+    discussion_data = discussion_manager.join(discussion_id, user_id, name)
     serialized = dumps(discussion_data, cls=UUIDEncoder)
     await sio.emit("joined_discussion", serialized)
     return serialized
