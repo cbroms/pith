@@ -131,7 +131,7 @@ async def post_add_tag(sid, json):
     discussion_manager.post_add_tag(discussion_id, user_id, post_id, tag)
     serialized = dumps({"post_id": post_id, "user_id": user_id, "tag": tag}, \
         cls=UUIDEncoder, broadcast=True)
-    await sio.emit("tagged_post", serialized)
+    await sio.emit("tagged_post", serialized, room=discussion_id)
     return serialized
 
 
@@ -144,7 +144,7 @@ async def post_remove_tag(sid, json):
     discussion_manager.post_remove_tag(discussion_id, user_id, post_id, tag)
     serialized = dumps({"post_id": post_id, "tag": tag}, \
         cls=UUIDEncoder, broadcast=True)
-    await sio.emit("untagged_post", serialized)
+    await sio.emit("untagged_post", serialized, room=discussion_id)
     return serialized
 
 
@@ -157,7 +157,7 @@ async def block_add_tag(sid, json):
     discussion_manager.block_add_tag(discussion_id, user_id, block_id, tag)
     serialized = dumps({"block_id": block_id, "user_id": user_id, "tag": tag}, \
         cls=UUIDEncoder)
-    await sio.emit("tagged_block", serialized)
+    await sio.emit("tagged_block", serialized, room=discussion_id)
     return serialized
 
 
@@ -170,7 +170,7 @@ async def block_remove_tag(sid, json):
     discussion_manager.block_remove_tag(discussion_id, user_id, block_id, tag)
     serialized = dumps({"block_id": block_id, "tag": tag}, \
         cls=UUIDEncoder)
-    await sio.emit("untagged_block", serialized)
+    await sio.emit("untagged_block", serialized, room=discussion_id)
     return serialized
 
 
@@ -188,8 +188,10 @@ async def join_discussion(sid, json):
     user_id = json["user_id"]
     name = json["name"]
     discussion_data = discussion_manager.join(discussion_id, user_id, name)
+    discussion_id = discussion_data["_id"]
     serialized = dumps(discussion_data, cls=UUIDEncoder)
-    await sio.emit("joined_discussion", serialized)
+    sio.enter_room(sid, discussion_id)
+    await sio.emit("joined_discussion", serialized, room=discussion_id)
     return serialized
 
 
@@ -198,8 +200,10 @@ async def leave_discussion(sid, json):
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
     discussion_data = discussion_manager.leave(discussion_id, user_id)
+    discussion_id = discussion_data["_id"]
     serialized = dumps(discussion_data, cls=UUIDEncoder)
-    await sio.emit("left_discussion", serialized)
+    sio.leave_room(sid, discussion_id)
+    await sio.emit("left_discussion", serialized, room=discussion_id)
     return serialized
 
 
@@ -210,7 +214,7 @@ async def create_post(sid, json):
     blocks = json["blocks"]
     post_data = discussion_manager.create_post(discussion_id, user_id, blocks)
     serialized = dumps(post_data, cls=UUIDEncoder)
-    await sio.emit("created_post", serialized)
+    await sio.emit("created_post", serialized, room=discussion_id)
     return serialized
 
 
