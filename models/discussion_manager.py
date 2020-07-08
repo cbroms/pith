@@ -74,12 +74,12 @@ class DiscussionManager:
 
     def get_users(self, discussion_id):
         discussion_data = self.get(discussion_id)
-        user_ids = list([u["name"] for u in discussion_data["users"].values()])
+        user_ids = list(discussion_data["users"].keys())
         return user_ids
 
     def get_names(self, discussion_id):
         discussion_data = self.get(discussion_id)
-        names = discussion_data["users"]
+        names = list([u["name"] for u in discussion_data["users"].values()])
         return names
 
     def create_post(self, discussion_id, user_id, blocks):
