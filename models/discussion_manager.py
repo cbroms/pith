@@ -18,12 +18,13 @@ class DiscussionManager:
     """
     Of discussions.
     """
+
     def _insert(self, discussion_obj):
         discussion_data = discussion_obj.__dict__
         self.discussions.insert_one(discussion_data)
 
     def get(self, discussion_id):
-        discussion_data = self.discussions.find_one({ "_id" : discussion_id })
+        discussion_data = self.discussions.find_one({"_id": discussion_id})
         return discussion_data
 
     def get_all(self):
@@ -58,16 +59,16 @@ class DiscussionManager:
         if not self._is_user(discussion_id, user_id):
             if not self._name_exists(discussion_id, name):
                 user_manager.join_discussion(user_id, discussion_id, name)
-                self.discussions.update_one({"_id" : discussion_id}, \
-                    {"$set": {"users.{}".format(user_id) : {"name": name}}})
+                self.discussions.update_one({"_id": discussion_id},
+                                            {"$set": {"users.{}".format(user_id): {"name": name}}})
         discussion_data = self.get(discussion_id)
         return discussion_data
 
     def leave(self, discussion_id, user_id):
         user_manager.leave_discussion(user_id, discussion_id)
         if self._is_user(discussion_id, user_id):
-            self.discussions.update_one({"_id" : discussion_id}, \
-                {"$unset": {"users.{}".format(user_id) : 0}})
+            self.discussions.update_one({"_id": discussion_id},
+                                        {"$unset": {"users.{}".format(user_id): 0}})
         discussion_data = self.get(discussion_id)
         return discussion_data
 
@@ -78,7 +79,7 @@ class DiscussionManager:
 
     def get_names(self, discussion_id):
         discussion_data = self.get(discussion_id)
-        names = list([u["name"] for u in discussion_data["users"].values()])
+        names = discussion_data["users"]
         return names
 
     def create_post(self, discussion_id, user_id, blocks):
@@ -93,14 +94,14 @@ class DiscussionManager:
             block_id = block_obj._id
             block_ids.append(block_id)
             block_data = block_obj.__dict__
-            self.discussions.update_one({"_id" : discussion_id}, \
-                {"$set": {"history_blocks.{}".format(block_id) : block_data}})
+            self.discussions.update_one({"_id": discussion_id},
+                                        {"$set": {"history_blocks.{}".format(block_id): block_data}})
 
         post_obj.blocks = block_ids
         post_obj.freq_dict = utils.sum_dicts(freq_dicts)
         post_data = post_obj.__dict__
-        self.discussions.update_one({"_id" : discussion_id}, \
-            {"$set": {"history.{}".format(post_id) : post_data}})
+        self.discussions.update_one({"_id": discussion_id},
+                                    {"$set": {"history.{}".format(post_id): post_data}})
         user_manager.insert_post_user_history(user_id, discussion_id, post_id)
 
         return post_data
@@ -113,7 +114,7 @@ class DiscussionManager:
     def get_posts(self, discussion_id):
         discussion_data = self.get(discussion_id)
         history = discussion_data["history"]
-        return list(history.values()) # give data
+        return list(history.values())  # give data
 
     def get_block(self, discussion_id, block_id):
         print(discussion_id, block_id)
@@ -124,7 +125,7 @@ class DiscussionManager:
     def get_blocks(self, discussion_id):
         discussion_data = self.get(discussion_id)
         history_blocks = discussion_data["history_blocks"]
-        return list(history_blocks.values()) # give data
+        return list(history_blocks.values())  # give data
 
     def _is_tag(self, discussion_id, tag):
         discussion_data = self.get(discussion_id)
@@ -152,8 +153,8 @@ class DiscussionManager:
         if not self._is_tag(discussion_id, tag):
             tag_obj = Tag(tag)
             tag_data = tag_obj.__dict__
-            self.discussions.update_one({"_id" : discussion_id}, \
-                {"$set": {"internal_tags.{}".format(tag) : tag_data}})
+            self.discussions.update_one({"_id": discussion_id},
+                                        {"$set": {"internal_tags.{}".format(tag): tag_data}})
         else:
             tag_data = self._get_tag(discussion_id, tag)
         return tag_data
@@ -169,15 +170,15 @@ class DiscussionManager:
     def post_add_tag(self, discussion_id, user_id, post_id, tag):
         self._create_tag(discussion_id, tag)
         if not self._is_tag_post(discussion_id, post_id, tag):
-            self.discussions.update_one({"_id" : discussion_id}, \
-                {"$set": {"history.{}.tags.{}".format(post_id, tag) : \
-                {"owner": user_id}}})
+            self.discussions.update_one({"_id": discussion_id},
+                                        {"$set": {"history.{}.tags.{}".format(post_id, tag):
+                                                  {"owner": user_id}}})
 
     def post_remove_tag(self, discussion_id, user_id, post_id, tag):
         if self._is_tag_post(discussion_id, post_id, tag):
             if self._is_tag_owner_post(discussion_id, user_id, post_id, tag):
-                self.discussions.update_one({"_id" : discussion_id}, \
-                    {"$unset": {"history.{}.tags.{}".format(post_id, tag) : 0}})
+                self.discussions.update_one({"_id": discussion_id},
+                                            {"$unset": {"history.{}.tags.{}".format(post_id, tag): 0}})
 
     def _is_tag_block(self, discussion_id, block_id, tag):
         """
@@ -190,25 +191,25 @@ class DiscussionManager:
     def block_add_tag(self, discussion_id, user_id, block_id, tag):
         self._create_tag(discussion_id, tag)
         if not self._is_tag_block(discussion_id, block_id, tag):
-            self.discussions.update_one({"_id" : discussion_id}, \
-                {"$set": {"history_blocks.{}.tags.{}".format(block_id, tag) : \
-                {"owner": user_id}}})
+            self.discussions.update_one({"_id": discussion_id},
+                                        {"$set": {"history_blocks.{}.tags.{}".format(block_id, tag):
+                                                  {"owner": user_id}}})
 
     def block_remove_tag(self, discussion_id, user_id, block_id, tag):
         if self._is_tag_block(discussion_id, block_id, tag):
             if self._is_tag_owner_block(discussion_id, user_id, block_id, tag):
-                self.discussions.update_one({"_id" : discussion_id}, \
-                    {"$unset": {"history_blocks.{}.tags.{}".format(block_id, tag) : 0}})
+                self.discussions.update_one({"_id": discussion_id},
+                                            {"$unset": {"history_blocks.{}.tags.{}".format(block_id, tag): 0}})
 
     def discussion_scope_search(self, discussion_id, query):
         post_ids = self.get_posts(discussion_id)
         block_ids = self.get_blocks(discussion_id)
         posts_data = {
-            p: self.get_post(discussion_id, p) \
+            p: self.get_post(discussion_id, p)
             for p in post_ids
         }
         blocks_data = {
-            b: self.get_block(discussion_id, b) \
+            b: self.get_block(discussion_id, b)
             for b in block_ids
         }
         return basic_search(query, blocks_data, posts_data)
@@ -217,11 +218,11 @@ class DiscussionManager:
         post_ids = self.get_posts(discussion_id)
         block_ids = self.get_blocks(discussion_id)
         posts_data = {
-            p: self.get_post(discussion_id, p) \
+            p: self.get_post(discussion_id, p)
             for p in post_ids
         }
         blocks_data = {
-            b: self.get_block(discussion_id, b) \
+            b: self.get_block(discussion_id, b)
             for b in block_ids
         }
         return tag_search(tags, blocks_data, posts_data)
@@ -230,11 +231,11 @@ class DiscussionManager:
         post_ids = user_manager.get_user_saved_posts(user_id, discussion_id)
         block_ids = user_manager.get_user_saved_blocks(user_id, discussion_id)
         posts_data = {
-            p: self.get_post(discussion_id, p) \
+            p: self.get_post(discussion_id, p)
             for p in post_ids
         }
         blocks_data = {
-            b: self.get_block(discussion_id, b) \
+            b: self.get_block(discussion_id, b)
             for b in block_ids
         }
         return basic_search(query, blocks_data, posts_data)
@@ -243,11 +244,11 @@ class DiscussionManager:
         post_ids = user_manager.get_user_saved_posts(user_id, discussion_id)
         block_ids = user_manager.get_user_saved_blocks(user_id, discussion_id)
         posts_data = {
-            p: self.get_post(discussion_id, p) \
+            p: self.get_post(discussion_id, p)
             for p in post_ids
         }
         blocks_data = {
-            b: self.get_block(discussion_id, b) \
+            b: self.get_block(discussion_id, b)
             for b in block_ids
         }
         return tag_search(tags, blocks_data, posts_data)
