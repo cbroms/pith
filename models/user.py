@@ -11,8 +11,8 @@ class User():
             self._id = _id
             """
             A dict where keys are discussion ids and values are 
-            X history (don't need this)
             - active # if in the discussion at the moment
+            - name
             - library 
               - posts # saved post ids
               - blocks # saved block ids

@@ -4,9 +4,7 @@ import unittest
 import uuid
 
 from models.discussion_manager import DiscussionManager
-
-# using this for this test
-from user_constants import user_manager
+from models.user_manager import UserManager
 
 
 class DiscussionManagerTest(unittest.TestCase):
@@ -17,6 +15,8 @@ class DiscussionManagerTest(unittest.TestCase):
         db = client["db"]
         self.log = logging.getLogger("DiscussionManagerTest")
         self.discussion_manager = DiscussionManager(db)
+        # artificially insert
+        self.discussion_manager.user_manager = UserManager(db)
 
     def test_create_get(self):
         discussion_data = self.discussion_manager.create()
@@ -31,8 +31,8 @@ class DiscussionManagerTest(unittest.TestCase):
         ip2 = "67890"
         name = "hello"
         name2 = "goodbye"
-        user_manager.create(ip)
-        user_manager.create(ip2)
+        self.discussion_manager.user_manager.create(ip)
+        self.discussion_manager.user_manager.create(ip2)
         discussion_data = self.discussion_manager.create()
         discussion_id = discussion_data["_id"]
 
@@ -76,8 +76,8 @@ class DiscussionManagerTest(unittest.TestCase):
         ip2 = "67890"
         name1 = "hello"
         name2 = "goodbye"
-        user_manager.create(ip1)
-        user_manager.create(ip2)
+        self.discussion_manager.user_manager.create(ip1)
+        self.discussion_manager.user_manager.create(ip2)
         discussion_data = self.discussion_manager.create()
         discussion_id = discussion_data["_id"]
         self.discussion_manager.join(discussion_id, ip1, name1)
@@ -116,8 +116,8 @@ class DiscussionManagerTest(unittest.TestCase):
         ip2 = "67890"
         name1 = "hello"
         name2 = "goodbye"
-        user_manager.create(ip1)
-        user_manager.create(ip2)
+        self.discussion_manager.user_manager.create(ip1)
+        self.discussion_manager.user_manager.create(ip2)
         discussion_data = self.discussion_manager.create()
         discussion_id = discussion_data["_id"]
         self.discussion_manager.join(discussion_id, ip1, name1)
@@ -143,8 +143,8 @@ class DiscussionManagerTest(unittest.TestCase):
         ip2 = "67890"
         name1 = "hello"
         name2 = "goodbye"
-        user_manager.create(ip1)
-        user_manager.create(ip2)
+        self.discussion_manager.user_manager.create(ip1)
+        self.discussion_manager.user_manager.create(ip2)
         discussion_data = self.discussion_manager.create()
         discussion_id = discussion_data["_id"]
         self.discussion_manager.join(discussion_id, ip1, name1)

@@ -7,13 +7,13 @@ from models.tag import Tag
 
 from search.basic_search import basic_search
 from search.tag_search import tag_search
-from user_constants import user_manager
 
 
 class DiscussionManager:
 
     def __init__(self, db):
         self.discussions = db["discussions"]
+        self.user_manager = None
 
     """
     Of discussions.
@@ -58,14 +58,14 @@ class DiscussionManager:
     def join(self, discussion_id, user_id, name):
         if not self._is_user(discussion_id, user_id):
             if not self._name_exists(discussion_id, name):
-                user_manager.join_discussion(user_id, discussion_id, name)
+                self.user_manager.join_discussion(user_id, discussion_id, name)
                 self.discussions.update_one({"_id": discussion_id},
                                             {"$set": {"users.{}".format(user_id): {"name": name}}})
         discussion_data = self.get(discussion_id)
         return discussion_data
 
     def leave(self, discussion_id, user_id):
-        user_manager.leave_discussion(user_id, discussion_id)
+        self.user_manager.leave_discussion(user_id, discussion_id)
         if self._is_user(discussion_id, user_id):
             self.discussions.update_one({"_id": discussion_id},
                                         {"$unset": {"users.{}".format(user_id): 0}})
@@ -102,7 +102,7 @@ class DiscussionManager:
         post_data = post_obj.__dict__
         self.discussions.update_one({"_id": discussion_id},
                                     {"$set": {"history.{}".format(post_id): post_data}})
-        user_manager.insert_post_user_history(user_id, discussion_id, post_id)
+        self.user_manager.insert_post_user_history(user_id, discussion_id, post_id)
 
         return post_data
 
@@ -228,8 +228,8 @@ class DiscussionManager:
         return tag_search(tags, blocks_data, posts_data)
 
     def user_saved_scope_search(self, discussion_id, user_id, query):
-        post_ids = user_manager.get_user_saved_posts(user_id, discussion_id)
-        block_ids = user_manager.get_user_saved_blocks(user_id, discussion_id)
+        post_ids = self.user_manager.get_user_saved_posts(user_id, discussion_id)
+        block_ids = self.user_manager.get_user_saved_blocks(user_id, discussion_id)
         posts_data = {
             p: self.get_post(discussion_id, p)
             for p in post_ids
@@ -241,8 +241,8 @@ class DiscussionManager:
         return basic_search(query, blocks_data, posts_data)
 
     def user_saved_tag_search(self, discussion_id, user_id, tags):
-        post_ids = user_manager.get_user_saved_posts(user_id, discussion_id)
-        block_ids = user_manager.get_user_saved_blocks(user_id, discussion_id)
+        post_ids = self.user_manager.get_user_saved_posts(user_id, discussion_id)
+        block_ids = self.user_manager.get_user_saved_blocks(user_id, discussion_id)
         posts_data = {
             p: self.get_post(discussion_id, p)
             for p in post_ids

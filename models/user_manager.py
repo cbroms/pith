@@ -1,7 +1,6 @@
 """
 API relating to the user.
 """
-from constants import db
 from models.user import User
 
 from search.basic_search import basic_search
@@ -12,6 +11,7 @@ class UserManager:
 
     def __init__(self, db):
         self.users = db["users"]
+        self.discussion_manager = None
 
     """
     Of users.
