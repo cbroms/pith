@@ -74,7 +74,7 @@ class DiscussionManager:
 
     def get_users(self, discussion_id):
         discussion_data = self.get(discussion_id)
-        user_ids = list(discussion_data["users"].keys())
+        user_ids = list([u["name"] for u in discussion_data["users"].values()])
         return user_ids
 
     def get_names(self, discussion_id):
