@@ -37,8 +37,7 @@ class DiscussionManager:
     def create(self):
         discussion_obj = Discussion()
         self._insert(discussion_obj)
-        discussion_data = discussion_obj.__dict__
-        return discussion_data
+        return discussion_obj._id
 
     """
     Within a discussion.
@@ -61,16 +60,12 @@ class DiscussionManager:
                 self.user_manager.join_discussion(user_id, discussion_id, name)
                 self.discussions.update_one({"_id": discussion_id},
                                             {"$set": {"users.{}".format(user_id): {"name": name}}})
-        discussion_data = self.get(discussion_id)
-        return discussion_data
 
     def leave(self, discussion_id, user_id):
         self.user_manager.leave_discussion(user_id, discussion_id)
         if self._is_user(discussion_id, user_id):
             self.discussions.update_one({"_id": discussion_id},
                                         {"$unset": {"users.{}".format(user_id): 0}})
-        discussion_data = self.get(discussion_id)
-        return discussion_data
 
     def get_users(self, discussion_id):
         discussion_data = self.get(discussion_id)
@@ -81,6 +76,11 @@ class DiscussionManager:
         discussion_data = self.get(discussion_id)
         names = list([u["name"] for u in discussion_data["users"].values()])
         return names
+
+    def get_user_name(self, discussion_id, user_id):
+        discussion_data = self.get(discussion_id)
+        name = discussion_data["users"][user_id]["name"]
+        return name
 
     def create_post(self, discussion_id, user_id, blocks):
         post_obj = Post(user_id)
@@ -104,6 +104,11 @@ class DiscussionManager:
                                     {"$set": {"history.{}".format(post_id): post_data}})
         self.user_manager.insert_post_user_history(user_id, discussion_id, post_id)
 
+        post_info = {
+            "post_id": post_data["_id"],
+            "blocks": post_data["blocks"],
+        } 
+
         return post_data
 
     def get_post(self, discussion_id, post_id):
@@ -114,13 +119,25 @@ class DiscussionManager:
     def get_posts(self, discussion_id):
         discussion_data = self.get(discussion_id)
         history = discussion_data["history"]
-        return list(history.values())  # give data
+        posts = history.values()
+        posts_info = [{
+            "post_id": p["_id"],
+            "author": p["user"],
+            "author_name": self.get_user_name(discussion_id, p["user"]),
+            "created_at": p["created_at"],
+            "blocks": p["blocks"],
+        } for p in posts]
+        return posts_info
 
     def get_block(self, discussion_id, block_id):
-        print(discussion_id, block_id)
         discussion_data = self.get(discussion_id)
         block_data = discussion_data["history_blocks"][block_id]
-        return block_data
+        block_info = {
+            "block_id": block_data["_id"],
+            "body": block_data["body"],
+            "tags": block_data["tags"],
+        }
+        return block_info
 
     def get_blocks(self, discussion_id):
         discussion_data = self.get(discussion_id)

@@ -19,8 +19,7 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.user_manager = UserManager(db)
 
     def test_create_get(self):
-        discussion_data = self.discussion_manager.create()
-        discussion_id = discussion_data["_id"]
+        discussion_id = self.discussion_manager.create()
         discussion_data = self.discussion_manager.get(discussion_id)
         self.assertFalse(discussion_data is None)
         discussion_ids = self.discussion_manager.get_all()
@@ -33,8 +32,7 @@ class DiscussionManagerTest(unittest.TestCase):
         name2 = "goodbye"
         self.discussion_manager.user_manager.create(ip)
         self.discussion_manager.user_manager.create(ip2)
-        discussion_data = self.discussion_manager.create()
-        discussion_id = discussion_data["_id"]
+        discussion_id = self.discussion_manager.create()
 
         # test joining
         self.discussion_manager.join(discussion_id, ip, name)
@@ -43,6 +41,8 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertTrue(ip in user_ids)
         self.assertEqual(len(user_ids), 1) 
         self.assertEqual(len(names), 1)
+        ret_name1 = self.discussion_manager.get_user_name(discussion_id, ip)
+        self.assertEqual(ret_name1, name)
 
         # cannot join with existing name
         self.discussion_manager.join(discussion_id, ip2, name)
@@ -65,6 +65,10 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertTrue(name in names)
         self.assertTrue(name2 in names)
         self.assertEqual(len(names), 2)
+        ret_name1 = self.discussion_manager.get_user_name(discussion_id, ip)
+        self.assertEqual(ret_name1, name)
+        ret_name2 = self.discussion_manager.get_user_name(discussion_id, ip2)
+        self.assertEqual(ret_name2, name2)
 
         # test leaving
         self.discussion_manager.leave(discussion_id, ip)
@@ -78,8 +82,7 @@ class DiscussionManagerTest(unittest.TestCase):
         name2 = "goodbye"
         self.discussion_manager.user_manager.create(ip1)
         self.discussion_manager.user_manager.create(ip2)
-        discussion_data = self.discussion_manager.create()
-        discussion_id = discussion_data["_id"]
+        discussion_id = self.discussion_manager.create()
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
 
@@ -96,7 +99,7 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertFalse(post_data2 is None)
 
         posts_data = self.discussion_manager.get_posts(discussion_id)
-        posts_id = [p["_id"] for p in posts_data]
+        posts_id = [p["post_id"] for p in posts_data]
         self.assertTrue(post_id1 in posts_id)
         self.assertTrue(post_id2 in posts_id)
 
@@ -118,8 +121,7 @@ class DiscussionManagerTest(unittest.TestCase):
         name2 = "goodbye"
         self.discussion_manager.user_manager.create(ip1)
         self.discussion_manager.user_manager.create(ip2)
-        discussion_data = self.discussion_manager.create()
-        discussion_id = discussion_data["_id"]
+        discussion_id = self.discussion_manager.create()
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
 
@@ -145,8 +147,7 @@ class DiscussionManagerTest(unittest.TestCase):
         name2 = "goodbye"
         self.discussion_manager.user_manager.create(ip1)
         self.discussion_manager.user_manager.create(ip2)
-        discussion_data = self.discussion_manager.create()
-        discussion_id = discussion_data["_id"]
+        discussion_id = self.discussion_manager.create()
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
 

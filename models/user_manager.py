@@ -40,10 +40,6 @@ class UserManager:
         if not self._is_user(ip):
             user_obj = User(ip)
             self._insert(user_obj)
-            user_data = user_obj.__dict__
-        else:
-            user_data = self.get(ip)
-        return user_data
 
     """
     Within a user.

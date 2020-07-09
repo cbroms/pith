@@ -17,7 +17,7 @@ class Block():
             self.user = user
             self.post = post
             self.body = body
-            self.tags = {} # block ids, value stores user
+            self.tags = {} # tag ids, value stores user
             self.freq_dict = utils.make_freq_dict(self.body)
             self.created_at = datetime.utcnow().strftime(date_time_fmt)
             # convert back: datetime.strptime(self.created_at, date_time_fmt)
