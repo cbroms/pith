@@ -23,8 +23,11 @@ class DiscussionManager:
         discussion_data = discussion_obj.__dict__
         self.discussions.insert_one(discussion_data)
 
+    def _remove(self, discussion_id):
+        self.discussions.remove({"_id" : discussion_id})
+
     def get(self, discussion_id):
-        discussion_data = self.discussions.find_one({"_id": discussion_id})
+        discussion_data = self.discussions.find_one({"_id" : discussion_id})
         return discussion_data
 
     def get_all(self):
@@ -71,6 +74,12 @@ class DiscussionManager:
         discussion_data = self.get(discussion_id)
         user_ids = list(discussion_data["users"].keys())
         return user_ids
+
+    def get_num_users(self, discussion_id):
+        discussion_data = self.get(discussion_id)
+        user_ids = list(discussion_data["users"].keys())
+        num_users = len(user_ids)
+        return num_users
 
     def get_names(self, discussion_id):
         discussion_data = self.get(discussion_id)

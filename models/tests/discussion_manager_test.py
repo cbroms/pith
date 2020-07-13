@@ -54,6 +54,20 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertTrue(name in names)
         self.assertFalse(name2 in names)
         self.assertEqual(len(names), 1)
+        num_users = self.discussion_manager.get_num_users(discussion_id)
+        self.assertEqual(num_users, 1)
+
+        # attempt joining with same ip
+        self.discussion_manager.join(discussion_id, ip, name2)
+        user_ids = self.discussion_manager.get_users(discussion_id)
+        names = self.discussion_manager.get_names(discussion_id)
+        self.assertTrue(ip in user_ids)
+        self.assertEqual(len(user_ids), 1) 
+        self.assertTrue(name in names)
+        self.assertFalse(name2 in names)
+        self.assertEqual(len(names), 1)
+        num_users = self.discussion_manager.get_num_users(discussion_id)
+        self.assertEqual(num_users, 1)
 
         # join with different name
         self.discussion_manager.join(discussion_id, ip2, name2)
@@ -69,11 +83,21 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertEqual(ret_name1, name)
         ret_name2 = self.discussion_manager.get_user_name(discussion_id, ip2)
         self.assertEqual(ret_name2, name2)
+        num_users = self.discussion_manager.get_num_users(discussion_id)
+        self.assertEqual(num_users, 2)
 
         # test leaving
         self.discussion_manager.leave(discussion_id, ip)
         user_ids = self.discussion_manager.get_users(discussion_id)
         self.assertFalse(ip in user_ids)
+        num_users = self.discussion_manager.get_num_users(discussion_id)
+        self.assertEqual(num_users, 1)
+        self.discussion_manager.leave(discussion_id, ip2)
+        user_ids = self.discussion_manager.get_users(discussion_id)
+        self.assertFalse(ip in user_ids)
+        self.assertFalse(ip2 in user_ids)
+        num_users = self.discussion_manager.get_num_users(discussion_id)
+        self.assertEqual(num_users, 0)
 
     def test_post_block(self):
         ip1 = "12345"

@@ -408,6 +408,17 @@ USAGE: not used
 
 """
 Input: discussion_id<str>, user_id<str>, blocks: [block_msg1<str>, block_msg2<str>, ...]
+Output: {"num_users" : num_users<int>} 
+"""
+@sio.on('get_num_users')
+async def get_num_users(sid, json):
+    discussion_id = json["discussion_id"]
+    num_users = gm.discussion_manager.get_num_users(discussion_id)
+    serialized = dumps({"num_users": num_users}, cls=UUIDEncoder)
+    return serialized
+
+"""
+Input: discussion_id<str>, user_id<str>, blocks: [block_msg1<str>, block_msg2<str>, ...]
 Output: post_info: {
     "post_id" : post_id<str>,
     "blocks" : [block_id1<str>, block_id2<str>, ...]
