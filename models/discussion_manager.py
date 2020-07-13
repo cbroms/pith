@@ -23,7 +23,7 @@ class DiscussionManager:
         discussion_data = discussion_obj.__dict__
         self.discussions.insert_one(discussion_data)
 
-    def _remove(self, discussion_id):
+    def remove(self, discussion_id):
         self.discussions.remove({"_id" : discussion_id})
 
     def get(self, discussion_id):

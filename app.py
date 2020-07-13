@@ -373,6 +373,15 @@ USAGE: used
 """
 
 """
+Input: discussion_id<str>
+Output: None
+"""
+@sio.on('remove_discussion')
+async def remove_discussion(sid, json):
+    discussion_id = json["discussion_id"]
+    gm.discussion_manager.remove(discussion_id)
+
+"""
 Input: discussion_id<str>, user_id<str>, name<str>
 Output: None 
 """
