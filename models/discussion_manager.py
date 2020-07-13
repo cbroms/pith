@@ -37,8 +37,8 @@ class DiscussionManager:
             discussion_list.append(u["_id"])
         return discussion_list
 
-    def create(self):
-        discussion_obj = Discussion()
+    def create(self, title=None, theme=None, time_limit=None):
+        discussion_obj = Discussion(title, theme, time_limit)
         self._insert(discussion_obj)
         return discussion_obj._id
 

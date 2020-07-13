@@ -19,8 +19,12 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.user_manager = UserManager(db)
 
     def test_create_get(self):
-        discussion_id = self.discussion_manager.create()
+        title = "fake_title"
+        theme = "fake_theme"
+        time_limit = 3600
+        discussion_id = self.discussion_manager.create(title, theme, time_limit)
         discussion_data = self.discussion_manager.get(discussion_id)
+        self.assertTrue(discussion_data["expire_at"] is not None)
         self.assertFalse(discussion_data is None)
         discussion_ids = self.discussion_manager.get_all()
         self.assertTrue(discussion_id in discussion_ids)

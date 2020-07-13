@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from models.post import date_time_fmt
+from constants import date_time_fmt
 
 
 def make_metric(query_tags):

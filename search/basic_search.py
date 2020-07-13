@@ -4,7 +4,7 @@ import nltk
 from nltk import pos_tag
 from nltk.stem import PorterStemmer
 
-from models.post import date_time_fmt
+from constants import date_time_fmt
 
 from utils import utils
 

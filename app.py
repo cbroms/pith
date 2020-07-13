@@ -358,12 +358,19 @@ tag
 """
 
 """
-Input: None 
+Input: {
+    "title" : title<str>,
+    "theme" : theme<str>,
+    "time_limit" : time_limit_in_secs<int>
+} 
 Output: discussion_id<str>
 """
 @sio.on('create_discussion')
 async def create_discussion(sid, json):
-    discussion_id = gm.discussion_manager.create()
+    title = json["title"]
+    theme = json["theme"]
+    time_limit = json["time_limit"]
+    discussion_id = gm.discussion_manager.create(title, theme, time_limit)
     serialized = dumps(discussion_id, cls=UUIDEncoder)
     # eventually might only want to do this on the global map, and even then...
     await sio.emit("created_discussion", serialized)

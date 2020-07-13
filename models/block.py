@@ -4,7 +4,7 @@ A block only exists within the discussion scope.
 from datetime import datetime
 import uuid
 
-from models.post import date_time_fmt
+from constants import date_time_fmt
 from utils import utils
 
 
