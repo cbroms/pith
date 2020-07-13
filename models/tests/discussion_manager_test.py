@@ -34,12 +34,20 @@ class DiscussionManagerTest(unittest.TestCase):
         ip2 = "67890"
         name = "hello"
         name2 = "goodbye"
+        title = "fake_title"
+        theme = "fake_theme"
         self.discussion_manager.user_manager.create(ip)
         self.discussion_manager.user_manager.create(ip2)
-        discussion_id = self.discussion_manager.create()
+        discussion_id = self.discussion_manager.create(title, theme)
 
         # test joining
-        self.discussion_manager.join(discussion_id, ip, name)
+        info = self.discussion_manager.join(discussion_id, ip, name)
+        self.assertTrue("discussion_id" in info)
+        self.assertTrue("title" in info)
+        self.assertTrue("theme" in info)
+        self.assertEqual(info["discussion_id"], discussion_id)
+        self.assertEqual(info["title"], title)
+        self.assertEqual(info["theme"], theme)
         user_ids = self.discussion_manager.get_users(discussion_id)
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)

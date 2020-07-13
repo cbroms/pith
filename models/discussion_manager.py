@@ -63,6 +63,12 @@ class DiscussionManager:
                 self.user_manager.join_discussion(user_id, discussion_id, name)
                 self.discussions.update_one({"_id": discussion_id},
                                             {"$set": {"users.{}".format(user_id): {"name": name}}})
+        discussion_data = self.get(discussion_id)
+        return {
+            "discussion_id": discussion_id,
+            "title": discussion_data["title"],
+            "theme": discussion_data["theme"],
+        }
 
     def leave(self, discussion_id, user_id):
         self.user_manager.leave_discussion(user_id, discussion_id)

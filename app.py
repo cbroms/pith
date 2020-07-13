@@ -390,15 +390,19 @@ async def remove_discussion(sid, json):
 
 """
 Input: discussion_id<str>, user_id<str>, name<str>
-Output: None 
+Output: {
+    "discussion_id" : discussion_id<str>,
+    "title" : title<str>,
+    "theme" : theme<str>
+} 
 """
 @sio.on('join_discussion')
 async def join_discussion(sid, json):
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
     name = json["name"]
-    gm.discussion_manager.join(discussion_id, user_id, name)
-    serialized = dumps({}, cls=UUIDEncoder)
+    info = gm.discussion_manager.join(discussion_id, user_id, name)
+    serialized = dumps(info, cls=UUIDEncoder)
     sio.enter_room(sid, discussion_id)
     await sio.emit("joined_discussion", serialized, room=discussion_id)
 """
