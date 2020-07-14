@@ -1,4 +1,4 @@
-from pymongo import MongoClient 
+from pymongo import MongoClient
 
 from models.user_manager import UserManager
 from models.discussion_manager import DiscussionManager
@@ -15,5 +15,5 @@ class GlobalManager:
         self.discussion_manager = DiscussionManager(db)
 
         # exchange TODO: may eventually decide to just pass in self (global manager)
-        user_manager.discussion_manager = self.discussion_manager
-        discussion_manager.user_manager = self.user_manager
+        self.user_manager.discussion_manager = self.discussion_manager
+        self.discussion_manager.user_manager = self.user_manager

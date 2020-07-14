@@ -24,10 +24,10 @@ class DiscussionManager:
         self.discussions.insert_one(discussion_data)
 
     def remove(self, discussion_id):
-        self.discussions.remove({"_id" : discussion_id})
+        self.discussions.remove({"_id": discussion_id})
 
     def get(self, discussion_id):
-        discussion_data = self.discussions.find_one({"_id" : discussion_id})
+        discussion_data = self.discussions.find_one({"_id": discussion_id})
         return discussion_data
 
     def get_all(self):
@@ -122,7 +122,9 @@ class DiscussionManager:
         post_info = {
             "post_id": post_data["_id"],
             "blocks": post_data["blocks"],
-        } 
+        }
+
+        post_data["author_name"] = self.get_user_name(discussion_id, user_id)
 
         return post_data
 

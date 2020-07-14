@@ -11,7 +11,7 @@ from json import dumps
 import socketio
 from uuid import UUID
 
-from models.global_manager import global_manager
+from models.global_manager import GlobalManager
 from utils.utils import UUIDEncoder
 
 
@@ -77,6 +77,8 @@ Block
 Input: None
 Output: discussion_ids: [discussion_id1<str>, discussion_id2<str>, ...]
 """
+
+
 @sio.on('get_discussions')
 async def get_discussions(sid):
     discussion_ids = gm.discussion_manager.get_all()
@@ -124,6 +126,8 @@ Output: posts_info : [
     }, 
 ...] 
 """
+
+
 @sio.on('get_posts')
 async def get_posts(sid, json):
     discussion_id = json["discussion_id"]
@@ -141,6 +145,8 @@ add --> [post_data.user_name] ?
 Input: user_id<str>
 Output: None
 """
+
+
 @sio.on('create_user')
 async def create_user(sid, json):
     ip = json["user_id"]
@@ -159,6 +165,8 @@ Output: block_info: {
     }, ...]
 }
 """
+
+
 @sio.on('get_block')
 async def get_block(sid, json):
     discussion_id = json["discussion_id"]
@@ -209,6 +217,8 @@ USAGE: not used
 Input: user_id<str>, discussion_id<str>, block_id<str>
 Output: {"block_id" : block_id<str>}
 """
+
+
 @sio.on('save_block')
 async def save_block(sid, json):
     user_id = json["user_id"]
@@ -227,6 +237,8 @@ block_id
 Input: user_id<str>, discussion_id<str>, block_id<str>
 Output: {"block_id" : block_id<str>}
 """
+
+
 @sio.on('unsave_block')
 async def unsave_block(sid, json):
     user_id = json["user_id"]
@@ -258,6 +270,8 @@ USAGE: not used
 Input: user_id<str>, discussion_id<str>
 Output: block_ids: [block_id1<str>, block_id2<str>, ...]
 """
+
+
 @sio.on('get_saved_blocks')
 async def get_saved_blocks(sid, json):
     user_id = json["user_id"]
@@ -315,6 +329,8 @@ Output: {
     "tag" : tag<str>
 }
 """
+
+
 @sio.on('block_add_tag')
 async def block_add_tag(sid, json):
     discussion_id = json["discussion_id"]
@@ -340,6 +356,8 @@ Output: {
     "tag" : tag<str>
 }
 """
+
+
 @sio.on('block_remove_tag')
 async def block_remove_tag(sid, json):
     discussion_id = json["discussion_id"]
@@ -365,6 +383,8 @@ Input: {
 } 
 Output: discussion_id<str>
 """
+
+
 @sio.on('create_discussion')
 async def create_discussion(sid, json):
     title = json["title"]
@@ -383,6 +403,8 @@ USAGE: used
 Input: discussion_id<str>
 Output: None
 """
+
+
 @sio.on('remove_discussion')
 async def remove_discussion(sid, json):
     discussion_id = json["discussion_id"]
@@ -396,6 +418,8 @@ Output: {
     "theme" : theme<str>
 } 
 """
+
+
 @sio.on('join_discussion')
 async def join_discussion(sid, json):
     discussion_id = json["discussion_id"]
@@ -405,6 +429,7 @@ async def join_discussion(sid, json):
     serialized = dumps(info, cls=UUIDEncoder)
     sio.enter_room(sid, discussion_id)
     await sio.emit("joined_discussion", serialized, room=discussion_id)
+    return serialized
 """
 USAGE: discussion_data not used
 """
@@ -413,6 +438,8 @@ USAGE: discussion_data not used
 Input: discussion_id<str>, user_id<str>
 Output: None 
 """
+
+
 @sio.on('leave_discussion')
 async def leave_discussion(sid, json):
     discussion_id = json["discussion_id"]
@@ -430,6 +457,8 @@ USAGE: not used
 Input: discussion_id<str>, user_id<str>, blocks: [block_msg1<str>, block_msg2<str>, ...]
 Output: {"num_users" : num_users<int>} 
 """
+
+
 @sio.on('get_num_users')
 async def get_num_users(sid, json):
     discussion_id = json["discussion_id"]
@@ -444,6 +473,8 @@ Output: post_info: {
     "blocks" : [block_id1<str>, block_id2<str>, ...]
 } 
 """
+
+
 @sio.on('create_post')
 async def create_post(sid, json):
     discussion_id = json["discussion_id"]
@@ -465,6 +496,8 @@ Output: result: {
     "blocks" : [block_id1<str>, block_id2<str>, ...] 
 } 
 """
+
+
 @sio.on('search_discussion')
 async def search_discussion(sid, json):
     discussion_id = json["discussion_id"]
@@ -481,6 +514,8 @@ Output: result: {
     "blocks" : [block_id1<str>, block_id2<str>, ...] 
 } 
 """
+
+
 @sio.on('search_discussion_tags')
 async def search_discussion_tags(sid, json):
     discussion_id = json["discussion_id"]
@@ -497,6 +532,8 @@ Output: result: {
     "blocks" : [block_id1<str>, block_id2<str>, ...] 
 } 
 """
+
+
 @sio.on('search_user_saved')
 async def search_user_saved(sid, json):
     discussion_id = json["discussion_id"]
@@ -514,6 +551,8 @@ Output: result: {
     "blocks" : [block_id1<str>, block_id2<str>, ...] 
 } 
 """
+
+
 @sio.on('search_user_saved_tags')
 async def search_user_saved_tags(sid, json):
     discussion_id = json["discussion_id"]
