@@ -52,16 +52,18 @@ class DiscussionManager:
             discussion_list.append(u["_id"])
         return discussion_list
 
-    def expire(self, discussion_id):
+    async def expire(self, discussion_id):
         self.discussions.update_one(
             {"_id": discussion_id},
             {"$set": {"expired": True}}
         )
         discussion_data = self.get(discussion_id)
+        serialized = dumps({"discussion_id" : discussion_id}, cls=utils.UUIDEncoder)
+        await self.sio.emit("discussion_expired", serialized)
 
     async def _wait_to_expire(self, discussion_id, time_limit):
         await asyncio.sleep(time_limit)
-        self.expire(discussion_id)
+        await self.expire(discussion_id)
 
     def create(self, title=None, theme=None, time_limit=None):
         discussion_obj = Discussion(title, theme, time_limit)
