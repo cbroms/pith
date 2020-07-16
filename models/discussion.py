@@ -19,10 +19,13 @@ class Discussion():
             self.time_limit = time_limit
             self.created_at = datetime.utcnow().strftime(date_time_fmt)
             self.expire_at = None
+            self.expired = None
             if self.time_limit is not None:
+                self.expired = False
                 self.expire_at = datetime.utcnow() + timedelta(
                     seconds=self.time_limit
                 )
+
             self.users = {} # user ids with dict with name as value
             """
             The discussion stores the objects pertaining to it by id.

@@ -8,7 +8,6 @@ sudo rm /var/lib/mongodb/mongod.lock
 sudo service mongodb start
 """
 from json import dumps
-import socketio
 from uuid import UUID
 
 from models.global_manager import GlobalManager
@@ -16,14 +15,8 @@ from utils.utils import UUIDEncoder
 
 
 gm = GlobalManager()
-sio = socketio.AsyncServer(
-    async_mode='asgi',
-    cors_allowed_origins=[
-        "http://localhost:3000",
-        "https://dev1.pith.rainflame.com"
-    ]
-)
-app = socketio.ASGIApp(sio)
+sio = gm.sio
+app = gm.app
 
 """
 Possible JSON Outputs
@@ -59,6 +52,7 @@ Post
     "blocks" : [block_id1<str>, block_id2<str>, ...],
     "tags" : {tag<str> : {"owner" : user_id<str>}},
     "created_at" : time_stamp<str>
+    "author_name" : user_name<str>
 }
 Block
 {

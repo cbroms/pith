@@ -3,7 +3,7 @@ import sys
 import unittest
 import uuid
 
-from models.user_manager import UserManager
+from models.global_manager import GlobalManager
 from models.user import User
 from models.post import Post
 from models.block import Block
@@ -12,10 +12,8 @@ from models.block import Block
 class UserManagerTest(unittest.TestCase):
 
     def setUp(self):
-        from pymongo import MongoClient 
-        client = MongoClient('mongodb://localhost:27017')
-        db = client["db"]
-        self.user_manager = UserManager(db)
+        gm = GlobalManager()
+        self.user_manager = gm.user_manager
         self.log = logging.getLogger("UserManagerTest")
 
     def test_create_get(self):

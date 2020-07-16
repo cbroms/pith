@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+import socketio
 
 from models.user_manager import UserManager
 from models.discussion_manager import DiscussionManager
@@ -7,13 +8,18 @@ from models.discussion_manager import DiscussionManager
 class GlobalManager:
 
     def __init__(self):
-        client = MongoClient('mongodb://localhost:27017')
-        db = client["db"]
+        self.sio = socketio.AsyncServer(
+            async_mode='asgi',
+            cors_allowed_origins=[
+                "http://localhost:3000",
+                "https://dev1.pith.rainflame.com"
+            ]
+        )
+        self.app = socketio.ASGIApp(self.sio)
+
+        self.client = MongoClient('mongodb://localhost:27017')
+        self.db = self.client["db"]
 
         # create manager instances
-        self.user_manager = UserManager(db)
-        self.discussion_manager = DiscussionManager(db)
-
-        # exchange TODO: may eventually decide to just pass in self (global manager)
-        self.user_manager.discussion_manager = self.discussion_manager
-        self.discussion_manager.user_manager = self.user_manager
+        self.user_manager = UserManager(self, self.db)
+        self.discussion_manager = DiscussionManager(self, self.sio, self.db)

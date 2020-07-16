@@ -9,9 +9,9 @@ from search.tag_search import tag_search
 
 class UserManager:
 
-    def __init__(self, db):
+    def __init__(self, gm, db):
         self.users = db["users"]
-        self.discussion_manager = None
+        self.gm = gm
 
     """
     Of users.

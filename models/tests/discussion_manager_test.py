@@ -1,33 +1,35 @@
 import logging
 import sys
+import time
 import unittest
 import uuid
 
-from models.discussion_manager import DiscussionManager
-from models.user_manager import UserManager
+from models.global_manager import GlobalManager
 
 
 class DiscussionManagerTest(unittest.TestCase):
 
     def setUp(self):
         from pymongo import MongoClient 
-        client = MongoClient('mongodb://localhost:27017')
-        db = client["db"]
         self.log = logging.getLogger("DiscussionManagerTest")
-        self.discussion_manager = DiscussionManager(db)
-        # artificially insert
-        self.discussion_manager.user_manager = UserManager(db)
+        global_manager = GlobalManager()
+        self.discussion_manager = global_manager.discussion_manager
+        self.user_manager = global_manager.user_manager
 
     def test_create_get(self):
         title = "fake_title"
         theme = "fake_theme"
-        time_limit = 3600
+        time_limit = 5
         discussion_id = self.discussion_manager.create(title, theme, time_limit)
         discussion_data = self.discussion_manager.get(discussion_id)
-        self.assertTrue(discussion_data["expire_at"] is not None)
         self.assertFalse(discussion_data is None)
+        self.assertTrue(discussion_data["expire_at"] is not None)
+        self.assertFalse(discussion_data["expired"])
         discussion_ids = self.discussion_manager.get_all()
         self.assertTrue(discussion_id in discussion_ids)
+        time.sleep(time_limit + 1)
+        discussion_data = self.discussion_manager.get(discussion_id)
+        self.assertTrue(discussion_data["expired"])
 
     def test_join_leave(self):
         ip = "12345"
@@ -36,8 +38,8 @@ class DiscussionManagerTest(unittest.TestCase):
         name2 = "goodbye"
         title = "fake_title"
         theme = "fake_theme"
-        self.discussion_manager.user_manager.create(ip)
-        self.discussion_manager.user_manager.create(ip2)
+        self.user_manager.create(ip)
+        self.user_manager.create(ip2)
         discussion_id = self.discussion_manager.create(title, theme)
 
         # test joining
@@ -116,8 +118,8 @@ class DiscussionManagerTest(unittest.TestCase):
         ip2 = "67890"
         name1 = "hello"
         name2 = "goodbye"
-        self.discussion_manager.user_manager.create(ip1)
-        self.discussion_manager.user_manager.create(ip2)
+        self.user_manager.create(ip1)
+        self.user_manager.create(ip2)
         discussion_id = self.discussion_manager.create()
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
@@ -155,8 +157,8 @@ class DiscussionManagerTest(unittest.TestCase):
         ip2 = "67890"
         name1 = "hello"
         name2 = "goodbye"
-        self.discussion_manager.user_manager.create(ip1)
-        self.discussion_manager.user_manager.create(ip2)
+        self.user_manager.create(ip1)
+        self.user_manager.create(ip2)
         discussion_id = self.discussion_manager.create()
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
@@ -181,8 +183,8 @@ class DiscussionManagerTest(unittest.TestCase):
         ip2 = "67890"
         name1 = "hello"
         name2 = "goodbye"
-        self.discussion_manager.user_manager.create(ip1)
-        self.discussion_manager.user_manager.create(ip2)
+        self.user_manager.create(ip1)
+        self.user_manager.create(ip2)
         discussion_id = self.discussion_manager.create()
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
@@ -215,4 +217,3 @@ if __name__ == "__main__":
     logging.basicConfig(stream=sys.stderr)
     logging.getLogger("DiscussionManagerTest").setLevel(logging.DEBUG)
     unittest.main()
-
