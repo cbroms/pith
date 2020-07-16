@@ -175,6 +175,15 @@ class DiscussionManager:
         post_data = discussion_data["history"][post_id]
         return post_data
 
+    def _get_post_ids(self, discussion_id):
+        discussion_data = self.get(discussion_id)
+        return list(discussion_data["history"].keys())
+
+    def _get_block_ids(self, discussion_id):
+        discussion_data = self.get(discussion_id)
+        return list(discussion_data["history_blocks"].keys())
+
+
     def get_posts(self, discussion_id):
         discussion_data = self.get(discussion_id)
         history = discussion_data["history"]
@@ -302,8 +311,8 @@ class DiscussionManager:
                 )
 
     def discussion_scope_search(self, discussion_id, query):
-        post_ids = self.get_posts(discussion_id)
-        block_ids = self.get_blocks(discussion_id)
+        post_ids = self._get_post_ids(discussion_id)
+        block_ids = self._get_block_ids(discussion_id)
         posts_data = {
             p: self.get_post(discussion_id, p)
             for p in post_ids
@@ -315,8 +324,8 @@ class DiscussionManager:
         return basic_search(query, blocks_data, posts_data)
 
     def discussion_tag_search(self, discussion_id, tags):
-        post_ids = self.get_posts(discussion_id)
-        block_ids = self.get_blocks(discussion_id)
+        post_ids = self._get_post_ids(discussion_id)
+        block_ids = self._get_block_ids(discussion_id)
         posts_data = {
             p: self.get_post(discussion_id, p)
             for p in post_ids
