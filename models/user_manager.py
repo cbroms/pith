@@ -108,7 +108,7 @@ class UserManager:
             self.users.update_one({"_id" : user_id}, {"$unset" : \
                 {"discussions.{}.library.posts.{}".format(discussion_id, post_id): 0}})
 
-    def get_user_saved_posts(self, user_id, discussion_id):
+    def get_user_saved_post_ids(self, user_id, discussion_id):
         user_data = self.get(user_id)
         return list(user_data["discussions"][discussion_id]["library"]["posts"].keys())
 
@@ -126,6 +126,6 @@ class UserManager:
             self.users.update_one({"_id" : user_id}, {"$unset" : \
                 {"discussions.{}.library.blocks.{}".format(discussion_id, block_id) : 0}})
 
-    def get_user_saved_blocks(self, user_id, discussion_id):
+    def get_user_saved_block_ids(self, user_id, discussion_id):
         user_data = self.get(user_id)
         return list(user_data["discussions"][discussion_id]["library"]["blocks"].keys())

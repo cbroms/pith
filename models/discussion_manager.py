@@ -183,11 +183,13 @@ class DiscussionManager:
         discussion_data = self.get(discussion_id)
         return list(discussion_data["history_blocks"].keys())
 
-
     def get_posts(self, discussion_id):
         discussion_data = self.get(discussion_id)
         history = discussion_data["history"]
-        posts = history.values()
+        return list(history.values())  # give data
+
+    def get_posts_flattened(self, discussion_id):
+        posts = self.get_posts(discussion_id)
         posts_info = [{
             "post_id": p["_id"],
             "author": p["user"],
@@ -200,6 +202,10 @@ class DiscussionManager:
     def get_block(self, discussion_id, block_id):
         discussion_data = self.get(discussion_id)
         block_data = discussion_data["history_blocks"][block_id]
+        return block_data
+
+    def get_block_flattened(self, discussion_id, block_id):
+        block_data = self.get_block(discussion_id, block_id)
         block_info = {
             "block_id": block_data["_id"],
             "body": block_data["body"],
@@ -311,53 +317,31 @@ class DiscussionManager:
                 )
 
     def discussion_scope_search(self, discussion_id, query):
-        post_ids = self._get_post_ids(discussion_id)
-        block_ids = self._get_block_ids(discussion_id)
-        posts_data = {
-            p: self.get_post(discussion_id, p)
-            for p in post_ids
-        }
-        blocks_data = {
-            b: self.get_block(discussion_id, b)
-            for b in block_ids
-        }
+        posts_data = self.get_posts(discussion_id)
+        blocks_data = self.get_blocks(discussion_id) 
         return basic_search(query, blocks_data, posts_data)
 
     def discussion_tag_search(self, discussion_id, tags):
-        post_ids = self._get_post_ids(discussion_id)
-        block_ids = self._get_block_ids(discussion_id)
-        posts_data = {
-            p: self.get_post(discussion_id, p)
-            for p in post_ids
-        }
-        blocks_data = {
-            b: self.get_block(discussion_id, b)
-            for b in block_ids
-        }
+        posts_data = self.get_posts(discussion_id)
+        blocks_data = self.get_blocks(discussion_id) 
         return tag_search(tags, blocks_data, posts_data)
 
+    def get_user_saved_posts(self, discussion_id, user_id):
+        post_ids = self.gm.user_manager.get_user_saved_post_ids(user_id, discussion_id)
+        posts = [self.get_post(discussion_id, p) for p in post_ids]
+        return posts
+
+    def get_user_saved_blocks(self, discussion_id, user_id):
+        block_ids = self.gm.user_manager.get_user_saved_block_ids(user_id, discussion_id)
+        blocks = [self.get_block(discussion_id, b) for b in block_ids]
+        return blocks
+
     def user_saved_scope_search(self, discussion_id, user_id, query):
-        post_ids = self.gm.user_manager.get_user_saved_posts(user_id, discussion_id)
-        block_ids = self.gm.user_manager.get_user_saved_blocks(user_id, discussion_id)
-        posts_data = {
-            p: self.get_post(discussion_id, p)
-            for p in post_ids
-        }
-        blocks_data = {
-            b: self.get_block(discussion_id, b)
-            for b in block_ids
-        }
+        posts_data = self.get_user_saved_posts(discussion_id, user_id)
+        blocks_data = self.get_user_saved_blocks(discussion_id, user_id)
         return basic_search(query, blocks_data, posts_data)
 
     def user_saved_tag_search(self, discussion_id, user_id, tags):
-        post_ids = self.gm.user_manager.get_user_saved_posts(user_id, discussion_id)
-        block_ids = self.gm.user_manager.get_user_saved_blocks(user_id, discussion_id)
-        posts_data = {
-            p: self.get_post(discussion_id, p)
-            for p in post_ids
-        }
-        blocks_data = {
-            b: self.get_block(discussion_id, b)
-            for b in block_ids
-        }
+        posts_data = self.get_user_saved_posts(discussion_id, user_id)
+        blocks_data = self.get_user_saved_blocks(discussion_id, user_id)
         return tag_search(tags, blocks_data, posts_data)

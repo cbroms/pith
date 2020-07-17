@@ -81,10 +81,10 @@ class UserManagerTest(unittest.TestCase):
         post_obj = Post(ip2)
         post_id = post_obj._id
         self.user_manager.save_post(ip, discussion_id, post_id)
-        post_ids = self.user_manager.get_user_saved_posts(ip, discussion_id)
+        post_ids = self.user_manager.get_user_saved_post_ids(ip, discussion_id)
         self.assertTrue(post_id in post_ids)
         self.user_manager.unsave_post(ip, discussion_id, post_id)
-        post_ids = self.user_manager.get_user_saved_posts(ip, discussion_id)
+        post_ids = self.user_manager.get_user_saved_post_ids(ip, discussion_id)
         self.assertFalse(post_id in post_ids)
 
         self.user_manager.leave_discussion(ip, discussion_id)
@@ -101,10 +101,10 @@ class UserManagerTest(unittest.TestCase):
         block_obj = Block(ip2, post_obj._id, "test")
         block_id = block_obj._id
         self.user_manager.save_block(ip, discussion_id, block_id)
-        block_ids = self.user_manager.get_user_saved_blocks(ip, discussion_id)
+        block_ids = self.user_manager.get_user_saved_block_ids(ip, discussion_id)
         self.assertTrue(block_id in block_ids)
         self.user_manager.unsave_block(ip, discussion_id, block_id)
-        block_ids = self.user_manager.get_user_saved_blocks(ip, discussion_id)
+        block_ids = self.user_manager.get_user_saved_block_ids(ip, discussion_id)
         self.assertFalse(block_id in block_ids)
 
         self.user_manager.leave_discussion(ip, discussion_id)

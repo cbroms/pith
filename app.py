@@ -125,7 +125,7 @@ Output: posts_info : [
 @sio.on('get_posts')
 async def get_posts(sid, json):
     discussion_id = json["discussion_id"]
-    posts_info = gm.discussion_manager.get_posts(discussion_id)
+    posts_info = gm.discussion_manager.get_posts_flattened(discussion_id)
     return dumps(posts_info, cls=UUIDEncoder)
 """
 USAGE: 
@@ -165,7 +165,7 @@ Output: block_info: {
 async def get_block(sid, json):
     discussion_id = json["discussion_id"]
     block_id = json["block_id"]
-    block_data = gm.discussion_manager.get_block(discussion_id, block_id)
+    block_data = gm.discussion_manager.get_block_flattened(discussion_id, block_id)
     return dumps(block_data, cls=UUIDEncoder)
 """
 USAGE: 
