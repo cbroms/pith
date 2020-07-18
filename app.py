@@ -15,8 +15,7 @@ from utils.utils import UUIDEncoder
 
 
 gm = GlobalManager()
-sio = gm.sio
-app = gm.app
+
 
 """
 Possible JSON Outputs
@@ -497,7 +496,7 @@ async def search_discussion(sid, json):
     discussion_id = json["discussion_id"]
     query = json["query"]
     result = gm.discussion_manager.discussion_scope_search(discussion_id, query)
-    serialized = dumps(result, cls=UUIDEncoder, to=sid)
+    serialized = dumps(result, cls=UUIDEncoder)
     return serialized
 
 
@@ -515,7 +514,7 @@ async def search_discussion_tags(sid, json):
     discussion_id = json["discussion_id"]
     tags = json["tags"]
     result = gm.discussion_manager.discussion_tag_search(discussion_id, tags)
-    serialized = dumps(result, cls=UUIDEncoder, to=sid)
+    serialized = dumps(result, cls=UUIDEncoder)
     return serialized
 
 
@@ -534,7 +533,7 @@ async def search_user_saved(sid, json):
     user_id = json["user_id"]
     query = json["query"]
     result = gm.discussion_manager.user_saved_scope_search(discussion_id, user_id, query)
-    serialized = dumps(result, cls=UUIDEncoder, to=sid)
+    serialized = dumps(result, cls=UUIDEncoder)
     return serialized
 
 
@@ -553,5 +552,5 @@ async def search_user_saved_tags(sid, json):
     user_id = json["user_id"]
     tags = json["tags"]
     result = gm.discussion_manager.user_saved_tag_search(discussion_id, user_id, tags)
-    serialized = dumps(result, cls=UUIDEncoder, to=sid)
+    serialized = dumps(result, cls=UUIDEncoder)
     return serialized
