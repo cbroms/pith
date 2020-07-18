@@ -254,7 +254,7 @@ Output: post_ids: [post_id1<str>, post_id2<str>, ...]
 # async def get_saved_posts(sid, json):
 #     user_id = json["user_id"]
 #     discussion_id = json["discussion_id"]
-#     post_ids = gm.user_manager.get_user_saved_posts(user_id, discussion_id)
+#     post_ids = gm.user_manager.get_user_saved_post_ids(user_id, discussion_id)
 #     return dumps(post_ids, cls=UUIDEncoder)
 """
 USAGE: not used
@@ -270,7 +270,7 @@ Output: block_ids: [block_id1<str>, block_id2<str>, ...]
 async def get_saved_blocks(sid, json):
     user_id = json["user_id"]
     discussion_id = json["discussion_id"]
-    block_ids = gm.user_manager.get_user_saved_blocks(user_id, discussion_id)
+    block_ids = gm.user_manager.get_user_saved_block_ids(user_id, discussion_id)
     return dumps(block_ids, cls=UUIDEncoder)
 """
 USAGE:
