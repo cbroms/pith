@@ -15,7 +15,8 @@ from utils.utils import UUIDEncoder
 
 
 gm = GlobalManager()
-
+sio = gm.sio
+app = gm.app
 
 """
 Possible JSON Outputs
