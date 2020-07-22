@@ -23,7 +23,7 @@ $ sudo systemctl start mongod
 You probably want to create a virutal environment:
 
 ```
-$ python3 -m venv env
+$ python3.8 -m venv env
 $ source env/bin/activate
 ```
 

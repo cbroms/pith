@@ -1,6 +1,4 @@
 import asyncio
-from arq import create_pool
-from arq.connections import RedisSettings
 from threading import Thread
 from utils import utils
 
@@ -99,12 +97,14 @@ class DiscussionManager:
                     {"_id": discussion_id},
                     {"$set": {"users.{}".format(user_id): {"name": name}}}
                 )
-        discussion_data = self.get(discussion_id)
-        return {
-            "discussion_id": discussion_id,
-            "title": discussion_data["title"],
-            "theme": discussion_data["theme"],
-        }
+                discussion_data = self.get(discussion_id)
+                return {
+                    "discussion_id": discussion_id,
+                    "title": discussion_data["title"],
+                    "theme": discussion_data["theme"],
+                    "num_users": self.get_num_users(discussion_id),
+                }
+        return None
 
     def leave(self, discussion_id, user_id):
         self.gm.user_manager.leave_discussion(user_id, discussion_id)
@@ -113,6 +113,11 @@ class DiscussionManager:
                 {"_id": discussion_id},
                 {"$unset": {"users.{}".format(user_id): 0}}
             )
+        return {
+            "discussion_id": discussion_id,
+            "num_users": self.get_num_users(discussion_id),
+        }
+
 
     def get_users(self, discussion_id):
         discussion_data = self.get(discussion_id)

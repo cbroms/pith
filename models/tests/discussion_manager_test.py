@@ -10,7 +10,6 @@ from models.global_manager import GlobalManager
 class DiscussionManagerTest(unittest.TestCase):
 
     def setUp(self):
-        from pymongo import MongoClient 
         self.log = logging.getLogger("DiscussionManagerTest")
         global_manager = GlobalManager()
         self.discussion_manager = global_manager.discussion_manager
@@ -47,9 +46,11 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertTrue("discussion_id" in info)
         self.assertTrue("title" in info)
         self.assertTrue("theme" in info)
+        self.assertTrue("num_users" in info)
         self.assertEqual(info["discussion_id"], discussion_id)
         self.assertEqual(info["title"], title)
         self.assertEqual(info["theme"], theme)
+        self.assertEqual(info["num_users"], 1)
         user_ids = self.discussion_manager.get_users(discussion_id)
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)
@@ -59,7 +60,8 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertEqual(ret_name1, name)
 
         # cannot join with existing name
-        self.discussion_manager.join(discussion_id, ip2, name)
+        info = self.discussion_manager.join(discussion_id, ip2, name)
+        self.assertTrue(info is None)
         user_ids = self.discussion_manager.get_users(discussion_id)
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)
@@ -72,7 +74,8 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertEqual(num_users, 1)
 
         # attempt joining with same ip
-        self.discussion_manager.join(discussion_id, ip, name2)
+        info = self.discussion_manager.join(discussion_id, ip, name2)
+        self.assertTrue(info is None)
         user_ids = self.discussion_manager.get_users(discussion_id)
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)
@@ -84,7 +87,15 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertEqual(num_users, 1)
 
         # join with different name
-        self.discussion_manager.join(discussion_id, ip2, name2)
+        info = self.discussion_manager.join(discussion_id, ip2, name2)
+        self.assertTrue("discussion_id" in info)
+        self.assertTrue("title" in info)
+        self.assertTrue("theme" in info)
+        self.assertTrue("num_users" in info)
+        self.assertEqual(info["discussion_id"], discussion_id)
+        self.assertEqual(info["title"], title)
+        self.assertEqual(info["theme"], theme)
+        self.assertEqual(info["num_users"], 2)
         user_ids = self.discussion_manager.get_users(discussion_id)
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)
@@ -101,12 +112,20 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertEqual(num_users, 2)
 
         # test leaving
-        self.discussion_manager.leave(discussion_id, ip)
+        info = self.discussion_manager.leave(discussion_id, ip)
+        self.assertTrue("discussion_id" in info)
+        self.assertTrue("num_users" in info)
+        self.assertEqual(info["discussion_id"], discussion_id)
+        self.assertEqual(info["num_users"], 1)
         user_ids = self.discussion_manager.get_users(discussion_id)
         self.assertFalse(ip in user_ids)
         num_users = self.discussion_manager.get_num_users(discussion_id)
         self.assertEqual(num_users, 1)
-        self.discussion_manager.leave(discussion_id, ip2)
+        info = self.discussion_manager.leave(discussion_id, ip2)
+        self.assertTrue("discussion_id" in info)
+        self.assertTrue("num_users" in info)
+        self.assertEqual(info["discussion_id"], discussion_id)
+        self.assertEqual(info["num_users"], 0)
         user_ids = self.discussion_manager.get_users(discussion_id)
         self.assertFalse(ip in user_ids)
         self.assertFalse(ip2 in user_ids)

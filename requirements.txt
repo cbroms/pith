@@ -1,8 +1,8 @@
-arq
 click
 h11
 httptools
 joblib
+gunicorn
 nltk
 numpy
 pandas

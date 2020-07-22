@@ -409,7 +409,8 @@ Input: discussion_id<str>, user_id<str>, name<str>
 Output: {
     "discussion_id" : discussion_id<str>,
     "title" : title<str>,
-    "theme" : theme<str>
+    "theme" : theme<str>,
+    "num_users" : num_users<int>
 } 
 """
 
@@ -420,26 +421,30 @@ async def join_discussion(sid, json):
     user_id = json["user_id"]
     name = json["name"]
     info = gm.discussion_manager.join(discussion_id, user_id, name)
-    serialized = dumps(info, cls=UUIDEncoder)
-    sio.enter_room(sid, discussion_id)
-    await sio.emit("joined_discussion", serialized, room=discussion_id)
-    return serialized
+    if info is not None:
+        serialized = dumps(info, cls=UUIDEncoder)
+        sio.enter_room(sid, discussion_id)
+        await sio.emit("joined_discussion", serialized, room=discussion_id)
+        return serialized
+    return None
+
 """
 USAGE: discussion_data not used
 """
 
 """
 Input: discussion_id<str>, user_id<str>
-Output: None 
+Output: {
+    "discussion_id" : discussion_id<str>,
+    "num_users" : num_users<int>
+} 
 """
-
-
 @sio.on('leave_discussion')
 async def leave_discussion(sid, json):
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
-    gm.discussion_manager.leave(discussion_id, user_id)
-    serialized = dumps({}, cls=UUIDEncoder)
+    info = gm.discussion_manager.leave(discussion_id, user_id)
+    serialized = dumps(info, cls=UUIDEncoder)
     sio.leave_room(sid, discussion_id)
     await sio.emit("left_discussion", serialized, room=discussion_id)
     return serialized
