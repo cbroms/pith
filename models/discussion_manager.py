@@ -104,7 +104,15 @@ class DiscussionManager:
                     "theme": discussion_data["theme"],
                     "num_users": self.get_num_users(discussion_id),
                 }
-        return None
+            else:
+                return None
+        else:
+            return {
+                "discussion_id": discussion_id,
+                "title": discussion_data["title"],
+                "theme": discussion_data["theme"],
+                "num_users": self.get_num_users(discussion_id),
+            }
 
     def leave(self, discussion_id, user_id):
         self.gm.user_manager.leave_discussion(user_id, discussion_id)
