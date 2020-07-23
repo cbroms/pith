@@ -65,7 +65,8 @@ class UserManager:
         """
         Discussion should check we are not in, or active.
         """
-        assert(not self._is_active_discussion(user_id, discussion_id))
+        #TODO taking this out as may join from new tab
+        #assert(not self._is_active_discussion(user_id, discussion_id))
         if self._is_discussion_user(user_id, discussion_id): # rejoin
             self.users.update_one({"_id" : user_id}, {"$set": \
                 {"discussions.{}.active".format(discussion_id) : True}})

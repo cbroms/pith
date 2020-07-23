@@ -90,23 +90,32 @@ class DiscussionManager:
         )
 
     def join(self, discussion_id, user_id, name):
-        if not self._is_user(discussion_id, user_id):
-            if not self._name_exists(discussion_id, name):
-                self.gm.user_manager.join_discussion(user_id, discussion_id, name)
-                self.discussions.update_one(
-                    {"_id": discussion_id},
-                    {"$set": {"users.{}".format(user_id): {"name": name}}}
-                )
-                discussion_data = self.get(discussion_id)
-                return {
-                    "discussion_id": discussion_id,
-                    "title": discussion_data["title"],
-                    "theme": discussion_data["theme"],
-                    "num_users": self.get_num_users(discussion_id),
-                }
-            else:
+        is_user = self._is_user(discussion_id, user_id)
+
+        if not is_user:
+            if self._name_exists(discussion_id, name):
                 return None
+            self.gm.user_manager.join_discussion(user_id, discussion_id, name)
+            self.discussions.update_one(
+                {"_id": discussion_id},
+                {"$set": {"users.{}".format(user_id): {"name": name, "active" : True}}}
+            )
+            discussion_data = self.get(discussion_id)
+            return {
+                "discussion_id": discussion_id,
+                "title": discussion_data["title"],
+                "theme": discussion_data["theme"],
+                "num_users": self.get_num_users(discussion_id),
+            }
         else:
+            if name != self.get_user_name(discussion_id, user_id):
+                return None
+            self.gm.user_manager.join_discussion(user_id, discussion_id, name)
+            self.discussions.update_one(
+                {"_id": discussion_id},
+                {"$set": {"users.{}.active".format(user_id) : True}}
+            )
+            discussion_data = self.get(discussion_id)
             return {
                 "discussion_id": discussion_id,
                 "title": discussion_data["title"],
@@ -119,28 +128,38 @@ class DiscussionManager:
         if self._is_user(discussion_id, user_id):
             self.discussions.update_one(
                 {"_id": discussion_id},
-                {"$unset": {"users.{}".format(user_id): 0}}
+                {"$set": {"users.{}.active".format(user_id): False}}
             )
+
         return {
             "discussion_id": discussion_id,
             "num_users": self.get_num_users(discussion_id),
         }
 
 
+    def get_num_users(self, discussion_id): # only active users
+        discussion_data = self.get(discussion_id)
+        num_users = sum([u["active"] for u in discussion_data["users"].values()])
+        return num_users
+
     def get_users(self, discussion_id):
         discussion_data = self.get(discussion_id)
         user_ids = list(discussion_data["users"].keys())
         return user_ids
 
-    def get_num_users(self, discussion_id):
-        discussion_data = self.get(discussion_id)
-        user_ids = list(discussion_data["users"].keys())
-        num_users = len(user_ids)
-        return num_users
-
     def get_names(self, discussion_id):
         discussion_data = self.get(discussion_id)
         names = list([u["name"] for u in discussion_data["users"].values()])
+        return names
+
+    def get_users(self, discussion_id):
+        discussion_data = self.get(discussion_id)
+        user_ids = list([k for k, u in discussion_data["users"].items() if u["active"]])
+        return user_ids
+
+    def get_names(self, discussion_id):
+        discussion_data = self.get(discussion_id)
+        names = list([u["name"] for u in discussion_data["users"].values() if u["active"]])
         return names
 
     def get_user_name(self, discussion_id, user_id):

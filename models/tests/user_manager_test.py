@@ -12,7 +12,7 @@ from models.block import Block
 class UserManagerTest(unittest.TestCase):
 
     def setUp(self):
-        gm = GlobalManager()
+        gm = GlobalManager(test=True)
         self.user_manager = gm.user_manager
         self.log = logging.getLogger("UserManagerTest")
 

@@ -11,7 +11,7 @@ class DiscussionManagerTest(unittest.TestCase):
 
     def setUp(self):
         self.log = logging.getLogger("DiscussionManagerTest")
-        global_manager = GlobalManager()
+        global_manager = GlobalManager(test=True)
         self.discussion_manager = global_manager.discussion_manager
         self.user_manager = global_manager.user_manager
 
@@ -73,7 +73,7 @@ class DiscussionManagerTest(unittest.TestCase):
         num_users = self.discussion_manager.get_num_users(discussion_id)
         self.assertEqual(num_users, 1)
 
-        # attempt joining with same ip
+        # attempt joining with same ip but different name
         info = self.discussion_manager.join(discussion_id, ip, name2)
         self.assertTrue(info is None)
         user_ids = self.discussion_manager.get_users(discussion_id)
@@ -121,7 +121,39 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertFalse(ip in user_ids)
         num_users = self.discussion_manager.get_num_users(discussion_id)
         self.assertEqual(num_users, 1)
+
         info = self.discussion_manager.leave(discussion_id, ip2)
+        self.assertTrue("discussion_id" in info)
+        self.assertTrue("num_users" in info)
+        self.assertEqual(info["discussion_id"], discussion_id)
+        self.assertEqual(info["num_users"], 0)
+        user_ids = self.discussion_manager.get_users(discussion_id)
+        self.assertFalse(ip in user_ids)
+        self.assertFalse(ip2 in user_ids)
+        num_users = self.discussion_manager.get_num_users(discussion_id)
+        self.assertEqual(num_users, 0)
+
+        # attempt rejoining
+        info = self.discussion_manager.join(discussion_id, ip, name)
+        self.assertFalse(info is None)
+        self.assertTrue("discussion_id" in info)
+        self.assertTrue("title" in info)
+        self.assertTrue("theme" in info)
+        self.assertTrue("num_users" in info)
+        self.assertEqual(info["discussion_id"], discussion_id)
+        self.assertEqual(info["title"], title)
+        self.assertEqual(info["theme"], theme)
+        self.assertEqual(info["num_users"], 1)
+        user_ids = self.discussion_manager.get_users(discussion_id)
+        names = self.discussion_manager.get_names(discussion_id)
+        self.assertTrue(ip in user_ids)
+        self.assertEqual(len(user_ids), 1) 
+        self.assertTrue(name in names)
+        self.assertEqual(len(names), 1)
+        num_users = self.discussion_manager.get_num_users(discussion_id)
+        self.assertEqual(num_users, 1)
+
+        info = self.discussion_manager.leave(discussion_id, ip)
         self.assertTrue("discussion_id" in info)
         self.assertTrue("num_users" in info)
         self.assertEqual(info["discussion_id"], discussion_id)

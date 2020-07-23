@@ -25,7 +25,7 @@ NOTE: not the same as Python classes
 Discussion
 {
     "_id" : discussion_id<str>,
-    "users" : {user_id<str> : {"name" : name<str>}, ...},
+    "users" : {user_id<str> : {"name" : name<str>, "active" : active<bool>}, ...},
     "history": {post_id<str> : post_data<Post>}},
     "history_blocks": {block_id<str> : block_data<Block>},
     "internal_tags": {tag<str> : tag_data<Tag>, ...}
@@ -65,7 +65,6 @@ Block
 }
 
 """
-
 
 """
 Input: None
