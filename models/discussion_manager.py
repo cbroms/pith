@@ -57,8 +57,9 @@ class DiscussionManager:
         self._insert(discussion_obj)
 
        # add the expire event
-        redis_queue = await constants.redis_pool()
-        await redis_queue.enqueue_job("expire_discussion", discussion_id, _defer_by=datetime.timedelta(minutes=1))
+        if time_limit is not None:
+            redis_queue = await constants.redis_pool()
+            await redis_queue.enqueue_job("expire_discussion", discussion_id, _defer_by=datetime.timedelta(seconds=time_limit))
 
         return discussion_id
 

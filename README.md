@@ -84,3 +84,13 @@ $ arq worker.WorkerSettings
 ```
 
 Since the worker script and websockets server both use the same Redis server, then can be run in completely separate processes or even on different machines.
+
+## Tests
+
+To run the tests, ensure that MongoDB is running locally. Then,
+
+```
+$ python tests.py
+```
+
+This script will take care of running both the worker script and and tests.

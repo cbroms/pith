@@ -2,9 +2,14 @@ import logging
 import sys
 import time
 import unittest
+import asyncio
 import uuid
 
 from models.global_manager import GlobalManager
+
+
+async def create(self, *args):
+    return await self.discussion_manager.create(*args)
 
 
 class DiscussionManagerTest(unittest.TestCase):
@@ -19,7 +24,7 @@ class DiscussionManagerTest(unittest.TestCase):
         title = "fake_title"
         theme = "fake_theme"
         time_limit = 5
-        discussion_id = self.discussion_manager.create(title, theme, time_limit)
+        discussion_id = asyncio.run(create(self, title, theme, time_limit))
         discussion_data = self.discussion_manager.get(discussion_id)
         self.assertFalse(discussion_data is None)
         self.assertTrue(discussion_data["expire_at"] is not None)
@@ -39,7 +44,7 @@ class DiscussionManagerTest(unittest.TestCase):
         theme = "fake_theme"
         self.user_manager.create(ip)
         self.user_manager.create(ip2)
-        discussion_id = self.discussion_manager.create(title, theme)
+        discussion_id = asyncio.run(create(self, title, theme))
 
         # test joining
         info = self.discussion_manager.join(discussion_id, ip, name)
@@ -54,7 +59,7 @@ class DiscussionManagerTest(unittest.TestCase):
         user_ids = self.discussion_manager.get_users(discussion_id)
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)
-        self.assertEqual(len(user_ids), 1) 
+        self.assertEqual(len(user_ids), 1)
         self.assertEqual(len(names), 1)
         ret_name1 = self.discussion_manager.get_user_name(discussion_id, ip)
         self.assertEqual(ret_name1, name)
@@ -66,7 +71,7 @@ class DiscussionManagerTest(unittest.TestCase):
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)
         self.assertFalse(ip2 in user_ids)
-        self.assertEqual(len(user_ids), 1) 
+        self.assertEqual(len(user_ids), 1)
         self.assertTrue(name in names)
         self.assertFalse(name2 in names)
         self.assertEqual(len(names), 1)
@@ -79,7 +84,7 @@ class DiscussionManagerTest(unittest.TestCase):
         user_ids = self.discussion_manager.get_users(discussion_id)
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)
-        self.assertEqual(len(user_ids), 1) 
+        self.assertEqual(len(user_ids), 1)
         self.assertTrue(name in names)
         self.assertFalse(name2 in names)
         self.assertEqual(len(names), 1)
@@ -100,7 +105,7 @@ class DiscussionManagerTest(unittest.TestCase):
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)
         self.assertTrue(ip2 in user_ids)
-        self.assertEqual(len(user_ids), 2) 
+        self.assertEqual(len(user_ids), 2)
         self.assertTrue(name in names)
         self.assertTrue(name2 in names)
         self.assertEqual(len(names), 2)
@@ -147,7 +152,7 @@ class DiscussionManagerTest(unittest.TestCase):
         user_ids = self.discussion_manager.get_users(discussion_id)
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)
-        self.assertEqual(len(user_ids), 1) 
+        self.assertEqual(len(user_ids), 1)
         self.assertTrue(name in names)
         self.assertEqual(len(names), 1)
         num_users = self.discussion_manager.get_num_users(discussion_id)
@@ -171,7 +176,7 @@ class DiscussionManagerTest(unittest.TestCase):
         name2 = "goodbye"
         self.user_manager.create(ip1)
         self.user_manager.create(ip2)
-        discussion_id = self.discussion_manager.create()
+        discussion_id = asyncio.run(create(self))
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
 
@@ -214,7 +219,7 @@ class DiscussionManagerTest(unittest.TestCase):
         name2 = "goodbye"
         self.user_manager.create(ip1)
         self.user_manager.create(ip2)
-        discussion_id = self.discussion_manager.create()
+        discussion_id = asyncio.run(create(self))
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
 
@@ -240,7 +245,7 @@ class DiscussionManagerTest(unittest.TestCase):
         name2 = "goodbye"
         self.user_manager.create(ip1)
         self.user_manager.create(ip2)
-        discussion_id = self.discussion_manager.create()
+        discussion_id = asyncio.run(create(self))
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
 
@@ -266,7 +271,7 @@ class DiscussionManagerTest(unittest.TestCase):
         name2 = "goodbye"
         self.user_manager.create(ip1)
         self.user_manager.create(ip2)
-        discussion_id = self.discussion_manager.create()
+        discussion_id = asyncio.run(create(self))
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
 
@@ -285,7 +290,6 @@ class DiscussionManagerTest(unittest.TestCase):
         # tag before
         tag = "animals"
         self.discussion_manager.block_add_tag(discussion_id, ip1, block_id2, tag)
-
 
         self.user_manager.save_post(ip1, discussion_id, post_id2)
         self.user_manager.save_post(ip1, discussion_id, post_id1)
@@ -320,7 +324,7 @@ class DiscussionManagerTest(unittest.TestCase):
         name2 = "goodbye"
         self.user_manager.create(ip1)
         self.user_manager.create(ip2)
-        discussion_id = self.discussion_manager.create()
+        discussion_id = asyncio.run(create(self))
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
 
@@ -353,6 +357,7 @@ class DiscussionManagerTest(unittest.TestCase):
 
         self.discussion_manager.leave(discussion_id, ip1)
         self.discussion_manager.leave(discussion_id, ip2)
+
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stderr)

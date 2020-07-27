@@ -1,14 +1,28 @@
 import arq
 import constants
+import socketio
+import argparse
+import asyncio
 
+from arq.worker import run_worker
 from json import dumps
 from pymongo import MongoClient
 from utils.utils import UUIDEncoder
 from arq.connections import RedisSettings
 
-client = MongoClient(constants.mongo_atlas_url)
-discussions = client["db"]["discussions"]
+parser = argparse.ArgumentParser()
+parser.add_argument("-t", "--test", required=False, dest="test", action="store_true",
+                    help="run the script in test mode (uses a local mongodb database")
+parser.set_defaults(test=False)
+args = vars(parser.parse_args())
 
+if args["test"]:
+    print('starting in test mode...')
+    client = MongoClient("mongodb://localhost:27017/")
+else:
+    client = MongoClient(constants.MONGO_CONN)
+
+discussions = client["db"]["discussions"]
 external_sio = socketio.AsyncRedisManager(constants.SOCKET_REDIS, write_only=True)
 
 
@@ -32,10 +46,14 @@ async def shutdown(ctx):
     return
 
 
-class WorkerSettings:
+class WorkerSettings(arq.worker.Worker):
     redis_settings = constants.ARQ_REDIS
     max_jobs = constants.MAX_JOBS
     max_tries = constants.MAX_QUEUED_JOB_RETRIES
     on_startup = startup
     on_shutdown = shutdown
     functions = [expire_discussion]
+
+
+if __name__ == '__main__':
+    asyncio.run(run_worker(WorkerSettings))
