@@ -4,7 +4,7 @@ Discussion struct.
 from datetime import datetime, timedelta
 import uuid
 
-from constants import date_time_fmt
+from constants import DATE_TIME_FMT
 from utils import utils
 
 
@@ -17,7 +17,7 @@ class Discussion():
             self.title = title
             self.theme = theme
             self.time_limit = time_limit
-            self.created_at = datetime.utcnow().strftime(date_time_fmt)
+            self.created_at = datetime.utcnow().strftime(DATE_TIME_FMT)
             self.expire_at = None
             self.expired = None
             if self.time_limit is not None:
@@ -26,10 +26,10 @@ class Discussion():
                     seconds=self.time_limit
                 )
 
-            self.users = {} # user ids with dict with name as value
+            self.users = {}  # user ids with dict with name as value
             """
             The discussion stores the objects pertaining to it by id.
             """
-            self.history = {} # stores all posts
-            self.history_blocks = {} # stores all blocks
-            self.internal_tags = {} # tags for internal posts/blocks
+            self.history = {}  # stores all posts
+            self.history_blocks = {}  # stores all blocks
+            self.internal_tags = {}  # tags for internal posts/blocks

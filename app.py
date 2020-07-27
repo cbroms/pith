@@ -383,8 +383,9 @@ async def create_discussion(sid, json):
     title = json["title"]
     theme = json["theme"]
     time_limit = json["time_limit"]
-    discussion_id = gm.discussion_manager.create(title, theme, time_limit)
+    discussion_id = await gm.discussion_manager.create(title, theme, time_limit)
     serialized = dumps(discussion_id, cls=UUIDEncoder)
+    print(discussion_id)
     # eventually might only want to do this on the global map, and even then...
     await sio.emit("created_discussion", serialized)
     return serialized
@@ -438,6 +439,8 @@ Output: {
     "num_users" : num_users<int>
 } 
 """
+
+
 @sio.on('leave_discussion')
 async def leave_discussion(sid, json):
     discussion_id = json["discussion_id"]

@@ -1,7 +1,8 @@
-import asyncio
-from threading import Thread
-from utils import utils
 
+import constants
+import datetime
+
+from utils import utils
 from models.block import Block
 from models.discussion import Discussion
 from models.post import Post
@@ -10,19 +11,13 @@ from models.tag import Tag
 from search.basic_search import basic_search
 from search.tag_search import tag_search
 
+
 class DiscussionManager:
 
     def __init__(self, gm, sio, db):
         self.sio = sio
         self.discussions = db["discussions"]
         self.gm = gm
-        self.expire_loop = asyncio.new_event_loop()
-        t = Thread(target=self.start_loop, args=(self.expire_loop,))
-        t.start()
-
-    def start_loop(self, loop):
-        asyncio.set_event_loop(loop)
-        loop.run_forever()
 
     """
     Of discussions.
@@ -50,28 +45,21 @@ class DiscussionManager:
             discussion_list.append(u["_id"])
         return discussion_list
 
-    async def expire(self, discussion_id):
-        self.discussions.update_one(
-            {"_id": discussion_id},
-            {"$set": {"expired": True}}
-        )
-        discussion_data = self.get(discussion_id)
-        serialized = dumps({"discussion_id" : discussion_id}, cls=utils.UUIDEncoder)
-        await self.sio.emit("discussion_expired", serialized)
+    # async def expire(self, discussion_id):
+    #     self.
+    #     discussion_data = self.get(discussion_id)
+    #     serialized = dumps({"discussion_id": discussion_id}, cls=utils.UUIDEncoder)
+    #     await self.sio.emit("discussion_expired", serialized)
 
-    async def _wait_to_expire(self, discussion_id, time_limit):
-        await asyncio.sleep(time_limit)
-        await self.expire(discussion_id)
-
-    def create(self, title=None, theme=None, time_limit=None):
+    async def create(self, title=None, theme=None, time_limit=None):
         discussion_obj = Discussion(title, theme, time_limit)
         discussion_id = discussion_obj._id
         self._insert(discussion_obj)
-        if time_limit is not None:
-            asyncio.run_coroutine_threadsafe(
-                self._wait_to_expire(discussion_id, time_limit),
-                self.expire_loop,
-            )
+
+       # add the expire event
+        redis_queue = await constants.redis_pool()
+        await redis_queue.enqueue_job("expire_discussion", discussion_id, _defer_by=datetime.timedelta(minutes=1))
+
         return discussion_id
 
     """
@@ -98,7 +86,7 @@ class DiscussionManager:
             self.gm.user_manager.join_discussion(user_id, discussion_id, name)
             self.discussions.update_one(
                 {"_id": discussion_id},
-                {"$set": {"users.{}".format(user_id): {"name": name, "active" : True}}}
+                {"$set": {"users.{}".format(user_id): {"name": name, "active": True}}}
             )
             discussion_data = self.get(discussion_id)
             return {
@@ -113,7 +101,7 @@ class DiscussionManager:
             self.gm.user_manager.join_discussion(user_id, discussion_id, name)
             self.discussions.update_one(
                 {"_id": discussion_id},
-                {"$set": {"users.{}.active".format(user_id) : True}}
+                {"$set": {"users.{}.active".format(user_id): True}}
             )
             discussion_data = self.get(discussion_id)
             return {
@@ -136,8 +124,7 @@ class DiscussionManager:
             "num_users": self.get_num_users(discussion_id),
         }
 
-
-    def get_num_users(self, discussion_id): # only active users
+    def get_num_users(self, discussion_id):  # only active users
         discussion_data = self.get(discussion_id)
         num_users = sum([u["active"] for u in discussion_data["users"].values()])
         return num_users
@@ -233,16 +220,22 @@ class DiscussionManager:
 
     def get_block(self, discussion_id, block_id):
         discussion_data = self.get(discussion_id)
-        block_data = discussion_data["history_blocks"][block_id]
+        try:
+            block_data = discussion_data["history_blocks"][block_id]
+        except:
+            block_data = None
         return block_data
 
     def get_block_flattened(self, discussion_id, block_id):
         block_data = self.get_block(discussion_id, block_id)
-        block_info = {
-            "block_id": block_data["_id"],
-            "body": block_data["body"],
-            "tags": block_data["tags"],
-        }
+        if block_data is not None:
+            block_info = {
+                "block_id": block_data["_id"],
+                "body": block_data["body"],
+                "tags": block_data["tags"],
+            }
+        else:
+            block_info = None
         return block_info
 
     def get_blocks(self, discussion_id):
@@ -300,7 +293,7 @@ class DiscussionManager:
                 {"$set": {
                     "history.{}.tags.{}".format(
                         post_id, tag): {"owner": user_id}
-                    }
+                }
                 }
             )
 
@@ -312,7 +305,7 @@ class DiscussionManager:
                     {"$unset": {
                         "history.{}.tags.{}".format(
                             post_id, tag): 0
-                        }
+                    }
                     }
                 )
 
@@ -332,7 +325,7 @@ class DiscussionManager:
                 {"$set": {
                     "history_blocks.{}.tags.{}".format(
                         block_id, tag): {"owner": user_id}
-                    }
+                }
                 }
             )
 
@@ -344,18 +337,18 @@ class DiscussionManager:
                     {"$unset": {
                         "history_blocks.{}.tags.{}".format(
                             block_id, tag): 0
-                        }
+                    }
                     }
                 )
 
     def discussion_scope_search(self, discussion_id, query):
         posts_data = self.get_posts(discussion_id)
-        blocks_data = self.get_blocks(discussion_id) 
+        blocks_data = self.get_blocks(discussion_id)
         return basic_search(query, blocks_data, posts_data)
 
     def discussion_tag_search(self, discussion_id, tags):
         posts_data = self.get_posts(discussion_id)
-        blocks_data = self.get_blocks(discussion_id) 
+        blocks_data = self.get_blocks(discussion_id)
         return tag_search(tags, blocks_data, posts_data)
 
     def get_user_saved_posts(self, discussion_id, user_id):
