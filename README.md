@@ -20,7 +20,7 @@ $ sudo systemctl start mongod
 
 ### Install Pith API
 
-You probably want to create a virutal environment:
+This project uses Python 3.8. You probably want to create a virutal environment:
 
 ```
 $ python3.8 -m venv env
