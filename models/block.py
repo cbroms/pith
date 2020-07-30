@@ -9,7 +9,7 @@ from utils import utils
 
 
 class Block():
-    def __init__(self, user, post, body, **entries):
+    def __init__(self, body, user=None, post=None, **entries):
         if "_id" in entries:  # reload
             self.__dict__ = entries
         else:

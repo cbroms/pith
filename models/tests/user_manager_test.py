@@ -98,7 +98,7 @@ class UserManagerTest(unittest.TestCase):
         self.user_manager.join_discussion(ip, discussion_id, name)
 
         post_obj = Post(ip2)
-        block_obj = Block(ip2, post_obj._id, "test")
+        block_obj = Block("test", ip2, post_obj._id)
         block_id = block_obj._id
         self.user_manager.save_block(ip, discussion_id, block_id)
         block_ids = self.user_manager.get_user_saved_block_ids(ip, discussion_id)

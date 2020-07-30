@@ -1,8 +1,7 @@
-
 import constants
 import datetime
+import error
 
-from utils import utils
 from models.block import Block
 from models.discussion import Discussion
 from models.post import Post
@@ -10,6 +9,8 @@ from models.tag import Tag
 
 from search.basic_search import basic_search
 from search.tag_search import tag_search
+
+from utils import utils
 
 
 class DiscussionManager:
@@ -51,8 +52,15 @@ class DiscussionManager:
     #     serialized = dumps({"discussion_id": discussion_id}, cls=utils.UUIDEncoder)
     #     await self.sio.emit("discussion_expired", serialized)
 
-    async def create(self, title=None, theme=None, time_limit=None):
-        discussion_obj = Discussion(title, theme, time_limit)
+    async def create(
+      self,
+      title=None,
+      theme=None,
+      time_limit=None,
+      block_char_limit=None,
+      summary_char_limit=None
+    ):
+        discussion_obj = Discussion(title, theme, time_limit, block_char_limit, summary_char_limit)
         discussion_id = discussion_obj._id
         self._insert(discussion_obj)
 
@@ -162,7 +170,7 @@ class DiscussionManager:
         block_ids = []
         freq_dicts = []
         for b in blocks:
-            block_obj = Block(user_id, post_id, b)
+            block_obj = Block(b, user_id, post_id)
             freq_dicts.append(block_obj.freq_dict)
             block_id = block_obj._id
             block_ids.append(block_id)
@@ -371,3 +379,90 @@ class DiscussionManager:
         posts_data = self.get_user_saved_posts(discussion_id, user_id)
         blocks_data = self.get_user_saved_blocks(discussion_id, user_id)
         return tag_search(tags, blocks_data, posts_data)
+
+    def _transclusion_get_body(self, text):
+      match_res = constants.transclusion_header.match(text)
+      if match_res:
+        return text[len(match_res[0]):]
+      else:
+        return text
+
+    def _transclusion_get_id(self, text):
+      match_res = constants.transclusion_header.match(text)
+      if match_res:
+        return match_res[0][11:-1] # get stuff between "transclude<" and ">"
+      else:
+        return None
+
+    def _get_block_limit(self, discussion_id):
+      discussion_data = self.get(discussion_id)
+      return discussion_data["block_char_limit"]
+
+    def _get_summary_char_left(self, discussion_id):
+      discussion_data = self.get(discussion_id)
+      return discussion_data["summary_char_left"]
+
+    def _set_summary_char_left(self, discussion_id, new_limit):
+        self.discussions.update_one(
+            {"_id": discussion_id},
+            {"$set": {"summary_char_left": new_limit}}
+        )
+
+    def get_summary_block(self, discussion_id, block_id):
+      discussion_data = self.get(discussion_id)
+      return discussion_data["summary_blocks"][block_id]
+
+    def summary_add_block(self, discussion_id, body):
+        raw_body = self._transclusion_get_body(body)
+        body_len = len(raw_body)
+        block_limit_len = self._get_block_limit(discussion_id)
+        if block_limit_len:
+          if body_len > block_limit_len:
+            return None, error.D_S_B_C_BC
+
+        summ_char_left = self._get_summary_char_left(discussion_id)
+        if summ_char_left:
+          if body_len > summ_char_left:
+            return None, error.D_S_B_C_SC
+          else:
+            summ_char_left = summ_char_left - body_len
+            self._set_summary_char_left(discussion_id, summ_char_left)
+
+        block_obj = Block(body)
+        block_id = block_obj._id
+        self.discussions.update_one(
+            {"_id": discussion_id},
+            {"$set": {"summary_blocks.{}".format(block_id): block_obj.__dict__}}
+        )
+        return block_id, None
+
+    def summary_modify_block(self, discussion_id, block_id, body):
+        # should not be getting transclusions when modifying
+        block_data = self.get_summary_block(discussion_id, block_id)
+        original_body = block_data["body"]
+        body_len = len(body)
+        block_limit_len = self._get_block_limit(discussion_id)
+        if block_limit_len:
+          if body_len > block_limit_len:
+            return error.D_S_B_C_BC
+
+        summ_char_left = self._get_summary_char_left(discussion_id)
+        if summ_char_left:
+          new_left = summ_char_left + len(original_body) - body_len
+          if new_left < 0:
+            return error.D_S_B_C_SC
+          else:
+            self._set_summary_char_left(discussion_id, new_left)
+
+        block_data["body"] = body
+        self.discussions.update_one(
+            {"_id": discussion_id},
+            {"$set": {"summary_blocks.{}".format(block_id): block_data}}
+        )
+        return None
+
+    def summary_remove_block(self, discussion_id, block_id):
+        self.discussions.update_one(
+            {"_id": discussion_id},
+            {"$set": {"summary_blocks.{}".format(block_id): 0}}
+        )

@@ -8,8 +8,8 @@ import uuid
 from models.global_manager import GlobalManager
 
 
-async def create(self, *args):
-    return await self.discussion_manager.create(*args)
+async def create(self, *args, **kwargs):
+    return await self.discussion_manager.create(*args, **kwargs)
 
 
 class DiscussionManagerTest(unittest.TestCase):
@@ -357,6 +357,101 @@ class DiscussionManagerTest(unittest.TestCase):
 
         self.discussion_manager.leave(discussion_id, ip1)
         self.discussion_manager.leave(discussion_id, ip2)
+
+    def test_summary(self):
+        block1 = "hello there" # 11
+        block2 = "hello my friends" # 16
+        block3 = "pie is nice" # 11
+        block4 = "pie is disgusting" # 17
+        trans_block = "transclude<400>goodbye then" # 12
+        short = "four" # 4
+        discussion_id = asyncio.run(create(self, block_char_limit=15))
+        block_id0, err = self.discussion_manager.summary_add_block(discussion_id, trans_block)
+        self.assertFalse(block_id0 is None)
+        self.assertTrue(err is None)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id0)
+        block_id1, err = self.discussion_manager.summary_add_block(discussion_id, block1)
+        self.assertFalse(block_id1 is None)
+        self.assertTrue(err is None)
+        block_id2, err = self.discussion_manager.summary_add_block(discussion_id, block2)
+        self.assertTrue(block_id2 is None)
+        self.assertFalse(err is None)
+        err = self.discussion_manager.summary_modify_block(discussion_id, block_id1, block2)
+        self.assertFalse(err is None)
+        err = self.discussion_manager.summary_modify_block(discussion_id, block_id1, block3)
+        self.assertTrue(err is None)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id1)
+
+        discussion_id = asyncio.run(create(self, summary_char_limit=60))
+        block_id0, err = self.discussion_manager.summary_add_block(discussion_id, trans_block)
+        self.assertFalse(block_id0 is None)
+        self.assertTrue(err is None)
+        block_id1, err = self.discussion_manager.summary_add_block(discussion_id, block1)
+        self.assertFalse(block_id1 is None)
+        self.assertTrue(err is None)
+        block_id2, err = self.discussion_manager.summary_add_block(discussion_id, block2)
+        self.assertFalse(block_id2 is None)
+        self.assertTrue(err is None)
+        block_id3, err = self.discussion_manager.summary_add_block(discussion_id, block3)
+        self.assertFalse(block_id3 is None)
+        self.assertTrue(err is None)
+        block_id4, err = self.discussion_manager.summary_add_block(discussion_id, block4)
+        self.assertTrue(block_id4 is None)
+        self.assertFalse(err is None)
+        err = self.discussion_manager.summary_modify_block(discussion_id, block_id1, block3)
+        self.assertTrue(err is None)
+        err = self.discussion_manager.summary_modify_block(discussion_id, block_id1, block4 + block4)
+        self.assertFalse(err is None)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id0)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id1)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id2)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id3)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id4)
+
+        discussion_id = asyncio.run(create(self, block_char_limit=15, summary_char_limit=60))
+        block_id0, err = self.discussion_manager.summary_add_block(discussion_id, trans_block)
+        self.assertFalse(block_id0 is None)
+        self.assertTrue(err is None)
+        block_id1, err = self.discussion_manager.summary_add_block(discussion_id, block2)
+        self.assertTrue(block_id1 is None)
+        self.assertFalse(err is None)
+        block_id2, err = self.discussion_manager.summary_add_block(discussion_id, block4)
+        self.assertTrue(block_id2 is None)
+        self.assertFalse(err is None)
+        block_id3, err = self.discussion_manager.summary_add_block(discussion_id, block1)
+        self.assertFalse(block_id3 is None)
+        self.assertTrue(err is None)
+        block_id4, err = self.discussion_manager.summary_add_block(discussion_id, block3)
+        self.assertFalse(block_id4 is None)
+        self.assertTrue(err is None)
+        block_id5, err = self.discussion_manager.summary_add_block(discussion_id, block1)
+        self.assertFalse(block_id5 is None)
+        self.assertTrue(err is None)
+        block_id6, err = self.discussion_manager.summary_add_block(discussion_id, block1)
+        self.assertFalse(block_id6 is None)
+        self.assertTrue(err is None)
+        err = self.discussion_manager.summary_modify_block(discussion_id, block_id3, block1)
+        self.assertTrue(err is None)
+        block_id7, err = self.discussion_manager.summary_add_block(discussion_id, block3)
+        self.assertTrue(block_id7 is None)
+        self.assertFalse(err is None)
+        block_id8, err = self.discussion_manager.summary_add_block(discussion_id, short)
+        self.assertFalse(block_id8 is None)
+        self.assertTrue(err is None)
+        err = self.discussion_manager.summary_modify_block(discussion_id, block_id3, block4)
+        self.assertFalse(err is None)
+        err = self.discussion_manager.summary_modify_block(discussion_id, block_id8, block3)
+        self.assertTrue(err is None)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id0)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id1)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id2)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id3)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id4)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id5)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id6)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id7)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id8)
+          
 
 
 if __name__ == "__main__":

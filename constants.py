@@ -1,5 +1,6 @@
 import os
 import socketio
+import re
 
 from arq import create_pool
 from arq.connections import RedisSettings
@@ -25,6 +26,9 @@ MAX_JOBS = 10
 # using ISO so this can be easily parsed in js with Date()
 DATE_TIME_FMT = "%Y-%m-%dT%H:%M:%SZ"
 MONGO_CONN = os.getenv("MONGO_CONN")
+
+# compiled searcher for transclusion header
+transclusion_header = re.compile(r"transclude<\d*>")
 
 
 # manage creating and getting the redis pool instance. We only want to
