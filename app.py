@@ -386,11 +386,11 @@ async def create_discussion(sid, json):
     block_char_limit = json["block_char_limit"]
     summary_char_limit = json["summary_char_limit"]
     discussion_id = await gm.discussion_manager.create(
-      title,
-      theme,
-      time_limit,
-      block_char_limit,
-      summary_char_limit,
+        title,
+        theme,
+        time_limit,
+        block_char_limit,
+        summary_char_limit,
     )
     serialized = dumps(discussion_id, cls=UUIDEncoder)
     # eventually might only want to do this on the global map, and even then...
@@ -581,19 +581,21 @@ On failure: {
   "err": err<int>
 }
 """
+
+
 @sio.on('summary_add_block')
 async def summary_add_block(sid, json):
-  discussion_id = json["discussion_id"]
-  body = json["body"]
-  block_id, err = gm.discussion_manager.summary_add_block(discussion_id, body)
-  if err is None:
-    serialized = {"block_id": block_id, "body": body}
-    await sio.emit("added_summary_block", serialized, room=discussion_id)
-    return serialized
-  else:
-    serialized = {"err": err}
-    return serialized
-  
+    discussion_id = json["discussion_id"]
+    body = json["body"]
+    block_id, err = gm.discussion_manager.summary_add_block(discussion_id, body)
+    if err is None:
+        serialized = {"block_id": block_id, "body": body}
+        await sio.emit("added_summary_block", serialized, room=discussion_id)
+        return serialized
+    else:
+        serialized = {"err": err}
+        return serialized
+
 
 """
 Input: discussion_id<str>, block_id<str>, body<str>
@@ -605,19 +607,21 @@ On failure: {
   "err": err<int>
 }
 """
+
+
 @sio.on('summary_modify_block')
 async def summary_modify_block(sid, json):
-  discussion_id = json["discussion_id"]
-  block_id = json["block_id"]
-  body = json["body"]
-  err = gm.discussion_manager.summary_modify_block(discussion_id, block_id, body)
-  if err is None:
-    serialized = {"block_id": block_id, "body": body}
-    await sio.emit("modified_summary_block", serialized, room=discussion_id)
-    return serialized
-  else:
-    serialized = {"err": err}
-    return serialized
+    discussion_id = json["discussion_id"]
+    block_id = json["block_id"]
+    body = json["body"]
+    err = gm.discussion_manager.summary_modify_block(discussion_id, block_id, body)
+    if err is None:
+        serialized = {"block_id": block_id, "body": body}
+        await sio.emit("modified_summary_block", serialized, room=discussion_id)
+        return serialized
+    else:
+        serialized = {"err": err}
+        return serialized
 
 
 """
@@ -626,11 +630,13 @@ Output: {
   "block_id": block_id<str>,
 } 
 """
+
+
 @sio.on('summary_remove_block')
 async def summary_remove_block(sid, json):
-  discussion_id = json["discussion_id"]
-  block_id = json["block_id"]
-  gm.discussion_manager.summary_remove_block(discussion_id, block_id)
-  serialized = {"block_id": block_id}
-  await sio.emit("removed_summary_block", serialized, room=discussion_id)
-  return serialized
+    discussion_id = json["discussion_id"]
+    block_id = json["block_id"]
+    gm.discussion_manager.summary_remove_block(discussion_id, block_id)
+    serialized = {"block_id": block_id}
+    await sio.emit("removed_summary_block", serialized, room=discussion_id)
+    return serialized
