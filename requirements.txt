@@ -1,4 +1,5 @@
 click
+python-dotenv
 h11
 httptools
 joblib

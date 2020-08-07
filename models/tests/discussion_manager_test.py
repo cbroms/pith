@@ -2,9 +2,14 @@ import logging
 import sys
 import time
 import unittest
+import asyncio
 import uuid
 
 from models.global_manager import GlobalManager
+
+
+async def create(self, *args, **kwargs):
+    return await self.discussion_manager.create(*args, **kwargs)
 
 
 class DiscussionManagerTest(unittest.TestCase):
@@ -19,7 +24,7 @@ class DiscussionManagerTest(unittest.TestCase):
         title = "fake_title"
         theme = "fake_theme"
         time_limit = 5
-        discussion_id = self.discussion_manager.create(title, theme, time_limit)
+        discussion_id = asyncio.run(create(self, title, theme, time_limit))
         discussion_data = self.discussion_manager.get(discussion_id)
         self.assertFalse(discussion_data is None)
         self.assertTrue(discussion_data["expire_at"] is not None)
@@ -39,7 +44,7 @@ class DiscussionManagerTest(unittest.TestCase):
         theme = "fake_theme"
         self.user_manager.create(ip)
         self.user_manager.create(ip2)
-        discussion_id = self.discussion_manager.create(title, theme)
+        discussion_id = asyncio.run(create(self, title, theme))
 
         # test joining
         info = self.discussion_manager.join(discussion_id, ip, name)
@@ -54,7 +59,7 @@ class DiscussionManagerTest(unittest.TestCase):
         user_ids = self.discussion_manager.get_users(discussion_id)
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)
-        self.assertEqual(len(user_ids), 1) 
+        self.assertEqual(len(user_ids), 1)
         self.assertEqual(len(names), 1)
         ret_name1 = self.discussion_manager.get_user_name(discussion_id, ip)
         self.assertEqual(ret_name1, name)
@@ -66,7 +71,7 @@ class DiscussionManagerTest(unittest.TestCase):
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)
         self.assertFalse(ip2 in user_ids)
-        self.assertEqual(len(user_ids), 1) 
+        self.assertEqual(len(user_ids), 1)
         self.assertTrue(name in names)
         self.assertFalse(name2 in names)
         self.assertEqual(len(names), 1)
@@ -79,7 +84,7 @@ class DiscussionManagerTest(unittest.TestCase):
         user_ids = self.discussion_manager.get_users(discussion_id)
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)
-        self.assertEqual(len(user_ids), 1) 
+        self.assertEqual(len(user_ids), 1)
         self.assertTrue(name in names)
         self.assertFalse(name2 in names)
         self.assertEqual(len(names), 1)
@@ -100,7 +105,7 @@ class DiscussionManagerTest(unittest.TestCase):
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)
         self.assertTrue(ip2 in user_ids)
-        self.assertEqual(len(user_ids), 2) 
+        self.assertEqual(len(user_ids), 2)
         self.assertTrue(name in names)
         self.assertTrue(name2 in names)
         self.assertEqual(len(names), 2)
@@ -147,7 +152,7 @@ class DiscussionManagerTest(unittest.TestCase):
         user_ids = self.discussion_manager.get_users(discussion_id)
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)
-        self.assertEqual(len(user_ids), 1) 
+        self.assertEqual(len(user_ids), 1)
         self.assertTrue(name in names)
         self.assertEqual(len(names), 1)
         num_users = self.discussion_manager.get_num_users(discussion_id)
@@ -171,7 +176,7 @@ class DiscussionManagerTest(unittest.TestCase):
         name2 = "goodbye"
         self.user_manager.create(ip1)
         self.user_manager.create(ip2)
-        discussion_id = self.discussion_manager.create()
+        discussion_id = asyncio.run(create(self))
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
 
@@ -214,7 +219,7 @@ class DiscussionManagerTest(unittest.TestCase):
         name2 = "goodbye"
         self.user_manager.create(ip1)
         self.user_manager.create(ip2)
-        discussion_id = self.discussion_manager.create()
+        discussion_id = asyncio.run(create(self))
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
 
@@ -240,7 +245,7 @@ class DiscussionManagerTest(unittest.TestCase):
         name2 = "goodbye"
         self.user_manager.create(ip1)
         self.user_manager.create(ip2)
-        discussion_id = self.discussion_manager.create()
+        discussion_id = asyncio.run(create(self))
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
 
@@ -266,7 +271,7 @@ class DiscussionManagerTest(unittest.TestCase):
         name2 = "goodbye"
         self.user_manager.create(ip1)
         self.user_manager.create(ip2)
-        discussion_id = self.discussion_manager.create()
+        discussion_id = asyncio.run(create(self))
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
 
@@ -285,7 +290,6 @@ class DiscussionManagerTest(unittest.TestCase):
         # tag before
         tag = "animals"
         self.discussion_manager.block_add_tag(discussion_id, ip1, block_id2, tag)
-
 
         self.user_manager.save_post(ip1, discussion_id, post_id2)
         self.user_manager.save_post(ip1, discussion_id, post_id1)
@@ -320,7 +324,7 @@ class DiscussionManagerTest(unittest.TestCase):
         name2 = "goodbye"
         self.user_manager.create(ip1)
         self.user_manager.create(ip2)
-        discussion_id = self.discussion_manager.create()
+        discussion_id = asyncio.run(create(self))
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
 
@@ -353,6 +357,102 @@ class DiscussionManagerTest(unittest.TestCase):
 
         self.discussion_manager.leave(discussion_id, ip1)
         self.discussion_manager.leave(discussion_id, ip2)
+
+    def test_summary(self):
+        block1 = "hello there" # 11
+        block2 = "hello my friends" # 16
+        block3 = "pie is nice" # 11
+        block4 = "pie is disgusting" # 17
+        trans_block = "transclude<400>goodbye then" # 12
+        short = "four" # 4
+        discussion_id = asyncio.run(create(self, block_char_limit=15))
+        block_id0, err = self.discussion_manager.summary_add_block(discussion_id, trans_block)
+        self.assertFalse(block_id0 is None)
+        self.assertTrue(err is None)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id0)
+        block_id1, err = self.discussion_manager.summary_add_block(discussion_id, block1)
+        self.assertFalse(block_id1 is None)
+        self.assertTrue(err is None)
+        block_id2, err = self.discussion_manager.summary_add_block(discussion_id, block2)
+        self.assertTrue(block_id2 is None)
+        self.assertFalse(err is None)
+        err = self.discussion_manager.summary_modify_block(discussion_id, block_id1, block2)
+        self.assertFalse(err is None)
+        err = self.discussion_manager.summary_modify_block(discussion_id, block_id1, block3)
+        self.assertTrue(err is None)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id1)
+
+        discussion_id = asyncio.run(create(self, summary_char_limit=60))
+        block_id0, err = self.discussion_manager.summary_add_block(discussion_id, trans_block)
+        self.assertFalse(block_id0 is None)
+        self.assertTrue(err is None)
+        block_id1, err = self.discussion_manager.summary_add_block(discussion_id, block1)
+        self.assertFalse(block_id1 is None)
+        self.assertTrue(err is None)
+        block_id2, err = self.discussion_manager.summary_add_block(discussion_id, block2)
+        self.assertFalse(block_id2 is None)
+        self.assertTrue(err is None)
+        block_id3, err = self.discussion_manager.summary_add_block(discussion_id, block3)
+        self.assertFalse(block_id3 is None)
+        self.assertTrue(err is None)
+        block_id4, err = self.discussion_manager.summary_add_block(discussion_id, block4)
+        self.assertTrue(block_id4 is None)
+        self.assertFalse(err is None)
+        err = self.discussion_manager.summary_modify_block(discussion_id, block_id1, block3)
+        self.assertTrue(err is None)
+        err = self.discussion_manager.summary_modify_block(discussion_id, block_id1, block4 + block4)
+        self.assertFalse(err is None)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id0)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id1)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id2)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id3)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id4)
+
+        discussion_id = asyncio.run(create(self, block_char_limit=15, summary_char_limit=60))
+        block_id0, err = self.discussion_manager.summary_add_block(discussion_id, trans_block)
+        self.assertFalse(block_id0 is None)
+        self.assertTrue(err is None)
+        block_id1, err = self.discussion_manager.summary_add_block(discussion_id, block2)
+        self.assertTrue(block_id1 is None)
+        self.assertFalse(err is None)
+        block_id2, err = self.discussion_manager.summary_add_block(discussion_id, block4)
+        self.assertTrue(block_id2 is None)
+        self.assertFalse(err is None)
+        block_id3, err = self.discussion_manager.summary_add_block(discussion_id, block1)
+        self.assertFalse(block_id3 is None)
+        self.assertTrue(err is None)
+        block_id4, err = self.discussion_manager.summary_add_block(discussion_id, block3)
+        self.assertFalse(block_id4 is None)
+        self.assertTrue(err is None)
+        block_id5, err = self.discussion_manager.summary_add_block(discussion_id, block1)
+        self.assertFalse(block_id5 is None)
+        self.assertTrue(err is None)
+        block_id6, err = self.discussion_manager.summary_add_block(discussion_id, block1)
+        self.assertFalse(block_id6 is None)
+        self.assertTrue(err is None)
+        err = self.discussion_manager.summary_modify_block(discussion_id, block_id3, block1)
+        self.assertTrue(err is None)
+        block_id7, err = self.discussion_manager.summary_add_block(discussion_id, block3)
+        self.assertTrue(block_id7 is None)
+        self.assertFalse(err is None)
+        block_id8, err = self.discussion_manager.summary_add_block(discussion_id, short)
+        self.assertFalse(block_id8 is None)
+        self.assertTrue(err is None)
+        err = self.discussion_manager.summary_modify_block(discussion_id, block_id3, block4)
+        self.assertFalse(err is None)
+        err = self.discussion_manager.summary_modify_block(discussion_id, block_id8, block3)
+        self.assertTrue(err is None)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id0)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id1)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id2)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id3)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id4)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id5)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id6)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id7)
+        self.discussion_manager.summary_remove_block(discussion_id, block_id8)
+          
+
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stderr)

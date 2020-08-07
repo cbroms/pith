@@ -5,7 +5,7 @@ from datetime import datetime
 import uuid
 
 
-from constants import date_time_fmt
+from constants import DATE_TIME_FMT
 
 
 class Post():
@@ -15,8 +15,8 @@ class Post():
         else:
             self._id = uuid.uuid4().hex
             self.user = user
-            self.blocks = None # block ids
+            self.blocks = None  # block ids
             self.freq_dict = None
-            self.tags = {} # tag ids, values store user
-            self.created_at = datetime.utcnow().strftime(date_time_fmt)
+            self.tags = {}  # tag ids, values store user
+            self.created_at = datetime.utcnow().strftime(DATE_TIME_FMT)
             # convert back: datetime.strptime(self.created_at, date_time_fmt)

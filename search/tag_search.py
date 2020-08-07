@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from constants import date_time_fmt
+from constants import DATE_TIME_FMT
 
 
 def make_metric(query_tags):
@@ -10,28 +10,28 @@ def make_metric(query_tags):
     return metric
 
 
-def tag_search(tags, blocks_data, posts_data): 
+def tag_search(tags, blocks_data, posts_data):
     metric = make_metric(tags)
 
     blocks_order = [(
         metric(set(b["tags"].keys())),
-        datetime.strptime(b["created_at"], 
-            date_time_fmt
-        ),
+        datetime.strptime(b["created_at"],
+                          DATE_TIME_FMT
+                          ),
         b["_id"]
     ) for b in blocks_data]
     blocks_order.sort(reverse=True)
-    block_ids = [b for f,t,b in blocks_order if f > 0]
+    block_ids = [b for f, t, b in blocks_order if f > 0]
 
     posts_order = [(
         metric(set(p["tags"].keys())),
-        datetime.strptime(p["created_at"], 
-            date_time_fmt
-        ),
+        datetime.strptime(p["created_at"],
+                          DATE_TIME_FMT
+                          ),
         p["_id"]
     ) for p in posts_data]
     posts_order.sort(reverse=True)
-    post_ids = [p for f,t,p in posts_order if f > 0]
+    post_ids = [p for f, t, p in posts_order if f > 0]
 
     result = {"blocks": block_ids, "posts": post_ids}
     return result
