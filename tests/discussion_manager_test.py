@@ -16,7 +16,7 @@ class DiscussionManagerTest(unittest.TestCase):
 
     def setUp(self):
         self.log = logging.getLogger("DiscussionManagerTest")
-        global_manager = GlobalManager(test=True)
+        global_manager = GlobalManager()
         self.discussion_manager = global_manager.discussion_manager
         self.user_manager = global_manager.user_manager
 
@@ -80,7 +80,7 @@ class DiscussionManagerTest(unittest.TestCase):
 
         # attempt joining with same ip but different name
         info = self.discussion_manager.join(discussion_id, ip, name2)
-        self.assertTrue(info is None)
+        self.assertTrue(info is not None)
         user_ids = self.discussion_manager.get_users(discussion_id)
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)
@@ -183,12 +183,12 @@ class DiscussionManagerTest(unittest.TestCase):
         blocks1 = ["I am Fred.", "You are Fred.", "We are Fred."]
         blocks2 = ["She is Lee.", "They are Lee."]
         post_data1 = self.discussion_manager.create_post(discussion_id, ip1, blocks1)
-        post_id1 = post_data1["_id"]
+        post_id1 = post_data1["post_id"]
         post_data1 = self.discussion_manager.get_post(discussion_id, post_id1)
         self.assertFalse(post_data1 is None)
 
         post_data2 = self.discussion_manager.create_post(discussion_id, ip2, blocks2)
-        post_id2 = post_data2["_id"]
+        post_id2 = post_data2["post_id"]
         post_data2 = self.discussion_manager.get_post(discussion_id, post_id2)
         self.assertFalse(post_data2 is None)
 
@@ -225,7 +225,7 @@ class DiscussionManagerTest(unittest.TestCase):
 
         blocks = ["im a post"]
         post_data1 = self.discussion_manager.create_post(discussion_id, ip1, blocks)
-        post_id = post_data1["_id"]
+        post_id = post_data1["post_id"]
         tag = "imatag"
         self.discussion_manager.post_add_tag(discussion_id, ip1, post_id, tag)
         post_data = self.discussion_manager.get_post(discussion_id, post_id)
@@ -277,14 +277,14 @@ class DiscussionManagerTest(unittest.TestCase):
 
         blocks = ["I like whales", "do you like whales?"]
         post_data1 = self.discussion_manager.create_post(discussion_id, ip1, blocks)
-        post_id1 = post_data1["_id"]
+        post_id1 = post_data1["post_id"]
         blocks2 = ["I sort of like whales.", "Whales are big."]
         post_data2 = self.discussion_manager.create_post(discussion_id, ip2, blocks2)
-        post_id2 = post_data2["_id"]
+        post_id2 = post_data2["post_id"]
         block_id1 = post_data2["blocks"][1]
         blocks3 = ["But sometimes whales are scary you know?"]
         post_data3 = self.discussion_manager.create_post(discussion_id, ip2, blocks3)
-        post_id3 = post_data3["_id"]
+        post_id3 = post_data3["post_id"]
         block_id2 = post_data3["blocks"][0]
 
         # tag before
@@ -330,13 +330,13 @@ class DiscussionManagerTest(unittest.TestCase):
 
         blocks = ["I like whales", "do you like whales?"]
         post_data1 = self.discussion_manager.create_post(discussion_id, ip1, blocks)
-        post_id1 = post_data1["_id"]
+        post_id1 = post_data1["post_id"]
         blocks2 = ["I sort of like whales.", "Whales are big."]
         post_data2 = self.discussion_manager.create_post(discussion_id, ip2, blocks2)
-        post_id2 = post_data2["_id"]
+        post_id2 = post_data2["post_id"]
         blocks3 = ["But sometimes whales are scary you know?"]
         post_data3 = self.discussion_manager.create_post(discussion_id, ip2, blocks3)
-        post_id3 = post_data3["_id"]
+        post_id3 = post_data3["post_id"]
 
         tag = "animals"
         self.discussion_manager.block_add_tag(discussion_id, ip1, post_data2["blocks"][1], tag)
@@ -359,12 +359,12 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.leave(discussion_id, ip2)
 
     def test_summary(self):
-        block1 = "hello there" # 11
-        block2 = "hello my friends" # 16
-        block3 = "pie is nice" # 11
-        block4 = "pie is disgusting" # 17
-        trans_block = "transclude<400>goodbye then" # 12
-        short = "four" # 4
+        block1 = "hello there"  # 11
+        block2 = "hello my friends"  # 16
+        block3 = "pie is nice"  # 11
+        block4 = "pie is disgusting"  # 17
+        trans_block = "transclude<400>goodbye then"  # 12
+        short = "four"  # 4
         discussion_id = asyncio.run(create(self, block_char_limit=15))
         block_id0, err = self.discussion_manager.summary_add_block(discussion_id, trans_block)
         self.assertFalse(block_id0 is None)
@@ -451,7 +451,6 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.summary_remove_block(discussion_id, block_id6)
         self.discussion_manager.summary_remove_block(discussion_id, block_id7)
         self.discussion_manager.summary_remove_block(discussion_id, block_id8)
-          
 
 
 if __name__ == "__main__":

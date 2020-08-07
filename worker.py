@@ -1,7 +1,6 @@
 import arq
 import constants
 import socketio
-import argparse
 import asyncio
 
 from arq.worker import run_worker
@@ -10,17 +9,8 @@ from pymongo import MongoClient
 from utils.utils import UUIDEncoder
 from arq.connections import RedisSettings
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-t", "--test", required=False, dest="test", action="store_true",
-                    help="run the script in test mode (uses a local mongodb database")
-parser.set_defaults(test=False)
-args = vars(parser.parse_args())
 
-if args["test"]:
-    print('starting in test mode...')
-    client = MongoClient("mongodb://localhost:27017/")
-else:
-    client = MongoClient(constants.MONGO_CONN)
+client = MongoClient(constants.MONGO_CONN)
 
 discussions = client["db"]["discussions"]
 external_sio = socketio.AsyncRedisManager(constants.SOCKET_REDIS, write_only=True)
@@ -56,4 +46,7 @@ class WorkerSettings(arq.worker.Worker):
 
 
 if __name__ == '__main__':
-    asyncio.run(run_worker(WorkerSettings))
+    try:
+        asyncio.run(run_worker(WorkerSettings))
+    except:
+        pass

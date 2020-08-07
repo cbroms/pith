@@ -9,7 +9,7 @@ from constants import DATE_TIME_FMT
 from utils import utils
 
 
-nltk.download('averaged_perceptron_tagger')
+nltk.download('averaged_perceptron_tagger', quiet=True)
 ps = PorterStemmer()
 
 

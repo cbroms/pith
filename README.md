@@ -31,7 +31,7 @@ Alternatively, spin up an instance in the cloud with [MongoDB Atlas](https://www
 MONGO_CONN=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majority
 ```
 
-### Install the message queue
+### Install Redis
 
 We use Redis for the message and job queues. Install it:
 
@@ -87,10 +87,8 @@ Since the worker script and websockets server both use the same Redis server, th
 
 ## Tests
 
-To run the tests, ensure that MongoDB is running locally. Then,
+To run the tests, ensure that MongoDB and Redis are both running locally. Then run the tests:
 
 ```
 $ python tests.py
 ```
-
-This script will take care of running both the worker script and and tests.

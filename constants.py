@@ -41,6 +41,6 @@ async def redis_pool():
     # there's probably a better way of doing this without global
     global redis
     if redis == None:
-        print("create pool")
+        # print("create pool")
         redis = await create_pool(ARQ_REDIS)
     return redis

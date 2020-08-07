@@ -13,10 +13,10 @@ from uuid import UUID
 from models.global_manager import GlobalManager
 from utils.utils import UUIDEncoder
 
-
 gm = GlobalManager()
 sio = gm.sio
 app = gm.app
+
 
 """
 Possible JSON Outputs
