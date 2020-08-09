@@ -1,7 +1,7 @@
 from pymongo import MongoClient
-import socketio
 
-from constants import mongo_atlas_url
+import socketio
+import constants
 
 from models.user_manager import UserManager
 from models.discussion_manager import DiscussionManager
@@ -9,20 +9,16 @@ from models.discussion_manager import DiscussionManager
 
 class GlobalManager:
 
-    def __init__(self, test=False):
+    def __init__(self):
+        mgr = socketio.AsyncRedisManager(constants.SOCKET_REDIS)
         self.sio = socketio.AsyncServer(
             async_mode='asgi',
-            cors_allowed_origins=[
-                "http://localhost:3000",
-                "https://dev1.pith.rainflame.com"
-            ]
+            client_manager=mgr,
+            cors_allowed_origins="*"
         )
         self.app = socketio.ASGIApp(self.sio)
 
-        if test:
-            self.client = MongoClient('mongodb://localhost:27017')
-        else:
-            self.client = MongoClient(mongo_atlas_url)
+        self.client = MongoClient(constants.MONGO_CONN)
         self.db = self.client["db"]
 
         # create manager instances
