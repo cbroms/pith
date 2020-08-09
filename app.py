@@ -382,9 +382,9 @@ Output: discussion_id<str>
 async def create_discussion(sid, json):
     title = json["title"]
     theme = json["theme"]
-    time_limit = json["time_limit"]
-    block_char_limit = json["block_char_limit"]
-    summary_char_limit = json["summary_char_limit"]
+    time_limit = json["time_limit"] if "time_limit" in json else None
+    block_char_limit = json["block_char_limit"] if "block_char_limit" in json else None
+    summary_char_limit = json["summary_char_limit"] if "summary_char_limit" in json else None
     discussion_id = await gm.discussion_manager.create(
         title,
         theme,
