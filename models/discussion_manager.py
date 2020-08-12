@@ -25,8 +25,9 @@ class DiscussionManager:
     """
 
     def _insert(self, discussion_obj):
-        discussion_data = discussion_obj.__dict__
-        self.discussions.insert_one(discussion_data)
+        discussion_obj.save()
+        #discussion_data = discussion_obj.__dict__
+        #self.discussions.insert_one(discussion_data)
 
     def remove(self, discussion_id):
         self.discussions.remove({
@@ -46,12 +47,6 @@ class DiscussionManager:
             discussion_list.append(u["_id"])
         return discussion_list
 
-    # async def expire(self, discussion_id):
-    #     self.
-    #     discussion_data = self.get(discussion_id)
-    #     serialized = dumps({"discussion_id": discussion_id}, cls=utils.UUIDEncoder)
-    #     await self.sio.emit("discussion_expired", serialized)
-
     async def create(
         self,
         title=None,
@@ -60,7 +55,14 @@ class DiscussionManager:
         block_char_limit=None,
         summary_char_limit=None
     ):
-        discussion_obj = Discussion(title, theme, time_limit, block_char_limit, summary_char_limit)
+        discussion_obj = Discussion(
+          title=title,
+          theme=theme,
+          time_limit=time_limit,
+          block_char_limit=block_char_limit,
+          summary_char_limit=summary_char_limit
+        )
+        discussion_obj.summary_char_left = summary_char_limit # dependency
         discussion_id = discussion_obj._id
         self._insert(discussion_obj)
 
