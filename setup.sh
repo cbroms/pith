@@ -15,7 +15,7 @@ sudo apt install python3.8-venv python3.8-dev
 # virtual env
 python -m venv env
 source env/bin/activate
-echo "source env/bin/activate" >> startup.sh
+echo "source $(pwd)/env/bin/activate" >> startup.sh
 pip install -r requirements.txt
 # TODO need to fix this line so keeps this syntax
 echo "export PYTHONPATH=$(pwd):$PYTHONPATH" >> startup.sh
@@ -26,7 +26,10 @@ echo "sudo systemctl restart mongodb" >> startup.sh
 # redis
 sudo apt-get install redis-server
 echo "redis-server" >> startup.sh
-# arq models.discussion_manager.WorkerSettings
+
+echo "arq worker.WorkerSettings &" >> startup.sh
+
+
 
 # automate start-up script
 chmod +x startup.sh
