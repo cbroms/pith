@@ -3,9 +3,6 @@ API relating to the user.
 """
 from models.user import User
 
-from search.basic_search import basic_search
-from search.tag_search import tag_search
-
 
 class UserManager:
 
@@ -38,7 +35,7 @@ class UserManager:
 
     def create(self, ip):
         if not self._is_user(ip):
-            user_obj = User(ip)
+            user_obj = User(_id=ip)
             self._insert(user_obj)
 
     """
