@@ -21,19 +21,13 @@ class UserManagerTest(unittest.TestCase):
     def test_create_get(self):
         ip = "12345"
         self.user_manager.create(ip)
-        user_data = self.user_manager.get(ip)
-        self.assertEqual(user_data["_id"], ip)
-        users_data = self.user_manager.get_all()
-        user_ips = [u["_id"] for u in users_data]
-        self.assertTrue(ip in user_ips)
+        user_obj = self.user_manager.get(ip).get()
+        self.assertEqual(user_obj.ip, ip)
 
         # repeat creation and see if idempotent
         self.user_manager.create(ip)
-        user_data = self.user_manager.get(ip)
-        self.assertEqual(user_data["_id"], ip)
-        users_data = self.user_manager.get_all()
-        user_ips = [u["_id"] for u in users_data]
-        self.assertTrue(ip in user_ips)
+        user_obj = self.user_manager.get(ip).get()
+        self.assertEqual(user_obj.ip, ip)
 
     def test_in_discussion(self):
         ip = "12345"
@@ -43,34 +37,15 @@ class UserManagerTest(unittest.TestCase):
 
         # joining (only user-side)
         self.user_manager.join_discussion(ip, discussion_id, name)
-        user_data = self.user_manager.get(ip)
-        self.assertTrue(discussion_id in user_data["discussions"])
-        self.assertTrue(user_data["discussions"][discussion_id]["active"])
-
-        # posting (only user-side)
-        post_obj1 = Post(user=ip)
-        post_id1 = post_obj1._id
-        self.user_manager.insert_post_user_history(ip, discussion_id, post_id1)
-        user_data = self.user_manager.get(ip)
-        self.assertTrue(
-            user_data["discussions"][discussion_id]["history"] \
-                == [post_id1]
-        )        
-        post_obj2 = Post(user=ip)
-        post_id2 = post_obj2._id
-        self.user_manager.insert_post_user_history(ip, discussion_id, post_id2)
-        user_data = self.user_manager.get(ip)
-        self.assertTrue(
-            user_data["discussions"][discussion_id]["history"] \
-                == [post_id1, post_id2]
-        )        
+        user_obj = self.user_manager.get(ip).get()
+        self.assertTrue(self.user_manager._is_discussion_user(ip, discussion_id))
+        self.assertTrue(user_obj.discussions.filter(discussion_id=discussion_id).get().active)
 
         # leaving (only user-side)
         self.user_manager.leave_discussion(ip, discussion_id)
-        user_data = self.user_manager.get(ip)
-        # still keep discussion in those that we visited
-        self.assertTrue(discussion_id in user_data["discussions"])
-        self.assertFalse(user_data["discussions"][discussion_id]["active"])
+        user_obj = self.user_manager.get(ip).get()
+        # assume we still have discussion 
+        self.assertFalse(user_obj.discussions.filter(discussion_id=discussion_id).get().active)
 
     def test_saving_post(self):
         ip = "12345"
@@ -81,7 +56,7 @@ class UserManagerTest(unittest.TestCase):
         self.user_manager.join_discussion(ip, discussion_id, name)
 
         post_obj = Post(user=ip2)
-        post_id = post_obj._id
+        post_id = post_obj.id
         self.user_manager.save_post(ip, discussion_id, post_id)
         post_ids = self.user_manager.get_user_saved_post_ids(ip, discussion_id)
         self.assertTrue(post_id in post_ids)
@@ -100,8 +75,8 @@ class UserManagerTest(unittest.TestCase):
         self.user_manager.join_discussion(ip, discussion_id, name)
 
         post_obj = Post(user=ip2)
-        block_obj = Block(body="test", user=ip2, post=post_obj._id)
-        block_id = block_obj._id
+        block_obj = Block(body="test", user=ip2, post=post_obj.id)
+        block_id = block_obj.id
         self.user_manager.save_block(ip, discussion_id, block_id)
         block_ids = self.user_manager.get_user_saved_block_ids(ip, discussion_id)
         self.assertTrue(block_id in block_ids)

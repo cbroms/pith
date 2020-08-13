@@ -1,3 +1,6 @@
+typing: https://www.stefaanlippens.net/circular-imports-type-hints-python.html
+
+
 Tags used on posts/blocks within a discussion should be INTERNAL to the 
 discussion and not exposed outside the discussion.  Tags applied to the 
 discussion are naturally externally to the discussion.

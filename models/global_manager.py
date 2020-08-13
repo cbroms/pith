@@ -19,9 +19,8 @@ class GlobalManager:
         self.app = socketio.ASGIApp(self.sio)
 
         self.client = MongoClient(constants.MONGO_CONN)
-        self.db = self.client[constants.MONGODB_NAME]
         mongoengine.connect(constants.MONGODB_NAME, host=constants.MONGO_CONN)
 
         # create manager instances
-        self.user_manager = UserManager(self, self.db)
-        self.discussion_manager = DiscussionManager(self, self.sio, self.db)
+        self.user_manager = UserManager(self)
+        self.discussion_manager = DiscussionManager(self)

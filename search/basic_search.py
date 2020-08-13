@@ -45,29 +45,16 @@ def make_metric(key_word_list):
     return metric
 
 
-def basic_search(query, blocks_data, posts_data):
+def basic_search(query, blocks):
     key_word_list = list(set(utils.text_tokens(query)))
     metric = make_metric(key_word_list)
 
     blocks_order = [(
-        metric(b["freq_dict"]),
-        datetime.strptime(b["created_at"],
-                          DATE_TIME_FMT
-                          ),
-        b["_id"]
-    ) for b in blocks_data]
+        metric(b.freq_dict),
+        b.created_at, #datetime.strptime(b.created_at, DATE_TIME_FMT),
+        b.id
+    ) for b in blocks]
     blocks_order.sort(reverse=True)
     block_ids = [b for f, t, b in blocks_order if f > 0]
 
-    posts_order = [(
-        metric(p["freq_dict"]),
-        datetime.strptime(p["created_at"],
-                          DATE_TIME_FMT
-                          ),
-        p["_id"]
-    ) for p in posts_data]
-    posts_order.sort(reverse=True)
-    post_ids = [p for f, t, p in posts_order if f > 0]
-
-    result = {"blocks": block_ids, "posts": post_ids}
-    return result
+    return block_ids

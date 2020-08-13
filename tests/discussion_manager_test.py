@@ -16,21 +16,21 @@ class DiscussionManagerTest(unittest.TestCase):
 
     def setUp(self):
         self.log = logging.getLogger("DiscussionManagerTest")
-        global_manager = GlobalManager()
-        self.discussion_manager = global_manager.discussion_manager
-        self.user_manager = global_manager.user_manager
+        gm = GlobalManager()
+        self.discussion_manager = gm.discussion_manager
+        self.user_manager = gm.user_manager
 
     def test_create_get(self):
         title = "fake_title"
         theme = "fake_theme"
         time_limit = 5
         discussion_id = self.discussion_manager.create(title=title, theme=theme)# asyncio.run(create(self, title, theme, time_limit))
-        #discussion_ids = self.discussion_manager.get_all()
-        #self.assertTrue(discussion_id in discussion_ids)
+#        discussion_ids = self.discussion_manager.get_all()
+#        self.assertTrue(discussion_id in discussion_ids)
         discussion_obj = self.discussion_manager.get(discussion_id)
         self.assertFalse(discussion_obj is None)
-        self.assertTrue(discussion_obj.expire_at is not None)
-        self.assertFalse(discussion_obj.expired)
+        #self.assertTrue(discussion_obj.expire_at is not None)
+        #self.assertFalse(discussion_obj.expired)
         #time.sleep(time_limit + 1)
         #discussion_obj = self.discussion_manager.get(discussion_id)
         #self.assertTrue(discussion_obj.expired)
@@ -124,7 +124,7 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertEqual(info["discussion_id"], discussion_id)
         self.assertEqual(info["num_users"], 1)
         user_ids = self.discussion_manager.get_users(discussion_id)
-        self.assertFalse(ip in user_ids)
+        self.assertTrue(ip in user_ids) # still in discussion, just not active
         num_users = self.discussion_manager.get_num_users(discussion_id)
         self.assertEqual(num_users, 1)
 
@@ -134,8 +134,8 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertEqual(info["discussion_id"], discussion_id)
         self.assertEqual(info["num_users"], 0)
         user_ids = self.discussion_manager.get_users(discussion_id)
-        self.assertFalse(ip in user_ids)
-        self.assertFalse(ip2 in user_ids)
+        self.assertTrue(ip in user_ids)
+        self.assertTrue(ip2 in user_ids)
         num_users = self.discussion_manager.get_num_users(discussion_id)
         self.assertEqual(num_users, 0)
 
@@ -153,9 +153,9 @@ class DiscussionManagerTest(unittest.TestCase):
         user_ids = self.discussion_manager.get_users(discussion_id)
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)
-        self.assertEqual(len(user_ids), 1)
+        self.assertEqual(len(user_ids), 2)
         self.assertTrue(name in names)
-        self.assertEqual(len(names), 1)
+        self.assertEqual(len(names), 2)
         num_users = self.discussion_manager.get_num_users(discussion_id)
         self.assertEqual(num_users, 1)
 
@@ -165,8 +165,8 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertEqual(info["discussion_id"], discussion_id)
         self.assertEqual(info["num_users"], 0)
         user_ids = self.discussion_manager.get_users(discussion_id)
-        self.assertFalse(ip in user_ids)
-        self.assertFalse(ip2 in user_ids)
+        self.assertTrue(ip in user_ids)
+        self.assertTrue(ip2 in user_ids)
         num_users = self.discussion_manager.get_num_users(discussion_id)
         self.assertEqual(num_users, 0)
 
@@ -184,19 +184,19 @@ class DiscussionManagerTest(unittest.TestCase):
 
         blocks1 = ["I am Fred.", "You are Fred.", "We are Fred."]
         blocks2 = ["She is Lee.", "They are Lee."]
-        post_obj1 = self.discussion_manager.create_post(discussion_id, ip1, blocks1)
-        post_id1 = post_obj1.post_id
+        post_info1 = self.discussion_manager.create_post(discussion_id, ip1, blocks1)
+        post_id1 = post_info1["post_id"]
         post_obj1 = self.discussion_manager.get_post(discussion_id, post_id1)
         self.assertFalse(post_obj1 is None)
 
-        post_obj2 = self.discussion_manager.create_post(discussion_id, ip2, blocks2)
-        post_id2 = post_obj2.post_id
+        post_info2 = self.discussion_manager.create_post(discussion_id, ip2, blocks2)
+        post_id2 = post_info2["post_id"]
         post_obj2 = self.discussion_manager.get_post(discussion_id, post_id2)
         self.assertFalse(post_obj2 is None)
 
         posts_obj = self.discussion_manager.get_posts(discussion_id)
         posts_info = self.discussion_manager.get_posts_flattened(discussion_id)
-        posts_id = [p._id for p in posts_obj]
+        posts_id = [p.id for p in posts_obj]
         self.assertTrue(post_id1 in posts_id)
         self.assertTrue(post_id2 in posts_id)
         posts_id = [p["post_id"] for p in posts_info]
@@ -209,36 +209,10 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertEqual(set(blocks), set(blocks_body))
         for b in post_obj1.blocks:
             block_obj = self.discussion_manager.get_block(discussion_id, b)
-            self.assertTrue(block_obj.body in blocks)
+            self.assertTrue(block_obj.get().body in blocks)
 
         self.discussion_manager.leave(discussion_id, ip1)
         self.discussion_manager.leave(discussion_id, ip2)
-
-#     def test_tag_post(self):
-#         ip1 = "12345"
-#         ip2 = "67890"
-#         name1 = "hello"
-#         name2 = "goodbye"
-#         self.user_manager.create(ip1)
-#         self.user_manager.create(ip2)
-#         discussion_id = asyncio.run(create(self))
-#         self.discussion_manager.join(discussion_id, ip1, name1)
-#         self.discussion_manager.join(discussion_id, ip2, name2)
-# 
-#         blocks = ["im a post"]
-#         post_obj1 = self.discussion_manager.create_post(discussion_id, ip1, blocks)
-#         post_id = post_obj1["post_id"]
-#         tag = "imatag"
-#         self.discussion_manager.post_add_tag(discussion_id, ip1, post_id, tag)
-#         post_obj = self.discussion_manager.get_post(discussion_id, post_id)
-#         self.assertTrue(tag in post_obj["tags"])
-# 
-#         self.discussion_manager.post_remove_tag(discussion_id, ip1, post_id, tag)
-#         post_obj = self.discussion_manager.get_post(discussion_id, post_id)
-#         self.assertFalse(tag in post_obj["tags"])
-# 
-#         self.discussion_manager.leave(discussion_id, ip1)
-#         self.discussion_manager.leave(discussion_id, ip2)
 
     def test_tag_block(self):
         ip1 = "12345"
@@ -253,113 +227,94 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.join(discussion_id, ip2, name2)
 
         blocks = ["im a post"]
-        post_obj1 = self.discussion_manager.create_post(discussion_id, ip1, blocks)
-        block_id = post_obj1.blocks[0]
+        post_info = self.discussion_manager.create_post(discussion_id, ip1, blocks)
+        block_id = post_info["blocks"][0]
         tag = "imatag"
         self.discussion_manager.block_add_tag(discussion_id, ip1, block_id, tag)
         block_obj = self.discussion_manager.get_block(discussion_id, block_id)
-        self.assertTrue(tag in block_obj.tags)
+        self.assertTrue(block_obj.get().tags.filter(tag=tag))
 
         self.discussion_manager.block_remove_tag(discussion_id, ip1, block_id, tag)
         block_obj = self.discussion_manager.get_block(discussion_id, block_id)
-        self.assertFalse(tag in block_obj.tags)
+        self.assertFalse(block_obj.get().tags.filter(tag=tag))
 
         self.discussion_manager.leave(discussion_id, ip1)
         self.discussion_manager.leave(discussion_id, ip2)
 
-#     def test_user_save_search(self):
-#         ip1 = "12345"
-#         ip2 = "67890"
-#         name1 = "hello"
-#         name2 = "goodbye"
-#         self.user_manager.create(ip1)
-#         self.user_manager.create(ip2)
-#         discussion_id = asyncio.run(create(self))
-#         self.discussion_manager.join(discussion_id, ip1, name1)
-#         self.discussion_manager.join(discussion_id, ip2, name2)
-# 
-#         blocks = ["I like whales", "do you like whales?"]
-#         post_obj1 = self.discussion_manager.create_post(discussion_id, ip1, blocks)
-#         post_id1 = post_obj1["post_id"]
-#         blocks2 = ["I sort of like whales.", "Whales are big."]
-#         post_obj2 = self.discussion_manager.create_post(discussion_id, ip2, blocks2)
-#         post_id2 = post_obj2["post_id"]
-#         block_id1 = post_obj2["blocks"][1]
-#         blocks3 = ["But sometimes whales are scary you know?"]
-#         post_obj3 = self.discussion_manager.create_post(discussion_id, ip2, blocks3)
-#         post_id3 = post_obj3["post_id"]
-#         block_id2 = post_obj3["blocks"][0]
-# 
-#         # tag before
-#         tag = "animals"
-#         self.discussion_manager.block_add_tag(discussion_id, ip1, block_id2, tag)
-# 
-#         self.user_manager.save_post(ip1, discussion_id, post_id2)
-#         self.user_manager.save_post(ip1, discussion_id, post_id1)
-#         self.user_manager.save_block(ip1, discussion_id, block_id1)
-#         self.user_manager.save_block(ip1, discussion_id, block_id2)
-# 
-#         # tag after
-#         self.discussion_manager.post_add_tag(discussion_id, ip2, post_id2, tag)
-# 
-#         saved_posts = self.discussion_manager.get_user_saved_posts(discussion_id, ip1)
-#         saved_blocks = self.discussion_manager.get_user_saved_blocks(discussion_id, ip1)
-#         self.assertEqual(set([p["_id"] for p in saved_posts]), {post_id1, post_id2})
-#         self.assertEqual(set([b["body"] for b in saved_blocks]), {blocks2[1], blocks3[0]})
-#         self.assertTrue(all(["freq_dict" in p for p in saved_posts]))
-#         self.assertTrue(all(["freq_dict" in b for b in saved_blocks]))
-# 
-#         results = self.discussion_manager.user_saved_scope_search(discussion_id, ip1, "whale")
-#         self.assertEqual(set(results["blocks"]), {block_id2, block_id1})
-#         self.assertEqual(set(results["posts"]), {post_id2, post_id1})
-# 
-#         results = self.discussion_manager.user_saved_tag_search(discussion_id, ip1, [tag])
-#         self.assertEqual(results["blocks"], [block_id2])
-#         self.assertEqual(results["posts"], [post_id2])
-# 
-#         self.discussion_manager.leave(discussion_id, ip1)
-#         self.discussion_manager.leave(discussion_id, ip2)
+    def test_user_save_search(self):
+        ip1 = "12345"
+        ip2 = "67890"
+        name1 = "hello"
+        name2 = "goodbye"
+        self.user_manager.create(ip1)
+        self.user_manager.create(ip2)
+        #discussion_id = asyncio.run(create(self))
+        discussion_id = self.discussion_manager.create()
+        self.discussion_manager.join(discussion_id, ip1, name1)
+        self.discussion_manager.join(discussion_id, ip2, name2)
 
-#     def test_search(self):
-#         ip1 = "12345"
-#         ip2 = "67890"
-#         name1 = "hello"
-#         name2 = "goodbye"
-#         self.user_manager.create(ip1)
-#         self.user_manager.create(ip2)
-#         discussion_id = asyncio.run(create(self))
-#         self.discussion_manager.join(discussion_id, ip1, name1)
-#         self.discussion_manager.join(discussion_id, ip2, name2)
-# 
-#         blocks = ["I like whales", "do you like whales?"]
-#         post_obj1 = self.discussion_manager.create_post(discussion_id, ip1, blocks)
-#         post_id1 = post_obj1["post_id"]
-#         blocks2 = ["I sort of like whales.", "Whales are big."]
-#         post_obj2 = self.discussion_manager.create_post(discussion_id, ip2, blocks2)
-#         post_id2 = post_obj2["post_id"]
-#         blocks3 = ["But sometimes whales are scary you know?"]
-#         post_obj3 = self.discussion_manager.create_post(discussion_id, ip2, blocks3)
-#         post_id3 = post_obj3["post_id"]
-# 
-#         tag = "animals"
-#         self.discussion_manager.block_add_tag(discussion_id, ip1, post_obj2["blocks"][1], tag)
-#         self.discussion_manager.block_add_tag(discussion_id, ip2, post_obj3["blocks"][0], tag)
-#         self.discussion_manager.post_add_tag(discussion_id, ip2, post_id2, tag)
-#         self.discussion_manager.post_add_tag(discussion_id, ip1, post_id1, tag)
-# 
-#         results = self.discussion_manager.discussion_scope_search(discussion_id, "whales")
-#         self.assertEqual(
-#             set(results["blocks"]),
-#             set(post_obj3["blocks"] + post_obj2["blocks"] + post_obj1["blocks"])
-#         )
-#         self.assertEqual(set(results["posts"]), {post_id2, post_id1, post_id3})
-# 
-#         results = self.discussion_manager.discussion_tag_search(discussion_id, [tag])
-#         self.assertEqual(set(results["blocks"]), {post_obj3["blocks"][0], post_obj2["blocks"][1]})
-#         self.assertEqual(set(results["posts"]), {post_id2, post_id1})
-# 
-#         self.discussion_manager.leave(discussion_id, ip1)
-#         self.discussion_manager.leave(discussion_id, ip2)
+        blocks = ["I like whales", "do you like whales?"]
+        post_info1 = self.discussion_manager.create_post(discussion_id, ip1, blocks)
+        blocks2 = ["I sort of like whales.", "Whales are big."]
+        post_info2 = self.discussion_manager.create_post(discussion_id, ip2, blocks2)
+        block_id1 = post_info2["blocks"][1]
+        blocks3 = ["But sometimes whales are scary you know?"]
+        post_info3 = self.discussion_manager.create_post(discussion_id, ip2, blocks3)
+        block_id2 = post_info3["blocks"][0]
+
+        # tag before
+        tag = "animals"
+        self.discussion_manager.block_add_tag(discussion_id, ip1, block_id2, tag)
+
+        self.user_manager.save_block(ip1, discussion_id, block_id1)
+        self.user_manager.save_block(ip1, discussion_id, block_id2)
+
+        saved_blocks = self.discussion_manager.get_user_saved_blocks(discussion_id, ip1)
+        self.assertEqual(set([b.body for b in saved_blocks]), {blocks2[1], blocks3[0]})
+
+        results = self.discussion_manager.user_saved_scope_search(discussion_id, ip1, "whale")
+        self.assertEqual(set(results), {block_id2, block_id1})
+
+        results = self.discussion_manager.user_saved_tag_search(discussion_id, ip1, [tag])
+        self.assertEqual(results, [block_id2])
+
+        self.discussion_manager.leave(discussion_id, ip1)
+        self.discussion_manager.leave(discussion_id, ip2)
+
+    def test_search(self):
+        ip1 = "12345"
+        ip2 = "67890"
+        name1 = "hello"
+        name2 = "goodbye"
+        self.user_manager.create(ip1)
+        self.user_manager.create(ip2)
+        #discussion_id = asyncio.run(create(self))
+        discussion_id = self.discussion_manager.create()
+        self.discussion_manager.join(discussion_id, ip1, name1)
+        self.discussion_manager.join(discussion_id, ip2, name2)
+
+        blocks = ["I like whales", "do you like whales?"]
+        post_info1 = self.discussion_manager.create_post(discussion_id, ip1, blocks)
+        blocks2 = ["I sort of like whales.", "Whales are big."]
+        post_info2 = self.discussion_manager.create_post(discussion_id, ip2, blocks2)
+        blocks3 = ["But sometimes whales are scary you know?"]
+        post_info3 = self.discussion_manager.create_post(discussion_id, ip2, blocks3)
+
+        tag = "animals"
+        self.discussion_manager.block_add_tag(discussion_id, ip1, post_info2["blocks"][1], tag)
+        self.discussion_manager.block_add_tag(discussion_id, ip2, post_info3["blocks"][0], tag)
+
+        results = self.discussion_manager.discussion_scope_search(discussion_id, "whales")
+        self.assertEqual(
+            set(results),
+            set(post_info3["blocks"] + post_info2["blocks"] + post_info1["blocks"])
+        )
+
+        results = self.discussion_manager.discussion_tag_search(discussion_id, [tag])
+        self.assertEqual(set(results), {post_info3["blocks"][0], post_info2["blocks"][1]})
+
+        self.discussion_manager.leave(discussion_id, ip1)
+        self.discussion_manager.leave(discussion_id, ip2)
 
     def test_summary(self):
         block1 = "hello there"  # 11
@@ -407,11 +362,14 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertTrue(err is None)
         err = self.discussion_manager.summary_modify_block(discussion_id, block_id1, block4 + block4)
         self.assertFalse(err is None)
+
+        block_obj_r3 = self.discussion_manager.summary_get_block(discussion_id, block_id3)
+        self.assertEqual(block_obj_r3.get().id, block_id3)
+
         self.discussion_manager.summary_remove_block(discussion_id, block_id0)
         self.discussion_manager.summary_remove_block(discussion_id, block_id1)
         self.discussion_manager.summary_remove_block(discussion_id, block_id2)
         self.discussion_manager.summary_remove_block(discussion_id, block_id3)
-        self.discussion_manager.summary_remove_block(discussion_id, block_id4)
 
         #discussion_id = asyncio.run(create(self, block_char_limit=15, summary_char_limit=60))
         discussion_id = self.discussion_manager.create(block_char_limit=15, summary_char_limit=60)
@@ -449,14 +407,10 @@ class DiscussionManagerTest(unittest.TestCase):
         err = self.discussion_manager.summary_modify_block(discussion_id, block_id8, block3)
         self.assertTrue(err is None)
         self.discussion_manager.summary_remove_block(discussion_id, block_id0)
-        self.discussion_manager.summary_remove_block(discussion_id, block_id1)
-        self.discussion_manager.summary_remove_block(discussion_id, block_id2)
         self.discussion_manager.summary_remove_block(discussion_id, block_id3)
         self.discussion_manager.summary_remove_block(discussion_id, block_id4)
         self.discussion_manager.summary_remove_block(discussion_id, block_id5)
         self.discussion_manager.summary_remove_block(discussion_id, block_id6)
-        self.discussion_manager.summary_remove_block(discussion_id, block_id7)
-        self.discussion_manager.summary_remove_block(discussion_id, block_id8)
 
 
 if __name__ == "__main__":

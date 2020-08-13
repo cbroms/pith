@@ -4,6 +4,7 @@ Discussion document.
 from mongoengine import (
   Document,
   EmbeddedDocument,
+  PULL,
 )
 from mongoengine.fields import (
   BooleanField,
@@ -22,33 +23,37 @@ from constants import DATE_TIME_FMT
 from models.user import User
 
 
+class Tag(EmbeddedDocument):
+    id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
+    tag = StringField(required=True)
+    owner = StringField(required=True)
+
+
 class Block(EmbeddedDocument):
-    _id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
+    id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
     body = StringField(required=True)
-    user = StringField() # ReferenceField(User, reverse_delete_rule=mongoengine.PULL)
-    post = StringField() #ReferenceField('Post')
-    tags = DictField()  # tag ids, value stores user
-    created_at = DateTimeField(default=datetime.utcnow().strftime(DATE_TIME_FMT))
-    # convert back: datetime.strptime(created_at, date_time_fmt)
-    # freq_dict = utils.make_freq_dict(self.body)
+    user = StringField()
+    post = StringField()
+    tags = EmbeddedDocumentListField(Tag)
+    created_at = DateTimeField(default=datetime.utcnow()) # .strftime(DATE_TIME_FMT)
+    # convert back: datetime.strptime(created_at, DATE_TIME_FMT)
+    freq_dict = DictField()
 
 
 class Post(EmbeddedDocument):
-    _id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
-    user = StringField() # ReferenceField(User, reverse_delete_rule=mongoengine.PULL)
-    blocks = ListField(StringField()) #ReferenceField('Block')) # may add option to delete
-    tags = DictField()  # tag ids, values store user
-    created_at = DateTimeField(default=datetime.utcnow().strftime(DATE_TIME_FMT))
-    # convert back: datetime.strptime(created_at, date_time_fmt)
-    # freq_dict = None
+    id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
+    user = StringField()
+    blocks = ListField(StringField())
+    created_at = DateTimeField(default=datetime.utcnow()) # .strftime(DATE_TIME_FMT)
+    # convert back: datetime.strptime(created_at, DATE_TIME_FMT)
 
 
 class Discussion(Document):
     meta = {'collection': 'discussions'}
 
-    _id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
+    id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
     created_at = DateTimeField(default=datetime.utcnow().strftime(DATE_TIME_FMT))
-    users = DictField() #ListField(ReferenceField(User, reverse_delete_rule=mongoengine.PULL)) 
+    users = ListField(ReferenceField(User, reverse_delete_rule=PULL)) 
 
     """
     Configuration fields.
@@ -71,5 +76,4 @@ class Discussion(Document):
     """
     history = EmbeddedDocumentListField(Post)  # stores all posts, may add option to delete
     history_blocks = EmbeddedDocumentListField(Block)  # stores all blocks, may add option to delete
-    internal_tags = DictField()  # tags for internal posts/blocks
     summary_blocks = EmbeddedDocumentListField(Block) # store blocks in summary
