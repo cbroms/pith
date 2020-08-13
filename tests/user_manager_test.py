@@ -5,8 +5,10 @@ import uuid
 
 from models.global_manager import GlobalManager
 from models.user import User
-from models.post import Post
-from models.block import Block
+from models.discussion import (
+  Block,
+  Post,
+)
 
 
 class UserManagerTest(unittest.TestCase):
@@ -46,7 +48,7 @@ class UserManagerTest(unittest.TestCase):
         self.assertTrue(user_data["discussions"][discussion_id]["active"])
 
         # posting (only user-side)
-        post_obj1 = Post(ip)
+        post_obj1 = Post(user=ip)
         post_id1 = post_obj1._id
         self.user_manager.insert_post_user_history(ip, discussion_id, post_id1)
         user_data = self.user_manager.get(ip)
@@ -54,7 +56,7 @@ class UserManagerTest(unittest.TestCase):
             user_data["discussions"][discussion_id]["history"] \
                 == [post_id1]
         )        
-        post_obj2 = Post(ip)
+        post_obj2 = Post(user=ip)
         post_id2 = post_obj2._id
         self.user_manager.insert_post_user_history(ip, discussion_id, post_id2)
         user_data = self.user_manager.get(ip)
@@ -78,7 +80,7 @@ class UserManagerTest(unittest.TestCase):
         self.user_manager.create(ip)
         self.user_manager.join_discussion(ip, discussion_id, name)
 
-        post_obj = Post(ip2)
+        post_obj = Post(user=ip2)
         post_id = post_obj._id
         self.user_manager.save_post(ip, discussion_id, post_id)
         post_ids = self.user_manager.get_user_saved_post_ids(ip, discussion_id)
@@ -97,8 +99,8 @@ class UserManagerTest(unittest.TestCase):
         self.user_manager.create(ip)
         self.user_manager.join_discussion(ip, discussion_id, name)
 
-        post_obj = Post(ip2)
-        block_obj = Block("test", ip2, post_obj._id)
+        post_obj = Post(user=ip2)
+        block_obj = Block(body="test", user=ip2, post=post_obj._id)
         block_id = block_obj._id
         self.user_manager.save_block(ip, discussion_id, block_id)
         block_ids = self.user_manager.get_user_saved_block_ids(ip, discussion_id)
