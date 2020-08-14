@@ -1,4 +1,10 @@
 import datetime
+from typing import (
+  Any,
+  Dict,
+  List,
+  Tuple,
+)
 
 import constants
 import error
@@ -23,24 +29,26 @@ class DiscussionManager:
     Of discussions.
     """
 
-    def get(self, discussion_id):
+    # TODO
+    def get(self, discussion_id: str):
         return Discussion.objects(id=discussion_id)
 
-    def remove(self, discussion_id):
+    def remove(self, discussion_id: str) -> None:
         self.get(discussion_id).delete()
 
+    # TODO
 #    def get_all(self):
 #        return [d.id for d in Discussion.objects()]
 
     #async def create(
     def create(
         self,
-        title=None,
-        theme=None,
-        time_limit=None,
-        block_char_limit=None,
-        summary_char_limit=None
-    ):
+        title: str = None,
+        theme: str = None,
+        time_limit: int = None,
+        block_char_limit: int = None,
+        summary_char_limit: int = None
+    ) -> str:
         discussion_obj = Discussion(
           title=title,
           theme=theme,
@@ -64,7 +72,7 @@ class DiscussionManager:
     First arg is always `discussion_id`.
     """
 
-    def _is_user(self, discussion_id, user_id):
+    def _is_user(self, discussion_id: str, user_id: str) -> bool:
         try:
           user = self.gm.user_manager.get(user_id)
           user.get().discussions.filter(discussion_id=discussion_id).get()
@@ -72,19 +80,18 @@ class DiscussionManager:
         except Exception:
           return False
 
-    def _name_exists(self, discussion_id, name):
+    def _name_exists(self, discussion_id: str, name: str) -> bool:
         discussion_obj = self.get(discussion_id)
         return name in [u.discussions.filter(discussion_id=discussion_id).get().name for u in discussion_obj.get().users]
 
-    def join(self, discussion_id, user_id, name):
+    def join(self, discussion_id: str, user_id: str, name: str) -> Dict[str, Any]:
         user = self.gm.user_manager.get(user_id).get()
-        if not self._is_user(discussion_id, user_id): # is not user
+        if not self._is_user(discussion_id, user_id):
             if self._name_exists(discussion_id, name):
                 return None
             self.get(discussion_id).update(push__users=user.to_dbref())
             self.gm.user_manager.join_discussion(user_id, discussion_id, name)
-        else: # is user
-            # keep same name
+        else:
             used_name = self.get_user_name(discussion_id, user_id)
             self.gm.user_manager.join_discussion(user_id, discussion_id, name)
         discussion_obj = self.get(discussion_id).get()
@@ -95,34 +102,34 @@ class DiscussionManager:
             "num_users": self.get_num_users(discussion_id),
         }
 
-    def leave(self, discussion_id, user_id):
+    def leave(self, discussion_id: str, user_id: str) -> Dict[str, Any]:
         self.gm.user_manager.leave_discussion(user_id, discussion_id)
         return {
             "discussion_id": discussion_id,
             "num_users": self.get_num_users(discussion_id),
         }
 
-    def get_num_users(self, discussion_id):  # only active users
+    def get_num_users(self, discussion_id: str) -> int:  # only active users
         discussion_obj = self.get(discussion_id)
         num_users = sum([u.discussions.filter(discussion_id=discussion_id).get().active for u in discussion_obj.get().users])
         return num_users
 
-    def get_users(self, discussion_id):
+    def get_users(self, discussion_id: str) -> List[str]:
         discussion_obj = self.get(discussion_id)
         user_ids = [u.ip for u in discussion_obj.get().users]
         return user_ids
 
-    def get_names(self, discussion_id):
+    def get_names(self, discussion_id: str) -> List[str]:
         discussion_obj = self.get(discussion_id)
         names = list([u.discussions.filter(discussion_id=discussion_id).get().name for u in discussion_obj.get().users])
         return names
 
-    def get_user_name(self, discussion_id, user_id):
+    def get_user_name(self, discussion_id: str, user_id: str) -> str:
         user_obj = self.gm.user_manager.get(user_id)
         name = user_obj.get().discussions.filter(discussion_id=discussion_id).get().name
         return name
 
-    def create_post(self, discussion_id, user_id, blocks):
+    def create_post(self, discussion_id: str, user_id: str, blocks: List[str]) -> Dict[str, Any]:
         discussion_obj = self.get(discussion_id)
         post_obj = Post(user=user_id)
         post_id = post_obj.id
@@ -144,24 +151,22 @@ class DiscussionManager:
         }
         return post_info
 
-    def get_post(self, discussion_id, post_id):
+    # TODO
+    def get_post(self, discussion_id: str, post_id: str):
         discussion_obj = self.get(discussion_id)
         post_obj = discussion_obj.get().history.filter(id=post_id).get()
         return post_obj
 
-    def _get_post_ids(self, discussion_id):
-        discussion_obj = self.get(discussion_id)
-        return [p.id for p in discussion_obj.get().history]
-
-    def _get_block_ids(self, discussion_id):
-        discussion_obj = self.get(discussion_id)
-        return [b.id for b in discussion_obj.get().history_blocks]
-
-    def get_posts(self, discussion_id):
+    # TODO
+    def get_posts(self, discussion_id: str):
         discussion_obj = self.get(discussion_id)
         return [p for p in discussion_obj.get().history]
 
-    def get_posts_flattened(self, discussion_id):
+    def _get_post_ids(self, discussion_id: str) -> List[str]:
+        discussion_obj = self.get(discussion_id)
+        return [p.id for p in discussion_obj.get().history]
+
+    def get_posts_flattened(self, discussion_id: str) -> Dict[str, Any]:
         discussion_obj = self.get(discussion_id)
         posts_info = [{
             "post_id": p.id,
@@ -172,12 +177,22 @@ class DiscussionManager:
         } for p in discussion_obj.get().history]
         return posts_info
 
-    def get_block(self, discussion_id, block_id):
+    # TODO
+    def get_block(self, discussion_id: str, block_id: str):
         discussion_obj = self.get(discussion_id)
         block_obj = discussion_obj.get().history_blocks.filter(id=block_id)
         return block_obj
 
-    def get_block_flattened(self, discussion_id, block_id):
+    # TODO
+    def get_blocks(self, discussion_id: str):
+        discussion_obj = self.get(discussion_id)
+        return [b for b in discussion_obj.get().history_blocks]
+
+    def _get_block_ids(self, discussion_id: str) -> List[str]:
+        discussion_obj = self.get(discussion_id)
+        return [b.id for b in discussion_obj.get().history_blocks]
+
+    def get_block_flattened(self, discussion_id: str, block_id: str) -> Dict[str, Any]:
         block_obj = self.get_block(discussion_id, block_id).get()
         if block_obj is not None:
             block_info = {
@@ -189,15 +204,11 @@ class DiscussionManager:
             block_info = None
         return block_info
 
-    def get_blocks(self, discussion_id):
-        discussion_obj = self.get(discussion_id)
-        return [b for b in discussion_obj.get().history_blocks]
-
-    def _is_tag_owner_block(self, discussion_id, user_id, block_id, tag):
+    def _is_tag_owner_block(self, discussion_id: str, user_id: str, block_id: str, tag: str) -> str:
         block_obj = self.get_block(discussion_id, block_id)
         return block_obj.get().tags.filter(tag=tag).get().owner
 
-    def _is_tag_block(self, discussion_id, block_id, tag):
+    def _is_tag_block(self, discussion_id: str, block_id: str, tag: str) -> bool:
         """
         Only use this once the tag has been created for the discussion.
         """
@@ -208,74 +219,76 @@ class DiscussionManager:
         except Exception:
           return False
 
-    def block_add_tag(self, discussion_id, user_id, block_id, tag):
+    def block_add_tag(self, discussion_id: str, user_id: str, block_id: str, tag: str) -> None:
         discussion_obj = self.get(discussion_id)
         if not self._is_tag_block(discussion_id, block_id, tag):
             discussion_obj.filter(history_blocks__id=block_id).update(push__history_blocks__S__tags=Tag(tag=tag, owner=user_id))   
 
-    def block_remove_tag(self, discussion_id, user_id, block_id, tag):
+    def block_remove_tag(self, discussion_id: str, user_id: str, block_id: str, tag: str) -> None:
         discussion_obj = self.get(discussion_id)
         if self._is_tag_block(discussion_id, block_id, tag):
             if self._is_tag_owner_block(discussion_id, user_id, block_id, tag):
               discussion_obj.filter(history_blocks__id=block_id).update(pull__history_blocks__S__tags__tag=tag)
 
-    def discussion_scope_search(self, discussion_id, query):
+    def discussion_scope_search(self, discussion_id: str, query: str) -> List[str]:
         discussion_obj = self.get(discussion_id)
         return basic_search(query, discussion_obj.get().history_blocks)
 
-    def discussion_tag_search(self, discussion_id, tags):
+    def discussion_tag_search(self, discussion_id: str, tags: List[str]) -> List[str]:
         discussion_obj = self.get(discussion_id)
         return tag_search(tags, discussion_obj.get().history_blocks)
 
-    def get_user_saved_blocks(self, discussion_id, user_id):
+    # TODO
+    def get_user_saved_blocks(self, discussion_id: str, user_id: str):
         block_ids = self.gm.user_manager.get_user_saved_block_ids(user_id, discussion_id)
         blocks = [self.get_block(discussion_id, b).get() for b in block_ids]
         return blocks
 
-    def user_saved_scope_search(self, discussion_id, user_id, query):
+    def user_saved_scope_search(self, discussion_id: str, user_id: str, query: str) -> List[str]:
         blocks = self.get_user_saved_blocks(discussion_id, user_id)
         return basic_search(query, blocks)
 
-    def user_saved_tag_search(self, discussion_id, user_id, tags):
+    def user_saved_tag_search(self, discussion_id: str, user_id: str, tags: List[str]) -> List[str]:
         blocks = self.get_user_saved_blocks(discussion_id, user_id)
         return tag_search(tags, blocks)
 
-    def _transclusion_get_body(self, text):
+    def _transclusion_get_body(self, text: str) -> str:
         match_res = constants.transclusion_header.match(text)
         if match_res:
             return text[len(match_res[0]):]
         else:
             return text
 
-    def _transclusion_get_id(self, text):
+    def _transclusion_get_id(self, text: str) -> str:
         match_res = constants.transclusion_header.match(text)
         if match_res:
             return match_res[0][11:-1]  # get stuff between "transclude<" and ">"
         else:
             return None
 
-    def _get_block_limit(self, discussion_id):
+    def _get_block_limit(self, discussion_id: str) -> int:
         discussion_obj = self.get(discussion_id)
         try:
           return discussion_obj.get().block_char_limit
         except Exception:
           return None
 
-    def _get_summary_char_left(self, discussion_id):
+    def _get_summary_char_left(self, discussion_id: str) -> int:
         discussion_obj = self.get(discussion_id)
         try:
           return discussion_obj.get().summary_char_left
         except Exception:
           return None
 
-    def _set_summary_char_left(self, discussion_id, new_limit):
+    def _set_summary_char_left(self, discussion_id: str, new_limit: int) -> None:
         self.get(discussion_id).update(summary_char_left=new_limit)
 
-    def summary_get_block(self, discussion_id, block_id):
+    # TODO
+    def summary_get_block(self, discussion_id: str, block_id: str):
         discussion_obj = self.get(discussion_id)
         return discussion_obj.get().summary_blocks.filter(id=block_id)
 
-    def summary_add_block(self, discussion_id, body):
+    def summary_add_block(self, discussion_id: str, body: str) -> Tuple[str, str]:
         raw_body = self._transclusion_get_body(body)
         body_len = len(raw_body)
         block_limit_len = self._get_block_limit(discussion_id)
@@ -297,7 +310,7 @@ class DiscussionManager:
         block_id = block_obj.id
         return block_id, None
 
-    def summary_modify_block(self, discussion_id, block_id, body):
+    def summary_modify_block(self, discussion_id: str, block_id: str, body: str) -> Tuple[str, str]:
         # should not be getting transclusions when modifying
         block_obj = self.summary_get_block(discussion_id, block_id).get()
         original_body = block_obj.body
@@ -318,6 +331,6 @@ class DiscussionManager:
         self.get(discussion_id).filter(summary_blocks__id=block_id).update(set__summary_blocks__S__body=body)
         return None
 
-    def summary_remove_block(self, discussion_id, block_id):
+    def summary_remove_block(self, discussion_id: str, block_id: str) -> None:
         discussion_obj = self.get(discussion_id)
         discussion_obj.update(pull__summary_blocks__id=block_id)

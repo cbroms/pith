@@ -21,6 +21,5 @@ class GlobalManager:
         self.client = MongoClient(constants.MONGO_CONN)
         mongoengine.connect(constants.MONGODB_NAME, host=constants.MONGO_CONN)
 
-        # create manager instances
         self.user_manager = UserManager(self)
         self.discussion_manager = DiscussionManager(self)

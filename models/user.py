@@ -36,5 +36,4 @@ class User(Document):
     """
     Discussion state.
     """
-
     discussions = EmbeddedDocumentListField(DiscussionState)

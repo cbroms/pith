@@ -35,8 +35,7 @@ class Block(EmbeddedDocument):
     user = StringField()
     post = StringField()
     tags = EmbeddedDocumentListField(Tag)
-    created_at = DateTimeField(default=datetime.utcnow()) # .strftime(DATE_TIME_FMT)
-    # convert back: datetime.strptime(created_at, DATE_TIME_FMT)
+    created_at = DateTimeField(default=datetime.utcnow())
     freq_dict = DictField()
 
 
@@ -44,8 +43,7 @@ class Post(EmbeddedDocument):
     id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
     user = StringField()
     blocks = ListField(StringField())
-    created_at = DateTimeField(default=datetime.utcnow()) # .strftime(DATE_TIME_FMT)
-    # convert back: datetime.strptime(created_at, DATE_TIME_FMT)
+    created_at = DateTimeField(default=datetime.utcnow())
 
 
 class Discussion(Document):
@@ -58,12 +56,12 @@ class Discussion(Document):
     """
     Configuration fields.
     """
-    title = StringField() #null=True)
-    theme = StringField() #null=True)
-    time_limit = IntField() #null=True)
-    expire_at = DateTimeField() #null=True)
-    block_char_limit = IntField() #null=True) 
-    summary_char_limit = IntField() #null=True) 
+    title = StringField(null=True)
+    theme = StringField(null=True)
+    time_limit = IntField(null=True)
+    expire_at = DateTimeField(null=True)
+    block_char_limit = IntField(null=True) 
+    summary_char_limit = IntField(null=True) 
 
     """
     State fields.
