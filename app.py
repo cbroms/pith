@@ -1,12 +1,3 @@
-"""
-Peruse following for more efficient updates:
-- https://stackoverflow.com/questions/4372797/how-do-i-update-a-mongo-document-after-inserting-it
-- https://stackoverflow.com/questions/33189258/append-item-to-mongodb-document-array-in-pymongo-without-re-insertion
-
-If things go wonky, try:
-sudo rm /var/lib/mongodb/mongod.lock
-sudo service mongodb start
-"""
 from json import dumps
 from uuid import UUID
 
@@ -18,94 +9,30 @@ sio = gm.sio
 app = gm.app
 
 
-"""
-Possible JSON Outputs
-NOTE: not the same as Python classes
+# TODO environ? authenticate_user import?
+@sio.on('connect')
+def connect(sid, environ):
+  user_id = authenticate_user(environ)
+  sio.save_session(sid, {'user_id': user_id})
 
-Discussion
-{
-    "_id" : discussion_id<str>,
-    "users" : {user_id<str> : {"name" : name<str>, "active" : active<bool>}, ...},
-    "history": {post_id<str> : post_data<Post>}},
-    "history_blocks": {block_id<str> : block_data<Block>},
-    "internal_tags": {tag<str> : tag_data<Tag>, ...}
-}
 
-User
-{
-    "_id" : user_id<str>,
-    "discussions" : {
-        "active" : is_active<bool>,
-        "name" : name<str>,
-        "history" : [post_id1<str>, post_id2<str>, ...],
-        "library" : {
-            "posts" : {post_id1<str> : None, post_id2<str> : None, ...}
-            "blocks" : {block_id1<str> : None, block_id2<str> : None, ...} 
-        }
-    }
-}
-
-Post
-{
-    "_id" : post_id<str>,
-    "user" : user_id<str>,
-    "blocks" : [block_id1<str>, block_id2<str>, ...],
-    "tags" : {tag<str> : {"owner" : user_id<str>}},
-    "created_at" : time_stamp<str>
-    "author_name" : user_name<str>
-}
-Block
-{
-    "_id" : block_id<str>,
-    "user" : user_id<str>,
-    "post" : post_id<str>,
-    "body" : block_msg<str>,
-    "tags" : {tag<str> : {"owner" : user_id<str>}},
-    "created_at" : time_stamp<str>
-}
-
-"""
+# TODO leave active discussion
+@sio.on('disconnect')
+def disconnect(sid, environ):
+  #discussion_id = sio.session(sid)["active_discussion_id"]
+  #user_id = sio.session(sid)["user_id"]
+  self.gm.discussion_manager.leave(discussion_id, user_id)
 
 """
 Input: None
 Output: discussion_ids: [discussion_id1<str>, discussion_id2<str>, ...]
 """
-
-
+# TODO fix mongo db for new schema
 @sio.on('get_discussions')
 async def get_discussions(sid):
     discussion_ids = gm.discussion_manager.get_all()
     return dumps(discussion_ids, cls=UUIDEncoder)
-"""
-USAGE:
-[discussion._id]
-"""
 
-"""
-Input: discussion_id<str>
-Output: discussion_data<Discussion>
-"""
-# @sio.on('get_discussion')
-# async def get_discussion(sid, json):
-#     discussion_id = json["discussion_id"]
-#     discussion_data = gm.discussion_manager.get(discussion_id)
-#     return dumps(discussion_data, cls=UUIDEncoder)
-"""
-USAGE: not used
-"""
-
-"""
-Input: discussion_id<str>
-Output: names : [name1<str>, name2<str>, ...]
-"""
-# @sio.on('get_discussion_names')
-# async def get_discussion_names(sid, json):
-#     discussion_id = json["discussion_id"]
-#     names = gm.discussion_manager.get_names(discussion_id)
-#     return dumps(names, cls=UUIDEncoder)
-"""
-USAGE: not used 
-"""
 
 """
 Input: discussion_id<str>
@@ -119,34 +46,25 @@ Output: posts_info : [
     }, 
 ...] 
 """
-
-
 @sio.on('get_posts')
 async def get_posts(sid, json):
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     discussion_id = json["discussion_id"]
     posts_info = gm.discussion_manager.get_posts_flattened(discussion_id)
     return dumps(posts_info, cls=UUIDEncoder)
-"""
-USAGE: 
-[post_data.blocks]
-[post_data.created_at]
-[post_data.user]
-add --> [post_data.user_name] ?
-"""
+
 
 """
 Input: user_id<str>
 Output: None
 """
-
-
+# TODO clarify how this interacts with connect
 @sio.on('create_user')
 async def create_user(sid, json):
+    #user_id = sio.session(sid)["user_id"]
     ip = json["user_id"]
     gm.user_manager.create(ip)
-"""
-USAGE: user_data not used
-"""
+
 
 """
 Input: discussion_id<str>, block_id<str>
@@ -158,62 +76,23 @@ Output: block_info: {
     }, ...]
 }
 """
-
-
 @sio.on('get_block')
 async def get_block(sid, json):
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     discussion_id = json["discussion_id"]
     block_id = json["block_id"]
     block_data = gm.discussion_manager.get_block_flattened(discussion_id, block_id)
     return dumps(block_data, cls=UUIDEncoder)
-"""
-USAGE: 
-block_data.body
-block_data.tags
-"""
 
-"""
-Input: user_id<str>, discussion_id<str>, block_id<str>
-Output: {"post_id" : post_id<str>}
-"""
-# @sio.on('save_post')
-# async def save_post(sid, json):
-#     user_id = json["user_id"]
-#     discussion_id = json["discussion_id"]
-#     post_id = json["post_id"]
-#     gm.user_manager.save_post(user_id, discussion_id, post_id)
-#     serialized = dumps({"post_id": post_id}, cls=UUIDEncoder)
-#     await sio.emit("saved_post", serialized, to=sid)
-#     return serialized
-"""
-USAGE: not used
-"""
-
-"""
-Input: user_id<str>, discussion_id<str>, block_id<str>
-Output: {"post_id" : post_id<str>}
-"""
-# @sio.on('unsave_post')
-# async def unsave_post(sid, json):
-#     user_id = json["user_id"]
-#     discussion_id = json["discussion_id"]
-#     post_id = json["post_id"]
-#     gm.user_manager.unsave_post(user_id, discussion_id, post_id)
-#     serialized = dumps({"post_id": post_id}, cls=UUIDEncoder)
-#     await sio.emit("unsaved_post", serialized, to=sid)
-#     return serialized
-"""
-USAGE: not used
-"""
 
 """
 Input: user_id<str>, discussion_id<str>, block_id<str>
 Output: {"block_id" : block_id<str>}
 """
-
-
 @sio.on('save_block')
 async def save_block(sid, json):
+    #user_id = sio.session(sid)["user_id"]
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     user_id = json["user_id"]
     discussion_id = json["discussion_id"]
     block_id = json["block_id"]
@@ -221,19 +100,16 @@ async def save_block(sid, json):
     serialized = dumps({"block_id": block_id}, cls=UUIDEncoder)
     await sio.emit("saved_block", serialized, to=sid)
     return serialized
-"""
-USAGE:
-block_id
-"""
+
 
 """
 Input: user_id<str>, discussion_id<str>, block_id<str>
 Output: {"block_id" : block_id<str>}
 """
-
-
 @sio.on('unsave_block')
 async def unsave_block(sid, json):
+    #user_id = sio.session(sid)["user_id"]
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     user_id = json["user_id"]
     discussion_id = json["discussion_id"]
     block_id = json["block_id"]
@@ -241,78 +117,21 @@ async def unsave_block(sid, json):
     serialized = dumps({"block_id": block_id}, cls=UUIDEncoder)
     await sio.emit("unsaved_block", serialized, to=sid)
     return serialized
-"""
-USAGE: block_id
-"""
 
-"""
-Input: user_id<str>, discussion_id<str>
-Output: post_ids: [post_id1<str>, post_id2<str>, ...]
-"""
-# @sio.on('get_saved_posts')
-# async def get_saved_posts(sid, json):
-#     user_id = json["user_id"]
-#     discussion_id = json["discussion_id"]
-#     post_ids = gm.user_manager.get_user_saved_post_ids(user_id, discussion_id)
-#     return dumps(post_ids, cls=UUIDEncoder)
-"""
-USAGE: not used
-"""
 
 """
 Input: user_id<str>, discussion_id<str>
 Output: block_ids: [block_id1<str>, block_id2<str>, ...]
 """
-
-
 @sio.on('get_saved_blocks')
 async def get_saved_blocks(sid, json):
+    #user_id = sio.session(sid)["user_id"]
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     user_id = json["user_id"]
     discussion_id = json["discussion_id"]
     block_ids = gm.user_manager.get_user_saved_block_ids(user_id, discussion_id)
     return dumps(block_ids, cls=UUIDEncoder)
-"""
-USAGE:
-[block_id]
-"""
 
-"""
-Input: discussion_id<str>, user_id<str>, post_id<str>, tag<str> 
-Output: {"post_id" : post_id<str>, "user_id" : user_id<str>, "tag" : tag<str>}
-"""
-# @sio.on('post_add_tag')
-# async def post_add_tag(sid, json):
-#     discussion_id = json["discussion_id"]
-#     user_id = json["user_id"]
-#     post_id = json["post_id"]
-#     tag = json["tag"]
-#     gm.discussion_manager.post_add_tag(discussion_id, user_id, post_id, tag)
-#     serialized = dumps({"post_id": post_id, "user_id": user_id, "tag": tag},
-#                        cls=UUIDEncoder, broadcast=True)
-#     await sio.emit("tagged_post", serialized, room=discussion_id)
-#     return serialized
-"""
-USAGE: not used
-"""
-
-"""
-Input: discussion_id<str>, user_id<str>, post_id<str>, tag<str> 
-Output: {"post_id" : post_id<str>, "tag" : tag<str>}
-"""
-# @sio.on('post_remove_tag')
-# async def post_remove_tag(sid, json):
-#     discussion_id = json["discussion_id"]
-#     user_id = json["user_id"]
-#     post_id = json["post_id"]
-#     tag = json["tag"]
-#     gm.discussion_manager.post_remove_tag(discussion_id, user_id, post_id, tag)
-#     serialized = dumps({"post_id": post_id, "tag": tag},
-#                        cls=UUIDEncoder, broadcast=True)
-#     await sio.emit("untagged_post", serialized, room=discussion_id)
-#     return serialized
-""""
-USAGE: not used
-"""
 
 """
 Input: discussion_id<str>, user_id<str>, block_id<str>, tag<str> 
@@ -322,10 +141,10 @@ Output: {
     "tag" : tag<str>
 }
 """
-
-
 @sio.on('block_add_tag')
 async def block_add_tag(sid, json):
+    #user_id = sio.session(sid)["user_id"]
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
     block_id = json["block_id"]
@@ -335,12 +154,7 @@ async def block_add_tag(sid, json):
                        cls=UUIDEncoder)
     await sio.emit("tagged_block", serialized, room=discussion_id)
     return serialized
-"""
-USAGE:
-block_id
-tag
-user_id
-"""
+
 
 """
 Input: discussion_id<str>, user_id<str>, block_id<str>, tag<str> 
@@ -349,10 +163,10 @@ Output: {
     "tag" : tag<str>
 }
 """
-
-
 @sio.on('block_remove_tag')
 async def block_remove_tag(sid, json):
+    #user_id = sio.session(sid)["user_id"]
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
     block_id = json["block_id"]
@@ -362,11 +176,7 @@ async def block_remove_tag(sid, json):
                        cls=UUIDEncoder)
     await sio.emit("untagged_block", serialized, room=discussion_id)
     return serialized
-"""
-USAGE:
-block_id
-tag
-"""
+
 
 """
 Input: {
@@ -376,8 +186,6 @@ Input: {
 } 
 Output: discussion_id<str>
 """
-
-
 @sio.on('create_discussion')
 async def create_discussion(sid, json):
     title = json["title"]
@@ -396,20 +204,18 @@ async def create_discussion(sid, json):
     # eventually might only want to do this on the global map, and even then...
     await sio.emit("created_discussion", serialized)
     return serialized
-"""
-USAGE: used
-"""
+
 
 """
 Input: discussion_id<str>
 Output: None
 """
-
-
 @sio.on('remove_discussion')
 async def remove_discussion(sid, json):
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     discussion_id = json["discussion_id"]
     gm.discussion_manager.remove(discussion_id)
+
 
 """
 Input: discussion_id<str>, user_id<str>, name<str>
@@ -420,10 +226,10 @@ Output: {
     "num_users" : num_users<int>
 } 
 """
-
-
 @sio.on('join_discussion')
 async def join_discussion(sid, json):
+    #user_id = sio.session(sid)["user_id"]
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
     name = json["name"]
@@ -435,9 +241,6 @@ async def join_discussion(sid, json):
         return serialized
     return None
 
-"""
-USAGE: discussion_data not used
-"""
 
 """
 Input: discussion_id<str>, user_id<str>
@@ -446,10 +249,10 @@ Output: {
     "num_users" : num_users<int>
 } 
 """
-
-
 @sio.on('leave_discussion')
 async def leave_discussion(sid, json):
+    #user_id = sio.session(sid)["user_id"]
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
     info = gm.discussion_manager.leave(discussion_id, user_id)
@@ -457,22 +260,20 @@ async def leave_discussion(sid, json):
     sio.leave_room(sid, discussion_id)
     await sio.emit("left_discussion", serialized, room=discussion_id)
     return serialized
-"""
-USAGE: not used
-"""
+
 
 """
 Input: discussion_id<str>, user_id<str>, blocks: [block_msg1<str>, block_msg2<str>, ...]
 Output: {"num_users" : num_users<int>} 
 """
-
-
 @sio.on('get_num_users')
 async def get_num_users(sid, json):
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     discussion_id = json["discussion_id"]
     num_users = gm.discussion_manager.get_num_users(discussion_id)
     serialized = dumps({"num_users": num_users}, cls=UUIDEncoder)
     return serialized
+
 
 """
 Input: discussion_id<str>, user_id<str>, blocks: [block_msg1<str>, block_msg2<str>, ...]
@@ -481,10 +282,10 @@ Output: post_info: {
     "blocks" : [block_id1<str>, block_id2<str>, ...]
 } 
 """
-
-
 @sio.on('create_post')
 async def create_post(sid, json):
+    #user_id = sio.session(sid)["user_id"]
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
     blocks = json["blocks"]
@@ -492,10 +293,7 @@ async def create_post(sid, json):
     serialized = dumps(post_info, cls=UUIDEncoder)
     await sio.emit("created_post", serialized, room=discussion_id)
     return serialized
-"""
-USAGE: 
-post_data.blocks
-"""
+
 
 """
 Input: discussion_id<str>, query<str> 
@@ -504,10 +302,9 @@ Output: result: {
     "blocks" : [block_id1<str>, block_id2<str>, ...] 
 } 
 """
-
-
 @sio.on('search_discussion')
 async def search_discussion(sid, json):
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     discussion_id = json["discussion_id"]
     query = json["query"]
     result = gm.discussion_manager.discussion_scope_search(discussion_id, query)
@@ -522,10 +319,9 @@ Output: result: {
     "blocks" : [block_id1<str>, block_id2<str>, ...] 
 } 
 """
-
-
 @sio.on('search_discussion_tags')
 async def search_discussion_tags(sid, json):
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     discussion_id = json["discussion_id"]
     tags = json["tags"]
     result = gm.discussion_manager.discussion_tag_search(discussion_id, tags)
@@ -540,10 +336,10 @@ Output: result: {
     "blocks" : [block_id1<str>, block_id2<str>, ...] 
 } 
 """
-
-
 @sio.on('search_user_saved')
 async def search_user_saved(sid, json):
+    #user_id = sio.session(sid)["user_id"]
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
     query = json["query"]
@@ -559,10 +355,10 @@ Output: result: {
     "blocks" : [block_id1<str>, block_id2<str>, ...] 
 } 
 """
-
-
 @sio.on('search_user_saved_tags')
 async def search_user_saved_tags(sid, json):
+    #user_id = sio.session(sid)["user_id"]
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     discussion_id = json["discussion_id"]
     user_id = json["user_id"]
     tags = json["tags"]
@@ -581,10 +377,9 @@ On failure: {
   "err": err<int>
 }
 """
-
-
 @sio.on('summary_add_block')
 async def summary_add_block(sid, json):
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     discussion_id = json["discussion_id"]
     body = json["body"]
     block_id, err = gm.discussion_manager.summary_add_block(discussion_id, body)
@@ -607,10 +402,9 @@ On failure: {
   "err": err<int>
 }
 """
-
-
 @sio.on('summary_modify_block')
 async def summary_modify_block(sid, json):
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     discussion_id = json["discussion_id"]
     block_id = json["block_id"]
     body = json["body"]
@@ -630,10 +424,9 @@ Output: {
   "block_id": block_id<str>,
 } 
 """
-
-
 @sio.on('summary_remove_block')
 async def summary_remove_block(sid, json):
+    #discussion_id = sio.session(sid)["active_discussion_id"]
     discussion_id = json["discussion_id"]
     block_id = json["block_id"]
     gm.discussion_manager.summary_remove_block(discussion_id, block_id)
