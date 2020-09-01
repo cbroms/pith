@@ -27,7 +27,14 @@ echo "sudo systemctl restart mongodb" >> startup.sh
 sudo apt-get install redis-server
 echo "redis-server" >> startup.sh
 
+# arq
 echo "arq worker.WorkerSettings &" >> startup.sh
+
+# open port for development
+sudo ufw allow 8080
 
 # automate start-up script
 chmod +x startup.sh
+
+# .env file
+echo "Remember to make a .env file with REDIS_IP, REDIS_PORT, MONGO_CONN."
