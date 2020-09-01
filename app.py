@@ -224,7 +224,7 @@ class DiscussionNamespace(Namespace):
         :type block_id: str
 
         :return: block_id
-        rtype: str 
+        :rtype: str 
         """
         user_id = sio.session(sid)["user_id"]
         discussion_id = sio.session(sid)["active_discussion_id"]
@@ -244,7 +244,7 @@ class DiscussionNamespace(Namespace):
         :type block_id: str
 
         :return: block_id
-        rtype: str 
+        :rtype: str 
         """
         user_id = sio.session(sid)["user_id"]
         discussion_id = sio.session(sid)["active_discussion_id"]
@@ -262,7 +262,7 @@ class DiscussionNamespace(Namespace):
         :type user_id: str
 
         :return: block_ids
-        rtype: List[str]
+        :rtype: List[str]
         """
         user_id = sio.session(sid)["user_id"]
         discussion_id = sio.session(sid)["active_discussion_id"]
