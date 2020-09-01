@@ -47,7 +47,7 @@ async def create_user(sid, json):
 # Discussion-based functions.
 
 
-class DiscussionNamespace(Namespace):
+class DiscussionNamespace(AsyncNamespace):
     """
     Namespace functions for the discussion abstraction.
     """
