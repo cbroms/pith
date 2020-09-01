@@ -2,6 +2,9 @@ FROM ubuntu:18.04
 
 ENV LANG C.UTF-8
 
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    rm -rf /var/lib/apt/lists/*
 RUN add-apt-repository ppa:deadsnakes/ppa \
     && apt-get update \
     && apt-get install -y \
@@ -10,7 +13,8 @@ RUN add-apt-repository ppa:deadsnakes/ppa \
     software-properties-common \
     python3.8 \
     python3.8-dev \
-    python3.8-distutils
+    python3.8-distutils \
+    python3-pip
 
 RUN python3.8 -m pip --no-cache-dir install --upgrade \
     pip \
