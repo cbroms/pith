@@ -22,7 +22,7 @@ $ sudo systemctl start mongod
 In a `.env` file in the repository root, add:
 
 ```
-MONGO_CONN=mongodb://localhost:27017/'
+MONGO_CONN=mongodb://localhost:27017/
 ```
 
 Alternatively, spin up an instance in the cloud with [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) and get the connection string. Add it to a `.env` file under `MONGO_CONN`:
@@ -54,7 +54,7 @@ REDIS_PORT=6379
 
 ### Install Pith API
 
-This project uses Python 3.8. You probably want to create a virutal environment:
+This project uses Python 3.8. You probably want to create a virtual environment:
 
 ```
 $ python3.8 -m venv env
