@@ -18,16 +18,16 @@ sio.attach(aio_app)
 
 
 @sio.on('connect')
-def connect(sid, environ):
+async def connect(sid, environ):
   user_id = sid # TODO placeholder
-  sio.save_session(sid, {'user_id': user_id})
-  sio.save_session(sid, {'active_discussion_id': None})
+  await sio.save_session(sid, {'user_id': user_id, 'active_discussion_id': None})
 
 
 @sio.on('disconnect')
-def disconnect(sid):
-  discussion_id = sio.session(sid)["active_discussion_id"]
-  user_id = sio.session(sid)["user_id"]
+async def disconnect(sid):
+  session = await sio.get_session(sid)
+  discussion_id = session["active_discussion_id"]
+  user_id = session["user_id"]
   if discussion_id:
     self.gm.discussion_manager.leave(discussion_id, user_id)
 
@@ -42,7 +42,8 @@ async def create_user(sid, json):
     :param user_id: 
     :type user_id: str
     """
-    user_id = sio.session(sid)["user_id"]
+    session = await sio.get_session(sid)
+    user_id = session["user_id"]
     gm.user_manager.create(user_id)
 
 
@@ -73,7 +74,8 @@ class DiscussionNamespace(AsyncNamespace):
           - **created_at** (*str*) -
           - **blocks** (*List[str]*) -
         """
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        discussion_id = session["active_discussion_id"]
         posts_info = gm.discussion_manager.get_posts_flattened(discussion_id)
         return dumps(posts_info, cls=UUIDEncoder)
 
@@ -111,7 +113,8 @@ class DiscussionNamespace(AsyncNamespace):
         :param discussion_id:
         :type discussion_id: str
         """
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        discussion_id = session["active_discussion_id"]
         gm.discussion_manager.remove(discussion_id)
 
     async def join(sid, json):
@@ -129,8 +132,9 @@ class DiscussionNamespace(AsyncNamespace):
           - **theme** (*str*) -
           - **num_users** (*int*) -
         """
-        user_id = sio.session(sid)["user_id"]
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        user_id = session["user_id"]
+        discussion_id = session["active_discussion_id"]
         name = json["name"]
         info = gm.discussion_manager.join(discussion_id, user_id, name)
         if info is not None:
@@ -151,8 +155,9 @@ class DiscussionNamespace(AsyncNamespace):
           - **discussion_id** (*str*) - 
           - **num_users** (*int* - 
         """
-        user_id = sio.session(sid)["user_id"]
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        user_id = session["user_id"]
+        discussion_id = session["active_discussion_id"]
         info = gm.discussion_manager.leave(discussion_id, user_id)
         serialized = dumps(info, cls=UUIDEncoder)
         sio.leave_room(sid, discussion_id)
@@ -171,7 +176,8 @@ class DiscussionNamespace(AsyncNamespace):
         :return: **num_users**
         :rtype: int
         """
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        discussion_id = session["active_discussion_id"]
         num_users = gm.discussion_manager.get_num_users(discussion_id)
         serialized = dumps({"num_users": num_users}, cls=UUIDEncoder)
         return serialized
@@ -189,8 +195,9 @@ class DiscussionNamespace(AsyncNamespace):
           - **post_id** (*str*) -
           - **blocks** (*List[str]*) - 
         """
-        user_id = sio.session(sid)["user_id"]
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        user_id = session["user_id"]
+        discussion_id = session["active_discussion_id"]
         blocks = json["blocks"]
         post_info = gm.discussion_manager.create_post(discussion_id, user_id, blocks)
         serialized = dumps(post_info, cls=UUIDEncoder)
@@ -211,7 +218,8 @@ class DiscussionNamespace(AsyncNamespace):
           - **tags** (*str*)
             - **owner** (*str*) 
         """
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        discussion_id = session["active_discussion_id"]
         block_id = json["block_id"]
         block_data = gm.discussion_manager.get_block_flattened(discussion_id, block_id)
         return dumps(block_data, cls=UUIDEncoder)
@@ -228,8 +236,9 @@ class DiscussionNamespace(AsyncNamespace):
         :return: block_id
         :rtype: str 
         """
-        user_id = sio.session(sid)["user_id"]
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        user_id = session["user_id"]
+        discussion_id = session["active_discussion_id"]
         block_id = json["block_id"]
         gm.user_manager.save_block(user_id, discussion_id, block_id)
         serialized = dumps({"block_id": block_id}, cls=UUIDEncoder)
@@ -248,8 +257,9 @@ class DiscussionNamespace(AsyncNamespace):
         :return: block_id
         :rtype: str 
         """
-        user_id = sio.session(sid)["user_id"]
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        user_id = session["user_id"]
+        discussion_id = session["active_discussion_id"]
         block_id = json["block_id"]
         gm.user_manager.unsave_block(user_id, discussion_id, block_id)
         serialized = dumps({"block_id": block_id}, cls=UUIDEncoder)
@@ -266,8 +276,9 @@ class DiscussionNamespace(AsyncNamespace):
         :return: block_ids
         :rtype: List[str]
         """
-        user_id = sio.session(sid)["user_id"]
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        user_id = session["user_id"]
+        discussion_id = session["active_discussion_id"]
         block_ids = gm.user_manager.get_user_saved_block_ids(user_id, discussion_id)
         return dumps(block_ids, cls=UUIDEncoder)
 
@@ -287,8 +298,9 @@ class DiscussionNamespace(AsyncNamespace):
           - **user_id** (*str*) - 
           - **tag** (*str*) - 
         """
-        user_id = sio.session(sid)["user_id"]
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        user_id = session["user_id"]
+        discussion_id = session["active_discussion_id"]
         block_id = json["block_id"]
         tag = json["tag"]
         gm.discussion_manager.block_add_tag(discussion_id, user_id, block_id, tag)
@@ -312,8 +324,9 @@ class DiscussionNamespace(AsyncNamespace):
           - **block_id** (*str*) -
           - **tag** (*str*) - 
         """
-        user_id = sio.session(sid)["user_id"]
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        user_id = session["user_id"]
+        discussion_id = session["active_discussion_id"]
         block_id = json["block_id"]
         tag = json["tag"]
         gm.discussion_manager.block_remove_tag(discussion_id, user_id, block_id, tag)
@@ -332,7 +345,8 @@ class DiscussionNamespace(AsyncNamespace):
         :return: **blocks**
         :rtype: List[str]
         """
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        discussion_id = session["active_discussion_id"]
         query = json["query"]
         result = gm.discussion_manager.discussion_scope_search(discussion_id, query)
         serialized = dumps(result, cls=UUIDEncoder)
@@ -348,7 +362,8 @@ class DiscussionNamespace(AsyncNamespace):
         :return: **blocks**
         :rtype: List[str]
         """
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        discussion_id = session["active_discussion_id"]
         tags = json["tags"]
         result = gm.discussion_manager.discussion_tag_search(discussion_id, tags)
         serialized = dumps(result, cls=UUIDEncoder)
@@ -366,8 +381,9 @@ class DiscussionNamespace(AsyncNamespace):
         :return: **blocks**
         :rtype: List[str]
         """
-        user_id = sio.session(sid)["user_id"]
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        user_id = session["user_id"]
+        discussion_id = session["active_discussion_id"]
         query = json["query"]
         result = gm.discussion_manager.user_saved_scope_search(discussion_id, user_id, query)
         serialized = dumps(result, cls=UUIDEncoder)
@@ -385,8 +401,9 @@ class DiscussionNamespace(AsyncNamespace):
         :return: **blocks**
         :rtype: List[str]
         """
-        user_id = sio.session(sid)["user_id"]
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        user_id = session["user_id"]
+        discussion_id = session["active_discussion_id"]
         tags = json["tags"]
         result = gm.discussion_manager.user_saved_tag_search(discussion_id, user_id, tags)
         serialized = dumps(result, cls=UUIDEncoder)
@@ -407,7 +424,8 @@ class DiscussionNamespace(AsyncNamespace):
           - **-1**: D_S_B_C_BC
           - **-2**: D_S_B_C_SC
         """
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        discussion_id = session["active_discussion_id"]
         body = json["body"]
         block_id, err = gm.discussion_manager.summary_add_block(discussion_id, body)
         if err is None:
@@ -435,7 +453,8 @@ class DiscussionNamespace(AsyncNamespace):
           - **-1**: D_S_B_C_BC
           - **-2**: D_S_B_C_SC
         """
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        discussion_id = session["active_discussion_id"]
         block_id = json["block_id"]
         body = json["body"]
         err = gm.discussion_manager.summary_modify_block(discussion_id, block_id, body)
@@ -457,7 +476,8 @@ class DiscussionNamespace(AsyncNamespace):
         :return: block_id
         :rtype: str
         """
-        discussion_id = sio.session(sid)["active_discussion_id"]
+        session = await sio.get_session(sid)
+        discussion_id = session["active_discussion_id"]
         block_id = json["block_id"]
         gm.discussion_manager.summary_remove_block(discussion_id, block_id)
         serialized = {"block_id": block_id}
