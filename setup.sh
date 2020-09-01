@@ -29,7 +29,5 @@ echo "redis-server" >> startup.sh
 
 echo "arq worker.WorkerSettings &" >> startup.sh
 
-
-
 # automate start-up script
 chmod +x startup.sh

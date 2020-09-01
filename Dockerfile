@@ -28,6 +28,6 @@ RUN python3.8 -m pip install -r /api/requirements.txt
 
 WORKDIR /api 
 
-EXPOSE 8000
+EXPOSE 8080
 
-CMD [ "python3", "app.py" ]
+CMD [ "python3.8", "app.py" ]
