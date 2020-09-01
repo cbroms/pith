@@ -13,7 +13,7 @@ entity's model/feature file?
 
 After this, make sure all the calls/objects used are correct.
 
->> example serving doc webpages with port 1234
+>> example serving doc webpages with port 1234 in docs directory
 sudo ufw status
 sudo ufw allow 1234
 python3 -m http.server 1234 

@@ -90,7 +90,8 @@ Since the worker script and websockets server both use the same Redis server, th
 Deploying the required services is done with Docker. Build and run it:
 
 ```
-$ docker-compose up 
+$ sudo docker-compose up --build -d
+$ sudo docker-compose up
 ```
 
 
