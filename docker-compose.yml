@@ -1,8 +1,10 @@
-version: '3'
+version: "3"
 services:
-  web:
-    build: .
-    ports:
-      - "8080:8080"
-  redis:
-    image: "redis:alpine"
+    web:
+        build: .
+        environment:
+            - port=8080
+        ports:
+            - "8080:8080"
+    redis:
+        image: "redis:alpine"

@@ -1,3 +1,5 @@
+import constants
+
 from aiohttp import web
 from json import dumps
 from socketio import AsyncNamespace
@@ -465,4 +467,4 @@ class DiscussionNamespace(AsyncNamespace):
 sio.register_namespace(DiscussionNamespace('/discussion'))
 
 if __name__ == '__main__':
-    web.run_app(aio_app)
+    web.run_app(aio_app, port=constants.PORT)

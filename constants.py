@@ -8,6 +8,8 @@ from arq.connections import RedisSettings
 from dotenv import load_dotenv
 load_dotenv()
 
+# the port to run the socketio server 
+PORT = os.getenv("PORT", 8080)
 
 # connect to the redis server instance. When running locally, use 127.0.0.1, or
 # use the container name if using docker within a docker network
