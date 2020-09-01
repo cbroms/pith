@@ -1,5 +1,6 @@
+from aiohttp import web
 from json import dumps
-from socketio import Namespace
+from socketio import AsyncNamespace
 from uuid import UUID
 
 from models.global_manager import GlobalManager
@@ -8,6 +9,10 @@ from utils.utils import UUIDEncoder
 gm = GlobalManager()
 sio = gm.sio
 app = gm.app
+
+# for deployment, use aiohttp
+aio_app = web.Application()
+sio.attach(aio_app)
 
 
 # TODO environ? authenticate_user import?
@@ -45,7 +50,7 @@ async def create_user(sid, json):
 """
 Discussion-based functions.
 """
-class DiscussionNamespace(Namespace):
+class DiscussionNamespace(AsyncNamespace):
   """
   Input: None
   Output: discussion_ids: [discussion_id1<str>, discussion_id2<str>, ...]
@@ -405,3 +410,6 @@ class DiscussionNamespace(Namespace):
       return serialized
 
 sio.register_namespace(DiscussionNamespace('/discussion'))
+
+if __name__ == '__main__':
+    web.run_app(aio_app)

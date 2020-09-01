@@ -23,4 +23,4 @@ WORKDIR /api
 
 EXPOSE 8000
 
-CMD [ "uvicorn", "app:app", "--host", "0.0.0.0" ]
+CMD [ "python", "app.py" ]
