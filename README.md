@@ -85,6 +85,15 @@ $ arq worker.WorkerSettings
 
 Since the worker script and websockets server both use the same Redis server, then can be run in completely separate processes or even on different machines.
 
+## Deployment 
+
+Deploying the required services is done with Docker. Build and run it:
+
+```
+$ docker-compose up 
+```
+
+
 ## Tests
 
 To run the tests, ensure that MongoDB and Redis are both running locally. Then run the tests:

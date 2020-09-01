@@ -12,7 +12,7 @@ class GlobalManager:
     def __init__(self):
         mgr = socketio.AsyncRedisManager(constants.SOCKET_REDIS)
         self.sio = socketio.AsyncServer(
-            async_mode='asgi',
+            async_mode='aiohttp',
             client_manager=mgr,
             cors_allowed_origins="*"
         )
