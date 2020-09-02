@@ -33,12 +33,10 @@ MONGODB_NAME = "db"
 # compiled searcher for transclusion header
 transclusion_header = re.compile(r"transclude<\d*>")
 
-
 # manage creating and getting the redis pool instance. We only want to
 # instantiate the redis pool once and then use the same pool in all
 # future calls.
 redis = None
-
 
 async def redis_pool():
     # there's probably a better way of doing this without global

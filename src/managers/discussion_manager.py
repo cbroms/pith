@@ -3,6 +3,7 @@ from typing import (
   Any,
   Dict,
   List,
+  Optional,
   Tuple,
 )
 
@@ -259,19 +260,19 @@ class DiscussionManager:
         else:
             return ""
 
-    def _get_block_limit(self, discussion_id: str) -> int:
+    def _get_block_limit(self, discussion_id: str) -> Optional[int]:
         discussion_obj = self.get(discussion_id)
         try:
           return discussion_obj.get().block_char_limit
         except Exception:
-          return -1
+          return None
 
-    def _get_summary_char_left(self, discussion_id: str) -> int:
+    def _get_summary_char_left(self, discussion_id: str) -> Optional[int]:
         discussion_obj = self.get(discussion_id)
         try:
           return discussion_obj.get().summary_char_left
         except Exception:
-          return -1
+          return None
 
     def _set_summary_char_left(self, discussion_id: str, new_limit: int) -> None:
         self.get(discussion_id).update(summary_char_left=new_limit)
@@ -284,12 +285,12 @@ class DiscussionManager:
         raw_body = self._transclusion_get_body(body)
         body_len = len(raw_body)
         block_limit_len = self._get_block_limit(discussion_id)
-        if block_limit_len >= 0:
+        if block_limit_len:
             if body_len > block_limit_len:
                 return "", error.D_S_B_C_BC
 
         summ_char_left = self._get_summary_char_left(discussion_id)
-        if summ_char_left >= 0:
+        if summ_char_left:
             if body_len > summ_char_left:
                 return "", error.D_S_B_C_SC
             else:
@@ -308,12 +309,12 @@ class DiscussionManager:
         original_body = block_obj.body
         body_len = len(body)
         block_limit_len = self._get_block_limit(discussion_id)
-        if block_limit_len >= 0:
+        if block_limit_len:
             if body_len > block_limit_len:
                 return error.D_S_B_C_BC
 
         summ_char_left = self._get_summary_char_left(discussion_id)
-        if summ_char_left >= 0:
+        if summ_char_left:
             new_left = summ_char_left + len(original_body) - body_len
             if new_left < 0:
                 return error.D_S_B_C_SC

@@ -13,12 +13,12 @@ from models.discussion import (
 
 class UserManagerTest(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         gm = GlobalManager()
         self.user_manager = gm.user_manager
         self.log = logging.getLogger("UserManagerTest")
 
-    def test_create_get(self):
+    def test_create_get(self) -> None:
         ip = "12345"
         self.user_manager.create(ip)
         user_obj = self.user_manager.get(ip).get()
@@ -29,7 +29,7 @@ class UserManagerTest(unittest.TestCase):
         user_obj = self.user_manager.get(ip).get()
         self.assertEqual(user_obj.ip, ip)
 
-    def test_in_discussion(self):
+    def test_in_discussion(self) -> None:
         ip = "12345"
         discussion_id = "in_discussion" + str(uuid.uuid4().hex)
         name = "hello"
@@ -47,7 +47,7 @@ class UserManagerTest(unittest.TestCase):
         # assume we still have discussion 
         self.assertFalse(user_obj.discussions.filter(discussion_id=discussion_id).get().active)
 
-    def test_saving_post(self):
+    def test_saving_post(self) -> None:
         ip = "12345"
         ip2 = "67890"
         name = "hello"
@@ -66,7 +66,7 @@ class UserManagerTest(unittest.TestCase):
 
         self.user_manager.leave_discussion(ip, discussion_id)
 
-    def test_saving_block(self):
+    def test_saving_block(self) -> None:
         ip = "12345"
         ip2 = "67890"
         name = "hello"

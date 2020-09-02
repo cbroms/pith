@@ -1,19 +1,10 @@
-typing: https://www.stefaanlippens.net/circular-imports-type-hints-python.html
-
-
-Tags used on posts/blocks within a discussion should be INTERNAL to the 
-discussion and not exposed outside the discussion.  Tags applied to the 
-discussion are naturally externally to the discussion.
-
-Need to think about what is the "base" thing that is being manipulated.
-The mongo entries or the abstract objects.  
-=> This determines if we use a struct/method model or an object model.
-Furthermore, should database methods pertaining to an entity be within the
-entity's model/feature file?
-
-After this, make sure all the calls/objects used are correct.
-
 >> example serving doc webpages with port 1234 in docs directory
 sudo ufw status
 sudo ufw allow 1234
 python3 -m http.server 1234 
+
+>> typing
+https://docs.python.org/3/library/typing.html
+https://github.com/python/mypy
+https://www.stefaanlippens.net/circular-imports-type-hints-python.html
+mypy <file> to type-check within file
