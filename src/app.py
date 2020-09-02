@@ -450,7 +450,7 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = session["active_discussion_id"]
         body = json["body"]
         block_id, err = gm.discussion_manager.summary_add_block(discussion_id, body)
-        if err is None:
+        if not err:
             serialized = {"block_id": block_id, "body": body}
             await self.emit("added_summary_block", serialized, room=discussion_id)
             return serialized
@@ -481,7 +481,7 @@ class DiscussionNamespace(AsyncNamespace):
         block_id = json["block_id"]
         body = json["body"]
         err = gm.discussion_manager.summary_modify_block(discussion_id, block_id, body)
-        if err is None:
+        if not err:
             serialized = {"block_id": block_id, "body": body}
             await self.emit("modified_summary_block", serialized, room=discussion_id)
             return serialized

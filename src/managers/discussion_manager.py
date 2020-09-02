@@ -29,13 +29,13 @@ class DiscussionManager:
     Of discussions.
     """
 
-    def get(self, discussion_id: str):
+    def get(self, discussion_id: str) -> Discussion:
         return Discussion.objects(id=discussion_id)
 
     def remove(self, discussion_id: str) -> None:
         self.get(discussion_id).delete()
 
-    def get_all(self):
+    def get_all(self) -> List[Discussion]:
         return [d.id for d in Discussion.objects()]
 
     #async def create(
@@ -86,7 +86,7 @@ class DiscussionManager:
         user = self.gm.user_manager.get(user_id).get()
         if not self._is_user(discussion_id, user_id):
             if self._name_exists(discussion_id, name):
-                return None
+                return {}
             self.get(discussion_id).update(push__users=user.to_dbref())
             self.gm.user_manager.join_discussion(user_id, discussion_id, name)
         else:
@@ -149,14 +149,12 @@ class DiscussionManager:
         }
         return post_info
 
-    # TODO
-    def get_post(self, discussion_id: str, post_id: str):
+    def get_post(self, discussion_id: str, post_id: str) -> Post:
         discussion_obj = self.get(discussion_id)
         post_obj = discussion_obj.get().history.filter(id=post_id).get()
         return post_obj
 
-    # TODO
-    def get_posts(self, discussion_id: str):
+    def get_posts(self, discussion_id: str) -> List[Post]:
         discussion_obj = self.get(discussion_id)
         return [p for p in discussion_obj.get().history]
 
@@ -164,7 +162,7 @@ class DiscussionManager:
         discussion_obj = self.get(discussion_id)
         return [p.id for p in discussion_obj.get().history]
 
-    def get_posts_flattened(self, discussion_id: str) -> Dict[str, Any]:
+    def get_posts_flattened(self, discussion_id: str) -> List[Dict[str, Any]]:
         discussion_obj = self.get(discussion_id)
         posts_info = [{
             "post_id": p.id,
@@ -175,14 +173,12 @@ class DiscussionManager:
         } for p in discussion_obj.get().history]
         return posts_info
 
-    # TODO
-    def get_block(self, discussion_id: str, block_id: str):
+    def get_block(self, discussion_id: str, block_id: str) -> Block:
         discussion_obj = self.get(discussion_id)
         block_obj = discussion_obj.get().history_blocks.filter(id=block_id)
         return block_obj
 
-    # TODO
-    def get_blocks(self, discussion_id: str):
+    def get_blocks(self, discussion_id: str) -> List[Block]:
         discussion_obj = self.get(discussion_id)
         return [b for b in discussion_obj.get().history_blocks]
 
@@ -199,7 +195,7 @@ class DiscussionManager:
                 "tags": block_obj.tags,
             }
         else:
-            block_info = None
+            block_info = {}
         return block_info
 
     def _is_tag_owner_block(self, discussion_id: str, user_id: str, block_id: str, tag: str) -> str:
@@ -236,8 +232,7 @@ class DiscussionManager:
         discussion_obj = self.get(discussion_id)
         return tag_search(tags, discussion_obj.get().history_blocks)
 
-    # TODO
-    def get_user_saved_blocks(self, discussion_id: str, user_id: str):
+    def get_user_saved_blocks(self, discussion_id: str, user_id: str) -> List[Block]:
         block_ids = self.gm.user_manager.get_user_saved_block_ids(user_id, discussion_id)
         blocks = [self.get_block(discussion_id, b).get() for b in block_ids]
         return blocks
@@ -262,42 +257,41 @@ class DiscussionManager:
         if match_res:
             return match_res[0][11:-1]  # get stuff between "transclude<" and ">"
         else:
-            return None
+            return ""
 
     def _get_block_limit(self, discussion_id: str) -> int:
         discussion_obj = self.get(discussion_id)
         try:
           return discussion_obj.get().block_char_limit
         except Exception:
-          return None
+          return -1
 
     def _get_summary_char_left(self, discussion_id: str) -> int:
         discussion_obj = self.get(discussion_id)
         try:
           return discussion_obj.get().summary_char_left
         except Exception:
-          return None
+          return -1
 
     def _set_summary_char_left(self, discussion_id: str, new_limit: int) -> None:
         self.get(discussion_id).update(summary_char_left=new_limit)
 
-    # TODO
-    def summary_get_block(self, discussion_id: str, block_id: str):
+    def summary_get_block(self, discussion_id: str, block_id: str) -> Block:
         discussion_obj = self.get(discussion_id)
         return discussion_obj.get().summary_blocks.filter(id=block_id)
 
-    def summary_add_block(self, discussion_id: str, body: str) -> Tuple[str, str]:
+    def summary_add_block(self, discussion_id: str, body: str) -> Tuple[str, int]:
         raw_body = self._transclusion_get_body(body)
         body_len = len(raw_body)
         block_limit_len = self._get_block_limit(discussion_id)
-        if block_limit_len:
+        if block_limit_len >= 0:
             if body_len > block_limit_len:
-                return None, error.D_S_B_C_BC
+                return "", error.D_S_B_C_BC
 
         summ_char_left = self._get_summary_char_left(discussion_id)
-        if summ_char_left:
+        if summ_char_left >= 0:
             if body_len > summ_char_left:
-                return None, error.D_S_B_C_SC
+                return "", error.D_S_B_C_SC
             else:
                 summ_char_left = summ_char_left - body_len
                 self._set_summary_char_left(discussion_id, summ_char_left)
@@ -306,20 +300,20 @@ class DiscussionManager:
         self.get(discussion_id).update(push__history_blocks=block_obj)
         self.get(discussion_id).update(push__summary_blocks=block_obj)
         block_id = block_obj.id
-        return block_id, None
+        return block_id, 0
 
-    def summary_modify_block(self, discussion_id: str, block_id: str, body: str) -> Tuple[str, str]:
+    def summary_modify_block(self, discussion_id: str, block_id: str, body: str) -> int:
         # should not be getting transclusions when modifying
         block_obj = self.summary_get_block(discussion_id, block_id).get()
         original_body = block_obj.body
         body_len = len(body)
         block_limit_len = self._get_block_limit(discussion_id)
-        if block_limit_len:
+        if block_limit_len >= 0:
             if body_len > block_limit_len:
                 return error.D_S_B_C_BC
 
         summ_char_left = self._get_summary_char_left(discussion_id)
-        if summ_char_left:
+        if summ_char_left >= 0:
             new_left = summ_char_left + len(original_body) - body_len
             if new_left < 0:
                 return error.D_S_B_C_SC
@@ -327,7 +321,7 @@ class DiscussionManager:
                 self._set_summary_char_left(discussion_id, new_left)
 
         self.get(discussion_id).filter(summary_blocks__id=block_id).update(set__summary_blocks__S__body=body)
-        return None
+        return 0
 
     def summary_remove_block(self, discussion_id: str, block_id: str) -> None:
         discussion_obj = self.get(discussion_id)

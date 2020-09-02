@@ -15,10 +15,10 @@ from utils.utils import make_freq_dict
 
 class SearchTest(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         pass
 
-    def test_basic_search(self):
+    def test_basic_search(self) -> None:
         query = "good whales"
 
         b1 = Block(body="whales whales whales whales"
@@ -79,7 +79,7 @@ class SearchTest(unittest.TestCase):
         results = basic_search(query, [b1, b2, b3, b4, b5, b6])
         self.assertEqual(results, ["6", "3", "1", "2", "4"])
 
-    def test_tag_search(self):
+    def test_tag_search(self) -> None:
         tags = ["good", "whales"]
 
         b1 = Block(body="")

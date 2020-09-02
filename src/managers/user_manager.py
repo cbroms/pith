@@ -17,8 +17,7 @@ class UserManager:
     Of users.
     """
 
-    # TODO
-    def get(self, user_id: str):
+    def get(self, user_id: str) -> User:
         return User.objects(ip=user_id)
 
     def _is_user(self, user_id: str) -> bool:
@@ -91,8 +90,7 @@ class UserManager:
         if self._is_saved_post(user_id, discussion_id, post_id):
             user_obj.filter(discussions__discussion_id=discussion_id).update(pull__discussions__S__library_posts=post_id)
 
-    # TODO
-    def get_user_saved_post_ids(self, user_id: str, discussion_id: str):
+    def get_user_saved_post_ids(self, user_id: str, discussion_id: str) -> List[str]:
         user_obj = self.get(user_id)
         return user_obj.get().discussions.filter(discussion_id=discussion_id).get().library_posts
 
