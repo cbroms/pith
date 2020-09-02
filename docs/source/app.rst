@@ -3,6 +3,11 @@ Pith App Interface
 
 Uncollected Functions
 **********************
+.. automodule:: app.connect
+.. automodule:: app.disconnect
+.. automodule:: app.create
+.. automodule:: app.remove
+.. automodule:: app.create_user
 
 Discussion Namespace
 **********************

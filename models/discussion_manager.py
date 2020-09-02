@@ -29,16 +29,14 @@ class DiscussionManager:
     Of discussions.
     """
 
-    # TODO
     def get(self, discussion_id: str):
         return Discussion.objects(id=discussion_id)
 
     def remove(self, discussion_id: str) -> None:
         self.get(discussion_id).delete()
 
-    # TODO
-#    def get_all(self):
-#        return [d.id for d in Discussion.objects()]
+    def get_all(self):
+        return [d.id for d in Discussion.objects()]
 
     #async def create(
     def create(

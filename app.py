@@ -18,36 +18,65 @@ sio.attach(aio_app)
 logging.basicConfig(level=logging.DEBUG)
 
 
+# TODO board namespace
+
+# TODO need to rethink how to reconcile with discussion connect
 @sio.on('connect')
 async def connect(sid, environ):
-  """
-  :event: connect
-  """
-  logging.info("we are connected!")
   user_id = sid # TODO placeholder
   await sio.save_session(sid, {'user_id': user_id, 'active_discussion_id': None})
 
 
 @sio.on('disconnect')
 async def disconnect(sid):
-  """
-  :event: disconnect
-  """
-  session = await sio.get_session(sid)
-  discussion_id = session["active_discussion_id"]
-  user_id = session["user_id"]
-  if discussion_id:
-    self.gm.discussion_manager.leave(discussion_id, user_id)
+  pass
 
 
-# User-based functions.
+@sio.on('create')
+async def create(sid, json):
+    """
+    :param title:
+    :type title: str
+    :param theme:
+    :type theme: str
+    :param time_limit: seconds
+    :type time_limit: int
 
+    :return: **discussion_id**
+    :rtype: str
+    emit: created
+    """
+    title = json["title"]
+    theme = json["theme"]
+    time_limit = json["time_limit"] if "time_limit" in json else None
+    block_char_limit = json["block_char_limit"] if "block_char_limit" in json else None
+    summary_char_limit = json["summary_char_limit"] if "summary_char_limit" in json else None
+    discussion_id = gm.discussion_manager.create( # TODO await
+        title,
+        theme,
+        time_limit,
+        block_char_limit,
+        summary_char_limit,
+    )
+    serialized = dumps(discussion_id, cls=UUIDEncoder)
+    await sio.emit("created", serialized)
+    return serialized
+
+@sio.on('remove')
+async def remove(sid, json):
+    """
+    :param discussion_id:
+    :type discussion_id: str
+    """
+    discussion_id = json["discussion_id"]
+    gm.discussion_manager.remove(discussion_id)
+
+# TODO User-based functions.
 
 # TODO NEED TO RECONCILE WITH CONNECT
 @sio.on('create_user')
 async def create_user(sid, json):
     """
-    :event: create_user
     :param user_id: 
     :type user_id: str
     """
@@ -56,14 +85,26 @@ async def create_user(sid, json):
     gm.user_manager.create(user_id)
 
 
-# Discussion-based functions.
-
-
 class DiscussionNamespace(AsyncNamespace):
     """
     Namespace functions for the discussion abstraction.
     """
-    async def get(self, sid):
+    async def on_connect(self, sid, environ):
+        user_id = sid # TODO placeholder
+
+        # TODO temporary solution
+        gm.user_manager.create(user_id)
+
+        await self.save_session(sid, {'user_id': user_id, 'active_discussion_id': None})
+
+    async def on_disconnect(self, sid):
+        session = await self.get_session(sid)
+        discussion_id = session["active_discussion_id"]
+        user_id = session["user_id"]
+        if discussion_id:
+          gm.discussion_manager.leave(discussion_id, user_id)
+
+    async def on_get(self, sid):
         """
         :return: **discussion_ids** 
         :rtype: List[str]
@@ -71,7 +112,7 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_ids = gm.discussion_manager.get_all()
         return dumps(discussion_ids, cls=UUIDEncoder)
 
-    async def get_posts(self, sid, json):
+    async def on_get_posts(self, sid, json):
         """
         :param discussion_id:
         :type discussion_id: str
@@ -88,48 +129,7 @@ class DiscussionNamespace(AsyncNamespace):
         posts_info = gm.discussion_manager.get_posts_flattened(discussion_id)
         return dumps(posts_info, cls=UUIDEncoder)
 
-    async def create(self, sid, json):
-        """
-        :param title:
-        :type title: str
-        :param theme:
-        :type theme: str
-        :param time_limit: seconds
-        :type time_limit: int
-
-        :return: **discussion_id**
-        :rtype: str
-        :emit: created
-        """
-        title = json["title"]
-        theme = json["theme"]
-        time_limit = json["time_limit"] if "time_limit" in json else None
-        block_char_limit = json["block_char_limit"] if "block_char_limit" in json else None
-        summary_char_limit = json["summary_char_limit"] if "summary_char_limit" in json else None
-        discussion_id = await gm.discussion_manager.create(
-            title,
-            theme,
-            time_limit,
-            block_char_limit,
-            summary_char_limit,
-        )
-        serialized = dumps(discussion_id, cls=UUIDEncoder)
-        # TODO eventually might only want to do this on the global map, and even then...
-        await self.emit("created", serialized)
-        logging.info("Created output: {}".format(serialized.keys()))
-        return serialized
-
-    async def remove(self, sid, json):
-        """
-        :param discussion_id:
-        :type discussion_id: str
-        """
-        session = await self.get_session(sid)
-        discussion_id = session["active_discussion_id"]
-        gm.discussion_manager.remove(discussion_id)
-
-    # TODO connect
-    async def join(self, sid, json):
+    async def on_join(self, sid, json):
         """
         :param discussion_id:
         :type discussion_id: str
@@ -147,18 +147,18 @@ class DiscussionNamespace(AsyncNamespace):
         """
         session = await self.get_session(sid)
         user_id = session["user_id"]
-        discussion_id = session["active_discussion_id"]
+        discussion_id = json["discussion_id"]
         name = json["name"]
         info = gm.discussion_manager.join(discussion_id, user_id, name)
         if info is not None:
+            await sio.save_session(sid, {'active_discussion_id': discussion_id})
             serialized = dumps(info, cls=UUIDEncoder)
             self.enter_room(sid, discussion_id)
             await self.emit("joined", serialized, room=discussion_id)
             return serialized
         return None
 
-    # TODO disconnect
-    async def leave(self, sid, json):
+    async def on_leave(self, sid, json):
         """
         :param discussion_id:
         :type discussion_id: str
@@ -167,19 +167,20 @@ class DiscussionNamespace(AsyncNamespace):
 
         :returns:
           - **discussion_id** (*str*) - 
-          - **num_users** (*int* - 
+          - **num_users** (*int*) - 
         :emit: left
         """
         session = await self.get_session(sid)
         user_id = session["user_id"]
         discussion_id = session["active_discussion_id"]
         info = gm.discussion_manager.leave(discussion_id, user_id)
+        await sio.save_session(sid, {'active_discussion_id': None})
         serialized = dumps(info, cls=UUIDEncoder)
         self.leave_room(sid, discussion_id)
         await self.emit("left", serialized, room=discussion_id)
         return serialized
 
-    async def get_num_users(self, sid, json):
+    async def on_get_num_users(self, sid, json):
         """
         :param discussion_id:
         :type discussion_id: str
@@ -197,7 +198,7 @@ class DiscussionNamespace(AsyncNamespace):
         serialized = dumps({"num_users": num_users}, cls=UUIDEncoder)
         return serialized
 
-    async def create_post(self, sid, json):
+    async def on_create_post(self, sid, json):
         """
         :param discussion_id:
         :type discussion_id: str
@@ -220,7 +221,7 @@ class DiscussionNamespace(AsyncNamespace):
         await self.emit("created_post", serialized, room=discussion_id)
         return serialized
 
-    async def get_block(self, sid, json):
+    async def on_get_block(self, sid, json):
         """
         :param discussion_id: 
         :type discussion_id: str
@@ -240,7 +241,7 @@ class DiscussionNamespace(AsyncNamespace):
         block_data = gm.discussion_manager.get_block_flattened(discussion_id, block_id)
         return dumps(block_data, cls=UUIDEncoder)
 
-    async def save_block(self, sid, json):
+    async def on_save_block(self, sid, json):
         """
         :param discussion_id: 
         :type discussion_id: str
@@ -249,7 +250,7 @@ class DiscussionNamespace(AsyncNamespace):
         :param block_id: 
         :type block_id: str
 
-        :return: block_id
+        :return: **block_id**
         :rtype: str 
         :emit: saved_block
         """
@@ -262,7 +263,7 @@ class DiscussionNamespace(AsyncNamespace):
         await self.emit("saved_block", serialized, to=sid)
         return serialized
 
-    async def unsave_block(self, sid, json):
+    async def on_unsave_block(self, sid, json):
         """
         :param discussion_id: 
         :type discussion_id: str
@@ -271,7 +272,7 @@ class DiscussionNamespace(AsyncNamespace):
         :param block_id: 
         :type block_id: str
 
-        :return: block_id
+        :return: **block_id**
         :rtype: str 
         :emit: unsaved_block
         """
@@ -284,14 +285,14 @@ class DiscussionNamespace(AsyncNamespace):
         await self.emit("unsaved_block", serialized, to=sid)
         return serialized
 
-    async def get_saved_blocks(self, sid, json):
+    async def on_get_saved_blocks(self, sid, json):
         """
         :param discussion_id: 
         :type discussion_id: str
         :param user_id: 
         :type user_id: str
 
-        :return: block_ids
+        :return: **block_ids**
         :rtype: List[str]
         """
         session = await self.get_session(sid)
@@ -300,7 +301,7 @@ class DiscussionNamespace(AsyncNamespace):
         block_ids = gm.user_manager.get_user_saved_block_ids(user_id, discussion_id)
         return dumps(block_ids, cls=UUIDEncoder)
 
-    async def block_add_tag(self, sid, json):
+    async def on_block_add_tag(self, sid, json):
         """
         :param discussion_id: 
         :type discussion_id: str
@@ -328,7 +329,7 @@ class DiscussionNamespace(AsyncNamespace):
         await self.emit("tagged_block", serialized, room=discussion_id)
         return serialized
 
-    async def block_remove_tag(self, sid, json):
+    async def on_block_remove_tag(self, sid, json):
         """
         :param discussion_id: 
         :type discussion_id: str
@@ -355,7 +356,7 @@ class DiscussionNamespace(AsyncNamespace):
         await self.emit("untagged_block", serialized, room=discussion_id)
         return serialized
 
-    async def search_basic(self, sid, json):
+    async def on_search_basic(self, sid, json):
         """
         :param discussion_id: 
         :type discussion_id: str
@@ -372,7 +373,7 @@ class DiscussionNamespace(AsyncNamespace):
         serialized = dumps(result, cls=UUIDEncoder)
         return serialized
 
-    async def search_tags(self, sid, json):
+    async def on_search_tags(self, sid, json):
         """
         :param discussion_id: 
         :type discussion_id: str
@@ -389,7 +390,7 @@ class DiscussionNamespace(AsyncNamespace):
         serialized = dumps(result, cls=UUIDEncoder)
         return serialized
 
-    async def search_user_saved_basic(self, sid, json):
+    async def on_search_user_saved_basic(self, sid, json):
         """
         :param discussion_id: 
         :type discussion_id: str
@@ -409,7 +410,7 @@ class DiscussionNamespace(AsyncNamespace):
         serialized = dumps(result, cls=UUIDEncoder)
         return serialized
 
-    async def search_user_saved_tags(self, sid, json):
+    async def on_search_user_saved_tags(self, sid, json):
         """
         :param discussion_id: 
         :type discussion_id: str
@@ -429,7 +430,7 @@ class DiscussionNamespace(AsyncNamespace):
         serialized = dumps(result, cls=UUIDEncoder)
         return serialized
 
-    async def summary_add_block(self, sid, json):
+    async def on_summary_add_block(self, sid, json):
         """
         :param discussion_id: 
         :type discussion_id: str
@@ -457,7 +458,7 @@ class DiscussionNamespace(AsyncNamespace):
             serialized = {"err": err}
             return serialized
 
-    async def summary_modify_block(self, sid, json):
+    async def on_summary_modify_block(self, sid, json):
         """
         :param discussion_id: 
         :type discussion_id: str
@@ -488,14 +489,14 @@ class DiscussionNamespace(AsyncNamespace):
             serialized = {"err": err}
             return serialized
 
-    async def summary_remove_block(self, sid, json):
+    async def on_summary_remove_block(self, sid, json):
         """
         :param discussion_id: 
         :type discussion_id: str
         :param block_id: 
         :type block_id: str
 
-        :return: block_id
+        :return: **block_id**
         :rtype: str
         :emit: removed_summary_block
         """
@@ -507,7 +508,7 @@ class DiscussionNamespace(AsyncNamespace):
         await self.emit("removed_summary_block", serialized, room=discussion_id)
         return serialized
 
-self.register_namespace(DiscussionNamespace('/discussion'))
+sio.register_namespace(DiscussionNamespace('/discussion'))
 
 if __name__ == '__main__':
     web.run_app(aio_app, port=constants.PORT)
