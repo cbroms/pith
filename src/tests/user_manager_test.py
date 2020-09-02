@@ -3,7 +3,7 @@ import sys
 import unittest
 import uuid
 
-from models.global_manager import GlobalManager
+from managers.global_manager import GlobalManager
 from models.user import User
 from models.discussion import (
   Block,

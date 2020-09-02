@@ -5,7 +5,7 @@ import unittest
 import asyncio
 import uuid
 
-from models.global_manager import GlobalManager
+from managers.global_manager import GlobalManager
 
 
 #async def create(self, *args, **kwargs):

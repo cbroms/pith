@@ -3,8 +3,8 @@ import mongoengine
 import socketio
 
 import constants
-from models.user_manager import UserManager
-from models.discussion_manager import DiscussionManager
+from managers.user_manager import UserManager
+from managers.discussion_manager import DiscussionManager
 
 
 class GlobalManager:

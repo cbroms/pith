@@ -6,7 +6,7 @@ from json import dumps
 from socketio import AsyncNamespace
 from uuid import UUID
 
-from models.global_manager import GlobalManager
+from managers.global_manager import GlobalManager
 from utils.utils import UUIDEncoder
 
 gm = GlobalManager()
