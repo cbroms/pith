@@ -4,7 +4,6 @@ import unittest
 import uuid
 
 from managers.global_manager import GlobalManager
-from models.user import User
 from models.discussion import (
   Block,
   Post,
@@ -35,6 +34,12 @@ class UserManagerTest(unittest.TestCase):
         name = "hello"
         self.user_manager.create(ip)
 
+        # joining without name
+        try:
+          self.user_manager.join_discussion(ip, discussion_id)
+        except Exception:
+          pass
+
         # joining (only user-side)
         self.user_manager.join_discussion(ip, discussion_id, name)
         user_obj = self.user_manager.get(ip).get()
@@ -44,6 +49,20 @@ class UserManagerTest(unittest.TestCase):
         # leaving (only user-side)
         self.user_manager.leave_discussion(ip, discussion_id)
         user_obj = self.user_manager.get(ip).get()
+
+        # assume we still have discussion 
+        self.assertFalse(user_obj.discussions.filter(discussion_id=discussion_id).get().active)
+
+        # rejoin
+        self.user_manager.join_discussion(ip, discussion_id)
+        user_obj = self.user_manager.get(ip).get()
+        self.assertTrue(self.user_manager._is_discussion_user(ip, discussion_id))
+        self.assertTrue(user_obj.discussions.filter(discussion_id=discussion_id).get().active)
+
+        # leaving (only user-side)
+        self.user_manager.leave_discussion(ip, discussion_id)
+        user_obj = self.user_manager.get(ip).get()
+
         # assume we still have discussion 
         self.assertFalse(user_obj.discussions.filter(discussion_id=discussion_id).get().active)
 

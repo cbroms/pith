@@ -9,7 +9,7 @@ import sys
 import os
 import signal
 
-from tests.app_test import AppTest
+import AppTest
 from tests.discussion_manager_test import DiscussionManagerTest
 
 

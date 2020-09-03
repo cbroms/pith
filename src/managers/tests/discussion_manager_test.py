@@ -1,9 +1,6 @@
 import logging
 import sys
-import time
 import unittest
-import asyncio
-import uuid
 
 from managers.global_manager import GlobalManager
 
@@ -86,7 +83,7 @@ class DiscussionManagerTest(unittest.TestCase):
         names = self.discussion_manager.get_names(discussion_id)
         self.assertTrue(ip in user_ids)
         self.assertEqual(len(user_ids), 1)
-        self.assertTrue(name in names)
+        self.assertTrue(name in names) # original name used no matter what
         self.assertFalse(name2 in names)
         self.assertEqual(len(names), 1)
         num_users = self.discussion_manager.get_num_users(discussion_id)
@@ -254,7 +251,7 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.join(discussion_id, ip2, name2)
 
         blocks = ["I like whales", "do you like whales?"]
-        post_info1 = self.discussion_manager.create_post(discussion_id, ip1, blocks)
+        _ = self.discussion_manager.create_post(discussion_id, ip1, blocks)
         blocks2 = ["I sort of like whales.", "Whales are big."]
         post_info2 = self.discussion_manager.create_post(discussion_id, ip2, blocks2)
         block_id1 = post_info2["blocks"][1]

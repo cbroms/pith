@@ -7,7 +7,6 @@ from mongoengine import (
 )
 from mongoengine.fields import (
   BooleanField,
-  DictField,
   EmbeddedDocumentListField,
   ListField,
   StringField,

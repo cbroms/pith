@@ -1,8 +1,13 @@
 from collections import Counter, defaultdict
+import datetime
 from functools import reduce
-from json import dumps, JSONEncoder
-from operator import or_
+from json import JSONEncoder
+from mongoengine import (
+  Document,
+  EmbeddedDocument,
+)
 from nltk.stem import PorterStemmer
+from operator import or_
 import string
 from typing import (
   Any,
@@ -10,6 +15,7 @@ from typing import (
   List,
 )
 
+import constants
 from uuid import UUID
 
 
@@ -37,8 +43,12 @@ def sum_dicts(dL: List[Dict[Any, Any]]) -> Dict[Any, Any]:
   return defaultdict(lambda:0, {k:sum([d.get(k,0) for d in dL]) for k in keys})
 
 
-class UUIDEncoder(JSONEncoder):
+class GenericEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, UUID):
             return obj.hex
+        if isinstance(obj, (datetime.date, datetime.datetime)):
+            return obj.strftime(constants.DATE_TIME_FMT)
+        if isinstance(obj, (Document, EmbeddedDocument)):
+            return obj.to_mongo() # dict
         return JSONEncoder.default(self, obj)

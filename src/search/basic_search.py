@@ -1,4 +1,3 @@
-from datetime import datetime
 import math
 import nltk
 from nltk import pos_tag
@@ -8,8 +7,6 @@ from typing import (
   Dict,
   List,
 )
-
-from constants import DATE_TIME_FMT
 
 from models.discussion import Block
 from utils import utils
@@ -39,11 +36,10 @@ def assign_pos_weight(cat: str) -> int:
 
 def make_metric(key_word_list: List[str]) -> Callable[[Dict[str, int]], float]:
     stemmed = [ps.stem(w) for w in key_word_list]
-    pos = pos_tag(key_word_list)
+    pos = pos_tag(stemmed)#key_word_list)
     weights = {w: assign_pos_weight(c) for w, c in pos}
 
     def metric(fd: Dict[str, int]) -> float:
-        score = 0
         word_freq = {w: fd[w] for w in key_word_list if w in fd}
         word_score = [weights[w] * math.log(f + 1) for w, f in word_freq.items()]
         return sum(word_score)

@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import (
   Callable,
   List,
@@ -6,7 +5,6 @@ from typing import (
 )
 
 from models.discussion import Block
-from constants import DATE_TIME_FMT
 
 
 def make_metric(query_tags: List[str]) -> Callable[[Set[str]], float]:

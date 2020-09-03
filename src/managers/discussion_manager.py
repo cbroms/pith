@@ -1,4 +1,3 @@
-import datetime
 from typing import (
   Any,
   Dict,
@@ -83,16 +82,15 @@ class DiscussionManager:
         discussion_obj = self.get(discussion_id)
         return name in [u.discussions.filter(discussion_id=discussion_id).get().name for u in discussion_obj.get().users]
 
-    def join(self, discussion_id: str, user_id: str, name: str) -> Dict[str, Any]:
+    def join(self, discussion_id: str, user_id: str, name: str = None) -> Dict[str, Any]:
         user = self.gm.user_manager.get(user_id).get()
         if not self._is_user(discussion_id, user_id):
-            if self._name_exists(discussion_id, name):
+            if not name or self._name_exists(discussion_id, name):
                 return {}
             self.get(discussion_id).update(push__users=user.to_dbref())
             self.gm.user_manager.join_discussion(user_id, discussion_id, name)
-        else:
-            used_name = self.get_user_name(discussion_id, user_id)
-            self.gm.user_manager.join_discussion(user_id, discussion_id, name)
+        else: # use same name
+            self.gm.user_manager.join_discussion(user_id, discussion_id)
         discussion_obj = self.get(discussion_id).get()
         return {
             "discussion_id": discussion_id,

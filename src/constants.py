@@ -1,5 +1,4 @@
 import os
-import socketio
 import re
 
 from arq import create_pool

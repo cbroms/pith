@@ -1,5 +1,4 @@
 import socketio
-import uuid
 import unittest
 import logging
 import sys

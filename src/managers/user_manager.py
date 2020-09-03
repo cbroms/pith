@@ -55,7 +55,7 @@ class UserManager:
         user_obj = self.get(user_id)
         return user_obj.get().discussions.filter(discussion_id=discussion_id).get().active
 
-    def join_discussion(self, user_id: str, discussion_id: str, name: str) -> None:
+    def join_discussion(self, user_id: str, discussion_id: str, name: str = None) -> None:
         """
         Discussion should check we are not in, or active.
         """
@@ -63,6 +63,7 @@ class UserManager:
         if self._is_discussion_user(user_id, discussion_id): # rejoin
             user_obj.filter(discussions__discussion_id=discussion_id).update(set__discussions__S__active=True)
         else:
+            assert(name is not None)
             u = user_obj.get()
             u.discussions.create(
               discussion_id=discussion_id,

@@ -16,10 +16,9 @@ from mongoengine.fields import (
   ReferenceField,
   StringField,
 )
-from datetime import datetime, timedelta
+from datetime import datetime
 import uuid
 
-from constants import DATE_TIME_FMT
 from models.user import User
 
 
@@ -50,7 +49,7 @@ class Discussion(Document):
     meta = {'collection': 'discussions'}
 
     id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
-    created_at = DateTimeField(default=datetime.utcnow().strftime(DATE_TIME_FMT))
+    created_at = DateTimeField(default=datetime.utcnow())
     users = ListField(ReferenceField(User, reverse_delete_rule=PULL)) 
 
     """
