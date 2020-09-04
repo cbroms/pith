@@ -1,36 +1,44 @@
+import asyncio
 import logging
-import sys
+import time
 import unittest
+from redis import Redis
+from rq.job import Job
 
-from managers.global_manager import GlobalManager
-
-
-#async def create(self, *args, **kwargs):
-#   return await self.discussion_manager.create(*args, **kwargs)
+from app import gm
+from redis_pool import redis_queue
 
 
 class DiscussionManagerTest(unittest.TestCase):
 
     def setUp(self) -> None:
         self.log = logging.getLogger("DiscussionManagerTest")
-        gm = GlobalManager()
         self.discussion_manager = gm.discussion_manager
         self.user_manager = gm.user_manager
+        self.loop = asyncio.get_event_loop()
 
     def test_create_get(self) -> None:
         title = "fake_title"
         theme = "fake_theme"
         time_limit = 5
-        discussion_id = self.discussion_manager.create(title=title, theme=theme)# asyncio.run(create(self, title, theme, time_limit))
-#        discussion_ids = self.discussion_manager.get_all()
-#        self.assertTrue(discussion_id in discussion_ids)
-        discussion_obj = self.discussion_manager.get(discussion_id)
-        self.assertFalse(discussion_obj is None)
-        #self.assertTrue(discussion_obj.expire_at is not None)
-        #self.assertFalse(discussion_obj.expired)
-        #time.sleep(time_limit + 1)
-        #discussion_obj = self.discussion_manager.get(discussion_id)
-        #self.assertTrue(discussion_obj.expired)
+        buff_limit = 1
+        discussion_id = self.loop.run_until_complete(
+            self.discussion_manager.create(title=title, theme=theme, time_limit=time_limit)
+        )
+        discussion_ids = self.discussion_manager.get_all()
+        self.assertTrue(discussion_id in discussion_ids)
+        discussion_obj = self.discussion_manager.get(discussion_id).get()
+        self.assertFalse(discussion_obj.expired)
+        redis = Redis()
+        logging.info("discussion_id {}".format(discussion_id))
+        for i in range(time_limit + buff_limit):
+            results = self.loop.run_until_complete(redis_queue.all_job_results())
+            # https://arq-docs.helpmanual.io/_modules/arq/jobs.html
+            results = [(r.job_id, r.result) for r in results]
+            logging.info("last queued {}: {}".format(i, results[-1]))
+            time.sleep(1)
+        discussion_obj = self.discussion_manager.get(discussion_id).get()
+        self.assertTrue(discussion_obj.expired)
 
     def test_join_leave(self) -> None:
         ip = "12345"
@@ -42,7 +50,10 @@ class DiscussionManagerTest(unittest.TestCase):
         self.user_manager.create(ip)
         self.user_manager.create(ip2)
         #discussion_id = asyncio.run(create(self, title, theme))
-        discussion_id = self.discussion_manager.create(title=title, theme=theme)
+        #discussion_id = self.discussion_manager.create(title=title, theme=theme)
+        discussion_id = self.loop.run_until_complete(
+            self.discussion_manager.create(title=title, theme=theme)
+        )
 
         # test joining
         info = self.discussion_manager.join(discussion_id, ip, name)
@@ -175,7 +186,8 @@ class DiscussionManagerTest(unittest.TestCase):
         self.user_manager.create(ip1)
         self.user_manager.create(ip2)
         #discussion_id = asyncio.run(create(self))
-        discussion_id = self.discussion_manager.create()
+        #discussion_id = self.discussion_manager.create()
+        discussion_id = self.loop.run_until_complete(self.discussion_manager.create())
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
 
@@ -219,7 +231,8 @@ class DiscussionManagerTest(unittest.TestCase):
         self.user_manager.create(ip1)
         self.user_manager.create(ip2)
         #discussion_id = asyncio.run(create(self))
-        discussion_id = self.discussion_manager.create()
+        #discussion_id = self.discussion_manager.create()
+        discussion_id = self.loop.run_until_complete(self.discussion_manager.create())
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
 
@@ -246,7 +259,8 @@ class DiscussionManagerTest(unittest.TestCase):
         self.user_manager.create(ip1)
         self.user_manager.create(ip2)
         #discussion_id = asyncio.run(create(self))
-        discussion_id = self.discussion_manager.create()
+        #discussion_id = self.discussion_manager.create()
+        discussion_id = self.loop.run_until_complete(self.discussion_manager.create())
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
 
@@ -286,7 +300,8 @@ class DiscussionManagerTest(unittest.TestCase):
         self.user_manager.create(ip1)
         self.user_manager.create(ip2)
         #discussion_id = asyncio.run(create(self))
-        discussion_id = self.discussion_manager.create()
+        #discussion_id = self.discussion_manager.create()
+        discussion_id = self.loop.run_until_complete(self.discussion_manager.create())
         self.discussion_manager.join(discussion_id, ip1, name1)
         self.discussion_manager.join(discussion_id, ip2, name2)
 
@@ -321,7 +336,8 @@ class DiscussionManagerTest(unittest.TestCase):
         trans_block = "transclude<400>goodbye then"  # 12
         short = "four"  # 4
         #discussion_id = asyncio.run(create(self, block_char_limit=15))
-        discussion_id = self.discussion_manager.create(block_char_limit=15)
+        #discussion_id = self.discussion_manager.create(block_char_limit=15)
+        discussion_id = self.loop.run_until_complete(self.discussion_manager.create(block_char_limit=15))
         block_id0, err = self.discussion_manager.summary_add_block(discussion_id, trans_block)
         self.assertTrue(err == 0)
         block_id1, err = self.discussion_manager.summary_add_block(discussion_id, block1)
@@ -335,7 +351,8 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.summary_remove_block(discussion_id, block_id1)
 
         #discussion_id = asyncio.run(create(self, summary_char_limit=60))
-        discussion_id = self.discussion_manager.create(summary_char_limit=60)
+        #discussion_id = self.discussion_manager.create(summary_char_limit=60)
+        discussion_id = self.loop.run_until_complete(self.discussion_manager.create(summary_char_limit=60))
         block_id0, err = self.discussion_manager.summary_add_block(discussion_id, trans_block)
         self.assertTrue(err == 0)
         block_id1, err = self.discussion_manager.summary_add_block(discussion_id, block1)
@@ -360,7 +377,8 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.summary_remove_block(discussion_id, block_id3)
 
         #discussion_id = asyncio.run(create(self, block_char_limit=15, summary_char_limit=60))
-        discussion_id = self.discussion_manager.create(block_char_limit=15, summary_char_limit=60)
+        #discussion_id = self.discussion_manager.create(block_char_limit=15, summary_char_limit=60)
+        discussion_id = self.loop.run_until_complete(self.discussion_manager.create(block_char_limit=15, summary_char_limit=60))
         # 12 
         block_id0, err = self.discussion_manager.summary_add_block(discussion_id, trans_block)
         self.assertTrue(err == 0)
@@ -400,6 +418,4 @@ class DiscussionManagerTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(stream=sys.stderr)
-    logging.getLogger("DiscussionManagerTest").setLevel(logging.DEBUG)
     unittest.main()

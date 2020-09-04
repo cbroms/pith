@@ -1,11 +1,13 @@
 import os
 import re
 
-from arq import create_pool
 from arq.connections import RedisSettings
 
 from dotenv import load_dotenv
 load_dotenv()
+
+# whether we are testing
+TEST = os.getenv("TEST", False)
 
 # the port to run the socketio server 
 PORT = os.getenv("PORT", 8080)
@@ -23,24 +25,12 @@ MAX_QUEUED_JOB_RETRIES = 5
 # the maximum number of jobs we should try to run at once from the queue
 MAX_JOBS = 10
 
-
 # using ISO so this can be easily parsed in js with Date()
 DATE_TIME_FMT = "%Y-%m-%dT%H:%M:%SZ"
 MONGO_CONN = os.getenv("MONGO_CONN", "mongodb://localhost:27017")
-MONGODB_NAME = "db"
+MONGO_CONN_TEST = os.getenv("MONGO_CONN_TEST", "mongodb://localhost:27017")
+MONGODB_NAME = "pith"
+MONGODB_NAME_TEST = "pith-test"
 
 # compiled searcher for transclusion header
 transclusion_header = re.compile(r"transclude<\d*>")
-
-# manage creating and getting the redis pool instance. We only want to
-# instantiate the redis pool once and then use the same pool in all
-# future calls.
-redis = None
-
-async def redis_pool():
-    # there's probably a better way of doing this without global
-    global redis
-    if redis == None:
-        # print("create pool")
-        redis = await create_pool(ARQ_REDIS)
-    return redis

@@ -1,3 +1,4 @@
+import logging
 import unittest
 
 from utils import utils
@@ -38,4 +39,5 @@ class TestUtils(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    logging.info("Running util tests...")
     unittest.main()

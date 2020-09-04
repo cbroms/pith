@@ -1,3 +1,5 @@
+import datetime
+import logging
 from typing import (
   Any,
   Dict,
@@ -8,6 +10,7 @@ from typing import (
 
 import constants
 import error
+from redis_pool import redis_queue
 from search.basic_search import basic_search
 from search.tag_search import tag_search
 from utils import utils
@@ -23,6 +26,7 @@ from models.discussion import (
 class DiscussionManager:
 
     def __init__(self, gm):
+        assert(redis_queue is not None)
         self.gm = gm
 
     """
@@ -38,8 +42,14 @@ class DiscussionManager:
     def get_all(self) -> List[Discussion]:
         return [d.id for d in Discussion.objects()]
 
-    #async def create(
-    def create(
+    def expire(self, discussion_id: str) -> Dict[str, Any]:
+        logging.info("...expiring {}".format(discussion_id))
+        discussion_obj = self.get(discussion_id)
+        discussion_obj.update(expired=True)
+        return {"discussion_id": discussion_id}
+
+    async def create(
+    #def create(
         self,
         title: str = None,
         theme: str = None,
@@ -56,11 +66,15 @@ class DiscussionManager:
         )
         discussion_obj.summary_char_left = summary_char_limit # dependency
         discussion_id = discussion_obj.id
-
-       # add the expire event
-#         if time_limit is not None:
-#             redis_queue = await constants.redis_pool()
-#             await redis_queue.enqueue_job("expire_discussion", discussion_id, _defer_by=datetime.timedelta(seconds=time_limit))
+        if time_limit is not None:
+            # won't add job until time limit is reached
+            await redis_queue.enqueue_job(
+                "expire_discussion",
+                discussion_id,
+                _job_id="expire_{}".format(discussion_id),
+                _defer_by=datetime.timedelta(seconds=time_limit)
+            )
+            logging.info("set expiration for {}".format(discussion_id))
 
         discussion_obj.save()
         return discussion_id
@@ -106,7 +120,7 @@ class DiscussionManager:
             "num_users": self.get_num_users(discussion_id),
         }
 
-    def get_num_users(self, discussion_id: str) -> int:  # only active users
+    def get_num_users(self, discussion_id: str) -> int: # only active users
         discussion_obj = self.get(discussion_id)
         num_users = sum([u.discussions.filter(discussion_id=discussion_id).get().active for u in discussion_obj.get().users])
         return num_users
@@ -254,7 +268,7 @@ class DiscussionManager:
     def _transclusion_get_id(self, text: str) -> str:
         match_res = constants.transclusion_header.match(text)
         if match_res:
-            return match_res[0][11:-1]  # get stuff between "transclude<" and ">"
+            return match_res[0][11:-1] # get stuff between "transclude<" and ">"
         else:
             return ""
 
@@ -302,7 +316,6 @@ class DiscussionManager:
         return block_id, 0
 
     def summary_modify_block(self, discussion_id: str, block_id: str, body: str) -> int:
-        # should not be getting transclusions when modifying
         block_obj = self.summary_get_block(discussion_id, block_id).get()
         original_body = block_obj.body
         body_len = len(body)

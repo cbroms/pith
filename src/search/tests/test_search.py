@@ -1,6 +1,5 @@
 from datetime import datetime
 import logging
-import sys
 import unittest
 
 from constants import DATE_TIME_FMT
@@ -110,7 +109,7 @@ class SearchTest(unittest.TestCase):
         results = tag_search(tags, [b1, b2, b3, b4, b5])
         self.assertEqual(results, ["3", "1", "2", "4"])
 
+
 if __name__ == "__main__":
-    logging.basicConfig(stream=sys.stderr)
-    logging.getLogger("SearchTest").setLevel(logging.DEBUG)
+    logging.info("Running search tests...")
     unittest.main()

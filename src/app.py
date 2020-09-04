@@ -1,21 +1,25 @@
-import constants
-import logging
-
 from aiohttp import web
 from json import dumps
+import logging
 from socketio import AsyncNamespace
 
+import constants
 from managers.global_manager import GlobalManager
 from utils.utils import GenericEncoder
 
-gm = GlobalManager()
+logging.basicConfig(level=logging.DEBUG)
+gm = GlobalManager(constants.TEST)
+logging.info("Created global_manager")
 sio = gm.sio
 app = gm.app
+aio_app = gm.aio_app
 
-aio_app = web.Application()
-sio.attach(aio_app)
-logging.basicConfig(level=logging.DEBUG)
 
+async def expire_discussion(ctx, discussion_id):
+    logging.info("expiring {}".format(discussion_id))
+    response = gm.discussion_manager.expire(discussion_id)
+    serialized = dumps(response, cls=GenericEncoder)
+    await sio.emit("discussion_expired", serialized)
 
 # TODO board namespace
 
