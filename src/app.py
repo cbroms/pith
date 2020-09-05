@@ -8,7 +8,7 @@ from managers.global_manager import GlobalManager
 from utils.utils import GenericEncoder
 
 logging.basicConfig(level=logging.DEBUG)
-gm = GlobalManager(constants.TEST)
+gm = GlobalManager()
 logging.info("Created global_manager")
 sio = gm.sio
 app = gm.app
@@ -62,7 +62,7 @@ async def create(sid, json):
     time_limit = json["time_limit"] if "time_limit" in json else None
     block_char_limit = json["block_char_limit"] if "block_char_limit" in json else None
     summary_char_limit = json["summary_char_limit"] if "summary_char_limit" in json else None
-    discussion_id = gm.discussion_manager.create( # TODO await
+    discussion_id = await gm.discussion_manager.create( # TODO await
         title,
         theme,
         time_limit,

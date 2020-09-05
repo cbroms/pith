@@ -1,8 +1,40 @@
 version: "3"
 services:
-    web:
-        build: .
-        ports:
-            - "8080:8080"
-    redis:
-        image: "redis:alpine"
+  app:
+    build:
+      context: .
+      dockerfile: app.Dockerfile
+    depends_on:
+      - worker
+      - mongo
+      - redis
+    ports:
+      - "8080:8080"
+    restart: always
+    environment:
+      MONGODB_CONN: mongodb://root:example@mongo:27017/?authSource=admin
+      REDIS_IP: redis
+  worker:
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    depends_on:
+      - mongo
+      - redis
+    restart: always
+    environment:
+      MONGODB_CONN: mongodb://root:example@mongo:27017/?authSource=admin
+      REDIS_IP: redis
+  redis:
+    image: "redis:alpine"
+    logging:
+      driver: none
+    restart: always
+  mongo:
+    image: mongo
+    restart: always
+    logging:
+      driver: none
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example

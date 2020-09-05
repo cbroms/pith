@@ -1,0 +1,17 @@
+version: "3"
+services:
+  app:
+    logging:
+      driver: none
+  worker:
+    logging:
+      driver: none
+  tests:
+    build:
+      context: .
+      dockerfile: tests.Dockerfile
+    depends_on:
+      - app
+      - worker
+      - mongo
+      - redis
