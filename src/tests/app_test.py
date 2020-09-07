@@ -1,9 +1,7 @@
 from json import loads
 import logging
 import socketio
-import sys
 import unittest
-
 
 
 class AppTest(unittest.TestCase):

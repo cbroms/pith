@@ -8,3 +8,6 @@ https://docs.python.org/3/library/typing.html
 https://github.com/python/mypy
 https://www.stefaanlippens.net/circular-imports-type-hints-python.html
 mypy <file> to type-check within file
+
+>> Docker
+remove all running forcefully: sudo docker rm -f $(sudo docker ps -a -q)

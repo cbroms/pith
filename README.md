@@ -32,7 +32,8 @@ $ sudo docker-compose -f docker-compose.yml -f docker-compose.tests.yml --env-fi
 To rebuild just the test container:
 
 ```
-$ sudo docker-compose -f docker-compose.yml -f docker-compose.tests.yml --env-file .env.test up --build -d --no-deps tests
+$ sudo docker-compose --env-file .env.test up -d
+$ sudo docker-compose -f docker-compose.yml -f docker-compose.tests.yml --env-file .env.test up --build --no-deps tests
 ```
 
 If you're using a cloud-based Redis or MongoDB database, you can set the respective environment variables in `.env` with the connection information.
