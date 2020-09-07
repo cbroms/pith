@@ -16,3 +16,6 @@ services:
       - worker
       - mongo
       - redis
+    environment:
+      MONGODB_CONN: mongodb://root:example@mongo:27017/?authSource=admin
+      REDIS_IP: redis
