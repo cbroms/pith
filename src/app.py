@@ -1,10 +1,13 @@
 from aiohttp import web
 from json import dumps
+from jsonschema import validate
 import logging
 from socketio import AsyncNamespace
 
 import constants
 from managers.global_manager import GlobalManager
+import schema.discussion_requests as dreq
+import schema.board_requests as breq
 from utils.utils import GenericEncoder
 
 logging.basicConfig(level=logging.DEBUG)
@@ -52,16 +55,24 @@ async def create(sid, json):
     :type theme: str
     :param time_limit: seconds
     :type time_limit: int
+    :param block_char_limit: seconds
+    :type block_char_limit: int
+    :param summary_char_limit: seconds
+    :type summary_char_limit: int
 
     :return: **discussion_id**
     :rtype: str
     emit: created
     """
-    title = json["title"]
-    theme = json["theme"]
+    if validate(instance=json, schema=breq.create):
+      #TODO
+      return False
+    title = json["title"] if "title" in json else None
+    theme = json["theme"] if "theme" in json else None
     time_limit = json["time_limit"] if "time_limit" in json else None
     block_char_limit = json["block_char_limit"] if "block_char_limit" in json else None
     summary_char_limit = json["summary_char_limit"] if "summary_char_limit" in json else None
+
     discussion_id = await gm.discussion_manager.create( # TODO await
         title,
         theme,
@@ -79,6 +90,9 @@ async def remove(sid, json):
     :param discussion_id:
     :type discussion_id: str
     """
+    if validate(instance=json, schema=breq.remove):
+      #TODO
+      return False
     discussion_id = json["discussion_id"]
     gm.discussion_manager.remove(discussion_id)
 
@@ -91,8 +105,11 @@ async def create_user(sid, json):
     :param user_id: 
     :type user_id: str
     """
-    session = await sio.get_session(sid)
-    user_id = session["user_id"]
+    if validate(instance=json, schema=breq.create_user):
+      #TODO
+      return False
+    user_id = json["user_id"]
+
     gm.user_manager.create(user_id)
 
 
@@ -111,25 +128,10 @@ class DiscussionNamespace(AsyncNamespace):
         if discussion_id:
           gm.discussion_manager.leave(discussion_id, user_id)
 
-    async def on_get_posts(self, sid, json):
-        """
-        :param discussion_id:
-        :type discussion_id: str
-
-        :returns: List[{
-          - **post_id** (*str*) -
-          - **author** (*str*) -
-          - **author_name** (*str*) -
-          - **created_at** (*str*) -
-          - **blocks** (*List[str]*) -
-        }]
-        """
-        discussion_id = json["discussion_id"]
-        posts_info = gm.discussion_manager.get_posts_flattened(discussion_id)
-        return dumps(posts_info, cls=GenericEncoder)
-
     async def on_join(self, sid, json):
         """
+        Should be called before any other function in the `discussion` namespace.
+
         :param discussion_id:
         :type discussion_id: str
         :param user_id:
@@ -145,8 +147,11 @@ class DiscussionNamespace(AsyncNamespace):
         }
         :emit: joined
         """
-        user_id = json["user_id"]
+        if validate(instance=json, schema=dreq.join):
+          #TODO
+          return False
         discussion_id = json["discussion_id"]
+        user_id = json["user_id"]
         name = json["name"]
 
         # TODO hack, create user when enter discussion
@@ -162,13 +167,24 @@ class DiscussionNamespace(AsyncNamespace):
             return serialized
         return None
 
+    async def on_get_posts(self, sid, json):
+        """
+        :returns: List[{
+          - **post_id** (*str*) -
+          - **author** (*str*) -
+          - **author_name** (*str*) -
+          - **created_at** (*str*) -
+          - **blocks** (*List[str]*) -
+        }]
+        """
+        session = await self.get_session(sid)
+        # discussion_id = json["discussion_id"]
+        discussion_id = session["active_discussion_id"]
+        posts_info = gm.discussion_manager.get_posts_flattened(discussion_id)
+        return dumps(posts_info, cls=GenericEncoder)
+
     async def on_leave(self, sid, json):
         """
-        :param discussion_id:
-        :type discussion_id: str
-        :param user_id:
-        :type user_id: str
-
         :returns: {
           - **discussion_id** (*str*) - 
           - **num_users** (*int*) - 
@@ -187,13 +203,6 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def on_get_num_users(self, sid, json):
         """
-        :param discussion_id:
-        :type discussion_id: str
-        :param user_id:
-        :type user_id: str
-        :param blocks:
-        :type blocks: List[str]
-
         :return: **num_users**
         :rtype: int
         """
@@ -205,10 +214,6 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def on_create_post(self, sid, json):
         """
-        :param discussion_id:
-        :type discussion_id: str
-        :param user_id:
-        :type user_id: str
         :param blocks:
         :type blocks: List[str]
 
@@ -220,10 +225,14 @@ class DiscussionNamespace(AsyncNamespace):
         }
         :emit: created_post
         """
+        if validate(instance=json, schema=dreq.create_post):
+          #TODO
+          return False
+        blocks = json["blocks"]
+
         session = await self.get_session(sid)
         user_id = session["user_id"]
         discussion_id = session["active_discussion_id"]
-        blocks = json["blocks"]
         post_info = gm.discussion_manager.create_post(discussion_id, user_id, blocks)
         serialized = dumps(post_info, cls=GenericEncoder)
         await self.emit("created_post", serialized, room=discussion_id)
@@ -231,8 +240,6 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def on_get_block(self, sid, json):
         """
-        :param discussion_id: 
-        :type discussion_id: str
         :param block_id: 
         :type block_id: str
 
@@ -243,18 +250,18 @@ class DiscussionNamespace(AsyncNamespace):
           - **tags** (*str*)
             - **owner** (*str*) 
         """
+        if validate(instance=json, schema=dreq.get_block):
+          #TODO
+          return False
+        block_id = json["block_id"]
+
         session = await self.get_session(sid)
         discussion_id = session["active_discussion_id"]
-        block_id = json["block_id"]
         block_data = gm.discussion_manager.get_block_flattened(discussion_id, block_id)
         return dumps(block_data, cls=GenericEncoder)
 
     async def on_save_block(self, sid, json):
         """
-        :param discussion_id: 
-        :type discussion_id: str
-        :param user_id: 
-        :type user_id: str
         :param block_id: 
         :type block_id: str
 
@@ -262,10 +269,14 @@ class DiscussionNamespace(AsyncNamespace):
         :rtype: str 
         :emit: saved_block
         """
+        if validate(instance=json, schema=dreq.save_block):
+          #TODO
+          return False
+        block_id = json["block_id"]
+
         session = await self.get_session(sid)
         user_id = session["user_id"]
         discussion_id = session["active_discussion_id"]
-        block_id = json["block_id"]
         gm.user_manager.save_block(user_id, discussion_id, block_id)
         serialized = dumps({"block_id": block_id}, cls=GenericEncoder)
         await self.emit("saved_block", serialized, room=sid)
@@ -273,10 +284,6 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def on_unsave_block(self, sid, json):
         """
-        :param discussion_id: 
-        :type discussion_id: str
-        :param user_id: 
-        :type user_id: str
         :param block_id: 
         :type block_id: str
 
@@ -284,10 +291,14 @@ class DiscussionNamespace(AsyncNamespace):
         :rtype: str 
         :emit: unsaved_block
         """
+        if validate(instance=json, schema=dreq.unsave_block):
+          #TODO
+          return False
+        block_id = json["block_id"]
+
         session = await self.get_session(sid)
         user_id = session["user_id"]
         discussion_id = session["active_discussion_id"]
-        block_id = json["block_id"]
         gm.user_manager.unsave_block(user_id, discussion_id, block_id)
         serialized = dumps({"block_id": block_id}, cls=GenericEncoder)
         await self.emit("unsaved_block", serialized, room=sid)
@@ -295,11 +306,6 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def on_get_saved_blocks(self, sid, json):
         """
-        :param discussion_id: 
-        :type discussion_id: str
-        :param user_id: 
-        :type user_id: str
-
         :return: **block_ids**
         :rtype: List[str]
         """
@@ -311,10 +317,6 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def on_block_add_tag(self, sid, json):
         """
-        :param discussion_id: 
-        :type discussion_id: str
-        :param user_id: 
-        :type user_id: str
         :param block_id: 
         :type block_id: str
         :param tag: 
@@ -327,11 +329,15 @@ class DiscussionNamespace(AsyncNamespace):
         }
         :emit: tagged_block
         """
+        if validate(instance=json, schema=dreq.block_add_tag):
+          #TODO
+          return False
+        block_id = json["block_id"]
+        tag = json["tag"]
+
         session = await self.get_session(sid)
         user_id = session["user_id"]
         discussion_id = session["active_discussion_id"]
-        block_id = json["block_id"]
-        tag = json["tag"]
         gm.discussion_manager.block_add_tag(discussion_id, user_id, block_id, tag)
         serialized = dumps({"block_id": block_id, "user_id": user_id, "tag": tag},
                            cls=GenericEncoder)
@@ -340,10 +346,6 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def on_block_remove_tag(self, sid, json):
         """
-        :param discussion_id: 
-        :type discussion_id: str
-        :param user_id: 
-        :type user_id: str
         :param block_id: 
         :type block_id: str
         :param tag: 
@@ -355,11 +357,15 @@ class DiscussionNamespace(AsyncNamespace):
         }
         :emit: untagged_block
         """
+        if validate(instance=json, schema=dreq.block_remove_tag):
+          #TODO
+          return False
+        block_id = json["block_id"]
+        tag = json["tag"]
+
         session = await self.get_session(sid)
         user_id = session["user_id"]
         discussion_id = session["active_discussion_id"]
-        block_id = json["block_id"]
-        tag = json["tag"]
         gm.discussion_manager.block_remove_tag(discussion_id, user_id, block_id, tag)
         serialized = dumps({"block_id": block_id, "tag": tag},
                            cls=GenericEncoder)
@@ -368,82 +374,84 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def on_search_basic(self, sid, json):
         """
-        :param discussion_id: 
-        :type discussion_id: str
         :param query: 
         :type query: str
 
         :return: **blocks**
         :rtype: List[str]
         """
+        if validate(instance=json, schema=dreq.search_basic):
+          #TODO
+          return False
+        query = json["query"]
+
         session = await self.get_session(sid)
         discussion_id = session["active_discussion_id"]
-        query = json["query"]
         result = gm.discussion_manager.discussion_scope_search(discussion_id, query)
         serialized = dumps(result, cls=GenericEncoder)
         return serialized
 
     async def on_search_tags(self, sid, json):
         """
-        :param discussion_id: 
-        :type discussion_id: str
         :param tags: 
         :type tags: List[str]
 
         :return: **blocks**
         :rtype: List[str]
         """
+        if validate(instance=json, schema=dreq.search_tags):
+          #TODO
+          return False
+        tags = json["tags"]
+
         session = await self.get_session(sid)
         discussion_id = session["active_discussion_id"]
-        tags = json["tags"]
         result = gm.discussion_manager.discussion_tag_search(discussion_id, tags)
         serialized = dumps(result, cls=GenericEncoder)
         return serialized
 
     async def on_search_user_saved_basic(self, sid, json):
         """
-        :param discussion_id: 
-        :type discussion_id: str
-        :param user_id: 
-        :type user_id: str
         :param query: 
         :type query: str
 
         :return: **blocks**
         :rtype: List[str]
         """
+        if validate(instance=json, schema=dreq.search_user_saved_basic):
+          #TODO
+          return False
+        query = json["query"]
+
         session = await self.get_session(sid)
         user_id = session["user_id"]
         discussion_id = session["active_discussion_id"]
-        query = json["query"]
         result = gm.discussion_manager.user_saved_scope_search(discussion_id, user_id, query)
         serialized = dumps(result, cls=GenericEncoder)
         return serialized
 
     async def on_search_user_saved_tags(self, sid, json):
         """
-        :param discussion_id: 
-        :type discussion_id: str
-        :param user_id: 
-        :type user_id: str
         :param tags: 
         :type tags: List[str]
 
         :return: **blocks**
         :rtype: List[str]
         """
+        if validate(instance=json, schema=dreq.search_user_saved_tags):
+          #TODO
+          return False
+        tags = json["tags"]
+
         session = await self.get_session(sid)
         user_id = session["user_id"]
         discussion_id = session["active_discussion_id"]
-        tags = json["tags"]
         result = gm.discussion_manager.user_saved_tag_search(discussion_id, user_id, tags)
         serialized = dumps(result, cls=GenericEncoder)
         return serialized
 
     async def on_summary_add_block(self, sid, json):
         """
-        :param discussion_id: 
-        :type discussion_id: str
         :param body: 
         :type body: str
 
@@ -457,9 +465,13 @@ class DiscussionNamespace(AsyncNamespace):
           - **-2**: D_S_B_C_SC
         :emit: added_summary_block
         """
+        if validate(instance=json, schema=dreq.summary_add_block):
+          #TODO
+          return False
+        body = json["body"]
+
         session = await self.get_session(sid)
         discussion_id = session["active_discussion_id"]
-        body = json["body"]
         block_id, err = gm.discussion_manager.summary_add_block(discussion_id, body)
         if not err:
             serialized = {"block_id": block_id, "body": body}
@@ -471,8 +483,6 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def on_summary_modify_block(self, sid, json):
         """
-        :param discussion_id: 
-        :type discussion_id: str
         :param block_id: 
         :type block_id: str
         :param body: 
@@ -488,10 +498,14 @@ class DiscussionNamespace(AsyncNamespace):
           - **-2**: D_S_B_C_SC
         :emit: modified_summary_block
         """
-        session = await self.get_session(sid)
-        discussion_id = session["active_discussion_id"]
+        if validate(instance=json, schema=dreq.summary_modify_block):
+          #TODO
+          return False
         block_id = json["block_id"]
         body = json["body"]
+
+        session = await self.get_session(sid)
+        discussion_id = session["active_discussion_id"]
         err = gm.discussion_manager.summary_modify_block(discussion_id, block_id, body)
         if not err:
             serialized = {"block_id": block_id, "body": body}
@@ -503,8 +517,6 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def on_summary_remove_block(self, sid, json):
         """
-        :param discussion_id: 
-        :type discussion_id: str
         :param block_id: 
         :type block_id: str
 
@@ -512,9 +524,13 @@ class DiscussionNamespace(AsyncNamespace):
         :rtype: str
         :emit: removed_summary_block
         """
+        if validate(instance=json, schema=dreq.summary_remove_block):
+          #TODO
+          return False
+        block_id = json["block_id"]
+
         session = await self.get_session(sid)
         discussion_id = session["active_discussion_id"]
-        block_id = json["block_id"]
         gm.discussion_manager.summary_remove_block(discussion_id, block_id)
         serialized = {"block_id": block_id}
         await self.emit("removed_summary_block", serialized, room=discussion_id)

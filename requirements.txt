@@ -25,6 +25,7 @@ idna==2.10
 ipaddress==1.0.23
 iso8601==0.1.12
 joblib==0.15.1
+jsonschema
 mongoengine==0.20.0
 mongomock==3.20.0
 monotonic==1.5
