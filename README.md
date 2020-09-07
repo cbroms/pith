@@ -31,11 +31,8 @@ $ sudo docker-compose -f docker-compose.yml -f docker-compose.tests.yml --env-fi
 
 If you're using a cloud-based Redis or MongoDB database, you can set the respective environment variables in `.env` with the connection information.
 
-```yml
-environment:
-    MONGODB_CONN: mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majority
+```
+    MONGODB: mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majority
     MONGO_NAME=<dbname>
     REDIS=redis
-    MONGO_USER=root
-    MONGO_PASS=example
 ```
