@@ -11,7 +11,7 @@ python3.8 managers/global_manager.py
 
 # functionality tests
 python3.8 utils/tests/test_utils.py
-python search/tests/test_search.py
+python3.8 search/tests/test_search.py
 
 # manager tests
 python3.8 managers/tests/user_manager_test.py

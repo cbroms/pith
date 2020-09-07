@@ -6,6 +6,9 @@ services:
   worker:
     logging:
       driver: none
+    environment:
+      MONGODB_CONN: mongodb+srv://dbUser:XwgmOHe0WNkQ87YN@cluster0.nvpuq.mongodb.net/pith-test?retryWrites=true&w=majority
+      MONGODB_NAME: pith-test
   tests:
     build:
       context: .
@@ -15,3 +18,7 @@ services:
       - worker
       - mongo
       - redis
+    environment:
+      MONGODB_CONN: mongodb+srv://dbUser:XwgmOHe0WNkQ87YN@cluster0.nvpuq.mongodb.net/pith-test?retryWrites=true&w=majority
+      MONGODB_NAME: pith-test
+      REDIS_IP: redis

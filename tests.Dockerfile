@@ -30,4 +30,5 @@ COPY /src /api
 
 WORKDIR /api 
 
+ENV PYTHONPATH /api:
 CMD [ "./test.sh" ]

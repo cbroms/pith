@@ -28,4 +28,6 @@ class GlobalManager:
 
         self.client = MongoClient(constants.MONGODB_CONN)
         mongoengine.connect(constants.MONGODB_NAME, host=constants.MONGODB_CONN)
-        
+        logging.info("MONGODB_CONN {} MONGODB_NAME {}".format(constants.MONGODB_CONN, constants.MONGODB_NAME))
+        logging.info("Taking a minute to set up connection...")
+        time.sleep(60)

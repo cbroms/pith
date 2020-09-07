@@ -12,7 +12,7 @@ services:
       - "8080:8080"
     restart: always
     environment:
-      MONGODB_CONN: mongodb://root:example@mongo:27017/?authSource=admin
+      MONGODB_CONN: mongodb+srv://dbUser:XwgmOHe0WNkQ87YN@cluster0.nvpuq.mongodb.net/pith?retryWrites=true&w=majority
       REDIS_IP: redis
   worker:
     build:
@@ -23,7 +23,7 @@ services:
       - redis
     restart: always
     environment:
-      MONGODB_CONN: mongodb://root:example@mongo:27017/?authSource=admin
+      MONGODB_CONN: mongodb+srv://dbUser:XwgmOHe0WNkQ87YN@cluster0.nvpuq.mongodb.net/pith?retryWrites=true&w=majority
       REDIS_IP: redis
   redis:
     image: "redis:alpine"
@@ -36,5 +36,5 @@ services:
     logging:
       driver: none
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_ROOT_USERNAME: dbUser
+      MONGO_INITDB_ROOT_PASSWORD: XwgmOHe0WNkQ87YN
