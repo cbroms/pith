@@ -20,13 +20,13 @@ The docker compose file for testing (`docker-compose.tests.yml`) defines one add
 To run the development build:
 
 ```
-$ sudo docker-compose up --build
+$ sudo docker-compose --env-file .env.test up --build
 ```
 
 To run the tests:
 
 ```
-$ sudo docker-compose -f docker-compose.yml -f docker-compose.tests.yml up --build
+$ sudo docker-compose -f docker-compose.yml -f docker-compose.tests.yml --env-file .env.test up --build
 ```
 
 If you're using a cloud-based Redis or MongoDB database, you can set the respective environment variables in `docker-compose.yml` with the connection information.

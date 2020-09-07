@@ -18,8 +18,9 @@ services:
       - "8080:8080"
     restart: always
     environment:
-      MONGODB_CONN: mongodb+srv://dbUser:XwgmOHe0WNkQ87YN@cluster0.nvpuq.mongodb.net/pith?retryWrites=true&w=majority
-      REDIS_IP: redis
+      MONGODB_CONN: ${MONGO}
+      MONGODB_NAME: ${MONGO_NAME}
+      REDIS_IP: ${REDIS}
   worker:
     build:
       context: .
@@ -30,8 +31,9 @@ services:
       - redis
     restart: always
     environment:
-      MONGODB_CONN: mongodb+srv://dbUser:XwgmOHe0WNkQ87YN@cluster0.nvpuq.mongodb.net/pith?retryWrites=true&w=majority
-      REDIS_IP: redis
+      MONGODB_CONN: ${MONGO}
+      MONGODB_NAME: ${MONGO_NAME}
+      REDIS_IP: ${REDIS}
   redis:
     image: "redis:alpine"
     logging:
@@ -43,5 +45,5 @@ services:
     logging:
       driver: none
     environment:
-      MONGO_INITDB_ROOT_USERNAME: dbUser
-      MONGO_INITDB_ROOT_PASSWORD: XwgmOHe0WNkQ87YN
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
