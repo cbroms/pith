@@ -1,10 +1,16 @@
 version: "3"
 services:
+  common:
+    image: pith-api_common:latest
+    build:
+      context: .
+      dockerfile: common.Dockerfile
   app:
     build:
       context: .
       dockerfile: app.Dockerfile
     depends_on:
+      - common
       - worker
       - mongo
       - redis
@@ -19,6 +25,7 @@ services:
       context: .
       dockerfile: worker.Dockerfile
     depends_on:
+      - common
       - mongo
       - redis
     restart: always

@@ -14,6 +14,7 @@ services:
       context: .
       dockerfile: tests.Dockerfile
     depends_on:
+      - common
       - app
       - worker
       - mongo

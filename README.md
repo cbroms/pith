@@ -13,20 +13,20 @@ We use Docker containers to facilitate development and testing. All of the servi
 
 The docker compose file for testing (`docker-compose.tests.yml`) defines one additional service:
 
--`tests`: a container that runs the unit tests and connects to `app` to test the interface.
+-   `tests`: a container that runs the unit tests and connects to `app` to test the interface.
 
 ### Run it
 
 To run the development build:
 
 ```
-$ docker-compose up --build
+$ sudo docker-compose up --build
 ```
 
 To run the tests:
 
 ```
-$ docker-compose -f docker-compose.yml -f docker-compose.tests.yml up --build
+$ sudo docker-compose -f docker-compose.yml -f docker-compose.tests.yml up --build
 ```
 
 If you're using a cloud-based Redis or MongoDB database, you can set the respective environment variables in `docker-compose.yml` with the connection information.
