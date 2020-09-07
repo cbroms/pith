@@ -1,6 +1,7 @@
 version: "3"
 services:
   common:
+    image: pith-api_common:latest
     build:
       context: .
       dockerfile: common.Dockerfile
