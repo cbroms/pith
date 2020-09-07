@@ -139,12 +139,11 @@ class DiscussionNamespace(AsyncNamespace):
         :param name:
         :type name: str
 
-        :returns: {
+        :returns:
           - **discussion_id** (*str*) -
           - **title** (*str*) -
           - **theme** (*str*) -
           - **num_users** (*int*) -
-        }
         :emit: joined
         """
         if validate(instance=json, schema=dreq.join):
@@ -169,13 +168,12 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def on_get_posts(self, sid, json):
         """
-        :returns: List[{
+        :returns: List of
           - **post_id** (*str*) -
           - **author** (*str*) -
           - **author_name** (*str*) -
           - **created_at** (*str*) -
           - **blocks** (*List[str]*) -
-        }]
         """
         session = await self.get_session(sid)
         # discussion_id = json["discussion_id"]
@@ -185,10 +183,9 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def on_leave(self, sid, json):
         """
-        :returns: {
+        :returns:
           - **discussion_id** (*str*) - 
           - **num_users** (*int*) - 
-        }
         :emit: left
         """
         session = await self.get_session(sid)
@@ -217,12 +214,11 @@ class DiscussionNamespace(AsyncNamespace):
         :param blocks:
         :type blocks: List[str]
 
-        :returns: {
+        :returns:
           - **post_id** (*str*) -
           - **blocks** (*List[str]*) - 
           - **created_at** (*str*) - 
           - **author_name** (*str*) - 
-        }
         :emit: created_post
         """
         if validate(instance=json, schema=dreq.create_post):
@@ -247,8 +243,8 @@ class DiscussionNamespace(AsyncNamespace):
         :results:
           - **block_id** (*str*) - 
           - **body** (*str*) - 
-          - **tags** (*str*)
-            - **owner** (*str*) 
+          - **tags** (*str*) -
+            - **owner** (*str*) -
         """
         if validate(instance=json, schema=dreq.get_block):
           #TODO
@@ -322,11 +318,10 @@ class DiscussionNamespace(AsyncNamespace):
         :param tag: 
         :type tag: str
 
-        :returns: {
+        :returns:
           - **block_id** (*str*) -
           - **user_id** (*str*) - 
           - **tag** (*str*) - 
-        }
         :emit: tagged_block
         """
         if validate(instance=json, schema=dreq.block_add_tag):
@@ -351,10 +346,9 @@ class DiscussionNamespace(AsyncNamespace):
         :param tag: 
         :type tag: str
 
-        :returns: {
+        :returns:
           - **block_id** (*str*) -
           - **tag** (*str*) - 
-        }
         :emit: untagged_block
         """
         if validate(instance=json, schema=dreq.block_remove_tag):
@@ -455,10 +449,9 @@ class DiscussionNamespace(AsyncNamespace):
         :param body: 
         :type body: str
 
-        :returns: {
+        :returns:
           - **block_id** (*str*) - 
           - **body** (*str*) - 
-        }
 
         :raises: **err**
           - **-1**: D_S_B_C_BC
@@ -488,10 +481,9 @@ class DiscussionNamespace(AsyncNamespace):
         :param body: 
         :type body: str
 
-        :returns: {
+        :returns:
           - **block_id** (*str*) - 
           - **body** (*str*) - 
-        }
 
         :raises: **err**
           - **-1**: D_S_B_C_BC

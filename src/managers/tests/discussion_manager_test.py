@@ -2,8 +2,6 @@ import asyncio
 import logging
 import time
 import unittest
-from redis import Redis
-from rq.job import Job
 
 from app import gm
 from redis_pool import redis_queue
@@ -29,7 +27,6 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertTrue(discussion_id in discussion_ids)
         discussion_obj = self.discussion_manager.get(discussion_id).get()
         self.assertFalse(discussion_obj.expired)
-        redis = Redis()
         logging.info("discussion_id {}".format(discussion_id))
         for i in range(time_limit + buff_limit):
             results = self.loop.run_until_complete(redis_queue.all_job_results())

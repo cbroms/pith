@@ -18,6 +18,4 @@ python3.8 managers/tests/user_manager_test.py
 python3.8 managers/tests/discussion_manager_test.py
 
 # interface tests
-#python tests/app_test.py
-
-
+python3.8 tests/app_test.py

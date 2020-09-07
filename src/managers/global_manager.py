@@ -1,9 +1,7 @@
 from aiohttp import web
-import logging
 from pymongo import MongoClient
 import mongoengine
 import socketio
-import time
 
 import constants
 from managers.user_manager import UserManager
