@@ -13,7 +13,7 @@ We use Docker containers to facilitate development and testing. All of the servi
 
 The docker compose file for testing (`docker-compose.tests.yml`) defines one additional service:
 
--`tests`: a container that runs the unit tests and connects to `app` to test the interface.
+-   `tests`: a container that runs the unit tests and connects to `app` to test the interface.
 
 ### Run it
 
