@@ -29,10 +29,13 @@ To run the tests:
 $ sudo docker-compose -f docker-compose.yml -f docker-compose.tests.yml --env-file .env.test up --build
 ```
 
-If you're using a cloud-based Redis or MongoDB database, you can set the respective environment variables in `docker-compose.yml` with the connection information.
+If you're using a cloud-based Redis or MongoDB database, you can set the respective environment variables in `.env` with the connection information.
 
 ```yml
 environment:
     MONGODB_CONN: mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majority
-    REDIS_IP: <hostname>
+    MONGO_NAME=<dbname>
+    REDIS=redis
+    MONGO_USER=root
+    MONGO_PASS=example
 ```
