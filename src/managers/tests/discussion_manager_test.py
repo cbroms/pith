@@ -35,7 +35,10 @@ class DiscussionManagerTest(unittest.TestCase):
             results = self.loop.run_until_complete(redis_queue.all_job_results())
             # https://arq-docs.helpmanual.io/_modules/arq/jobs.html
             results = [(r.job_id, r.result) for r in results]
-            logging.info("last queued {}: {}".format(i, results[-1]))
+            if len(results) > 0:
+              logging.info("last queued {}: {}".format(i, results[-1]))
+            else:
+              logging.info("nothing queued yet")
             time.sleep(1)
         discussion_obj = self.discussion_manager.get(discussion_id).get()
         self.assertTrue(discussion_obj.expired)

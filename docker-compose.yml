@@ -1,8 +1,49 @@
 version: "3"
 services:
-    web:
-        build: .
-        ports:
-            - "8080:8080"
-    redis:
-        image: "redis:alpine"
+  common:
+    image: pith-api_common:latest
+    build:
+      context: .
+      dockerfile: common.Dockerfile
+  app:
+    build:
+      context: .
+      dockerfile: app.Dockerfile
+    depends_on:
+      - common
+      - worker
+      - mongo
+      - redis
+    ports:
+      - "8080:8080"
+    restart: always
+    environment:
+      MONGODB_CONN: ${MONGO}
+      MONGODB_NAME: ${MONGO_NAME}
+      REDIS_IP: ${REDIS}
+  worker:
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    depends_on:
+      - common
+      - mongo
+      - redis
+    restart: always
+    environment:
+      MONGODB_CONN: ${MONGO}
+      MONGODB_NAME: ${MONGO_NAME}
+      REDIS_IP: ${REDIS}
+  redis:
+    image: "redis:alpine"
+    logging:
+      driver: none
+    restart: always
+  mongo:
+    image: mongo
+    restart: always
+    logging:
+      driver: none
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}

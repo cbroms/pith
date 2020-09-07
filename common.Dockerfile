@@ -16,18 +16,16 @@ RUN add-apt-repository ppa:deadsnakes/ppa \
     python3.8-distutils \
     python3-pip
 
-RUN python3.8 -m pip --no-cache-dir install --upgrade \
+RUN python3.8 -m pip  install --upgrade \
     pip \
     setuptools
 
-# copy over the files used by the api
-COPY / /api
+COPY requirements.txt /api/requirements.txt
 
 # install the requirements 
 RUN python3.8 -m pip install -r /api/requirements.txt
 
+# copy over the files used by the api
+COPY /src /api
+
 WORKDIR /api 
-
-EXPOSE 8080
-
-CMD [ "python3.8", "app.py" ]

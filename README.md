@@ -1,50 +1,38 @@
 # Pith API
 
-The server-side portion of Pith. It uses [python-socketio](https://python-socketio.readthedocs.io/en/latest/index.html) running on the [uvicorn ASGI server](https://www.uvicorn.org/).
+The server-side portion of Pith. It uses [python-socketio](https://github.com/miguelgrinberg/python-socketio) running on the [aiohttp server](https://github.com/aio-libs/aiohttp), [Arq](https://github.com/samuelcolvin/arq) for task queues, [Redis](https://redis.io/) as a database for task and message queues, and [MongoDB](https://www.mongodb.com/) as a database for storing content.
 
 ## Development
 
-Commands are written assuming installation on Linux. It has been used for Ubuntu 18.04 specifically.
+We use Docker containers to facilitate development and testing. All of the services needed to run the project are defined in `docker-compose.yml`. These are:
 
-### Install MongoDB 
+-   `app`: the socketio interface that's used by [the React client](https://github.com/rainflame/pith-client).
+-   `worker`: a worker script using the [arq task queue](https://github.com/samuelcolvin/arq) for executing assorted long-term tasks such as archiving discussions when they're complete.
+-   `redis`: a Redis database used by the task queue (`worker`) and as a message queue by socketio (`app`).
+-   `mongo`: the MongoDB database used to store the discussion content.
 
-We use MongoDB as the database for Pith. It can either be installed locally or on the cloud with MongoDB Atlas. To install it locally on your machine, follow [MongoDB's instructions](https://docs.mongodb.com/manual/installation/). 
+The docker compose file for testing (`docker-compose.tests.yml`) defines one additional service:
 
-### Environment
+-   `tests`: a container that runs the unit tests and connects to `app` to test the interface.
 
-Add the following lines in a `.env` file to setup your connection to MongoDB and Redis.
+### Run it
 
-```
-# If you use local MongoDB.
-MONGO_CONN=mongodb://localhost:27017/
-MONGO_CONN_TEST=mongodb://localhost:27017/
-
-# If you use [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) and have a connection string. 
-#MONGO_CONN=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majority
-#MONGO_CONN_TEST=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<dbname-test>?retryWrites=true&w=majority
-
-# Redis
-REDIS_IP=localhost
-REDIS_PORT=6379
-```
-
-Then run `setup.sh`. This will setup your environment and create the `src/startup.sh` script.
-
-## Testing/Developing
-
-Run the following in `src` to begin testing and developing within your environment:
-```
-$ . startup.sh
-$ . test.sh
-$ python app.py
-```
-Now, the backend should be up and running locally on port 8080. You can connect from the [Pith client](https://github.com/rainflame/pith-client), which creates a websockets connection with the API.
-
-## Deployment 
-
-Deploying the required services is done with Docker. Build and run it:
+To run the development build:
 
 ```
-$ sudo docker-compose up --build -d
-$ sudo docker-compose up
+$ sudo docker-compose --env-file .env.test up --build
+```
+
+To run the tests:
+
+```
+$ sudo docker-compose -f docker-compose.yml -f docker-compose.tests.yml --env-file .env.test up --build
+```
+
+If you're using a cloud-based Redis or MongoDB database, you can set the respective environment variables in `docker-compose.yml` with the connection information.
+
+```yml
+environment:
+    MONGODB_CONN: mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majority
+    REDIS_IP: <hostname>
 ```

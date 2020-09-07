@@ -6,8 +6,6 @@ from arq.connections import RedisSettings
 from dotenv import load_dotenv
 load_dotenv()
 
-# whether we are testing
-TEST = os.getenv("TEST", False)
 
 # the port to run the socketio server 
 PORT = os.getenv("PORT", 8080)
@@ -27,10 +25,8 @@ MAX_JOBS = 10
 
 # using ISO so this can be easily parsed in js with Date()
 DATE_TIME_FMT = "%Y-%m-%dT%H:%M:%SZ"
-MONGO_CONN = os.getenv("MONGO_CONN", "mongodb://localhost:27017")
-MONGO_CONN_TEST = os.getenv("MONGO_CONN_TEST", "mongodb://localhost:27017")
-MONGODB_NAME = "pith"
-MONGODB_NAME_TEST = "pith-test"
+MONGODB_CONN = os.getenv("MONGODB_CONN", "mongodb://localhost:27017")
+MONGODB_NAME = os.getenv("MONGODB_NAME", "pith")
 
 # compiled searcher for transclusion header
 transclusion_header = re.compile(r"transclude<\d*>")

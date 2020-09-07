@@ -12,7 +12,7 @@ from managers.discussion_manager import DiscussionManager
 
 class GlobalManager:
 
-    def __init__(self, test: bool = False):
+    def __init__(self):
         self.user_manager = UserManager(self)
         self.discussion_manager = DiscussionManager(self)
 
@@ -26,13 +26,5 @@ class GlobalManager:
         self.aio_app = web.Application()
         self.sio.attach(self.aio_app)
 
-        MONGO_CONN = constants.MONGO_CONN
-        MONGODB_NAME = constants.MONGODB_NAME
-        if test:
-            MONGO_CONN = constants.MONGO_CONN_TEST
-            MONGODB_NAME = constants.MONGODB_NAME_TEST
-        self.client = MongoClient(MONGO_CONN)
-        mongoengine.connect(MONGODB_NAME, host=MONGO_CONN)
-        logging.info("conn: {}\tname: {}".format(MONGO_CONN, MONGODB_NAME))
-        logging.info("Sleeping for a minute to start up mongo...")
-        time.sleep(60)
+        self.client = MongoClient(constants.MONGODB_CONN)
+        mongoengine.connect(constants.MONGODB_NAME, host=constants.MONGODB_CONN)
