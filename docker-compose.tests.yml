@@ -3,11 +3,17 @@ services:
   app:
     logging:
       driver: none
+    environment:
+      MONGODB_CONN: mongodb://root:example@mongo:27017/?authSource=admin
+      # MONGODB_CONN: mongodb+srv://dbUser:XwgmOHe0WNkQ87YN@cluster0.nvpuq.mongodb.net/pith-test?retryWrites=true&w=majority
+      MONGODB_NAME: pith-test
+      REDIS_IP: redis
   worker:
     logging:
       driver: none
     environment:
-      MONGODB_CONN: mongodb+srv://dbUser:XwgmOHe0WNkQ87YN@cluster0.nvpuq.mongodb.net/pith-test?retryWrites=true&w=majority
+      MONGODB_CONN: mongodb://root:example@mongo:27017/?authSource=admin
+      # MONGODB_CONN: mongodb+srv://dbUser:XwgmOHe0WNkQ87YN@cluster0.nvpuq.mongodb.net/pith-test?retryWrites=true&w=majority
       MONGODB_NAME: pith-test
   tests:
     build:
@@ -20,6 +26,7 @@ services:
       - mongo
       - redis
     environment:
-      MONGODB_CONN: mongodb+srv://dbUser:XwgmOHe0WNkQ87YN@cluster0.nvpuq.mongodb.net/pith-test?retryWrites=true&w=majority
+      MONGODB_CONN: mongodb://root:example@mongo:27017/?authSource=admin
+      # MONGODB_CONN: mongodb+srv://dbUser:XwgmOHe0WNkQ87YN@cluster0.nvpuq.mongodb.net/pith-test?retryWrites=true&w=majority
       MONGODB_NAME: pith-test
       REDIS_IP: redis
