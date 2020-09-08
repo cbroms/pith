@@ -2,7 +2,7 @@ import logging
 import unittest
 import uuid
 
-from app import gm
+from managers.global_manager import GlobalManager
 from models.discussion import (
   Block,
   Post,
@@ -12,6 +12,8 @@ from models.discussion import (
 class UserManagerTest(unittest.TestCase):
 
     def setUp(self) -> None:
+        gm = GlobalManager()
+        gm.start()
         self.user_manager = gm.user_manager
         self.log = logging.getLogger("UserManagerTest")
 
@@ -105,4 +107,5 @@ class UserManagerTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     unittest.main()

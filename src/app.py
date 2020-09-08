@@ -10,16 +10,14 @@ import schema.discussion_requests as dreq
 import schema.board_requests as breq
 from utils.utils import GenericEncoder
 
-logging.basicConfig(level=logging.DEBUG)
+
 gm = GlobalManager()
-logging.info("Created global_manager")
+#gm.start() # if move to main, redis is unhappy
 sio = gm.sio
-app = gm.app
-aio_app = gm.aio_app
 
 
+# used by worker, needs app.py to run before this
 async def expire_discussion(ctx, discussion_id):
-    logging.info("expiring {}".format(discussion_id))
     response = gm.discussion_manager.expire(discussion_id)
     serialized = dumps(response, cls=GenericEncoder)
     await sio.emit("discussion_expired", serialized)
@@ -537,9 +535,10 @@ class DiscussionNamespace(AsyncNamespace):
 sio.register_namespace(DiscussionNamespace('/discussion'))
 
 def main():
+    gm.start()
+    logging.basicConfig(level=logging.DEBUG)
+    aio_app = gm.aio_app
     web.run_app(aio_app, port=constants.PORT)
-
-
-# kjh k   
+ 
 if __name__ == '__main__':
     main()

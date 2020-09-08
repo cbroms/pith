@@ -54,4 +54,30 @@ html_theme = 'alabaster'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-autodoc_mock_imports = ['json', 'socketio', 'uuid', 'aiohttp', 'jsonschema', 'logging']
+# add all the imports, make sure redis file is not imported/run
+"""
+autodoc_mock_imports = [
+  'json',
+  'socketio',
+  'uuid',
+  'aiohttp',
+  'jsonschema',
+  'logging',
+  'mongoengine',
+  'datetime',
+  'os',
+  're',
+  'arq',
+  'dotenv',
+  'unittest',
+  'typing',
+  'math',
+  'nltk',
+  'collections',
+  'functools',
+  'operator',
+  'string',
+  'asyncio',
+  'pymongo',
+]
+"""
