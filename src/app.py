@@ -12,7 +12,7 @@ from utils.utils import GenericEncoder
 
 
 gm = GlobalManager()
-gm.start() # if move to main, redis is unhappy
+#gm.start() # if move to main, redis is unhappy
 sio = gm.sio
 
 
