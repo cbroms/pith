@@ -12,15 +12,8 @@ from utils.utils import GenericEncoder
 
 
 gm = GlobalManager()
-#gm.start() # if move to main, redis is unhappy
 sio = gm.sio
 
-
-# used by worker, needs app.py to run before this
-async def expire_discussion(ctx, discussion_id):
-    response = gm.discussion_manager.expire(discussion_id)
-    serialized = dumps(response, cls=GenericEncoder)
-    await sio.emit("discussion_expired", serialized)
 
 # TODO board namespace
 

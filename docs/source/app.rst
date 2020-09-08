@@ -15,11 +15,3 @@ Discussion Namespace
     :members:
     :undoc-members:
     :show-inheritance:
-
-Worker Functions
-**********************
-.. automodule:: app
-    :members: expire_discussion
-    :undoc-members:
-    :show-inheritance:
-

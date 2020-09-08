@@ -1,7 +1,7 @@
 import arq
 import logging
 
-from app import expire_discussion
+from worker_functions import expire_discussion
 import constants
 
 

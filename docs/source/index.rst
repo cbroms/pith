@@ -11,6 +11,7 @@ Interface Documentation
 .. toctree::
 
   app
+  worker 
 
 Backend Documentation
 
