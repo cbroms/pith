@@ -535,6 +535,7 @@ class DiscussionNamespace(AsyncNamespace):
 sio.register_namespace(DiscussionNamespace('/discussion'))
 
 if __name__ == '__main__':
+    gm.start() # if move to main, redis is unhappy
     logging.basicConfig(level=logging.DEBUG)
     aio_app = gm.aio_app
     web.run_app(aio_app, port=constants.PORT)
