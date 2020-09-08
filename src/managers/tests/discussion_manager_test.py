@@ -3,15 +3,16 @@ import logging
 import time
 import unittest
 
-from app import gm
-from redis_pool import redis_queue
+from managers.global_manager import GlobalManager
 
 
 class DiscussionManagerTest(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.log = logging.getLogger("DiscussionManagerTest")
+        gm = GlobalManager()
+        gm.start()
         self.discussion_manager = gm.discussion_manager
+        self.redis_queue = self.discussion_manager.redis_queue
         self.user_manager = gm.user_manager
         self.loop = asyncio.get_event_loop()
 
@@ -29,7 +30,7 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertFalse(discussion_obj.expired)
         logging.info("discussion_id {}".format(discussion_id))
         for i in range(time_limit + buff_limit):
-            results = self.loop.run_until_complete(redis_queue.all_job_results())
+            results = self.loop.run_until_complete(self.redis_queue.all_job_results())
             # https://arq-docs.helpmanual.io/_modules/arq/jobs.html
             results = [(r.job_id, r.result) for r in results]
             if len(results) > 0:
@@ -418,4 +419,5 @@ class DiscussionManagerTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     unittest.main()

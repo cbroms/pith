@@ -4,6 +4,8 @@ import re
 from arq.connections import RedisSettings
 
 from dotenv import load_dotenv
+
+
 load_dotenv()
 
 

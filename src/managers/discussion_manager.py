@@ -10,7 +10,6 @@ from typing import (
 
 import constants
 import error
-from redis_pool import redis_queue
 from search.basic_search import basic_search
 from search.tag_search import tag_search
 from utils import utils
@@ -26,8 +25,8 @@ from models.discussion import (
 class DiscussionManager:
 
     def __init__(self, gm):
-        assert(redis_queue is not None)
         self.gm = gm
+        self.redis_queue = self.gm.redis_queue
 
     """
     Of discussions.
@@ -68,7 +67,7 @@ class DiscussionManager:
         discussion_id = discussion_obj.id
         if time_limit is not None:
             # won't add job until time limit is reached
-            await redis_queue.enqueue_job(
+            await self.redis_queue.enqueue_job(
                 "expire_discussion",
                 discussion_id,
                 _job_id="expire_{}".format(discussion_id),
