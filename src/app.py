@@ -62,8 +62,8 @@ async def create(sid, json):
 
     :return: **discussion_id**
     :rtype: str
+    emit:: created
     """
-    #:emit: created
     if validate(instance=json, schema=breq.create):
       #TODO
       return False
@@ -144,8 +144,8 @@ class DiscussionNamespace(AsyncNamespace):
           - **title** (*str*) -
           - **theme** (*str*) -
           - **num_users** (*int*) -
+        emit:: joined
         """
-        #:emit: joined
         if validate(instance=json, schema=dreq.join):
           #TODO
           return False
@@ -186,8 +186,8 @@ class DiscussionNamespace(AsyncNamespace):
         :returns:
           - **discussion_id** (*str*) - 
           - **num_users** (*int*) - 
+        emit:: left
         """
-        # :emit: left
         session = await self.get_session(sid)
         user_id = session["user_id"]
         discussion_id = session["active_discussion_id"]
@@ -219,8 +219,8 @@ class DiscussionNamespace(AsyncNamespace):
           - **blocks** (*List[str]*) - 
           - **created_at** (*str*) - 
           - **author_name** (*str*) - 
+        emit:: created_post
         """
-        # :emit: created_post
         if validate(instance=json, schema=dreq.create_post):
           #TODO
           return False
@@ -262,8 +262,8 @@ class DiscussionNamespace(AsyncNamespace):
 
         :return: **block_id**
         :rtype: str 
+        emit:: saved_block
         """
-        #:emit: saved_block
         if validate(instance=json, schema=dreq.save_block):
           #TODO
           return False
@@ -284,8 +284,8 @@ class DiscussionNamespace(AsyncNamespace):
 
         :return: **block_id**
         :rtype: str 
+        emit:: unsaved_block
         """
-        #:emit: unsaved_block
         if validate(instance=json, schema=dreq.unsave_block):
           #TODO
           return False
@@ -321,8 +321,8 @@ class DiscussionNamespace(AsyncNamespace):
           - **block_id** (*str*) -
           - **user_id** (*str*) - 
           - **tag** (*str*) - 
+        emit:: tagged_block
         """
-        # :emit: tagged_block
         if validate(instance=json, schema=dreq.block_add_tag):
           #TODO
           return False
@@ -348,8 +348,8 @@ class DiscussionNamespace(AsyncNamespace):
         :returns:
           - **block_id** (*str*) -
           - **tag** (*str*) - 
+        emit:: untagged_block
         """
-        # :emit: untagged_block
         if validate(instance=json, schema=dreq.block_remove_tag):
           #TODO
           return False
@@ -455,8 +455,8 @@ class DiscussionNamespace(AsyncNamespace):
         :raises: **err**
           - **-1**: D_S_B_C_BC
           - **-2**: D_S_B_C_SC
+        emit:: added_summary_block
         """
-        # :emit: added_summary_block
         if validate(instance=json, schema=dreq.summary_add_block):
           #TODO
           return False
@@ -487,8 +487,8 @@ class DiscussionNamespace(AsyncNamespace):
         :raises: **err**
           - **-1**: D_S_B_C_BC
           - **-2**: D_S_B_C_SC
+        emit:: modified_summary_block
         """
-        # :emit: modified_summary_block
         if validate(instance=json, schema=dreq.summary_modify_block):
           #TODO
           return False
@@ -513,8 +513,8 @@ class DiscussionNamespace(AsyncNamespace):
 
         :return: **block_id**
         :rtype: str
+        emit:: removed_summary_block
         """
-        # :emit: removed_summary_block
         if validate(instance=json, schema=dreq.summary_remove_block):
           #TODO
           return False

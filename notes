@@ -2,6 +2,7 @@
 sudo ufw status
 sudo ufw allow 1234
 python3 -m http.server 1234 
+http://45.79.183.28:1234/
 
 >> typing
 https://docs.python.org/3/library/typing.html
@@ -11,3 +12,6 @@ mypy <file> to type-check within file
 
 >> Docker
 remove all running forcefully: sudo docker rm -f $(sudo docker ps -a -q)
+
+>> Sphinx
+docs/> make html

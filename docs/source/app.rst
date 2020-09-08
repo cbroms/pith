@@ -1,10 +1,19 @@
 Pith App Interface
 =====================
 
-Uncollected Functions
+Board Namespace
 **********************
 .. automodule:: app
-    :members: connect, disconnect, create, remove, create_user
+    :members: connect, disconnect, get, create, remove, create_user
+    :undoc-members:
+    :show-inheritance:
+
+Worker Functions
+**********************
+.. automodule:: app
+    :members: expire_discussion
+    :undoc-members:
+    :show-inheritance:
 
 Discussion Namespace
 **********************
