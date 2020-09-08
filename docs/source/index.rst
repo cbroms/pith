@@ -7,12 +7,10 @@ Pith Documentation
 =====================================
 
 Interface Documentation
-
+-------------------------------------
 .. toctree::
-
   app
-  worker 
 
 Backend Documentation
-
+-------------------------------------
 .. toctree::

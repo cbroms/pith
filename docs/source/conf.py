@@ -57,6 +57,7 @@ html_static_path = ['_static']
 # add all the imports, make sure redis file is not imported/run
 """
 autodoc_mock_imports = [
+  'asyncio',
   'json',
   'socketio',
   'uuid',
@@ -77,7 +78,6 @@ autodoc_mock_imports = [
   'functools',
   'operator',
   'string',
-  'asyncio',
   'pymongo',
 ]
 """
