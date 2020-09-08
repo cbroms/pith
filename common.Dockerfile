@@ -25,7 +25,3 @@ COPY requirements.txt /api/requirements.txt
 # install the requirements 
 RUN python3.8 -m pip install -r /api/requirements.txt
 
-# copy over the files used by the api
-COPY /src /api
-
-WORKDIR /api 

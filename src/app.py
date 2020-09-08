@@ -536,5 +536,10 @@ class DiscussionNamespace(AsyncNamespace):
 
 sio.register_namespace(DiscussionNamespace('/discussion'))
 
-if __name__ == '__main__':
+def main():
     web.run_app(aio_app, port=constants.PORT)
+
+
+# kjh k   
+if __name__ == '__main__':
+    main()

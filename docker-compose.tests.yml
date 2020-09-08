@@ -20,3 +20,6 @@ services:
       MONGODB_CONN: ${MONGO}
       MONGODB_NAME: ${MONGO_NAME}
       REDIS_IP: ${REDIS}
+    working_dir: /api
+    volumes:
+      - ./src:/api:cached

@@ -21,11 +21,15 @@ services:
       MONGODB_CONN: ${MONGO}
       MONGODB_NAME: ${MONGO_NAME}
       REDIS_IP: ${REDIS}
+    working_dir: /api
+    volumes:
+      - ./src:/api:cached
   worker:
     build:
       context: .
       dockerfile: worker.Dockerfile
     depends_on:
+      - app
       - common
       - mongo
       - redis
@@ -34,6 +38,9 @@ services:
       MONGODB_CONN: ${MONGO}
       MONGODB_NAME: ${MONGO_NAME}
       REDIS_IP: ${REDIS}
+    working_dir: /api
+    volumes:
+      - ./src:/api:cached
   redis:
     image: "redis:alpine"
     logging:
