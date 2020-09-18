@@ -1,6 +1,16 @@
 # Pith
 
-The server-side portion of Pith. It uses [python-socketio](https://github.com/miguelgrinberg/python-socketio) running on the [aiohttp server](https://github.com/aio-libs/aiohttp), [Arq](https://github.com/samuelcolvin/arq) for task queues, [Redis](https://redis.io/) as a database for task and message queues, and [MongoDB](https://www.mongodb.com/) as a database for storing content.
+This repository contains the code for running a Pith server and client interface.
+
+There are two primary components to this project:
+
+### Frontend
+
+The client-side portion is a [React](https://reactjs.org/) project using [Redux](https://redux.js.org/) for state management and the [socket.io client library](https://socket.io/docs/client-api/) for interfacing with the backend. You can find the client code in the `/frontend` directory.
+
+### Backend
+
+The server-side portion of Pith. It uses [python-socketio](https://github.com/miguelgrinberg/python-socketio) running on the [aiohttp server](https://github.com/aio-libs/aiohttp), [Arq](https://github.com/samuelcolvin/arq) for task queues, [Redis](https://redis.io/) as a database for task and message queues, and [MongoDB](https://www.mongodb.com/) as a database for storing content. You can find it in the `/backend` directory.
 
 ## Development
 
@@ -44,7 +54,7 @@ $ docker exec -it pith-api_tests_1 /bin/bash
 Then, run the tests:
 
 ```
-$ ./tests.sh
+$ ./test.sh
 ```
 
 ## Deployment
@@ -58,7 +68,6 @@ To deploy, determine the number of instances of the interface you'd like to run.
 ```
 server app01 127.0.0.1:5000 check cookie app01
 server app02 127.0.0.1:5001 check cookie app02
-server app03 127.0.0.1:5002 check cookie app03
 # add more here as needed
 ```
 
@@ -68,11 +77,11 @@ In `docker-compose.prod.yml`, adjust the port range of the `app` to accommodate 
 services:
     app:
         ports:
-            - "5000-5002:8080"
+            - "5000-5001:8080"
 ```
 
 Then, start the services, specifying how many `app` instances to run:
 
 ```
-$ docker-compose -f docker-compose.prod.yml --env-file .env.test up --build --scale app=3
+$ docker-compose -f docker-compose.prod.yml --env-file .env.test up --build --scale app=2
 ```

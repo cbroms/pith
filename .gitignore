@@ -1,3 +1,5 @@
+# js stuff 
+node_modules/
 
 # redis stuff
 *.rdb 

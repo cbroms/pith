@@ -1,16 +1,10 @@
 version: "3"
 services:
-  common:
-    image: pith-api_common:latest
-    build:
-      context: .
-      dockerfile: ./dockerfiles/common.Dockerfile
   app:
     build:
       context: .
-      dockerfile: ./dockerfiles/app.Dockerfile
+      dockerfile: ./dockerfiles/app.prod.Dockerfile
     depends_on:
-      - common
       - mongo
       - redis
     ports:
@@ -21,15 +15,12 @@ services:
       MONGODB_NAME: ${MONGO_NAME}
       REDIS_IP: ${REDIS}
     working_dir: /api
-    volumes:
-      - ./src:/api:cached
   worker:
     build:
       context: .
-      dockerfile: ./dockerfiles/worker.Dockerfile
+      dockerfile: ./dockerfiles/worker.prod.Dockerfile
     depends_on:
       - app
-      - common
       - mongo
       - redis
     restart: always
@@ -38,8 +29,6 @@ services:
       MONGODB_NAME: ${MONGO_NAME}
       REDIS_IP: ${REDIS}
     working_dir: /api
-    volumes:
-      - ./src:/api:cached
   static:
     build:
       context: .
@@ -53,9 +42,7 @@ services:
     stdin_open: true
     environment:
       REACT_APP_BACKEND_HOST: ${HOST_NAME}
-      REACT_APP_BACKEND_PORT: ${HOST_PORT}/api
-    volumes:
-      - ./frontend:/static:cached
+      REACT_APP_BACKEND_PORT: ${HOST_PORT}
   redis:
     image: "redis:alpine"
     restart: always
@@ -71,6 +58,7 @@ services:
       dockerfile: ./dockerfiles/balancer.Dockerfile
     depends_on:
       - app
+      - static
     restart: always
     ports:
       - "80:80"

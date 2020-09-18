@@ -55,7 +55,7 @@ services:
       REACT_APP_BACKEND_HOST: "localhost"
       REACT_APP_BACKEND_PORT: "8080"
     volumes:
-      - ./frontend:/static:cached
+      - ./frontend/src:/static/src:cached
   redis:
     image: "redis:alpine"
     restart: always

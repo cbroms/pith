@@ -2,7 +2,11 @@ FROM node:latest
 
 COPY frontend/package.json /static/package.json
 
-RUN npm install 
+WORKDIR /static 
+
+RUN npm install
+
+COPY frontend/public /static/public
 
 CMD [ "npm", "start" ]
-# CMD ["ping", "localhost"]
+
