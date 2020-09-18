@@ -1,0 +1,33 @@
+.post {
+	/*padding: 5px;*/
+	margin: 10px 0;
+	/*background-color: #eff4fc;*/
+	/*border: 1px solid #c9dbfc;*/
+	width: 100%;
+}
+
+.post-height-limited {
+	max-height: 50vh;
+	overflow: auto;
+	margin-bottom: 0;
+}
+
+.post-title {
+	font-family: freight-sans-pro, sans-serif;
+	display: inline-block;
+	margin: 0;
+	margin-right: 10px;
+	color: #4c4c4c;
+}
+
+.post-subtitle {
+	color: #4c4c4c;
+	margin: 0;
+	font-family: freight-sans-pro, sans-serif;
+	display: inline-block;
+	font-weight: normal;
+}
+
+.post-header {
+	padding: 5px 0;
+}

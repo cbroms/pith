@@ -20,7 +20,7 @@ RUN python3.8 -m pip  install --upgrade \
     pip \
     setuptools
 
-COPY requirements.txt /api/requirements.txt
+COPY backend/requirements.txt /api/requirements.txt
 
 # install the requirements 
 RUN python3.8 -m pip install -r /api/requirements.txt

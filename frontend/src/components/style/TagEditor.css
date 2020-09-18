@@ -1,0 +1,47 @@
+.tags {
+	/*float: left;*/
+	display: inline-block;
+}
+
+.tag-wrapper {
+	max-width: 300px;
+	margin-bottom: 5px;
+}
+
+.tag-input {
+	font-family: freight-sans-pro, sans-serif;
+	border: none;
+	padding: 2px;
+	margin: 5px 0;
+	font-size: 16px;
+	display: inline-block;
+	max-width: 100px;
+	background-color: #313131;
+}
+
+.tag {
+	/*to account for the overlapping borders*/
+	font-family: freight-sans-pro, sans-serif;
+	background-color: #313131;
+	cursor: default;
+	/*margin-right: -1px;*/
+	display: inline-block;
+	padding: 2px;
+	padding-left: 5px;
+	padding-right: 5px;
+	margin-top: 5px;
+	margin-right: 5px;
+}
+
+.tag-button {
+	display: inline-block;
+	padding: 2px;
+	margin-top: 5px;
+	cursor: pointer;
+}
+
+.tag-close {
+	display: inline-block;
+	margin-left: 5px;
+	cursor: pointer;
+}

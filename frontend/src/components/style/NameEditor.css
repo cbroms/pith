@@ -1,0 +1,10 @@
+.name-editor-wrapper {
+	margin-top: 200px;
+	max-width: var(--column-width);
+	width: 100%;
+}
+
+input {
+	background-color: #313131;
+	padding: 10px;
+}
