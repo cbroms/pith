@@ -15,25 +15,31 @@ The docker compose file for testing (`docker-compose.tests.yml`) defines one add
 
 -   `tests`: a container that runs the unit tests and connects to `app` to test the interface.
 
+Addition
+
 ### Run it
+
+#### Development
 
 To run the development build:
 
 ```
-$ sudo docker-compose --env-file .env.test up --build
+$ docker-compose --env-file .env.test up --build
 ```
+
+#### Testing
 
 To run the tests:
 
 ```
-$ sudo docker-compose -f docker-compose.yml -f docker-compose.tests.yml --env-file .env.test up --build
+$ docker-compose -f docker-compose.yml -f docker-compose.tests.yml --env-file .env.test up --build
 ```
 
 To rebuild just the test container:
 
 ```
-$ sudo docker-compose --env-file .env.test up -d
-$ sudo docker-compose -f docker-compose.yml -f docker-compose.tests.yml --env-file .env.test up --build --no-deps tests
+$ docker-compose --env-file .env.test up -d
+$ docker-compose -f docker-compose.yml -f docker-compose.tests.yml --env-file .env.test up --build --no-deps tests
 ```
 
 If you're using a cloud-based Redis or MongoDB database, you can set the respective environment variables in `.env` with the connection information.
@@ -42,4 +48,30 @@ If you're using a cloud-based Redis or MongoDB database, you can set the respect
 MONGODB: mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majority
 MONGO_NAME=<dbname>
 REDIS=redis
+```
+
+#### Deployment
+
+To deploy, determine the number of instances of the interface to run. In `haproxy.cfg`, add additional servers as needed:
+
+```
+server app01 127.0.0.1:5000 check cookie app01
+server app02 127.0.0.1:5001 check cookie app02
+server app03 127.0.0.1:5002 check cookie app03
+# add more here as needed
+```
+
+In `docker-compose.prod.yml`, adjust the port range of the `app` as needed:
+
+```yml
+services:
+    app:
+        ports:
+            - "5000-5002:8080"
+```
+
+Then, start the services, specifiying how many `app` instances to run:
+
+```
+$ docker-compose -f docker-compose.prod.yml --env-file .env.test up --build --scale app=3
 ```
