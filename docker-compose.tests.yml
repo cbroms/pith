@@ -9,7 +9,7 @@ services:
   tests:
     build:
       context: .
-      dockerfile: tests.Dockerfile
+      dockerfile: ./dockerfiles/tests.Dockerfile
     depends_on:
       - common
       - app

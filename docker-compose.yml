@@ -4,17 +4,17 @@ services:
     image: pith-api_common:latest
     build:
       context: .
-      dockerfile: common.Dockerfile
+      dockerfile: ./dockerfiles/common.Dockerfile
   app:
     build:
       context: .
-      dockerfile: app.Dockerfile
+      dockerfile: ./dockerfiles/app.Dockerfile
     depends_on:
       - common
       - mongo
       - redis
     ports:
-      - "8080:8080"
+      - "5000-5001:8080"
     restart: always
     environment:
       MONGODB_CONN: ${MONGO}
@@ -26,7 +26,7 @@ services:
   worker:
     build:
       context: .
-      dockerfile: worker.Dockerfile
+      dockerfile: ./dockerfiles/worker.Dockerfile
     depends_on:
       - app
       - common
@@ -53,3 +53,13 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
+  balancer:
+    build:
+      context: .
+      dockerfile: ./dockerfiles/balancer.Dockerfile
+    depends_on:
+      - app
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
