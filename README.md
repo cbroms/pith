@@ -27,10 +27,12 @@ The containers use volumes to easily facilitate development. You can edit any co
 
 ### Run it
 
+If you are running on a remote machine, copy the .env.test file to a .env file. Change HOST_NAME within the .env file to the external IP address of the remote machine. Use .env instead of .env.test in the following commands. 
+
 To run the development build:
 
 ```
-$ docker-compose --env-file .env.test up --build
+$ docker-compose --env-file .env.test up --build -d
 ```
 
 Once the build completes, the client can be accessed from `http://localhost:3000`. The socketio api is running at `http://localhost:8080`.
@@ -48,7 +50,7 @@ REDIS=redis
 To run the tests, connect to the `tests` container:
 
 ```
-$ docker exec -it pith-api_tests_1 /bin/bash
+$ docker exec -it pith_tests_1 /bin/bash
 ```
 
 Then, run the tests:

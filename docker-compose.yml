@@ -52,8 +52,8 @@ services:
       - "3000:3000"
     stdin_open: true
     environment:
-      REACT_APP_BACKEND_HOST: "localhost"
-      REACT_APP_BACKEND_PORT: "8080"
+      REACT_APP_BACKEND_HOST: ${HOST_NAME}
+      REACT_APP_BACKEND_PORT: ${HOST_PORT}
     volumes:
       - ./frontend/src:/static/src:cached
   redis:
