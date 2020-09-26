@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "unit_id": {"type": "string"},
+    "start_time": {"type": "string"},
+    "end_time": {"type": "string"},
+  },
+  "required": ["unit_id", "start_time", "end_time"],
+}

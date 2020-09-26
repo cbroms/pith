@@ -1,64 +1,57 @@
+create_user = {
+  "type": "object",
+  "properties": {
+    "discussion_id": {"type": "string"},
+    "nickname": {"type": "string"},
+  },
+  "required": ["discussion_id", "nickname"],
+}
+
 join = {
   "type": "object",
   "properties": {
     "discussion_id": {"type": "string"},
     "user_id": {"type": "string"},
-    "name": {"type": "string"},
   },
-  "required": ["discussion_id", "user_id", "name"],
+  "required": ["discussion_id", "user_id"],
 }
 
-create_post = {
+get_unit_page = {
   "type": "object",
   "properties": {
-    "blocks": {"type": "array", "items": {"type": "string"}}
+    "unit_id": {"type": "string"},
   },
-  "required": ["blocks"],
+  "required": ["unit_id"],
 }
 
-get_block = {
+get_unit_content = {
   "type": "object",
   "properties": {
-    "block_id": {"type": "string"},
+    "unit_id": {"type": "string"},
   },
-  "required": ["block_id"],
+  "required": ["unit_id"],
 }
 
-save_block = {
+get_unit_context = {
   "type": "object",
   "properties": {
-    "block_id": {"type": "string"},
+    "unit_id": {"type": "string"},
   },
-  "required": ["block_id"],
+  "required": ["unit_id"],
 }
 
-unsave_block = {
+post = {
   "type": "object",
   "properties": {
-    "block_id": {"type": "string"},
+    "piths": {
+      "type": "array",
+      "items": {"type": "string"},
+    },
   },
-  "required": ["block_id"],
+  "required": ["piths"],
 }
 
-block_add_tag = { 
-  "type": "object",
-  "properties": {
-    "block_id": {"type": "string"},
-    "tag": {"type": "string"},
-  },
-  "required": ["block_id", "tag"],
-}
-
-block_remove_tag = {
-  "type": "object",
-  "properties": {
-    "block_id": {"type": "string"},
-    "tag": {"type": "string"},
-  },
-  "required": ["block_id", "tag"],
-}
-
-search_basic = {
+search = {
   "type": "object",
   "properties": {
     "query": {"type": "string"},
@@ -66,51 +59,102 @@ search_basic = {
   "required": ["query"],
 }
 
-search_tags = {
+send_to_doc = {
   "type": "object",
   "properties": {
-    "tags": {"type": "string"},
+    "unit_id": {"type": "string"},
   },
-  "required": ["tags"],
+  "required": ["unit_id"],
 }
 
-search_user_saved_basic = {
+"""
+position - -1 means streaming
+"""
+move_cursor = {
   "type": "object",
   "properties": {
-    "query": {"type": "string"},
+    "position": {"type": "integer", "minimum": -1}
   },
-  "required": ["query"],
+  "required": ["position"],
 }
 
-search_user_saved_tags = {
+hide_unit = {
   "type": "object",
   "properties": {
-    "tags": {"type": "string"},
+    "unit_id": {"type": "string"},
   },
-  "required": ["tags"],
+  "required": ["unit_id"],
 }
 
-summary_add_block = {
+unhide_unit = {
   "type": "object",
   "properties": {
-    "body": {"type": "string"},
+    "unit_id": {"type": "string"},
   },
-  "required": ["body"],
+  "required": ["unit_id"],
 }
 
-summary_modify_block = {
+add_unit = {
   "type": "object",
   "properties": {
-    "block_id": {"type": "string"},
-    "body": {"type": "string"},
+    "pith": {"type": "string"},
   },
-  "required": ["block_id", "body"],
+  "required": ["pith"],
 }
 
-summary_remove_block = {
+select_unit = {
   "type": "object",
   "properties": {
-    "block_id": {"type": "string"},
+    "unit_id": {"type": "string"},
   },
-  "required": ["block_id"],
+  "required": ["unit_id"],
+}
+
+move_units = {
+  "type": "object",
+  "properties": {
+    "units": {
+      "type": "array",
+      "items": {"type": "string"},
+    },
+    "parent": {"type": "string"},
+  },
+  "required": ["units", "parent"],
+}
+
+merge_units = {
+  "type": "object",
+  "properties": {
+    "units": {
+      "type": "array",
+      "items": {"type": "string"},
+    },
+    "parent": {"type": "string"},
+  },
+  "required": ["units", "parent"],
+}
+
+request_to_edit = {
+  "type": "object",
+  "properties": {
+    "unit_id": {"type": "string"},
+  },
+  "required": ["unit_id"],
+}
+
+edit_unit = {
+  "type": "object",
+  "properties": {
+    "unit_id": {"type": "string"},
+    "pith": {"type": "string"},
+  },
+  "required": ["unit_id", "pith"],
+}
+
+get_ancestors = {
+  "type": "object",
+  "properties": {
+    "unit_id": {"type": "string"},
+  },
+  "required": ["unit_id"],
 }

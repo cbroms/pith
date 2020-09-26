@@ -1,4 +1,5 @@
-# TODO: emits have standard output patterns, need to change
+# TODO: add links to requests/responses to go to actual documentation
+# TODO: means to return False
 # how they are documented
 
 from aiohttp import web
@@ -9,8 +10,9 @@ from socketio import AsyncNamespace
 
 import constants
 from managers.global_manager import GlobalManager
+import schema.board_responses as bres
 import schema.discussion_requests as dreq
-import schema.board_requests as breq
+import schema.discussion_responses as dres
 from utils.utils import GenericEncoder
 
 
@@ -19,16 +21,16 @@ sio = gm.sio
 
 
 @sio.on('create')
-async def create(sid, json):
+async def create(sid, request):
     """
-    :return: **discussion_id**
-    :rtype: str
+    :return: create 
     """
-    if validate(instance=json, schema=breq.create):
-      #TODO
-      return False
     discussion_id = await gm.discussion_manager.create()
-    serialized = dumps({"discussion_id": discussion_id}, cls=GenericEncoder)
+
+    response = {"discussion_id": discussion_id}
+    serialized = dumps(response, cls=GenericEncoder)
+    if validate(instance=serialized, schema=bres.create):
+      return False
     return serialized
 
 class DiscussionNamespace(AsyncNamespace):
@@ -45,45 +47,40 @@ class DiscussionNamespace(AsyncNamespace):
         if discussion_id:
           gm.discussion_manager.leave(discussion_id, user_id)
 
-    async def create_user(self, sid, json):
+    async def create_user(self, sid, request):
         """
-        :param discussion_id: 
-        :type discussion_id: str
-        :param nickname: 
-        :type nickname: str
-
-        :return: **user_id** -
-        :rtype: str
+        :event: create_user
+        :return: create_user 
         """
-        if validate(instance=json, schema=breq.create_user):
-          #TODO
+        if validate(instance=request, schema=dreq.create_user):
           return False
-        discussion_id = json["discussion_id"]
-        nickname = json["nickname"]
+        discussion_id = request["discussion_id"]
+        nickname = request["nickname"]
 
         user_id = gm.discussion_manager.create_user(nickname)
-        serialized = dumps({"user_id": user_id}, cls=GenericEncoder)
+
+        response = {"user_id": user_id}
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.create_user):
+          return False
         return serialized
 
-    async def on_join(self, sid, json):
+    async def on_join(self, sid, request):
         """
-        :param discussion_id:
-        :type discussion_id: str
-        :param user_id:
-        :type user_id: str
-
-        :returns:
-          - **nickname** (*str*)
-        :emit: joined_user
+        :event: join
+        :emit: joined_user (join)
         """
-        if validate(instance=json, schema=dreq.join):
-          #TODO
+        if validate(instance=request, schema=dreq.join):
           return False
-        discussion_id = json["discussion_id"]
-        user_id = json["user_id"]
+        discussion_id = request["discussion_id"]
+        user_id = request["user_id"]
 
         nickname = gm.discussion_manager.join(discussion_id, user_id)
-        serialized = dumps({"nickname": nickname}, cls=GenericEncoder)
+
+        response = {"nickname": nickname}
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.join):
+          return False
         self.enter_room(sid, discussion_id)
         await self.emit("joined_user", serialized, room=discussion_id)
         await self.save_session(sid, {
@@ -91,415 +88,370 @@ class DiscussionNamespace(AsyncNamespace):
           "user_id": user_id}
         )
 
-        return serialized
-
-    async def on_leave(self, sid, json):
+    async def on_leave(self, sid, request):
         """
-        :return: **nickname**
-        :rtype: str
-        :emit: left_user
+        :emit: left_user (leave)
         """
         session = await self.get_session(sid)
         user_id = session["user_id"]
         discussion_id = session["discussion_id"]
+
         nickname = gm.discussion_manager.leave(discussion_id, user_id)
-        serialized = dumps({"nickname": nickname}, cls=GenericEncoder)
+
+        response = {"nickname": nickname}
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.leave):
+          return False
         await self.emit("left_user", serialized, room=discussion_id)
         self.leave_room(sid, discussion_id)
 
-        return serialized
-
-    async def load(self, sid, json):
+    async def load(self, sid, request):
         """
-        :return:
-            - **cursors** (*Dict[string,Cursor]*) - Map of active user IDs to cursor positions. 
-            - **current_unit** (*str*) - ID of the unit the user was last looking at.
-            - **timeline** (*List[TimeInterval]*) - List of the units visited via the cursor.
-            - **chat_history** - List of the posts:
-
-              - **created_at** (*datetime*) - Creation time of unit. 
-              - **author** (*string*) - Nickname of the author.
-              - **units** (*List[string]*) - List of unit IDs.
+        :return: load
         """
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
-        info = gm.discussion_manager.load(discussion_id, user_id)
-        serialized = dumps(info, cls=GenericEncoder)
+
+        response = gm.discussion_manager.load(discussion_id, user_id)
+
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.load):
+          return False
         return serialized
     
-    async def get_unit_page(self, sid, json):
+    async def get_unit_page(self, sid, request):
         """
-        :param unit_id:
-        :type unit_id: str
-
-        :return: 
-          - **pith** (*str*) - Pith of the unit.
-          - **ancestors** (*List[str]*) - Ancestors of the unit, including self.
-          - **children** (*List[(str, List[str])]*) - List of tuples, where each tuple has a children unit ID and the list of children for that unit.
-          - **backlinks** (*List[(str, List[str])]*) - List of tuples, where each tuple has a backlink unit ID and the list of backlinks for that unit.
+        :event: get_unit_page
+        :return: get_unit_page 
         """
-        if validate(instance=json, schema=dreq.get_unit_page):
-          #TODO
+        if validate(instance=request, schema=dreq.get_unit_page):
           return False
-        unit_id = json["unit_id"]
-
+        unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
-        info = gm.discussion_manager.get_unit_page(discussion_id, unit_id)
-        serialized = dumps(info, cls=GenericEncoder)
+
+        response = gm.discussion_manager.get_unit_page(discussion_id, unit_id)
+
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.get_unit_page):
+          return False
         return serialized
 
-    async def get_unit_content(self, sid, json):
+    async def get_unit_content(self, sid, request):
         """
-        :param unit_id:
-        :type unit_id: str
-
-        :return: 
-          - **pith** (*str*) - Pith of the unit.
-          - **hidden** (*bool*) - Whether the unit is hidden, default false. 
+        :event: get_unit_content
+        :return: get_unit_content
         """
-        if validate(instance=json, schema=dreq.get_unit_content):
-          #TODO
+        if validate(instance=request, schema=dreq.get_unit_content):
           return False
-        unit_id = json["unit_id"]
-
+        unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
-        info = gm.discussion_manager.get_unit_content(discussion_id, unit_id)
-        serialized = dumps(info, cls=GenericEncoder)
+        response = gm.discussion_manager.get_unit_content(discussion_id, unit_id)
+
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.get_unit_content):
+          return False
         return serialized
 
-    async def get_unit_context(self, sid, json):
+    async def get_unit_context(self, sid, request):
         """
-        :param unit_id:
-        :type unit_id: str
-
-        :return: 
-          - **pith** (*str*) - Pith of the unit.
-          - **children** (*List[str]*) - List of children unit IDs. 
+        :event: get_unit_context
+        :return: get_unit_context
         """
-        if validate(instance=json, schema=dreq.get_unit_context):
-          #TODO
+        if validate(instance=request, schema=dreq.get_unit_context):
           return False
-        unit_id = json["unit_id"]
-
+        unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
-        info = gm.discussion_manager.get_unit_context(discussion_id, unit_id)
-        serialized = dumps(info, cls=GenericEncoder)
+
+        response = gm.discussion_manager.get_unit_context(discussion_id, unit_id)
+
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.get_unit_context):
+          return False
         return serialized
 
-    async def post(self, sid, json):
+    async def post(self, sid, request):
         """
-        :param piths: List of pith strings, one per unit.
-        :type piths: List[str]
-
-        :returns:
-          - **created_at** (*datetime*) - Creation time of unit. 
-          - **author** (*str*) - Nickname of the author. 
-          - **piths** (*List[str]*) - List of pith strings, one per unit.
-        :emit: created_post
+        :event: post
+        :emit: created_post (post)
         """
-        if validate(instance=json, schema=dreq.post):
-          #TODO
+        if validate(instance=request, schema=dreq.post):
           return False
-        piths = json["piths"]
-
+        piths = request["piths"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
-        info = gm.discussion_manager.post(discussion_id, user_id, piths)
-        serialized = dumps(info, cls=GenericEncoder)
+
+        response = gm.discussion_manager.post(discussion_id, user_id, piths)
+
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.post):
+          return False
         await self.emit("created_post", serialized, room=discussion_id)
-        return serialized
 
-    async def on_search(self, sid, json):
+    async def on_search(self, sid, request):
         """
-        :param query: 
-        :type query: str
-
-        :return: **units** - List of unit IDs, sorted in order of relevance.
-        :rtype: List[str]
+        :event: search
+        :return: search
         """
-        if validate(instance=json, schema=dreq.search):
-          #TODO
+        if validate(instance=request, schema=dreq.search):
           return False
-        query = json["query"]
-
+        query = request["query"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
-        result = gm.discussion_manager.search(discussion_id, query)
-        serialized = dumps(result, cls=GenericEncoder)
+
+        response = gm.discussion_manager.search(discussion_id, query)
+
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.search):
+          return False
         return serialized
 
-    async def send_to_doc(self, sid, json):
+    async def send_to_doc(self, sid, request):
         """
-        :param unit_id: Unit that will be copied to doc.
-        :type unit_id: str 
-
-        :return:
-          - **unit_id** (*str*) - Unit ID.
-          - **pith** (*str*) - Pith of the unit.
-          - **created_at** (*datetime*) - Creation time of unit. 
-          - **parent** (*str*) - Parent unit ID unit was added to.
-          - **position** (*int*) - Index of unit in parent.
-        :emit: added_unit
+        :event: send_to_doc
+        :emit: added_unit (added_unit)
         """
-        if validate(instance=json, schema=dreq.send_to_doc):
-          #TODO
+        if validate(instance=request, schema=dreq.send_to_doc):
           return False
-        unit_id = json["unit_id"]
-
+        unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
-        info = gm.discussion_manager.send_to_doc(discussion_id, user_id, unit_id)
-        serialized = dumps(result, cls=GenericEncoder)
+
+        response = gm.discussion_manager.send_to_doc(discussion_id, user_id, unit_id)
+
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.added_unit):
+          return False
         await self.emit("added_unit", serialized, room=discussion_id)
-        return serialized
 
-    async def move_cursor(self, sid, json): 
+    async def move_cursor(self, sid, request): 
         """
-        :param position: Position cursor is moved to.
-        :type position: Cursor
-
-        :return:
-          - **user_id** (*str*) - 
-          - **position** (*Cursor*) -
-        :emit: moved_cursor
+        :event: move_cursor
+        :emit: moved_cursor (move_cursor)
         """
-        if validate(instance=json, schema=dreq.move_cursor):
-          #TODO
+        if validate(instance=request, schema=dreq.move_cursor):
           return False
-        position = json["position"]
-
+        position = request["position"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
-        info = gm.discussion_manager.move_cursor(discussion_id, user_id, position)
-        serialized = dumps(result, cls=GenericEncoder)
+
+        response = gm.discussion_manager.move_cursor(discussion_id, user_id, position)
+
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.move_cursor):
+          return False
         await self.emit("moved_cursor", serialized, room=discussion_id)
-        return serialized
 
-    async def hide_unit(self, sid, json): 
+    async def hide_unit(self, sid, request): 
         """
-        :param unit_id:
-        :type unit_id: str
-
-        :return: **unit_id**
-        :rtype: str
-        :emit: hid_unit
+        :event: hide_unit
+        :emit: hid_unit (hide_unit)
         """
-        if validate(instance=json, schema=dreq.hide_unit):
-          #TODO
+        if validate(instance=request, schema=dreq.hide_unit):
           return False
-        unit_id = json["unit_id"]
-
+        unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
+
         # TODO save hidden state
         gm.discussion_manager.hide_unit(discussion_id, unit_id)
-        serialized = dumps({"unit_id": unit_id}, cls=GenericEncoder)
+
+        response = {"unit_id": unit_id}
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.hide_unit):
+          return False
         await self.emit("hid_unit", serialized, room=discussion_id)
-        return serialized
 
-    async def unhide_unit(self, sid, json): 
+    async def unhide_unit(self, sid, request): 
         """
-        :param unit_id:
-        :type unit_id: str
-
-        :return: **unit_id**
-        :rtype: str
-        :emit: unhid_unit
+        :event: unhide_unit
+        :emit: unhid_unit (unhide_unit)
         """
-        if validate(instance=json, schema=dreq.unhide_unit):
-          #TODO
+        if validate(instance=request, schema=dreq.unhide_unit):
           return False
-        unit_id = json["unit_id"]
-
+        unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
+
         # TODO save hidden state
         gm.discussion_manager.hide_unit(discussion_id, unit_id)
-        serialized = dumps({"unit_id": unit_id}, cls=GenericEncoder)
+
+        response = {"unit_id": unit_id}
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.unhide_unit):
+          return False
         await self.emit("unhid_unit", serialized, room=discussion_id)
-        return serialized
 
-    async def add_unit(self, sid, json): 
+    async def add_unit(self, sid, request): 
         """
-        :param pith:
-        :type pith: str
-
-        :return: 
-          - **unit_id** (*str*) - Unit ID.
-          - **pith** (*str*) - Pith of the unit.
-          - **created_at** (*datetime*) - Creation time of unit. 
-          - **parent** (*str*) - Parent unit ID unit was added to.
-          - **position** (*int*) - Index of unit in parent.
-        :emit: added_unit
+        :event: add_unit
+        :emit: added_unit (added_unit)
         """
-        if validate(instance=json, schema=dreq.add_unit):
-          #TODO
+        if validate(instance=request, schema=dreq.add_unit):
           return False
-         pith = json["pith"]
-
+        pith = request["pith"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
-        info = gm.discussion_manager.added_unit(discussion_id, user_id, pith)
-        serialized = dumps(info, cls=GenericEncoder)
+
+        response = gm.discussion_manager.added_unit(discussion_id, user_id, pith)
+
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.added_unit):
+          return False
         await self.emit("added_unit", serialized, room=discussion_id)
-        return serialized
 
-    async def select_unit(self, sid, json): 
+    async def select_unit(self, sid, request): 
         """
-        :param unit_id:
-        :type unit_id: str
-
-        :return: 
-          - **unit_id** (*str*) - Unit ID.
-          - **nickname** (*str*) - Nickname of user with unit's position lock.
-        :emit: locked_unit_position
+        :event: select_unit
+        :emit: locked_unit_position (locked_unit_position) OR fail 
         """
-        if validate(instance=json, schema=dreq.add_unit):
-          #TODO
+        if validate(instance=request, schema=dreq.add_unit):
           return False
-         unit_id = json["unit_id"]
-
+        unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
-        info = gm.discussion_manager.added_unit(discussion_id, user_id, unit_id)
-        serialized = dumps(info, cls=GenericEncoder)
+
+        response = gm.discussion_manager.added_unit(discussion_id, user_id, unit_id)
+
+        if response is None:
+          return False
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.locked_unit_position):
+          return False
         await self.emit("locked_unit_position", serialized, room=discussion_id)
-        return serialized
 
-    async def move_units(self, sid, json): 
+    async def move_units(self, sid, request): 
         """
-        :param units: Units to be moved.
-        :type units: List[str]
-        :param parent: Unit ID of parent unit.
-        :type parent: str
-
-        :return: 
-          - **unit_id** (*str*) - Unit ID.
-          - **parent** (*str*) - Parent unit ID.
-          - **position** (*int*) - Position of unit in parent unit.
-          - **old_parent** (*str*) - Old parent unit ID.
-          - **old_position** (*int*) - Position of unit in old parent unit.
-        :emit: repositioned_unit (per unit) OR nothing 
+        :event: move_units
+        :emit: repositioned_unit (per unit, repositioned_unit) OR fail
         """
-        if validate(instance=json, schema=dreq.move_units):
-          #TODO
+        if validate(instance=request, schema=dreq.move_units):
           return False
-        units = json["units"]
-        parent = json["parent"]
+        units = request["units"]
+        parent = request["parent"]
+        session = await self.get_session(sid)
+        discussion_id = session["discussion_id"]
+        user_id = session["user_id"]
+
+        responses = gm.discussion_manager.move_units(discussion_id, user_id, units, parent)
+
+        if responses is None:
+          return False
+        for response in responses:
+          serialized = dumps(response, cls=GenericEncoder)
+          if validate(instance=serialized, schema=dres.repositioned_unit):
+            return False
+          await self.emit("repositioned_unit", serialized, room=discussion_id)
+
+    async def merge_units(self, sid, request): 
+        """
+        :event: merge_units
+        :emit: repositioned_unit (per unit, repositioned_unit) AND added_unit (for parent unit, added_unit) OR fail 
+        """
+        if validate(instance=request, schema=dreq.merge_units):
+          return False
+        units = request["units"]
+        parent = request["parent"]
 
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
-        info = gm.discussion_manager.move_units(discussion_id, user_id, units, parent)
-        # TODO: by unit
-        serialized = dumps(info, cls=GenericEncoder)
-        await self.emit(repositioned_unit, serialized, room=discussion_id)
-        return serialized
 
-    async def merge_units(self, sid, json): 
-        """
-        :param units: Units to be merged.
-        :type units: List[str]
-        :param parent: Unit ID of parent unit.
-        :type parent: str
+        responses = gm.discussion_manager.merge_units(discussion_id, user_id, units, parent)
 
-        :return: 
-          - **unit_id** (*str*) - Unit ID.
-          - **parent** (*str*) - Parent unit ID.
-          - **position** (*int*) - Position of unit in parent unit.
-          - **old_parent** (*str*) - Old parent unit ID.
-          - **old_position** (*int*) - Position of unit in old parent unit.
-        :emit: repositioned_unit (per unit) AND added_unit (for parent unit) OR nothing 
-        """
-        if validate(instance=json, schema=dreq.merge_units):
-          #TODO
+        if responses is None:
           return False
-        units = json["units"]
-        parent = json["parent"]
+        repositions, add = responses
+        # give added first
+        serialized = dumps(add, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.added_unit):
+          return False
+        await self.emit("added_unit", serialized, room=discussion_id)
+        # repositions
+        for response in repositions:
+          serialized = dumps(response, cls=GenericEncoder)
+          if validate(instance=serialized, schema=dres.repositioned_unit):
+            return False
+          await self.emit("repositioned_unit", serialized, room=discussion_id)
 
+    async def request_to_edit(self, sid, request):
+        """
+        :event: request_to_edit
+        :emit: locked_unit_editable (locked_unit_editable) OR fail
+        """
+        if validate(instance=request, schema=dreq.request_to_edit):
+          return False
+        unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
-        info = gm.discussion_manager.merge_units(discussion_id, user_id, units, parent)
-        # TODO: by unit
-        serialized = dumps(info, cls=GenericEncoder)
-        await self.emit(repositioned_unit, serialized, room=discussion_id)
-        return serialized
 
-    async def request_to_edit(self, sid, json):
-        """
-        :param unit_id: 
-        :type unit_id: str 
+        response = gm.discussion_manager.request_to_edit(discussion_id, user_id, unit_id)
 
-        :return: 
-          - **unit_id** (*str*) - Unit ID.
-          - **nickname** (*str*) - Nickname of user holding the edit lock.
-        :emit: locked_unit_editable
-        """
-        if validate(instance=json, schema=dreq.request_to_edit):
-          #TODO
+        if response is None:
           return False
-        unit_id = json["unit_id"]
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.locked_unit_editable):
+          return False
+        await self.emit("locked_unit_editable", serialized, room=discussion_id)
 
+    async def edit_unit(self, sid, request):
+        """
+        :event: edit_unit
+        :emit: edited_unit (edited_unit) AND removed_backlink (opt, removed_backlink) AND added_backlink (opt, added_backlink) 
+        """
+        if validate(instance=request, schema=dreq.edit_unit):
+          return False
+        unit_id = request["unit_id"]
+        pith = request["pith"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
-        user_id = session["user_id"]
-        info = gm.discussion_manager.request_to_edit(discussion_id, user_id, unit_id)
-        serialized = dumps(info, cls=GenericEncoder)
-        await self.emit(locked_unit_editable, serialized, room=discussion_id)
-        return serialized
 
-    async def edit_unit(self, sid, json):
-        """
-        :param unit_id: 
-        :type unit_id: str 
-        :param pith: 
-        :type pith: str 
+        responses = gm.discussion_manager.edit_unit(discussion_id, unit_id, pith)
 
-        :return: 
-          - **unit_id** (*str*) - Unit ID.
-          - **pith** (*str*) - Pith of the unit.
-        :emit: edited_unit AND removed_back_link (OPT) AND added_backlink (OPT) 
-        """
-        if validate(instance=json, schema=dreq.edit_unit):
-          #TODO
+        edited, removed_backlinks, added_backlinks = responses
+        # edited
+        serialized = dumps(edited, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.edited_unit):
           return False
-        unit_id = json["unit_id"]
-        pith = json["pith"]
+        await self.emit("edited_unit", serialized, room=discussion_id)
+        # removed backlinks
+        for response in removed_backlinks:
+          serialized = dumps(response, cls=GenericEncoder)
+          if validate(instance=serialized, schema=dres.removed_backlink):
+            return False
+          await self.emit("removed_backlink", serialized, room=discussion_id)
+        # added backlinks
+        for response in added_backlinks:
+          serialized = dumps(response, cls=GenericEncoder)
+          if validate(instance=serialized, schema=dres.added_backlink):
+            return False
+          await self.emit("added_backlink", serialized, room=discussion_id)
 
+    async def get_ancestors(self, sid, request):
+        """
+        :event: get_ancestors
+        :return: get_ancestors
+        """
+        if validate(instance=request, schema=dreq.get_ancestors):
+          return False
+        unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
-        info = gm.discussion_manager.edit_unit(discussion_id, unit_id, pith)
-        serialized = dumps(info, cls=GenericEncoder)
-        await self.emit(edited_unit, serialized, room=discussion_id)
-        return serialized
 
-    async def get_ancestors(self, sid, json):
-        """
-        :param unit_id: 
-        :type unit_id: str 
+        response = gm.discussion_manager.get_ancestors(discussion_id, unit_id)
 
-        :return: ancestors - List of ancestor unit IDs, from most recent to oldest.
-        :rtype: List[string]
-        """
-        if validate(instance=json, schema=dreq.get_ancestors):
-          #TODO
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.get_ancestors):
           return False
-        unit_id = json["unit_id"]
-
-        session = await self.get_session(sid)
-        discussion_id = session["discussion_id"]
-        info = gm.discussion_manager.get_ancestors(discussion_id, unit_id)
-        serialized = dumps(info, cls=GenericEncoder)
         await self.emit(edited_unit, serialized, room=discussion_id)
         return serialized
 
