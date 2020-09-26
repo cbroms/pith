@@ -73,7 +73,7 @@ position - -1 means streaming
 move_cursor = {
   "type": "object",
   "properties": {
-    "position": {"type": "integer", "minimum": -1}
+    "position": {"type": "integer", "minimum": -1},
   },
   "required": ["position"],
 }

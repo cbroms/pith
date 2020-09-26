@@ -48,10 +48,10 @@ load = {
         "author": {"type": "string"},
         "units": {
           "type": "array",
-          "items": {"type": "string"}
+          "items": {"type": "string"},
         },
       },
-      "required": ["created_at", "author", "units"]
+      "required": ["created_at", "author", "units"],
     },
   },
   "required": ["cursors", "current_unit", "timeline", "chat_history"],
@@ -90,9 +90,9 @@ get_unit_page = {
             "items": {"type": "string"},
           },
         },
-        "required": ["unit_id", "children"] 
-      }
-    }
+        "required": ["unit_id", "children"], 
+      },
+    },
     "backlinks": {
       "type": "array",
       "items": {
@@ -104,8 +104,8 @@ get_unit_page = {
             "items": {"type": "string"},
           },
         },
-        "required": ["unit_id", "backlinks"] 
-      }
+        "required": ["unit_id", "backlinks"], 
+      },
     },
   },
   "required": ["pith", "ancestors", "children", "backlinks"],
@@ -301,7 +301,7 @@ get_ancestors = {
     "ancestors": {
       "type": "array",
       "items": {"type": "string"},
-    }
+    },
   },
   "required": ["ancestors"],
 }
