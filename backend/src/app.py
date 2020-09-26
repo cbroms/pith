@@ -1,7 +1,3 @@
-# TODO: add links to requests/responses to go to actual documentation
-# TODO: means to return False
-# how they are documented
-
 from aiohttp import web
 from json import dumps
 from jsonschema import validate
@@ -25,9 +21,8 @@ async def create(sid, request):
     """
     :return: create 
     """
-    discussion_id = await gm.discussion_manager.create()
+    response = await gm.discussion_manager.create()
 
-    response = {"discussion_id": discussion_id}
     serialized = dumps(response, cls=GenericEncoder)
     if validate(instance=serialized, schema=bres.create):
       return False
@@ -57,9 +52,8 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = request["discussion_id"]
         nickname = request["nickname"]
 
-        user_id = gm.discussion_manager.create_user(nickname)
+        response = gm.discussion_manager.create_user(nickname)
 
-        response = {"user_id": user_id}
         serialized = dumps(response, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.create_user):
           return False
@@ -75,9 +69,8 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = request["discussion_id"]
         user_id = request["user_id"]
 
-        nickname = gm.discussion_manager.join(discussion_id, user_id)
+        response = gm.discussion_manager.join(discussion_id, user_id)
 
-        response = {"nickname": nickname}
         serialized = dumps(response, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.join):
           return False
@@ -96,9 +89,8 @@ class DiscussionNamespace(AsyncNamespace):
         user_id = session["user_id"]
         discussion_id = session["discussion_id"]
 
-        nickname = gm.discussion_manager.leave(discussion_id, user_id)
+        response = gm.discussion_manager.leave(discussion_id, user_id)
 
-        response = {"nickname": nickname}
         serialized = dumps(response, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.leave):
           return False
@@ -148,6 +140,7 @@ class DiscussionNamespace(AsyncNamespace):
         unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
+
         response = gm.discussion_manager.get_unit_content(discussion_id, unit_id)
 
         serialized = dumps(response, cls=GenericEncoder)
@@ -261,8 +254,8 @@ class DiscussionNamespace(AsyncNamespace):
 
         # TODO save hidden state
         gm.discussion_manager.hide_unit(discussion_id, unit_id)
-
         response = {"unit_id": unit_id}
+
         serialized = dumps(response, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.hide_unit):
           return False
@@ -281,8 +274,8 @@ class DiscussionNamespace(AsyncNamespace):
 
         # TODO save hidden state
         gm.discussion_manager.hide_unit(discussion_id, unit_id)
-
         response = {"unit_id": unit_id}
+
         serialized = dumps(response, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.unhide_unit):
           return False
