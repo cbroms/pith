@@ -112,6 +112,20 @@ get_unit_page = {
 }
 
 """
+- ancestors - List of ancestor unit IDs, from most recent to oldest.
+"""
+get_ancestors = {
+  "type": "object",
+  "properties": {
+    "ancestors": {
+      "type": "array",
+      "items": {"type": "string"},
+    },
+  },
+  "required": ["ancestors"],
+}
+
+"""
 - **pith** (*str*) - Pith of the unit.
 - **hidden** (*bool*) - Whether the unit is hidden, default false. 
 """
@@ -290,18 +304,4 @@ added_backlink = {
     "backlink": {"type": "string"},
   },
   "required": ["unit_id", "backlink"],
-}
-
-"""
-- ancestors - List of ancestor unit IDs, from most recent to oldest.
-"""
-get_ancestors = {
-  "type": "object",
-  "properties": {
-    "ancestors": {
-      "type": "array",
-      "items": {"type": "string"},
-    },
-  },
-  "required": ["ancestors"],
 }

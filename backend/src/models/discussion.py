@@ -10,6 +10,7 @@ from mongoengine.fields import (
   BooleanField,
   DateTimeField,
   DictField,
+  EmbeddedDocumentField,
   EmbeddedDocumentListField,
   IntField,
   ListField,
@@ -19,58 +20,42 @@ from mongoengine.fields import (
 from datetime import datetime
 import uuid
 
-from models.user import User
 
-
-class Tag(EmbeddedDocument):
+class Unit(Document):
     id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
-    tag = StringField(required=True)
-    owner = StringField(required=True)
-
-
-class Block(EmbeddedDocument):
-    id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
-    body = StringField(required=True)
-    user = StringField()
-    post = StringField()
-    tags = EmbeddedDocumentListField(Tag)
-    created_at = DateTimeField(default=datetime.utcnow())
+    pith = StringField(required=True)
+    children = ListField(StringField(), required=True, default=[])
+    forward_links = ListField(StringField(), required=True, default=[])
+    backward_links = ListField(StringField(), required=True, default=[])
+    created_at = DateTimeField(required=True, default=datetime.utcnow())
+    in_chat = BooleanField(required=True, default=False) # versus in document
+    parent = StringField() 
+    # if from chat
+    original_text = StringField()
+    # if from document
+    edit_count = IntField()
+    hidden = BooleanField()
+    # content_lock
+    # position_lock
     freq_dict = DictField()
 
 
-class Post(EmbeddedDocument):
+class Cursor(EmbeddedDocument):
+    unit_id = StringField(required=True)
+    position = IntField(null=True)
+
+
+class User(EmbeddedDocument):
     id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
-    user = StringField()
-    blocks = ListField(StringField())
-    created_at = DateTimeField(default=datetime.utcnow())
+    active = BooleanField(required=True, default=False)
+    name = StringField(required=True)
+    cursor = EmbeddedDocumentField(Cursor, required=True) 
 
 
 class Discussion(Document):
     meta = {'collection': 'discussions'}
 
     id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
-    created_at = DateTimeField(default=datetime.utcnow())
-    users = ListField(ReferenceField(User, reverse_delete_rule=PULL)) 
-
-    """
-    Configuration fields.
-    """
-    title = StringField(null=True)
-    theme = StringField(null=True)
-    time_limit = IntField(null=True)
-    expire_at = DateTimeField(null=True)
-    block_char_limit = IntField(null=True) 
-    summary_char_limit = IntField(null=True) 
-
-    """
-    State fields.
-    """
-    expired = BooleanField(default=False)
-    summary_char_left = IntField(null=True) # depends on summary_char_limit
-
-    """
-    The discussion stores the objects pertaining to it by id.
-    """
-    history = EmbeddedDocumentListField(Post)  # stores all posts, may add option to delete
-    history_blocks = EmbeddedDocumentListField(Block)  # stores all blocks, may add option to delete
-    summary_blocks = EmbeddedDocumentListField(Block) # store blocks in summary
+    document = StringField(required=True) # unit id
+    chat = EmbeddedDocumentListField(Unit, default=[])
+    users = EmbeddedDocumentListField(User, default=[]) 

@@ -6,7 +6,7 @@ import mongoengine
 import socketio
 
 import constants
-from managers.user_manager import UserManager
+from managers.board_manager import BoardManager
 from managers.discussion_manager import DiscussionManager
 
 
@@ -31,5 +31,5 @@ class GlobalManager:
         self.redis_queue = loop.run_until_complete(create_pool(constants.ARQ_REDIS))
 
         # these get all the other variables
-        self.user_manager = UserManager(self)
         self.discussion_manager = DiscussionManager(self)
+        self.board_manager = BoardManager(self)

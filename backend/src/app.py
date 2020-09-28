@@ -52,7 +52,7 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = request["discussion_id"]
         nickname = request["nickname"]
 
-        response = gm.discussion_manager.create_user(nickname)
+        response = gm.discussion_manager.create_user(discussion_id, nickname)
 
         serialized = dumps(response, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.create_user):
@@ -128,6 +128,25 @@ class DiscussionNamespace(AsyncNamespace):
         serialized = dumps(response, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.get_unit_page):
           return False
+        return serialized
+
+    async def get_ancestors(self, sid, request):
+        """
+        :event: get_ancestors
+        :return: get_ancestors
+        """
+        if validate(instance=request, schema=dreq.get_ancestors):
+          return False
+        unit_id = request["unit_id"]
+        session = await self.get_session(sid)
+        discussion_id = session["discussion_id"]
+
+        response = gm.discussion_manager.get_ancestors(discussion_id, unit_id)
+
+        serialized = dumps(response, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.get_ancestors):
+          return False
+        await self.emit(edited_unit, serialized, room=discussion_id)
         return serialized
 
     async def get_unit_content(self, sid, request):
@@ -252,7 +271,6 @@ class DiscussionNamespace(AsyncNamespace):
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
 
-        # TODO save hidden state
         gm.discussion_manager.hide_unit(discussion_id, unit_id)
         response = {"unit_id": unit_id}
 
@@ -272,7 +290,6 @@ class DiscussionNamespace(AsyncNamespace):
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
 
-        # TODO save hidden state
         gm.discussion_manager.hide_unit(discussion_id, unit_id)
         response = {"unit_id": unit_id}
 
@@ -293,7 +310,7 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
 
-        response = gm.discussion_manager.added_unit(discussion_id, user_id, pith)
+        response = gm.discussion_manager.add_unit(discussion_id, user_id, pith)
 
         serialized = dumps(response, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.added_unit):
@@ -312,7 +329,7 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
 
-        response = gm.discussion_manager.added_unit(discussion_id, user_id, unit_id)
+        response = gm.discussion_manager.select_unit(discussion_id, user_id, unit_id)
 
         if response is None:
           return False
@@ -428,25 +445,6 @@ class DiscussionNamespace(AsyncNamespace):
           if validate(instance=serialized, schema=dres.added_backlink):
             return False
           await self.emit("added_backlink", serialized, room=discussion_id)
-
-    async def get_ancestors(self, sid, request):
-        """
-        :event: get_ancestors
-        :return: get_ancestors
-        """
-        if validate(instance=request, schema=dreq.get_ancestors):
-          return False
-        unit_id = request["unit_id"]
-        session = await self.get_session(sid)
-        discussion_id = session["discussion_id"]
-
-        response = gm.discussion_manager.get_ancestors(discussion_id, unit_id)
-
-        serialized = dumps(response, cls=GenericEncoder)
-        if validate(instance=serialized, schema=dres.get_ancestors):
-          return False
-        await self.emit(edited_unit, serialized, room=discussion_id)
-        return serialized
 
 # TODO: later people can add backlinks directly.
 
