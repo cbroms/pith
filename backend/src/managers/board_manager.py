@@ -25,7 +25,8 @@ class BoardManager:
         self.redis_queue = self.gm.redis_queue
 
     def create(self):
-        unit = Unit(pith="")
+        unit = Unit(pith="", parent="")
+        unit.original_text = unit.pith
         unit.save()
         discussion = Discussion(document=unit.id)
         discussion.save()

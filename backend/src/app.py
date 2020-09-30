@@ -62,7 +62,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def on_join(self, sid, request):
         """
         :event: :ref:`dreq_join-label`
-        :emit: joined_user (:ref:`dres_join-label`)
+        :emit: *joined_user* (:ref:`dres_join-label`)
         """
         if validate(instance=request, schema=dreq.join):
           return False
@@ -83,7 +83,7 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def on_leave(self, sid, request):
         """
-        :emit: left_user (:ref:`dres_leave-label`)
+        :emit: *left_user* (:ref:`dres_leave-label`)
         """
         session = await self.get_session(sid)
         user_id = session["user_id"]
@@ -188,7 +188,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def post(self, sid, request):
         """
         :event: :ref:`dreq_post-label`
-        :emit: created_post (:ref:`dres_post-label`)
+        :emit: *created_post* (:ref:`dres_post-label`)
         """
         if validate(instance=request, schema=dreq.post):
           return False
@@ -225,7 +225,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def send_to_doc(self, sid, request):
         """
         :event: :ref:`dreq_send_to_doc-label`
-        :emit: added_unit (:ref:`dres_added_unit-label`)
+        :emit: *added_unit* (:ref:`dres_added_unit-label`)
         """
         if validate(instance=request, schema=dreq.send_to_doc):
           return False
@@ -244,7 +244,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def move_cursor(self, sid, request): 
         """
         :event: :ref:`dreq_move_cursor-label`
-        :emit: moved_cursor (:ref:`dres_move_cursor-label`)
+        :emit: *moved_cursor* (:ref:`dres_move_cursor-label`)
         """
         if validate(instance=request, schema=dreq.move_cursor):
           return False
@@ -263,9 +263,10 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def hide_unit(self, sid, request): 
         """
-        Call `request_to_edit` before this.
+        NOTE: Call `request_to_edit` before this.
+
         :event: :ref:`dreq_hide_unit-label`
-        :emit: hid_unit (:ref:`dres_hide_unit-label`) => edit lock released
+        :emit: *hid_unit* (:ref:`dres_hide_unit-label`) => edit lock released
         """
         if validate(instance=request, schema=dreq.hide_unit):
           return False
@@ -284,7 +285,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def unhide_unit(self, sid, request): 
         """
         :event: :ref:`dreq_unhide_unit-label`
-        :emit: unhid_unit (:ref:`dres_unhide_unit-label`)
+        :emit: *unhid_unit* (:ref:`dres_unhide_unit-label`)
         """
         if validate(instance=request, schema=dreq.unhide_unit):
           return False
@@ -303,7 +304,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def add_unit(self, sid, request): 
         """
         :event: :ref:`dreq_add_unit-label`
-        :emit: added_unit (:ref:`dres_added_unit-label`) => edit lock released
+        :emit: *added_unit* (:ref:`dres_added_unit-label`) => edit lock released
         """
         if validate(instance=request, schema=dreq.add_unit):
           return False
@@ -322,7 +323,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def select_unit(self, sid, request): 
         """
         :event: :ref:`dreq_select_unit-label`
-        :emit: locked_unit_position (:ref:`dres_locked_unit_position-label`) => position lock taken OR fail 
+        :emit: *locked_unit_position* (:ref:`dres_locked_unit_position-label`) => position lock taken OR fail 
         """
         if validate(instance=request, schema=dreq.add_unit):
           return False
@@ -343,7 +344,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def move_units(self, sid, request): 
         """
         :event: :ref:`dreq_move_units-label`
-        :emit: repositioned_unit (per unit, :ref:`dres_repositioned_unit-label`) => position lock released OR fail
+        :emit: *repositioned_unit* (per unit, :ref:`dres_repositioned_unit-label`) => position lock released OR fail
         """
         if validate(instance=request, schema=dreq.move_units):
           return False
@@ -366,7 +367,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def merge_units(self, sid, request): 
         """
         :event: :ref:`dreq_merge_units-label`
-        :emit: repositioned_unit (per unit, :ref:`dres_repositioned_unit-label`) => position lock released AND added_unit (for parent unit, :ref:`dres_added_unit-label`) OR fail 
+        :emit: *repositioned_unit* (per unit, :ref:`dres_repositioned_unit-label`) => position lock released AND *added_unit* (for parent unit, :ref:`dres_added_unit-label`) OR fail 
         """
         if validate(instance=request, schema=dreq.merge_units):
           return False
@@ -397,7 +398,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def request_to_edit(self, sid, request):
         """
         :event: :ref:`dreq_request_to_edit-label`
-        :emit: locked_unit_editable (:ref:`dres_locked_unit_editable-label`) => edit lock taken OR fail
+        :emit: *locked_unit_editable* (:ref:`dres_locked_unit_editable-label`) => edit lock taken OR fail
         """
         if validate(instance=request, schema=dreq.request_to_edit):
           return False
@@ -418,7 +419,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def edit_unit(self, sid, request):
         """
         :event: :ref:`dreq_edit_unit-label`
-        :emit: edited_unit (:ref:`dres_edited_unit-label`) => edit lock released AND removed_backlink (opt, :ref:`dres_removed_backlink-label`) AND added_backlink (opt, :ref:`dres_added_backlink-label`) 
+        :emit: *edited_unit* (:ref:`dres_edited_unit-label`) => edit lock released AND *removed_backlink* (opt, :ref:`dres_removed_backlink-label`) AND *added_backlink* (opt, :ref:`dres_added_backlink-label`) 
         """
         if validate(instance=request, schema=dreq.edit_unit):
           return False
