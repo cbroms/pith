@@ -146,7 +146,7 @@ class DiscussionNamespace(AsyncNamespace):
         serialized = dumps(response, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.get_ancestors):
           return False
-        await self.emit(edited_unit, serialized, room=discussion_id)
+        await self.emit("edited_unit", serialized, room=discussion_id)
         return serialized
 
     async def get_unit_content(self, sid, request):
@@ -248,12 +248,13 @@ class DiscussionNamespace(AsyncNamespace):
         """
         if validate(instance=request, schema=dreq.move_cursor):
           return False
+        unit_id = request["unit_id"]
         position = request["position"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
 
-        response = gm.discussion_manager.move_cursor(discussion_id, user_id, position)
+        response = gm.discussion_manager.move_cursor(discussion_id, user_id, unit_id, position)
 
         serialized = dumps(response, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.move_cursor):
@@ -262,8 +263,9 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def hide_unit(self, sid, request): 
         """
+        Call `request_to_edit` before this.
         :event: hide_unit
-        :emit: hid_unit (hide_unit)
+        :emit: hid_unit (hide_unit) => edit lock released
         """
         if validate(instance=request, schema=dreq.hide_unit):
           return False
@@ -301,7 +303,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def add_unit(self, sid, request): 
         """
         :event: add_unit
-        :emit: added_unit (added_unit)
+        :emit: added_unit (added_unit) => edit lock released
         """
         if validate(instance=request, schema=dreq.add_unit):
           return False
@@ -320,7 +322,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def select_unit(self, sid, request): 
         """
         :event: select_unit
-        :emit: locked_unit_position (locked_unit_position) OR fail 
+        :emit: locked_unit_position (locked_unit_position) => position lock taken OR fail 
         """
         if validate(instance=request, schema=dreq.add_unit):
           return False
@@ -341,7 +343,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def move_units(self, sid, request): 
         """
         :event: move_units
-        :emit: repositioned_unit (per unit, repositioned_unit) OR fail
+        :emit: repositioned_unit (per unit, repositioned_unit) => position lock released OR fail
         """
         if validate(instance=request, schema=dreq.move_units):
           return False
@@ -364,7 +366,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def merge_units(self, sid, request): 
         """
         :event: merge_units
-        :emit: repositioned_unit (per unit, repositioned_unit) AND added_unit (for parent unit, added_unit) OR fail 
+        :emit: repositioned_unit (per unit, repositioned_unit) => position lock released AND added_unit (for parent unit, added_unit) OR fail 
         """
         if validate(instance=request, schema=dreq.merge_units):
           return False
@@ -395,7 +397,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def request_to_edit(self, sid, request):
         """
         :event: request_to_edit
-        :emit: locked_unit_editable (locked_unit_editable) OR fail
+        :emit: locked_unit_editable (locked_unit_editable) => edit lock taken OR fail
         """
         if validate(instance=request, schema=dreq.request_to_edit):
           return False
@@ -416,7 +418,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def edit_unit(self, sid, request):
         """
         :event: edit_unit
-        :emit: edited_unit (edited_unit) AND removed_backlink (opt, removed_backlink) AND added_backlink (opt, added_backlink) 
+        :emit: edited_unit (edited_unit) => edit lock released AND removed_backlink (opt, removed_backlink) AND added_backlink (opt, added_backlink) 
         """
         if validate(instance=request, schema=dreq.edit_unit):
           return False

@@ -24,11 +24,11 @@ import uuid
 class Unit(Document):
     id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
     pith = StringField(required=True)
-    children = ListField(StringField(), required=True, default=[])
-    forward_links = ListField(StringField(), required=True, default=[])
-    backward_links = ListField(StringField(), required=True, default=[])
-    created_at = DateTimeField(required=True, default=datetime.utcnow())
-    in_chat = BooleanField(required=True, default=False) # versus in document
+    children = ListField(StringField(), default=[])
+    forward_links = ListField(StringField(), default=[])
+    backward_links = ListField(StringField(), default=[])
+    created_at = DateTimeField(default=datetime.utcnow())
+    in_chat = BooleanField(default=False) # versus in document
     parent = StringField() 
     # if from chat
     original_text = StringField()
@@ -45,11 +45,19 @@ class Cursor(EmbeddedDocument):
     position = IntField(null=True)
 
 
+class TimeInterval(EmbeddedDocument):
+    unit_id = StringField(required=True)
+    start_time = DateTimeField(required=True)
+    end_time = DateTimeField(required=True)
+
+
 class User(EmbeddedDocument):
     id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
-    active = BooleanField(required=True, default=False)
+    viewed_unit = StringField(required=True)
     name = StringField(required=True)
     cursor = EmbeddedDocumentField(Cursor, required=True) 
+    active = BooleanField(default=False)
+    timeline = EmbeddedDocumentListField(TimeInterval, default=[])
 
 
 class Discussion(Document):
@@ -57,5 +65,5 @@ class Discussion(Document):
 
     id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
     document = StringField(required=True) # unit id
-    chat = EmbeddedDocumentListField(Unit, default=[])
+    chat = ListField(StringField(), default=[]) # unit ids
     users = EmbeddedDocumentListField(User, default=[]) 

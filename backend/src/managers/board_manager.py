@@ -9,8 +9,6 @@ from typing import (
 )
 
 import constants
-import error
-from search.search import search
 from utils import utils
 
 from models.discussion import (
@@ -27,7 +25,7 @@ class BoardManager:
         self.redis_queue = self.gm.redis_queue
 
     def create(self):
-        unit = Unit("")
+        unit = Unit(pith="")
         unit.save()
         discussion = Discussion(document=unit.id)
         discussion.save()

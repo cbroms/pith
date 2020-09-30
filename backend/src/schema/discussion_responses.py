@@ -46,10 +46,7 @@ load = {
       "properties": {
         "created_at": {"type": "string"},
         "author": {"type": "string"},
-        "units": {
-          "type": "array",
-          "items": {"type": "string"},
-        },
+        "unit_id": {"type": "string"},
       },
       "required": ["created_at", "author", "units"],
     },

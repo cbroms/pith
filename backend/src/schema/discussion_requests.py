@@ -72,10 +72,11 @@ position - -1 means streaming
 """
 move_cursor = {
   "type": "object",
+  "unit_id": {"type": "string"},
   "properties": {
     "position": {"type": "integer", "minimum": -1},
   },
-  "required": ["position"],
+  "required": ["unit_id", "position"],
 }
 
 hide_unit = {
