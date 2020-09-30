@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "discussion_id": {"type": "string"},
+    "nickname": {"type": "string"}
+  },
+  "required": ["discussion_id", "nickname"]
+}
+

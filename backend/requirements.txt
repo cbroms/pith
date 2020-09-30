@@ -54,6 +54,8 @@ Rx==1.6.1
 sentinels==1.0.0
 singledispatch==3.4.0.3
 six==1.15.0
+sphinx
+sphinx-jsonschema
 tqdm==4.46.1
 typed-ast==1.4.1
 typing-extensions==3.7.4.3

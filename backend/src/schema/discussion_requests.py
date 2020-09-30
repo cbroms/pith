@@ -1,161 +1,60 @@
-create_user = {
-  "type": "object",
-  "properties": {
-    "discussion_id": {"type": "string"},
-    "nickname": {"type": "string"},
-  },
-  "required": ["discussion_id", "nickname"],
-}
+from json import load
+import os
 
-join = {
-  "type": "object",
-  "properties": {
-    "discussion_id": {"type": "string"},
-    "user_id": {"type": "string"},
-  },
-  "required": ["discussion_id", "user_id"],
-}
 
-get_unit_page = {
-  "type": "object",
-  "properties": {
-    "unit_id": {"type": "string"},
-  },
-  "required": ["unit_id"],
-}
+path = os.path.dirname(os.path.realpath(__file__))
 
-get_unit_content = {
-  "type": "object",
-  "properties": {
-    "unit_id": {"type": "string"},
-  },
-  "required": ["unit_id"],
-}
 
-get_unit_context = {
-  "type": "object",
-  "properties": {
-    "unit_id": {"type": "string"},
-  },
-  "required": ["unit_id"],
-}
+with open(path + "/discussion/requests/create_user.json") as file:
+  create_user = load(file)
 
-post = {
-  "type": "object",
-  "properties": {
-    "piths": {
-      "type": "array",
-      "items": {"type": "string"},
-    },
-  },
-  "required": ["piths"],
-}
+with open(path + "/discussion/requests/join.json") as file:
+  join = load(file)
 
-search = {
-  "type": "object",
-  "properties": {
-    "query": {"type": "string"},
-  },
-  "required": ["query"],
-}
+with open(path + "/discussion/requests/get_unit_page.json") as file:
+  get_unit_page = load(file)
 
-send_to_doc = {
-  "type": "object",
-  "properties": {
-    "unit_id": {"type": "string"},
-  },
-  "required": ["unit_id"],
-}
+with open(path + "/discussion/requests/get_ancestors.json") as file:
+  get_ancestors = load(file)
 
-"""
-position - -1 means streaming
-"""
-move_cursor = {
-  "type": "object",
-  "unit_id": {"type": "string"},
-  "properties": {
-    "position": {"type": "integer", "minimum": -1},
-  },
-  "required": ["unit_id", "position"],
-}
+with open(path + "/discussion/requests/get_unit_content.json") as file:
+  get_unit_content = load(file)
 
-hide_unit = {
-  "type": "object",
-  "properties": {
-    "unit_id": {"type": "string"},
-  },
-  "required": ["unit_id"],
-}
+with open(path + "/discussion/requests/get_unit_context.json") as file:
+  get_unit_context = load(file)
 
-unhide_unit = {
-  "type": "object",
-  "properties": {
-    "unit_id": {"type": "string"},
-  },
-  "required": ["unit_id"],
-}
+with open(path + "/discussion/requests/post.json") as file:
+  post = load(file)
 
-add_unit = {
-  "type": "object",
-  "properties": {
-    "pith": {"type": "string"},
-  },
-  "required": ["pith"],
-}
+with open(path + "/discussion/requests/search.json") as file:
+  search = load(file)
 
-select_unit = {
-  "type": "object",
-  "properties": {
-    "unit_id": {"type": "string"},
-  },
-  "required": ["unit_id"],
-}
+with open(path + "/discussion/requests/send_to_doc.json") as file:
+  send_to_doc = load(file)
 
-move_units = {
-  "type": "object",
-  "properties": {
-    "units": {
-      "type": "array",
-      "items": {"type": "string"},
-    },
-    "parent": {"type": "string"},
-  },
-  "required": ["units", "parent"],
-}
+with open(path + "/discussion/requests/move_cursor.json") as file:
+  move_cursor = load(file)
 
-merge_units = {
-  "type": "object",
-  "properties": {
-    "units": {
-      "type": "array",
-      "items": {"type": "string"},
-    },
-    "parent": {"type": "string"},
-  },
-  "required": ["units", "parent"],
-}
+with open(path + "/discussion/requests/hide_unit.json") as file:
+  hide_unit = load(file)
 
-request_to_edit = {
-  "type": "object",
-  "properties": {
-    "unit_id": {"type": "string"},
-  },
-  "required": ["unit_id"],
-}
+with open(path + "/discussion/requests/unhide_unit.json") as file:
+  unhide_unit = load(file)
 
-edit_unit = {
-  "type": "object",
-  "properties": {
-    "unit_id": {"type": "string"},
-    "pith": {"type": "string"},
-  },
-  "required": ["unit_id", "pith"],
-}
+with open(path + "/discussion/requests/add_unit.json") as file:
+  add_unit = load(file)
 
-get_ancestors = {
-  "type": "object",
-  "properties": {
-    "unit_id": {"type": "string"},
-  },
-  "required": ["unit_id"],
-}
+with open(path + "/discussion/requests/select_unit.json") as file:
+  select_unit = load(file)
+
+with open(path + "/discussion/requests/move_units.json") as file:
+  move_units = load(file)
+
+with open(path + "/discussion/requests/merge_units.json") as file:
+  merge_units = load(file)
+
+with open(path + "/discussion/requests/request_to_edit.json") as file:
+  request_to_edit = load(file)
+
+with open(path + "/discussion/requests/edit_unit.json") as file:
+  edit_unit = load(file)

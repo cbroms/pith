@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "created_at": {"type": "string"},
+    "author": {"type": "string"},
+    "piths": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "required": ["created_at", "author", "piths"]
+}
+

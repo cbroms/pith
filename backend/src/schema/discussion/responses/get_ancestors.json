@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "properties": {
+    "ancestors": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "required": ["ancestors"]
+}
+

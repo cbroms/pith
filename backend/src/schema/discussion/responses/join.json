@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "properties": {
+    "nickname": {"type": "string"}
+  },
+  "required": ["nickname"]
+}
+

@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "pith": {"type": "string"},
+    "hidden": {"type": "boolean"}
+  },
+  "required": ["pith", "hidden"]
+}
+

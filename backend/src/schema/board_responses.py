@@ -1,7 +1,9 @@
-create = {
-  "type": "object",
-  "properties": {
-    "discussion_id": {"type": "string"},
-  },
-  "required": ["discussion_id"],
-}
+from json import load
+import os
+
+
+path = os.path.dirname(os.path.realpath(__file__))
+
+
+with open(path + "/board/responses/create.json") as file:
+  create = load(file)
