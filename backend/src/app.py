@@ -192,12 +192,12 @@ class DiscussionNamespace(AsyncNamespace):
         """
         if validate(instance=request, schema=dreq.post):
           return False
-        piths = request["piths"]
+        pith = request["pith"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
 
-        response = gm.discussion_manager.post(discussion_id, user_id, piths)
+        response = gm.discussion_manager.post(discussion_id, user_id, pith)
 
         serialized = dumps(response, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.post):
@@ -266,15 +266,16 @@ class DiscussionNamespace(AsyncNamespace):
         NOTE: Call `request_to_edit` before this.
 
         :event: :ref:`dreq_hide_unit-label`
-        :emit: *hid_unit* (:ref:`dres_hide_unit-label`) => edit lock released
+        :emit: *hid_unit* (:ref:`dres_hide_unit-label`, edit lock released)
         """
         if validate(instance=request, schema=dreq.hide_unit):
           return False
         unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
+        user_id = session["user_id"]
 
-        gm.discussion_manager.hide_unit(discussion_id, unit_id)
+        gm.discussion_manager.hide_unit(discussion_id, user_id, unit_id)
         response = {"unit_id": unit_id}
 
         serialized = dumps(response, cls=GenericEncoder)
@@ -304,7 +305,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def add_unit(self, sid, request): 
         """
         :event: :ref:`dreq_add_unit-label`
-        :emit: *added_unit* (:ref:`dres_added_unit-label`) => edit lock released
+        :emit: *added_unit* (:ref:`dres_added_unit-label`)
         """
         if validate(instance=request, schema=dreq.add_unit):
           return False
@@ -323,7 +324,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def select_unit(self, sid, request): 
         """
         :event: :ref:`dreq_select_unit-label`
-        :emit: *locked_unit_position* (:ref:`dres_locked_unit_position-label`) => position lock taken OR fail 
+        :emit: *locked_unit_position* (:ref:`dres_locked_unit_position-label`, position lock taken) OR fail 
         """
         if validate(instance=request, schema=dreq.add_unit):
           return False
@@ -343,8 +344,10 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def move_units(self, sid, request): 
         """
+        NOTE: Call `select_unit` before this.
+
         :event: :ref:`dreq_move_units-label`
-        :emit: *repositioned_unit* (per unit, :ref:`dres_repositioned_unit-label`) => position lock released OR fail
+        :emit: *repositioned_unit* (:ref:`dres_repositioned_unit-label`, position lock released) OR fail
         """
         if validate(instance=request, schema=dreq.move_units):
           return False
@@ -358,16 +361,17 @@ class DiscussionNamespace(AsyncNamespace):
 
         if responses is None:
           return False
-        for response in responses:
-          serialized = dumps(response, cls=GenericEncoder)
-          if validate(instance=serialized, schema=dres.repositioned_unit):
-            return False
-          await self.emit("repositioned_unit", serialized, room=discussion_id)
+        serialized = dumps(responses, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.repositioned_unit):
+          return False
+        await self.emit("repositioned_unit", serialized, room=discussion_id)
 
     async def merge_units(self, sid, request): 
         """
+        NOTE: Call `select_unit` before this.
+
         :event: :ref:`dreq_merge_units-label`
-        :emit: *repositioned_unit* (per unit, :ref:`dres_repositioned_unit-label`) => position lock released AND *added_unit* (for parent unit, :ref:`dres_added_unit-label`) OR fail 
+        :emit: *repositioned_unit* (:ref:`dres_repositioned_unit-label`, position lock released) AND *added_unit* (for parent unit, :ref:`dres_added_unit-label`) OR fail 
         """
         if validate(instance=request, schema=dreq.merge_units):
           return False
@@ -389,16 +393,15 @@ class DiscussionNamespace(AsyncNamespace):
           return False
         await self.emit("added_unit", serialized, room=discussion_id)
         # repositions
-        for response in repositions:
-          serialized = dumps(response, cls=GenericEncoder)
-          if validate(instance=serialized, schema=dres.repositioned_unit):
-            return False
-          await self.emit("repositioned_unit", serialized, room=discussion_id)
+        serialized = dumps(repositions, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.repositioned_unit):
+          return False
+        await self.emit("repositioned_unit", serialized, room=discussion_id)
 
     async def request_to_edit(self, sid, request):
         """
         :event: :ref:`dreq_request_to_edit-label`
-        :emit: *locked_unit_editable* (:ref:`dres_locked_unit_editable-label`) => edit lock taken OR fail
+        :emit: *locked_unit_editable* (:ref:`dres_locked_unit_editable-label`, edit lock taken) OR fail
         """
         if validate(instance=request, schema=dreq.request_to_edit):
           return False
@@ -418,8 +421,10 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def edit_unit(self, sid, request):
         """
+        NOTE: Call `request_to_edit` before this.
+
         :event: :ref:`dreq_edit_unit-label`
-        :emit: *edited_unit* (:ref:`dres_edited_unit-label`) => edit lock released AND *removed_backlink* (opt, :ref:`dres_removed_backlink-label`) AND *added_backlink* (opt, :ref:`dres_added_backlink-label`) 
+        :emit: *edited_unit* (:ref:`dres_edited_unit-label`, edit lock released) AND OPT *removed_backlink* (:ref:`dres_removed_backlink-label`) AND OPT *added_backlink* (:ref:`dres_added_backlink-label`) 
         """
         if validate(instance=request, schema=dreq.edit_unit):
           return False
@@ -427,9 +432,12 @@ class DiscussionNamespace(AsyncNamespace):
         pith = request["pith"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
+        user_id = session["user_id"]
 
-        responses = gm.discussion_manager.edit_unit(discussion_id, unit_id, pith)
+        responses = gm.discussion_manager.edit_unit(discussion_id, user_id, unit_id, pith)
 
+        if responses is None:
+          return False
         edited, removed_backlinks, added_backlinks = responses
         # edited
         serialized = dumps(edited, cls=GenericEncoder)
@@ -437,14 +445,14 @@ class DiscussionNamespace(AsyncNamespace):
           return False
         await self.emit("edited_unit", serialized, room=discussion_id)
         # removed backlinks
-        for response in removed_backlinks:
-          serialized = dumps(response, cls=GenericEncoder)
+        if removed_backlinks:
+          serialized = dumps(removed_backlinks, cls=GenericEncoder)
           if validate(instance=serialized, schema=dres.removed_backlink):
             return False
           await self.emit("removed_backlink", serialized, room=discussion_id)
         # added backlinks
-        for response in added_backlinks:
-          serialized = dumps(response, cls=GenericEncoder)
+        if added_backlinks:
+          serialized = dumps(added_backlinks, cls=GenericEncoder)
           if validate(instance=serialized, schema=dres.added_backlink):
             return False
           await self.emit("added_backlink", serialized, room=discussion_id)
