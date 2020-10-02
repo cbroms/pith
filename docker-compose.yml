@@ -15,7 +15,6 @@ services:
       - redis
     ports:
       - "8080:8080"
-    restart: always
     environment:
       MONGODB_CONN: ${MONGO}
       MONGODB_NAME: ${MONGO_NAME}
@@ -32,7 +31,6 @@ services:
       - common
       - mongo
       - redis
-    restart: always
     environment:
       MONGODB_CONN: ${MONGO}
       MONGODB_NAME: ${MONGO_NAME}
@@ -44,7 +42,6 @@ services:
     build:
       context: .
       dockerfile: ./dockerfiles/static.Dockerfile
-    restart: always
     depends_on:
       - app
     working_dir: /static
@@ -58,10 +55,8 @@ services:
       - ./frontend/src:/static/src:cached
   redis:
     image: "redis:alpine"
-    restart: always
   mongo:
     image: mongo
-    restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
