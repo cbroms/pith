@@ -2,6 +2,8 @@
 setup/
 *notes
 
+.DS_Store 
+
 # js stuff 
 node_modules/
 
