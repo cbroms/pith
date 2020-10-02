@@ -1,0 +1,40 @@
+{
+  "type": "object",
+  "properties": {
+    "pith": {"type": "string"},
+    "ancestors": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "children": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "unit_id": {"type": "string"},
+          "children": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        },
+        "required": ["unit_id", "children"]
+      }
+    },
+    "backlinks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "unit_id": {"type": "string"},
+          "backlinks": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        },
+        "required": ["unit_id", "backlinks"]
+      }
+    }
+  },
+  "required": ["pith", "ancestors", "children", "backlinks"]
+}
+

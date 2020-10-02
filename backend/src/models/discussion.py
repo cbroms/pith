@@ -23,39 +23,212 @@ import uuid
 
 class Unit(Document):
     id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
+    """
+    :type: *str*
+    :required: False
+    :default: Automatically generated.
+    """
+
     pith = StringField(required=True)
-    children = ListField(StringField(), required=True, default=[])
-    forward_links = ListField(StringField(), required=True, default=[])
-    backward_links = ListField(StringField(), required=True, default=[])
-    created_at = DateTimeField(required=True, default=datetime.utcnow())
-    in_chat = BooleanField(required=True, default=False) # versus in document
-    parent = StringField() 
+    """
+    :type: *str*
+    :required: True
+    :default: None
+    """
+
+    children = ListField(StringField(), default=[])
+    """
+    :type: *List[str]*
+    :required: False
+    :default: []
+    """
+
+    forward_links = ListField(StringField(), default=[])
+    """
+    :type: *List[str]*
+    :required: False
+    :default: []
+    """
+
+    backward_links = ListField(StringField(), default=[])
+    """
+    :type: *List[str]*
+    :required: False
+    :default: []
+    """
+
+    created_at = DateTimeField(default=datetime.utcnow())
+    """
+    :type: *datetime*
+    :required: False
+    :default: Automatically generated.
+    """
+
+    in_chat = BooleanField(default=False) # versus in document
+    """
+    :type: *bool*
+    :required: False
+    :default: False
+    """
+
+    parent = StringField(required=True) 
+    """
+    :type: *str*
+    :required: True
+    :default: None
+    """
+
     # if from chat
-    original_text = StringField()
+    original_pith = StringField()
+    """
+    NOTE: Should be set to pith upon initialization.
+
+    :type: *str*
+    :required: False
+    :default: None
+    """
+
     # if from document
-    edit_count = IntField()
-    hidden = BooleanField()
+    edit_count = IntField(default=0)
+    """
+    :type: *int*
+    :required: False
+    :default: 0
+    """
+
+    hidden = BooleanField(default=False)
+    """
+    :type: *bool*
+    :required: False
+    :default: False
+    """
+
     # content_lock
     # position_lock
     freq_dict = DictField()
 
 
 class Cursor(EmbeddedDocument):
+    """
+    Position of a user within a document for editing.
+    """
+
     unit_id = StringField(required=True)
-    position = IntField(null=True)
+    """
+    :type: *str*
+    :required: True
+    :default: None
+    """
+
+    position = IntField(required=True)
+    """
+    :type: *int*
+    :required: True
+    :default: None
+    """
+
+
+class TimeInterval(EmbeddedDocument):
+    """
+    Time interval spent on some unit.
+    """
+
+    unit_id = StringField(required=True)
+    """
+    :type: *str*
+    :required: True
+    :default: None
+    """
+
+    start_time = DateTimeField(required=True)
+    """
+    :type: *datetime*
+    :required: True
+    :default: None
+    """
+
+    end_time = DateTimeField(required=True)
+    """
+    :type: *datetime*
+    :required: True
+    :default: None
+    """
 
 
 class User(EmbeddedDocument):
+    """
+    User representation.
+    """
+
     id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
-    active = BooleanField(required=True, default=False)
+
+    viewed_unit = StringField(required=True)
+    """
+    :type: *str*
+    :required: True
+    :default: None
+    """
+
     name = StringField(required=True)
+    """
+    :type: *str*
+    :required: True
+    :default: None
+    """
+
     cursor = EmbeddedDocumentField(Cursor, required=True) 
+    """
+    :type: *Cursor*
+    :required: True
+    :default: None
+    """
+
+    active = BooleanField(default=False)
+    """
+    :type: *bool*
+    :required: False
+    :default: False
+    """
+
+    timeline = EmbeddedDocumentListField(TimeInterval, default=[])
+    """
+    :type: *EmbeddedDocumentList[TimeInterval]*
+    :required: False
+    :default: []
+    """
 
 
 class Discussion(Document):
+    """
+    Discussion representation.
+    """
+
     meta = {'collection': 'discussions'}
 
     id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
-    document = StringField(required=True) # unit id
-    chat = EmbeddedDocumentListField(Unit, default=[])
+    """
+    :type: *str*
+    :required: False
+    :default: Automatically generated.
+    """
+    
+    document = StringField(required=True)
+    """
+    :type: *str*
+    :required: True
+    :default: None 
+    """
+
+    chat = ListField(StringField(), default=[]) # unit ids
+    """
+    :type: *List[str]*
+    :required: False
+    :default: []
+    """
+
     users = EmbeddedDocumentListField(User, default=[]) 
+    """
+    :type: *EmbeddedDocumentList[User]*
+    :required: False
+    :default: []
+    """

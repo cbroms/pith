@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "units": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "parent": {"type": "string"}
+  },
+  "required": ["units", "parent"]
+}
+

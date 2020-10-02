@@ -70,6 +70,8 @@ services:
       - worker
       - mongo
       - redis
+    ports:
+      - "1234:1234"
     environment:
       MONGODB_CONN: ${MONGO}
       MONGODB_NAME: ${MONGO_NAME}

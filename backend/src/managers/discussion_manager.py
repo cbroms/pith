@@ -9,14 +9,13 @@ from typing import (
 )
 
 import constants
-import error
-from search.search import search
 from utils import utils
 
 from models.discussion import (
+  Cursor,
+  Discussion,
   Unit,
   User,
-  Discussion,
 )
 
 
@@ -34,7 +33,7 @@ class DiscussionManager:
         discussion = self._get(discussion_id)
         unit_id = discussion.get().document
         cursor = Cursor(unit_id, -1) 
-        user = User(name=nickname, cursor=cursor) 
+        user = User(name=nickname, viewed_unit=unit_id, cursor=cursor) 
         discussion.update(push__users=user)
         response = {"user_id": user.id}
         return response
@@ -73,35 +72,57 @@ class DiscussionManager:
 
     def search(self, discussion_id, query):
         discussion = self._get(discussion_id)
+        # TODO figure out how to use indexing
       
     def send_to_doc(self, discussion_id, user_id, unit_id):
         discussion = self._get(discussion_id)
 
-    def move_cursor(self, discussion_id, user_id, position):
+    def move_cursor(self, discussion_id, user_id, unit_id, position):
         discussion = self._get(discussion_id)
 
     def hide_unit(self, discussion_id, unit_id):
-        """ change state, do not return """
+        """ 
+          Assumes we have edit lock through `request_to_edit`.
+          Releases edit lock.
+        """
         discussion = self._get(discussion_id)
+        
 
     def unhide_unit(self, discussion_id, unit_id):
-        """ change state, do not return """
         discussion = self._get(discussion_id)
 
     def added_unit(self, discussion_id, user_id, pith):
+        """
+          Releases edit lock.
+        """
         discussion = self._get(discussion_id)
 
     def select_unit(self, discussion_id, user_id, unit_id):
+        """
+          Takes position lock.
+        """
         discussion = self._get(discussion_id)
 
     def move_units(self, discussion_id, user_id, units, parent):
+        """
+          Releases position lock.
+        """
         discussion = self._get(discussion_id)
 
     def merge_units(self, discussion_id, user_id, units, parent):
+        """
+          Releases position lock.
+        """
         discussion = self._get(discussion_id)
 
     def request_to_edit(self, discussion_id, user_id, unit_id):
+        """
+          Takes edit lock.
+        """
         discussion = self._get(discussion_id)
 
     def edit_unit(self, discussion_id, unit_id, pith):
+        """
+          Releases edit lock.
+        """
         discussion = self._get(discussion_id)

@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "unit_id": {"type": "string"},
+    "nickname": {"type": "string"}
+  },
+  "required": ["unit_id", "nickname"]
+}
+

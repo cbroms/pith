@@ -18,7 +18,7 @@ sys.setrecursionlimit(1500)
 
 # -- Project information -----------------------------------------------------
 
-project = 'pith_docs'
+project = 'Pith'
 copyright = '2020, Sydney Zheng, Christian Broms'
 author = 'Sydney Zheng, Christian Broms'
 
@@ -29,7 +29,8 @@ author = 'Sydney Zheng, Christian Broms'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-  'sphinx.ext.autodoc'
+  'sphinx.ext.autodoc',
+  'sphinx-jsonschema'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

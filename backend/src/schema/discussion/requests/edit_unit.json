@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "unit_id": {"type": "string"},
+    "pith": {"type": "string"}
+  },
+  "required": ["unit_id", "pith"]
+}
+
