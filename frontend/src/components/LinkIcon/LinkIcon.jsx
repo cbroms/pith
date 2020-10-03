@@ -4,35 +4,40 @@ import styled from "styled-components";
 const StyledIcon = styled.div`
     position: relative;
     display: inline-block;
-    width: 25px;
-    height: 25px;
+    width: 17px;
+    height: 20px;
     font-size: ${(props) => props.theme.smallFont};
     font-family: ${(props) => props.theme.sans};
-
-    // ::after,
+    line-height: 20px;
+    margin: 0px 5px;
+    
     ::before {
-        content: "${(props) => (props.referenceNum ? props.referenceNum : "")}";
+        content: '';
         display: block;
         position: absolute;
         width: 15px;
-        height: 10px;
+        height: 18px;
         border-top: ${(props) => (props.forward ? "2px solid" : "none")};
         border-right: ${(props) => (props.forward ? "2px solid" : "none")};
         border-left: ${(props) => (props.backward ? "2px solid" : "none")};
         border-bottom: ${(props) => (props.backward ? "2px solid" : "none")};
-        top: 4px;
-        left: 4px;
     }
     
     color: ${(props) => props.theme.standardTextColor};
 
+    ::after {
+       padding-left: ${(props) => (props.backward ? 6 : 3)}px;
+       content: "${(props) =>
+           props.referenceNum ? props.referenceNum : "•"}"; 
+    }
+
     :hover {
-        background-color: ${(props) => props.theme.hoveredBackroundColor};
+        cursor: pointer;
+        background-color: ${(props) => props.theme.hoveredBackgroundColor};
     }
 `;
 
 export const LinkIcon = ({ backward, forward, referenceNum }) => {
-    // link can be either forward or backward
     return (
         <StyledIcon
             backward={backward}
