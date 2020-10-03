@@ -25,6 +25,32 @@ class DiscussionManager:
         self.gm = gm
         self.redis_queue = self.gm.redis_queue
 
+    def _check_discussion_id(func):
+      """check discussion_id is valid"""
+      def helper(self, **kwargs):
+        discussion_id = kwargs["discussion_id"]
+        return func(self, **kwargs)
+      return helper
+          
+    def _check_user_id(func):
+      """check user_id is valid"""
+      def helper(self, **kwargs):
+        user_id = kwargs["user_id"]
+        return func(self, **kwargs)
+      return helper
+
+    def _check_unit_id(func):
+      """check unit_id is valid"""
+      def helper(self, **kwargs):
+        unit_id = kwargs["unit_id"]
+        return func(self, **kwargs)
+      return helper
+
+    # verify user_id can use position lock for unit_id
+    # verify user_id can use edit lock for unit_id
+    # verify position is valid given unit_id's children list len
+    # verify parent is valid given children
+
     # pointer
     def _get(self, discussion_id):
         return Discussion.objects(id=discussion_id)
@@ -74,6 +100,9 @@ class DiscussionManager:
         discussion = self._get(discussion_id)
         # TODO figure out how to use indexing
       
+    @_check_discussion_id
+    @_check_user_id
+    @_check_unit_id
     def send_to_doc(self, discussion_id, user_id, unit_id):
         discussion = self._get(discussion_id)
 

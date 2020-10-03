@@ -1,3 +1,7 @@
+"""
+TODO: finish applying meta where needed. Consider if this is best method.
+"""
+
 from aiohttp import web
 from json import dumps
 from jsonschema import validate
@@ -10,7 +14,7 @@ from managers.global_manager import GlobalManager
 import schema.board_responses as bres
 import schema.discussion_requests as dreq
 import schema.discussion_responses as dres
-from utils.utils import GenericEncoder
+from utils.utils import GenericEncoder, sum_dicts
 
 
 gm = GlobalManager()
@@ -22,11 +26,13 @@ async def create(sid, request):
     """
     :return: :ref:`bres_create-label`
     """
-    response = await gm.discussion_manager.create()
+    result, meta = await gm.discussion_manager.create()
 
+    response = sum_dicts(result, meta)
     serialized = dumps(response, cls=GenericEncoder)
     if validate(instance=serialized, schema=bres.create):
-      return {"error": error.BAD_RESPONSE}
+      meta["error"] = error.BAD_RESPONSE
+      return meta 
     return serialized
 
 class DiscussionNamespace(AsyncNamespace):
@@ -53,11 +59,15 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = request["discussion_id"]
         nickname = request["nickname"]
 
-        response = gm.discussion_manager.create_user(discussion_id, nickname)
+        result, meta = gm.discussion_manager.create_user(discussion_id, nickname)
 
+        if meta["error"] != error.SUCCESS:
+          return meta 
+        response = sum_dicts(result, meta)
         serialized = dumps(response, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.create_user):
-          return {"error": error.BAD_RESPONSE}
+          meta["error"] = error.BAD_RESPONSE
+          return meta 
         return serialized
 
     async def on_join(self, sid, request):
@@ -70,11 +80,15 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = request["discussion_id"]
         user_id = request["user_id"]
 
-        response = gm.discussion_manager.join(discussion_id, user_id)
+        result, meta = gm.discussion_manager.join(discussion_id, user_id)
 
+        if meta["error"] != error.SUCCESS:
+          return meta 
+        response = sum_dicts(result, meta)
         serialized = dumps(response, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.join):
-          return {"error": error.BAD_RESPONSE}
+          meta["error"] = error.BAD_RESPONSE
+          return meta
         self.enter_room(sid, discussion_id)
         await self.emit("joined_user", serialized, room=discussion_id)
         await self.save_session(sid, {
@@ -90,11 +104,15 @@ class DiscussionNamespace(AsyncNamespace):
         user_id = session["user_id"]
         discussion_id = session["discussion_id"]
 
-        response = gm.discussion_manager.leave(discussion_id, user_id)
+        result, meta = gm.discussion_manager.leave(discussion_id, user_id)
 
+        if meta["error"] != error.SUCCESS:
+          return meta 
+        response = sum_dicts(result, meta)
         serialized = dumps(response, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.leave):
-          return {"error": error.BAD_RESPONSE}
+          meta["error"] = error.BAD_RESPONSE
+          return meta 
         await self.emit("left_user", serialized, room=discussion_id)
         self.leave_room(sid, discussion_id)
 
