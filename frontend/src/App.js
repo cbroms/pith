@@ -4,13 +4,12 @@ import { ThemeProvider } from "styled-components";
 import "./App.css";
 
 import LinkIcon from "./components/LinkIcon/LinkIcon";
-
-import Board from "./components/Board";
+import DiscussionLayout from "./components/DiscussionLayout";
 import Discussion from "./components/Discussion";
 
 const theme = {
 	standardTextColor: "white",
-	hoveredBackroundColor: "grey",
+	hoveredBackgroundColor: "grey",
 	smallFont: "14px",
 	sans: "'Source Sans Pro', sans-serif",
 	serif: "'Source Serif Pro', serif",
@@ -20,10 +19,7 @@ function App() {
 	return (
 		<div className="App">
 			<ThemeProvider theme={theme}>
-				This is some text and{" "}
-				<LinkIcon forward={true} referenceNum={1} /> it includes a link
-				too. <br /> Here's something else as well!{" "}
-				<LinkIcon forward={true} referenceNum={4} />
+				<DiscussionLayout />
 			</ThemeProvider>
 
 			{/*<Router>
