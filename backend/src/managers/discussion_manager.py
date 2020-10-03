@@ -25,35 +25,101 @@ class DiscussionManager:
         self.gm = gm
         self.redis_queue = self.gm.redis_queue
 
+    """
+    Verification functions. Require specific arguments in most cases.
+    """
+
     def _check_discussion_id(func):
-      """check discussion_id is valid"""
+      """
+      Check discussion_id is valid.
+      """
       def helper(self, **kwargs):
         discussion_id = kwargs["discussion_id"]
+        # TODO
         return func(self, **kwargs)
       return helper
           
     def _check_user_id(func):
-      """check user_id is valid"""
+      """
+      Check user_id is valid.
+      """
       def helper(self, **kwargs):
         user_id = kwargs["user_id"]
+        # TODO
         return func(self, **kwargs)
       return helper
 
-    def _check_unit_id(func):
-      """check unit_id is valid"""
+    def _check_unit(key):
+      """
+      Check unit_id is valid.
+      """
+      def func_helper(func):
+        def helper(self, **kwargs):
+          if kwargs[key] == True: # TODO
+            return error.BAD_UNIT_ID
+          return func(self, **kwargs)
+        return helper 
+      return func_helper
+
+    def _verify_position(func):
+      """
+      Check position is valid for unit.
+      NOTE: Requires _check_unit_id.
+      """
       def helper(self, **kwargs):
-        unit_id = kwargs["unit_id"]
+        unit_id = kwargs["unit_id"] # TODO: maybe change
+        position = kwargs["position"]
+        # TODO
         return func(self, **kwargs)
       return helper
 
-    # verify user_id can use position lock for unit_id
-    # verify user_id can use edit lock for unit_id
-    # verify position is valid given unit_id's children list len
-    # verify parent is valid given children
+    def _verify_edit_privilege(func):
+      """
+      Check user can edit unit.
+      NOTE: Requires _check_user_id and _check_unit_id.
+      """
+      def helper(self, **kwargs):
+        unit_id = kwargs["unit_id"] # TODO: maybe change
+        user_id = kwargs["user_id"]
+        # TODO
+        return func(self, **kwargs)
+      return helper
+
+    def _verify_position_privilege(func):
+      """
+      Check user can change position of unit.
+      NOTE: Requires _check_user_id and _check_unit_id.
+      """
+      def helper(self, **kwargs):
+        unit_id = kwargs["unit_id"] # TODO: maybe change
+        user_id = kwargs["user_id"]
+        # TODO
+        return func(self, **kwargs)
+      return helper
+
+    def _verify_valid_parent(func):
+      """
+      Check potential parent can be parent of units.
+      NOTE: Requires _check_unit on parent and units. 
+      """
+      def helper(self, **kwargs):
+        parent = kwargs["parent"]
+        units = kwargs["units"]
+        # TODO
+        return func(self, **kwargs)
+      return helper
+
+    """
+    Helper functions.
+    """
 
     # pointer
     def _get(self, discussion_id):
         return Discussion.objects(id=discussion_id)
+
+    """
+    Service functions.
+    """
 
     def create_user(self, discussion_id, nickname):
         discussion = self._get(discussion_id)
@@ -102,7 +168,7 @@ class DiscussionManager:
       
     @_check_discussion_id
     @_check_user_id
-    @_check_unit_id
+    @_check_unit_id("unit_id")
     def send_to_doc(self, discussion_id, user_id, unit_id):
         discussion = self._get(discussion_id)
 
