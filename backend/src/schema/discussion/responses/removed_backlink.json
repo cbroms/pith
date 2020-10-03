@@ -1,9 +1,12 @@
 {
-  "type": "object",
-  "properties": {
-    "unit_id": {"type": "string"},
-    "backlink": {"type": "string"}
-  },
-  "required": ["unit_id", "backlink"]
+  "type": "array",
+  "item": {
+    "type": "object",
+    "properties": {
+      "unit_id": {"type": "string"},
+      "backlink": {"type": "string"}
+    },
+    "required": ["unit_id", "backlink"]
+  }
 }
 

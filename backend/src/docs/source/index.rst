@@ -11,9 +11,8 @@ Pith Documentation
 Interface Documentation
 *************************************
 .. toctree::
-  app
-  discussion_documents
-  board_documents
+  board_app
+  discussion_app
   board_schema
   discussion_schema
 
@@ -21,3 +20,7 @@ Interface Documentation
 Backend Documentation
 *************************************
 .. toctree::
+  board_library
+  discussion_library
+  board_documents
+  discussion_documents

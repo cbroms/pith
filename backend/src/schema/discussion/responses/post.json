@@ -3,10 +3,7 @@
   "properties": {
     "created_at": {"type": "string"},
     "author": {"type": "string"},
-    "piths": {
-      "type": "array",
-      "items": {"type": "string"}
-    }
+    "pith": {"type": "string"}
   },
   "required": ["created_at", "author", "piths"]
 }

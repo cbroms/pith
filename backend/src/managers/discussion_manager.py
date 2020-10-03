@@ -67,7 +67,7 @@ class DiscussionManager:
     def get_unit_context(self, discussion_id, unit_id):
         discussion = self._get(discussion_id)
 
-    def post(self, discussion_id, user_id, piths):
+    def post(self, discussion_id, user_id, pith):
         discussion = self._get(discussion_id)
 
     def search(self, discussion_id, query):

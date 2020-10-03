@@ -1,12 +1,15 @@
 {
-  "type": "object",
-  "properties": {
-    "unit_id": {"type": "string"},
-    "parent": {"type": "string"},
-    "position": {"type": "integer", "minimum": 0},
-    "old_parent": {"type": "string"},
-    "old_position": {"type": "integer", "minimum": 0}
-  },
-  "required": ["unit_id", "parent", "position", "old_parent", "old_position"]
+  "type": "array",
+  "item": {
+    "type": "object",
+    "properties": {
+      "unit_id": {"type": "string"},
+      "parent": {"type": "string"},
+      "position": {"type": "integer", "minimum": 0},
+      "old_parent": {"type": "string"},
+      "old_position": {"type": "integer", "minimum": 0}
+    },
+    "required": ["unit_id", "parent", "position", "old_parent", "old_position"]
+  }
 }
 
