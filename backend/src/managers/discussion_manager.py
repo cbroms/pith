@@ -94,9 +94,9 @@ class DiscussionManager:
           self._release_position(unit_id)
 
           response.append({
-            "unit_id": ,
-            "parent": ,
-            "position": ,
+            "unit_id": unit_id,
+            "parent": unit.get().parent,
+            "position": unit.get().position,
             "old_parent": old_parent,
             "old_position": old_position,
           })
