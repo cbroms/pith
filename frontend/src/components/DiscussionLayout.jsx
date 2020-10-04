@@ -1,13 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 
+import { LargeHeading } from "./StandardUI";
 import ChatLayout from "./ChatLayout";
 
 const StyledContainer = styled.div`
     display: grid;
     grid-template-columns: [logo] 40px [logo-end discussion] 1fr [discussion-end document] 1fr [document-end];
     grid-template-rows: [header] 40px [header-end content] calc(100vh - 40px) [content-end];
-    max-height: 100vh;
 `;
 
 const StyledHeaderLogo = styled.div`
@@ -15,7 +15,7 @@ const StyledHeaderLogo = styled.div`
     grid-column-end: logo-end;
     grid-row-start: header;
     grid-row-end: header-end;
-    background-color: red;
+    background-color: ${(props) => props.theme.backgroundColor2};
 `;
 
 const StyledHeaderDiscussion = styled.div`
@@ -23,7 +23,17 @@ const StyledHeaderDiscussion = styled.div`
     grid-column-end: discussion-end;
     grid-row-start: header;
     grid-row-end: header-end;
-    background-color: green;
+    padding: 10px 10px;
+    background-color: ${(props) =>
+        props.active ? props.theme.backgroundColor2 : "inherit"};
+
+    @media (max-width: 768px) {
+        cursor: pointer;
+    }
+
+    @media (min-width: 768px) {
+        background-color: ${(props) => props.theme.backgroundColor1};
+    }
 `;
 
 const StyledHeaderDocument = styled.div`
@@ -31,15 +41,36 @@ const StyledHeaderDocument = styled.div`
     grid-column-end: document-end;
     grid-row-start: header;
     grid-row-end: header-end;
-    background-color: blue;
+    padding: 10px 10px;
+    background-color: ${(props) =>
+        props.active ? props.theme.backgroundColor2 : "inherit"};
+
+    @media (max-width: 768px) {
+        cursor: pointer;
+    }
+
+    @media (min-width: 768px) {
+        background-color: ${(props) => props.theme.backgroundColor1};
+    }
 `;
 
 const StyledDiscussionContainer = styled.div`
+    display: ${(props) => (props.active ? "block" : "none")};
+
+    @media (min-width: 768px) {
+        display: block;
+    }
     grid-column-start: discussion;
     grid-column-end: discussion-end;
     grid-row-start: content;
     grid-row-end: content-end;
-    background-color: cyan;
+    padding: 10px 10px;
+    // background-color: IndianRed;
+
+    @media (max-width: 768px) {
+        grid-column-start: logo;
+        grid-column-end: document-end;
+    }
 `;
 
 const StyledDocumentContainer = styled.div`
@@ -47,27 +78,48 @@ const StyledDocumentContainer = styled.div`
     grid-column-end: document-end;
     grid-row-start: content;
     grid-row-end: content-end;
-    background-color: pink;
+    padding: 10px 10px;
+    // background-color: DarkSlateBlue;
+
+    @media (max-width: 768px) {
+        grid-column-start: logo;
+        grid-column-end: document-end;
+    }
 `;
 
-class DiscussionLayout extends React.Component {
-    constructor(props) {
-        super(props);
-    }
+const StyledTitle = styled(LargeHeading)`
+    color: ${(props) =>
+        props.active ? props.theme.textColor1 : props.theme.textColor2};
 
-    render() {
-        return (
-            <StyledContainer>
-                <StyledHeaderLogo />
-                <StyledHeaderDiscussion />
-                <StyledHeaderDocument />
-                <StyledDiscussionContainer>
-                    <ChatLayout />
-                </StyledDiscussionContainer>
-                <StyledDocumentContainer />
-            </StyledContainer>
-        );
+    @media (min-width: 768px) {
+        color: ${(props) => props.theme.textColor1};
     }
-}
+`;
+
+const DiscussionLayout = (props) => {
+    const [discussionActive, setDiscussionActive] = useState(true);
+
+    return (
+        <StyledContainer>
+            <StyledHeaderLogo />
+            <StyledHeaderDiscussion
+                active={!discussionActive}
+                onClick={(e) => setDiscussionActive(true)}
+            >
+                <StyledTitle active={discussionActive}>Discuss</StyledTitle>
+            </StyledHeaderDiscussion>
+            <StyledHeaderDocument
+                active={discussionActive}
+                onClick={(e) => setDiscussionActive(false)}
+            >
+                <StyledTitle active={!discussionActive}>Document</StyledTitle>
+            </StyledHeaderDocument>
+            <StyledDocumentContainer />
+            <StyledDiscussionContainer active={discussionActive}>
+                <ChatLayout />
+            </StyledDiscussionContainer>
+        </StyledContainer>
+    );
+};
 
 export default DiscussionLayout;

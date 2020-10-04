@@ -14,7 +14,7 @@ body {
 	line-height: 25px;
 }
 
-input,
+/*input,
 textarea {
 	border: none;
 	font-family: freight-text-pro, serif;
@@ -48,3 +48,4 @@ input:focus,
 button:focus {
 	outline: none;
 }
+*/
