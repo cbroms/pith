@@ -37,14 +37,14 @@ class DiscussionManager:
     """
 
     # pointer
-    def _get(discussion_id):
+    def _get(self, discussion_id):
         return Discussion.objects(id=discussion_id)
 
     # pointer
-    def _get_unit(unit_id):
+    def _get_unit(self, unit_id):
         return Unit.objects(id=unit_id)
 
-    def _get_ancestors(unit_id):
+    def _get_ancestors(self, unit_id):
       curr = unit_id
       while curr != "": 
         ancestors.append(curr)
@@ -54,17 +54,18 @@ class DiscussionManager:
 
     """
     Verification functions. Require specific arguments in most cases.
+    args should only contain self. Other arguments should be in kwargs so they are queryable.
     """
 
     def _check_discussion_id(func):
       """
       Check discussion_id is valid.
       """
-      def helper(**kwargs):
+      def helper(self, **kwargs):
         discussion_id = kwargs["discussion_id"]
         try:
           Discussion.objects.get(id=discussion_id)
-          return func(**kwargs)
+          return func(self, **kwargs)
         except DoesNotExist:
           return error.BAD_DISCUSSION_ID 
       return helper
@@ -74,14 +75,14 @@ class DiscussionManager:
       Check user_id is valid.
       NOTE: Requires _check_discussion_id.
       """
-      def helper(**kwargs):
+      def helper(self, **kwargs):
         discussion_id = kwargs["discussion_id"]
         user_id = kwargs["user_id"]
         discussion = _get(discussion_id).get()
         if len(discussion.filter(users__id=user_id)) == 0:
           return error.BAD_USER_ID
         else:
-          return func(**kwargs)
+          return func(self, **kwargs)
       return helper
 
     def _check_unit(key):
@@ -89,11 +90,11 @@ class DiscussionManager:
       Check unit_id is valid.
       """
       def func_helper(func):
-        def helper(**kwargs):
+        def helper(self, **kwargs):
           unit_id = kwargs[key]
           try:
             Unit.objects.get(id=unit_id)
-            return func(**kwargs)
+            return func(self, **kwargs)
           except DoesNotExist:
             return error.BAD_UNIT_ID
         return helper 
@@ -104,12 +105,12 @@ class DiscussionManager:
       Check units are valid.
       """
       def func_helper(func):
-        def helper(**kwargs):
+        def helper(*args, **kwargs):
           units = kwargs[key]
           try:
             for unit_id in units:
               Unit.objects.get(id=unit_id)
-            return func(**kwargs)
+            return func(*args, **kwargs)
           except DoesNotExist:
             return error.BAD_UNIT_ID
         return helper 
@@ -120,14 +121,14 @@ class DiscussionManager:
       Check position is valid for unit.
       NOTE: Requires _check_unit.
       """
-      def helper(**kwargs):
+      def helper(*args, **kwargs):
         unit_id = kwargs["unit_id"] # TODO: maybe change
         position = kwargs["position"]
         unit = _get_unit(unit_id)
         if position > len(unit.children) or position < -1:
           return error.BAD_POSITION 
         else: 
-          return func(**kwargs)
+          return func(*args, **kwargs)
       return helper
 
     def _verify_edit_privilege(func):
@@ -135,13 +136,13 @@ class DiscussionManager:
       Check user can edit unit.
       NOTE: Requires _check_user_id and _check_unit.
       """
-      def helper(**kwargs):
+      def helper(*args, **kwargs):
         unit_id = kwargs["unit_id"] # TODO: maybe change
         user_id = kwargs["user_id"]
         if unit_id.edit_privilege != user_id:
           return error.BAD_EDIT_TRY
         else:
-          return func(**kwargs)
+          return func(*args, **kwargs)
       return helper
 
     def _verify_position_privilege(func):
@@ -149,13 +150,13 @@ class DiscussionManager:
       Check user can change position of unit.
       NOTE: Requires _check_user_id and _check_unit.
       """
-      def helper(**kwargs):
+      def helper(*args, **kwargs):
         unit_id = kwargs["unit_id"] # TODO: maybe change
         user_id = kwargs["user_id"]
         if unit_id.position_privilege != user_id:
           return error.BAD_POSITION_TRY
         else:
-          return func(**kwargs)
+          return func(*args, **kwargs)
       return helper
 
     def _verify_parent(func):
@@ -164,7 +165,7 @@ class DiscussionManager:
       If any of the units are the potential parent or ancestors of the parent, the parent is invalid.
       NOTE: Requires _check_unit on parent and _check_units units. 
       """
-      def helper(**kwargs):
+      def helper(*args, **kwargs):
         parent = kwargs["parent"]
         units = kwargs["units"]
         ancestors = _get_ancestors(parent)
@@ -172,7 +173,7 @@ class DiscussionManager:
         if len(inter) > 0:
           return error.BAD_PARENT
         else:
-          return func(**kwargs)
+          return func(*args, **kwargs)
       return helper
 
     """
@@ -181,7 +182,7 @@ class DiscussionManager:
 
     @_check_discussion_id
     def create_user(self, discussion_id, nickname):
-        discussion = self._get(discussion_id)
+        discussion = _get(discussion_id)
         unit_id = discussion.get().document
         cursor = Cursor(unit_id, -1) 
         user = User(name=nickname, viewed_unit=unit_id, cursor=cursor) 
@@ -195,7 +196,7 @@ class DiscussionManager:
         discussion.filter(users__id=user_id).update(users__S__active=True) 
         nickname = discussion.get().users.filter(id=user_id).name
         response = {"nickname": nickname}
-        return nickname
+        return response
 
     @_check_discussion_id
     @_check_user_id
@@ -212,7 +213,7 @@ class DiscussionManager:
         discussion = self._get(discussion_id)
 
     @_check_discussion_id
-    @_check_unit["unit_id"]
+    @_check_unit("unit_id")
     def get_unit_page(self, discussion_id, unit_id):
         discussion = self._get(discussion_id)
 
@@ -222,12 +223,12 @@ class DiscussionManager:
         return self._get_ancestors(unit_id)
 
     @_check_discussion_id
-    @_check_unit["unit_id"]
+    @_check_unit("unit_id")
     def get_unit_content(self, discussion_id, unit_id):
         discussion = self._get(discussion_id)
   
     @_check_discussion_id
-    @_check_unit["unit_id"]
+    @_check_unit("unit_id")
     def get_unit_context(self, discussion_id, unit_id):
         discussion = self._get(discussion_id)
 
@@ -249,13 +250,13 @@ class DiscussionManager:
 
     @_check_discussion_id
     @_check_user_id
-    @_check_unit["unit_id"]
+    @_check_unit("unit_id")
     @_verify_position
     def move_cursor(self, discussion_id, user_id, unit_id, position):
         discussion = self._get(discussion_id)
 
     @_check_discussion_id
-    @_check_unit["unit_id"]
+    @_check_unit("unit_id")
     @_verify_edit_privilege
     def hide_unit(self, discussion_id, unit_id):
         """ 
@@ -265,7 +266,7 @@ class DiscussionManager:
         discussion = self._get(discussion_id)
         
     @_check_discussion_id
-    @_check_unit["unit_id"]
+    @_check_unit("unit_id")
     def unhide_unit(self, discussion_id, unit_id):
         discussion = self._get(discussion_id)
 
@@ -279,7 +280,7 @@ class DiscussionManager:
 
     @_check_discussion_id
     @_check_user_id
-    @_check_unit["unit_id"]
+    @_check_unit("unit_id")
     def select_unit(self, discussion_id, user_id, unit_id):
         """
           Takes position lock.
@@ -288,8 +289,8 @@ class DiscussionManager:
 
     @_check_discussion_id
     @_check_user_id
-    @_check_units["units"]
-    @_check_unit["parent"]
+    @_check_units("units")
+    @_check_unit("parent")
     @_verify_position_privilege
     @_verify_parent
     def move_units(self, discussion_id, user_id, units, parent):
@@ -300,8 +301,8 @@ class DiscussionManager:
 
     @_check_discussion_id
     @_check_user_id
-    @_check_units["units"]
-    @_check_unit["parent"]
+    @_check_units("units")
+    @_check_unit("parent")
     @_verify_position_privilege
     @_verify_parent
     def merge_units(self, discussion_id, user_id, units, parent):
@@ -312,7 +313,7 @@ class DiscussionManager:
 
     @_check_discussion_id
     @_check_user_id
-    @_check_unit["unit_id"]
+    @_check_unit("unit_id")
     def request_to_edit(self, discussion_id, user_id, unit_id):
         """
           Takes edit lock.
@@ -320,7 +321,7 @@ class DiscussionManager:
         discussion = self._get(discussion_id)
 
     @_check_discussion_id
-    @_check_unit["unit_id"]
+    @_check_unit("unit_id")
     @_verify_edit_privilege
     def edit_unit(self, discussion_id, unit_id, pith):
         """
