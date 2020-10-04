@@ -1,0 +1,67 @@
+./worker_functions.py:1:1 'json.dumps' imported but unused
+./models/discussion.py:4:1 'mongoengine.PULL' imported but unused
+./models/discussion.py:9:1 'mongoengine.fields.DictField' imported but unused
+./models/discussion.py:9:1 'mongoengine.fields.ReferenceField' imported but unused
+./managers/discussion_manager.py:6:1 'datetime' imported but unused
+./managers/discussion_manager.py:7:1 'logging' imported but unused
+./managers/discussion_manager.py:9:1 'typing.Any' imported but unused
+./managers/discussion_manager.py:9:1 'typing.Dict' imported but unused
+./managers/discussion_manager.py:9:1 'typing.List' imported but unused
+./managers/discussion_manager.py:9:1 'typing.Optional' imported but unused
+./managers/discussion_manager.py:9:1 'typing.Tuple' imported but unused
+./managers/discussion_manager.py:17:1 'constants' imported but unused
+./managers/discussion_manager.py:19:1 'utils.utils' imported but unused
+./managers/discussion_manager.py:50:9 undefined name 'ancestors'
+./managers/discussion_manager.py:51:16 undefined name 'self'
+./managers/discussion_manager.py:53:14 undefined name 'ancestors'
+./managers/discussion_manager.py:80:22 undefined name '_get'
+./managers/discussion_manager.py:126:16 undefined name '_get_unit'
+./managers/discussion_manager.py:170:21 undefined name '_get_ancestors'
+./managers/discussion_manager.py:195:9 local variable 'response' is assigned to but never used
+./managers/discussion_manager.py:202:9 local variable 'response' is assigned to but never used
+./managers/discussion_manager.py:206:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:209:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:216:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:219:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:222:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:225:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:232:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:235:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:242:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:246:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:252:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:258:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:264:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:270:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:276:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:282:9 local variable 'discussion' is assigned to but never used
+./managers/board_manager.py:1:1 'datetime' imported but unused
+./managers/board_manager.py:2:1 'logging' imported but unused
+./managers/board_manager.py:3:1 'typing.Any' imported but unused
+./managers/board_manager.py:3:1 'typing.Dict' imported but unused
+./managers/board_manager.py:3:1 'typing.List' imported but unused
+./managers/board_manager.py:3:1 'typing.Optional' imported but unused
+./managers/board_manager.py:3:1 'typing.Tuple' imported but unused
+./managers/board_manager.py:11:1 'constants' imported but unused
+./managers/board_manager.py:12:1 'utils.utils' imported but unused
+./managers/board_manager.py:14:1 'models.discussion.User' imported but unused
+./managers/tests/discussion_manager_test.py:1:1 'asyncio' imported but unused
+./managers/tests/discussion_manager_test.py:3:1 'time' imported but unused
+./managers/tests/board_manager_test.py:3:1 'uuid' imported but unused
+./managers/tests/board_manager_test.py:6:1 'models.discussion.Discussion' imported but unused
+worker_functions.py:2: error: Cannot find implementation or library stub for module named 'managers.global_manager'
+tests/app_test.py:3: error: Skipping analyzing 'socketio': found module but no type hints or library stubs
+tests/app_test.py:3: note: See https://mypy.readthedocs.io/en/latest/running_mypy.html#missing-imports
+worker.py:4: error: Module 'worker_functions' has no attribute 'expire_discussion'
+worker.py:20: error: Incompatible types in assignment (expression has type "Callable[[Any], Any]", base class "Worker" defined the type as "Optional[StartupShutdown]")
+worker.py:21: error: Incompatible types in assignment (expression has type "Callable[[Any], Any]", base class "Worker" defined the type as "Optional[StartupShutdown]")
+worker.py:22: error: Incompatible types in assignment (expression has type "List[Any]", base class "Worker" defined the type as "Dict[str, Union[Function, CronJob]]")
+app.py:7: error: Skipping analyzing 'jsonschema': found module but no type hints or library stubs
+app.py:9: error: Skipping analyzing 'socketio': found module but no type hints or library stubs
+app.py:13: error: Cannot find implementation or library stub for module named 'managers.global_manager'
+app.py:14: error: Cannot find implementation or library stub for module named 'schema.board_responses'
+app.py:14: error: Cannot find implementation or library stub for module named 'schema'
+app.py:15: error: Cannot find implementation or library stub for module named 'schema.discussion_requests'
+app.py:16: error: Cannot find implementation or library stub for module named 'schema.discussion_responses'
+app.py:17: error: Cannot find implementation or library stub for module named 'utils.utils'
+Found 14 errors in 4 files (checked 7 source files)

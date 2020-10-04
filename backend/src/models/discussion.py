@@ -104,8 +104,10 @@ class Unit(Document):
     """
 
     # content_lock
+    edit_privilege = StringField(allow_null=True)
+
     # position_lock
-    freq_dict = DictField()
+    position_privilege = StringField(allow_null=True)
 
 
 class Cursor(EmbeddedDocument):

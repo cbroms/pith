@@ -4,7 +4,7 @@
 pyflakes .
 
 # type-check source files
-#mypy .
+mypy .
 
 # let global manager intialize a backend instance
 python3.8 managers/global_manager.py
@@ -15,8 +15,7 @@ python3.8 managers/global_manager.py
 
 # manager tests
 python3.8 managers/tests/board_manager_test.py
-#python3.8 managers/tests/user_manager_test.py
-#python3.8 managers/tests/discussion_manager_test.py
+python3.8 managers/tests/discussion_manager_test.py
 
 # interface tests
 #python3.8 tests/app_test.py

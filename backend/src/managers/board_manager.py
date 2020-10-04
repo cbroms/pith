@@ -24,6 +24,9 @@ class BoardManager:
         self.gm = gm
         self.redis_queue = self.gm.redis_queue
 
+    def _get(self, discussion_id):
+        return Discussion.objects.get(id=discussion_id)
+
     def create(self):
         unit = Unit(pith="", parent="")
         unit.original_text = unit.pith
