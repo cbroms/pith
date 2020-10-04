@@ -57,6 +57,13 @@ class Unit(Document):
     :default: []
     """
 
+    author = StringField()
+    """
+    :type: *str*
+    :required: False
+    :default: None
+    """
+
     created_at = DateTimeField(default=datetime.utcnow())
     """
     :type: *datetime*
@@ -75,6 +82,13 @@ class Unit(Document):
     """
     :type: *str*
     :required: True
+    :default: None
+    """
+
+    position = IntField()
+    """
+    :type: *int*
+    :required: False 
     :default: None
     """
 
@@ -105,9 +119,19 @@ class Unit(Document):
 
     # content_lock
     edit_privilege = StringField(allow_null=True)
+    """
+    :type: *str*
+    :requires: False
+    :nullable: True
+    """
 
     # position_lock
     position_privilege = StringField(allow_null=True)
+    """
+    :type: *str*
+    :requires: False
+    :nullable: True
+    """
 
 
 class Cursor(EmbeddedDocument):
@@ -167,6 +191,13 @@ class User(EmbeddedDocument):
     viewed_unit = StringField(required=True)
     """
     :type: *str*
+    :required: True
+    :default: None
+    """
+
+    start_time = StringField(required=True)
+    """
+    :type: *datetime*
     :required: True
     :default: None
     """

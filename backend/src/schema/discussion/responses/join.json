@@ -1,8 +1,9 @@
 {
   "type": "object",
   "properties": {
-    "nickname": {"type": "string"}
+    "nickname": {"type": "string"},
+    "cursor": {"$ref": "file:../../../cursor.json"}
   },
-  "required": ["nickname"]
+  "required": ["nickname", "cursor"]
 }
 

@@ -2,8 +2,8 @@
   "type": "object",
   "properties": {
     "user_id": {"type": "string"},
-    "position": {"type": "integer", "minimum": 0}
+    "cursor": {"$ref": "file:../../cursor.json"}
   },
-  "required": ["user_id", "position"]
+  "required": ["user_id", "cursor"]
 }
 

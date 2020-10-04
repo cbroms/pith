@@ -1,7 +1,7 @@
 {
   "type": "object",
-  "unit_id": {"type": "string"},
   "properties": {
+    "unit_id": {"type": "string"},
     "position": {"type": "integer", "minimum": -1}
   },
   "required": ["unit_id", "position"]

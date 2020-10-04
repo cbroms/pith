@@ -19,18 +19,26 @@ Unit
       :annotation: = Units current Unit refers to in the pith.
     .. autoattribute:: backward_links
       :annotation: = Units that refer to current Unit in their piths.
+    .. autoattribute:: author
+      :annotation: = Who first created the unit.
     .. autoattribute:: created_at
       :annotation: = When this Unit was created.
     .. autoattribute:: in_chat
       :annotation: = Whether this Unit is in the chat (true) or in the document (false).
     .. autoattribute:: parent
       :annotation: = Parent Unit.
+    .. autoattribute:: position
+      :annotation: = Position in parent Unit.
     .. autoattribute:: original_pith
       :annotation: = Original pith of Unit, useful if pith was changed.
     .. autoattribute:: edit_count
       :annotation: = Number of times Unit was changed.
     .. autoattribute:: hidden 
       :annotation: = Whether the Unit is hidden or not.
+    .. autoattribute:: edit_privilege 
+      :annotation: = Who, if anyone, has privilege to edit the content.
+    .. autoattribute:: position_privilege 
+      :annotation: = Who, if anyone, has privilege to change the position.
 
 *************************************
 Cursor
@@ -69,6 +77,8 @@ User
       :annotation: = ID of User.
     .. autoattribute:: viewed_unit
       :annotation: = ID of Unit the User was last viewing.
+    .. autoattribute:: start_time
+      :annotation: = Time visit current unit.
     .. autoattribute:: name
       :annotation: = Entered and saved nickname.
     .. autoattribute:: cursor

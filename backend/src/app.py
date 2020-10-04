@@ -116,18 +116,18 @@ class DiscussionNamespace(AsyncNamespace):
         await self.emit("left_user", serialized, room=discussion_id)
         self.leave_room(sid, discussion_id)
 
-    async def load_unit(self, sid, request):
+    async def load_user(self, sid, request):
         """
-        :return: :ref:`dres_load_unit-label`
+        :return: :ref:`dres_load_user-label`
         """
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
 
-        response = gm.discussion_manager.load(discussion_id, user_id)
+        response = gm.discussion_manager.load_user(discussion_id, user_id)
 
         serialized = dumps(response, cls=GenericEncoder)
-        if validate(instance=serialized, schema=dres.load_unit):
+        if validate(instance=serialized, schema=dres.load_uuser):
           return {"error": error.BAD_RESPONSE}
         return serialized
     

@@ -4,7 +4,7 @@
     "cursors": {"type": {
       "type": "object",
       "additionalProperties" : {
-        "$ref": "file:cursor.json"
+        "$ref": "file:../../cursor.json"
       }
     }},
     "current_unit": {"type": "string"},
@@ -13,13 +13,16 @@
       "items": {"$ref": "file:time_interval.json"}
     }, 
     "chat_history": {
-      "type": "object",
-      "properties": {
-        "created_at": {"type": "string"},
-        "author": {"type": "string"},
-        "unit_id": {"type": "string"}
-      },
-      "required": ["created_at", "author", "units"]
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "created_at": {"type": "string"},
+          "author": {"type": "string"},
+          "unit_id": {"type": "string"}
+        },
+        "required": ["created_at", "author", "units"]
+      }
     }
   },
   "required": ["cursors", "current_unit", "timeline", "chat_history"]

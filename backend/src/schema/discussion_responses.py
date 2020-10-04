@@ -24,8 +24,8 @@ with open(path + "/discussion/responses/leave.json") as file:
   * **author** - Nickname of the author.
   * **units** - List of unit IDs.
 """
-with open(path + "/discussion/responses/load_unit.json") as file:
-  load_unit = load(file)
+with open(path + "/discussion/responses/load_user.json") as file:
+  load_user = load(file)
 
 """
 - **pith** - Pith of the unit.

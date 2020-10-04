@@ -157,9 +157,9 @@ leave
 
 .. jsonschema:: ../../schema/discussion/responses/leave.json
 
-.. _dres_load_unit-label:
+.. _dres_load_user-label:
 
-load_unit
+load_user
 =====================================
 
 - **cursors** - Map of active user IDs to cursor positions. 
@@ -171,7 +171,7 @@ load_unit
   - **author** - Nickname of the author.
   - **units** - List of unit IDs.
 
-.. jsonschema:: ../../schema/discussion/responses/load_unit.json
+.. jsonschema:: ../../schema/discussion/responses/load_user.json
 
 .. _dres_get_unit_page-label:
 
