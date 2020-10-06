@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
+import UnitLayout from "./UnitLayout";
 import TextEditorLayout from "./TextEditorLayout";
 
 const StyledContainer = styled.div`
@@ -18,7 +19,6 @@ const StyledContainer = styled.div`
 const StyledChatOverflow = styled.div`
     height: 100%;
     overflow-y: auto;
-    // background-color: yellow;
 `;
 
 const StyledChat = styled.div`
@@ -27,20 +27,19 @@ const StyledChat = styled.div`
     align-items: flex-end;
     flex-wrap: wrap;
     align-content: flex-end;
-    // background-color: IndianRed;
 `;
 
 const StyledChatEditor = styled.div`
     position: relative;
-    // background-color: Khaki;
     border-top: 3px solid ${(props) => props.theme.backgroundColor2};
+    margin-top: 20px;
 `;
 
 const ChatLayout = (props) => {
     return (
         <StyledContainer>
             <StyledChatOverflow>
-                <StyledChat />
+                <StyledChat>{props.children}</StyledChat>
             </StyledChatOverflow>
             <StyledChatEditor>
                 <TextEditorLayout />

@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import "./App.css";
 
-import LinkIcon from "./components/LinkIcon/LinkIcon";
-import DiscussionLayout from "./components/DiscussionLayout";
+// import LinkIcon from "./components/LinkIcon";
+import Discussion from "./components/Discussion";
 // import Discussion from "./components/Discussion";
 
 const theme = {
@@ -25,11 +25,26 @@ const theme = {
 	serif: "'Source Serif Pro', serif",
 };
 
+const postsDummy = [
+	{
+		created_at: "02:28:52Z",
+		author: "Christian",
+		pith: "This is some cool text and stuff!",
+		id: "2o3iupoweuqo",
+	},
+	{
+		created_at: "02:36:31Z",
+		author: "Christian",
+		pith:
+			"Here's another interesting post of mine. This time it has some <em>formatting</em>",
+		id: "2o32o467o3y364",
+	},
+];
 function App() {
 	return (
 		<div className="App">
 			<ThemeProvider theme={theme}>
-				<DiscussionLayout />
+				<Discussion posts={postsDummy} />
 			</ThemeProvider>
 
 			{/*<Router>

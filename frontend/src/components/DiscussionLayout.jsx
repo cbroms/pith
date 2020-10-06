@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 
 import { LargeHeading } from "./StandardUI";
-import ChatLayout from "./ChatLayout";
+import Chat from "./Chat";
 
 const StyledContainer = styled.div`
     display: grid;
@@ -65,7 +65,6 @@ const StyledDiscussionContainer = styled.div`
     grid-row-start: content;
     grid-row-end: content-end;
     padding: 10px 10px;
-    // background-color: IndianRed;
 
     @media (max-width: 768px) {
         grid-column-start: logo;
@@ -79,7 +78,6 @@ const StyledDocumentContainer = styled.div`
     grid-row-start: content;
     grid-row-end: content-end;
     padding: 10px 10px;
-    // background-color: DarkSlateBlue;
 
     @media (max-width: 768px) {
         grid-column-start: logo;
@@ -116,7 +114,7 @@ const DiscussionLayout = (props) => {
             </StyledHeaderDocument>
             <StyledDocumentContainer />
             <StyledDiscussionContainer active={discussionActive}>
-                <ChatLayout />
+                {props.children}
             </StyledDiscussionContainer>
         </StyledContainer>
     );
