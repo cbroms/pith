@@ -3,6 +3,7 @@
   "properties": {
     "created_at": {"type": "string"},
     "author": {"type": "string"},
+    "unit_id": {"type": "string"},
     "pith": {"type": "string"}
   },
   "required": ["created_at", "author", "piths"]

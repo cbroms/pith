@@ -4,7 +4,15 @@
     "pith": {"type": "string"},
     "children": {
       "type": "array",
-      "items": {"type": "string"}
+      "items": {
+        "type": "object",
+        "properties": {
+          "unit_id": {"type": "string"},
+          "pith": {"type": "string"},
+          "hidden": {"type": "boolean"}
+        },
+        "required": ["unit_id", "pith", "hidden"]
+      }
     }
   },
   "required": ["pith", "children"]

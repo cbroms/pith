@@ -55,11 +55,11 @@ class DiscussionManager:
 
     def _time_entry(self, discussion_id, user_id):
         discussion = self._get(discussion_id)
-        user = discussion.get().filter(users__id=user_id).get()
+        user = discussion.get().users.filter(id=user_id).get()
         time_interval = TimeInterval(
           unit_id=user.viewed_unit,
           start_time=user.start_time,
-          end_time=datetime.utcnow()) 
+          end_time=datetime.utcnow().strftime(constants.DATE_TIME_FMT)) 
         discussion.filter(users__id=user_id).update(
           push__users__S__timeline=time_interval
         )
@@ -73,10 +73,7 @@ class DiscussionManager:
         unit.update(position_privilege=None)
 
     def _retrieve_links(self, pith):
-      """
-      TODO: Performs regex to retrieve links in a pith and return it as an array.
-      """
-      pass
+      return constants.link_pattern.findall(pith)
 
     def _move_units(self, discussion_id, user_id, units, parent_id):
         parent = self._get_unit(parent_id)
@@ -88,8 +85,8 @@ class DiscussionManager:
           old_parent = unit.get().parent
           old_position = unit.get().position
 
-          unit.update(parent=parent)\
-              .update(position=counter)
+          unit.update(parent=parent)
+          unit.update(position=counter)
           counter += 1
           self._release_position(unit_id)
 
@@ -120,7 +117,7 @@ class DiscussionManager:
           Discussion.objects.get(id=discussion_id)
           return func(self, **kwargs)
         except DoesNotExist:
-          return error.BAD_DISCUSSION_ID 
+          return {"error": error.BAD_DISCUSSION_ID} 
       return helper
           
     def _check_user_id(func):
@@ -133,7 +130,7 @@ class DiscussionManager:
         user_id = kwargs["user_id"]
         discussion = self._get(discussion_id)
         if len(discussion.filter(users__id=user_id)) == 0:
-          return error.BAD_USER_ID
+          return {"error": error.BAD_USER_ID}
         else:
           return func(self, **kwargs)
       return helper
@@ -148,7 +145,7 @@ class DiscussionManager:
           Unit.objects.get(id=unit_id)
           return func(self, **kwargs)
         except DoesNotExist:
-          return error.BAD_UNIT_ID
+          return {"error": error.BAD_UNIT_ID}
       return helper 
 
     def _check_units(func):
@@ -162,7 +159,7 @@ class DiscussionManager:
             Unit.objects.get(id=unit_id)
           return func(self, **kwargs)
         except DoesNotExist:
-          return error.BAD_UNIT_ID
+          return {"error": error.BAD_UNIT_ID}
       return helper 
 
     def _verify_position(func):
@@ -171,11 +168,11 @@ class DiscussionManager:
       NOTE: Requires _check_unit_id.
       """
       def helper(self, **kwargs):
-        unit_id = kwargs["unit_id"] # TODO: maybe change
+        unit_id = kwargs["unit_id"]
         position = kwargs["position"]
         unit = self._get_unit(unit_id)
         if position > len(unit.children) or position < -1:
-          return error.BAD_POSITION 
+          return {"error": error.BAD_POSITION}
         else: 
           return func(self, **kwargs)
       return helper
@@ -190,7 +187,7 @@ class DiscussionManager:
         user_id = kwargs["user_id"]
         unit = self._get_unit(unit_id)
         if unit.edit_privilege != user_id:
-          return error.BAD_EDIT_TRY
+          return {"error": error.BAD_EDIT_TRY}
         else:
           return func(self, **kwargs)
       return helper
@@ -206,7 +203,7 @@ class DiscussionManager:
         for unit_id in units:
           unit = self._get_unit(unit_id)
           if unit.position_privilege != user_id:
-            return error.BAD_POSITION_TRY
+            return {"error": error.BAD_POSITION_TRY}
         return func(self, **kwargs)
       return helper
 
@@ -219,12 +216,12 @@ class DiscussionManager:
       def helper(self, **kwargs):
         user_id = kwargs["user_id"]
         units = kwargs["units"]
-        user = discussion.get().filter(users__id=user_id).get()
+        user = discussion.get().users.filter(id=user_id).get()
         parent_id = user.cursor.unit_id
         ancestors = self._get_ancestors(parent_id)
         inter = set(ancestors).intersection(set(units))
         if len(inter) > 0:
-          return error.BAD_PARENT
+          return {"error": error.BAD_PARENT}
         else:
           return func(self, **kwargs)
       return helper
@@ -241,7 +238,7 @@ class DiscussionManager:
         user = User(
           name=nickname,
           viewed_unit=unit_id,
-          start_time=datetime.utcnow(),
+          start_time=datetime.utcnow().strftime(constants.DATE_TIME_FMT),
           cursor=cursor
         ) 
         discussion.update(push__users=user)
@@ -254,14 +251,15 @@ class DiscussionManager:
         Update start time of current unit.
         """
         discussion = self._get(discussion_id)
-        discussion.filter(users__id=user_id)\
-          .update(set__users__S__active=True)\
-          .update(set__users__S__start_time=datetime.utcnow()) 
-        nickname = discussion.get().users.filter(id=user_id).get().name
+        discussion.filter(users__id=user_id).update(
+          set__users__S__active=True,
+          set__users__S__start_time=
+            datetime.utcnow().strftime(constants.DATE_TIME_FMT)
+        ) 
 
-        user = discussion.get().filter(users__id=user_id).get()
+        user = discussion.get().users.filter(id=user_id).get()
         response = {
-          "nickname": nickname,
+          "nickname": user.name,
           "cursor": user.cursor
         }
         return response
@@ -284,7 +282,7 @@ class DiscussionManager:
     @_check_user_id
     def load_user(self, discussion_id, user_id):
         discussion = self._get(discussion_id).get()
-        user = discussion.users.filter(id=user_id).get()
+        user = discussion.get().users.filter(id=user_id).get()
 
         cursors = {}
         for p in discussion.users:
@@ -314,16 +312,38 @@ class DiscussionManager:
 
         children = []
         for c in unit.get().children:
+          c_unit = self._get_unit(c)
+          grandchildren = []
+          for g in c_unit.get().children:
+            g_unit = self._get_unit(g)
+            grandchildren.append({
+              "unit_id": g,
+              "pith": g_unit.pith,
+              "hidden": g_unit.hidden,
+            })
           children.append({
             "unit_id": c,
-            "children": c.children 
+            "pith": c_unit.pith,
+            "hidden": c_unit.hidden,
+            "children": grandchildren
           })
 
         backlinks = []
         for b in unit.get().backward_links:
+          b_unit = self._get_unit(b)
+          grandbacklinks = []
+          for g in b_unit.get().backward_links:
+            g_unit = self._get_unit(g)
+            grandchildren.append({
+              "unit_id": g,
+              "pith": g_unit.pith,
+              "hidden": g_unit.hidden,
+            })
           backlinks.append({
             "unit_id": b,
-            "backlinks": b.backward_links
+            "pith": b_unit.pith,
+            "hidden": b_unit.hidden,
+            "backlinks": grandbacklinks 
           })
 
         response = {
@@ -354,9 +374,18 @@ class DiscussionManager:
     def get_unit_context(self, discussion_id, unit_id):
         discussion = self._get(discussion_id)
         unit = self._get_unit(unit_id).get()
+        children = []
+        for c in unit.children:
+          c_unit = self._get_unit(c).get()
+          children.append({
+            "unit_id": c,
+            "pith": c_unit.pith,
+            "hidden": c_unit.hidden
+          })
+         
         response = {
           "pith": unit.pith,
-          "children": unit.children
+          "children": children
         }
         return response
 
@@ -373,6 +402,11 @@ class DiscussionManager:
           forward_links=forward_links
         )
         unit.original_text = unit.pith
+
+        """
+        TODO: backlinks
+        """
+
         unit.save()
 
         discussion.update(push__chat=unit)
@@ -380,6 +414,7 @@ class DiscussionManager:
         response = {
           "created_at": unit.created_at,
           "author": discussion.get().users.filter(id=user_id).get().name, 
+          "unit_id": unit.id,
           "pith": unit.pith 
         }
         return response
@@ -430,11 +465,12 @@ class DiscussionManager:
         """
         discussion = self._get(discussion_id)
         self._time_entry(discussion_id, user_id)
-        discussion.filter(users__id=user_id) \
-          .update(set__users__S__cursor__unit_id=unit_id)\
-          .update(set__users__S__cursor__position=position)
+        discussion.filter(users__id=user_id).update(
+          set__users__S__cursor__unit_id=unit_id,
+          set__users__S__cursor__position=position
+        )
 
-        user = discussion.get().filter(users__id=user_id).get()
+        user = discussion.get().users.filter(id=user_id).get()
         response = {
             "user_id": user_id,
             "cursor": user.cursor
@@ -509,10 +545,10 @@ class DiscussionManager:
         discussion = self._get(discussion_id)
         unit = self._get_unit(unit_id) 
         if unit.position_privilege is not None: 
-          return None
+          return {"error": error.FAILED_POSITION_ACQUIRE}
         unit.update(position_privilege=user_id)
 
-        user = discussion.get().filter(users__id=user_id).get()
+        user = discussion.get().users.filter(id=user_id).get()
         response = {
           "unit_id": unit_id,
           "nickname": user.name
@@ -529,7 +565,7 @@ class DiscussionManager:
           Releases position lock.
           Removes each of the units from old parent and puts under new parent.
         """
-        user = discussion.get().filter(users__id=user_id).get()
+        user = discussion.get().users.filter(id=user_id).get()
         parent_id = user.cursor.unit_id
         return self._move_units(discussion_id, user_id, units, parent_id)
 
@@ -560,10 +596,10 @@ class DiscussionManager:
         discussion = self._get(discussion_id)
         unit = self._get_unit(unit_id) 
         if unit.edit_privilege is not None: 
-          return None
+          return {"error": error.FAILED_EDIT_ACQUIRE}
         unit.update(edit_privilege=user_id)
 
-        user = discussion.get().filter(users__id=user_id).get()
+        user = discussion.get().users.filter(id=user_id).get()
         response = {
           "unit_id": unit_id,
           "nickname": user.name

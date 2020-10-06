@@ -120,8 +120,8 @@ with open(path + "/discussion/responses/locked_unit_editable.json") as file:
 with open(path + "/discussion/responses/edited_unit.json") as file:
   edited_unit = load(file)
 
-with open(path + "/discussion/responses/removed_backlink.json") as file:
-  removed_backlink = load(file)
+with open(path + "/discussion/responses/removed_backlinks.json") as file:
+  removed_backlinks = load(file)
 
-with open(path + "/discussion/responses/added_backlink.json") as file:
-  added_backlink = load(file)
+with open(path + "/discussion/responses/added_backlinks.json") as file:
+  added_backlinks = load(file)

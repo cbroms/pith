@@ -221,7 +221,7 @@ post
 
 - **created_at** - Creation time of unit. 
 - **author** - Nickname of the author. 
-- **piths** - List of pith strings, one per unit.
+- **pith** - Pith of the unit. 
 
 .. jsonschema:: ../../schema/discussion/responses/post.json
 
@@ -311,17 +311,17 @@ edited_unit
 
 .. jsonschema:: ../../schema/discussion/responses/edited_unit.json
 
-.. _dres_removed_backlink-label:
+.. _dres_removed_backlinks-label:
 
-removed_backlink
+removed_backlinks
 =====================================
 
-.. jsonschema:: ../../schema/discussion/responses/removed_backlink.json
+.. jsonschema:: ../../schema/discussion/responses/removed_backlinks.json
 
-.. _dres_added_backlink-label:
+.. _dres_added_backlinks-label:
 
-added_backlink
+added_backlinks
 =====================================
 
-.. jsonschema:: ../../schema/discussion/responses/added_backlink.json
+.. jsonschema:: ../../schema/discussion/responses/added_backlinks.json
 

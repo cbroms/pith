@@ -66,8 +66,6 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertFalse(discussion.get().users.filter(id=user_id).get().active)
         self.assertTrue(res, nickname)
 
-    def test_
-
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
