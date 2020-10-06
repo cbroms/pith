@@ -1,12 +1,15 @@
 import React from "react";
 
 import Chat from "./Chat";
+import Document from "./Document";
+
 import DiscussionLayout from "./DiscussionLayout";
 
 const Discussion = (props) => {
 	return (
 		<DiscussionLayout>
 			<Chat posts={props.posts} />
+			<Document view={props.document} />
 		</DiscussionLayout>
 	);
 };

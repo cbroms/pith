@@ -65,6 +65,7 @@ const StyledDiscussionContainer = styled.div`
     grid-row-start: content;
     grid-row-end: content-end;
     padding: 10px 10px;
+    z-index: 5;
 
     @media (max-width: 768px) {
         grid-column-start: logo;
@@ -78,6 +79,7 @@ const StyledDocumentContainer = styled.div`
     grid-row-start: content;
     grid-row-end: content-end;
     padding: 10px 10px;
+    z-index: 0;
 
     @media (max-width: 768px) {
         grid-column-start: logo;
@@ -90,7 +92,7 @@ const StyledTitle = styled(LargeHeading)`
         props.active ? props.theme.textColor1 : props.theme.textColor2};
 
     @media (min-width: 768px) {
-        color: ${(props) => props.theme.textColor1};
+        color: ${(props) => props.theme.textColor2};
     }
 `;
 
@@ -112,9 +114,11 @@ const DiscussionLayout = (props) => {
             >
                 <StyledTitle active={!discussionActive}>Document</StyledTitle>
             </StyledHeaderDocument>
-            <StyledDocumentContainer />
+            <StyledDocumentContainer>
+                {props.children[1]}
+            </StyledDocumentContainer>
             <StyledDiscussionContainer active={discussionActive}>
-                {props.children}
+                {props.children[0]}
             </StyledDiscussionContainer>
         </StyledContainer>
     );

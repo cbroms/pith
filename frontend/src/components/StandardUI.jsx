@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "styled-components";
 
 const LargeHeading = styled.h2`
@@ -15,12 +14,15 @@ const Button = styled.button`
     cursor: pointer;
     box-sizing: border-box;
     display: inline-block;
-    padding: 10px;
+    padding: ${(props) => (props.noBackground ? "0" : "10px")};
     margin: 0;
-    background-color: ${(props) => props.theme.backgroundColor2};
+    vertical-align: middle;
+    background-color: ${(props) =>
+        props.noBackground ? "inherit" : props.theme.backgroundColor2};
 
     :hover {
-        background-color: ${(props) => props.theme.backgroundColor3};
+        background-color: ${(props) =>
+            props.noBackground ? "inherit" : props.theme.backgroundColor3};
     }
 `;
 

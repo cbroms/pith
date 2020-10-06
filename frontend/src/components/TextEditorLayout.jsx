@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 
 import { Button } from "./StandardUI";
-import { UpArrow } from "./Arrows";
+import { UpArrow } from "./Symbols";
 
 import TextEditor from "./TextEditor";
 
