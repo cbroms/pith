@@ -12,4 +12,3 @@
     "required": ["unit_id", "parent", "position", "old_parent", "old_position"]
   }
 }
-

@@ -221,6 +221,7 @@ post
 
 - **created_at** - Creation time of unit. 
 - **author** - Nickname of the author. 
+- **unit_id** - ID of the unit.
 - **pith** - Pith of the unit. 
 
 .. jsonschema:: ../../schema/discussion/responses/post.json

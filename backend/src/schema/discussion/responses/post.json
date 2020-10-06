@@ -6,6 +6,6 @@
     "unit_id": {"type": "string"},
     "pith": {"type": "string"}
   },
-  "required": ["created_at", "author", "piths"]
+  "required": ["created_at", "author", "unit_id", "pith"]
 }
 
