@@ -1,8 +1,15 @@
 import React from "react";
 import styled from "styled-components";
+import * as dayjs from "dayjs";
+import * as calendar from "dayjs/plugin/calendar";
+import * as utc from "dayjs/plugin/utc";
 
 import ChatLayout from "./ChatLayout";
+import PostLayout from "./PostLayout";
 import Unit from "./Unit";
+
+dayjs.extend(calendar);
+dayjs.extend(utc);
 
 const Chat = (props) => {
     const postGroups = [];
@@ -26,11 +33,26 @@ const Chat = (props) => {
         const units = group.map((post) => {
             return <Unit pith={post.pith} key={post.id} />;
         });
+
+        const date = dayjs(group[0].created_at)
+            .utc()
+            .local();
+
+        const formattedDate = dayjs(date).calendar(null, {
+            sameDay: "[Today at] h:mm a",
+            lastDay: "[Yesterday at] h:mm a",
+            lastWeek: "dddd [at] h:mm a",
+            sameElse: "MM/D/YY [at] h:mm a",
+        });
+
         return (
-            <div>
-                {group[0].author}
+            <PostLayout
+                author={group[0].author}
+                time={formattedDate}
+                key={`${group[group.length - 1].id}-group`}
+            >
                 {units}
-            </div>
+            </PostLayout>
         );
     });
     return <ChatLayout>{posts}</ChatLayout>;

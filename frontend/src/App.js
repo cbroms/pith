@@ -10,7 +10,7 @@ import Discussion from "./components/Discussion";
 const theme = {
 	textColor1: "white",
 	textColor2: "#afafaf",
-	textColor3: "#565656",
+	textColor3: "#636363",
 	hoveredBackgroundColor: "grey",
 	backgroundColor1: "#222222",
 	backgroundColor2: "#383838",
@@ -27,17 +27,23 @@ const theme = {
 
 const postsDummy = [
 	{
-		created_at: "02:28:52Z",
+		created_at: "2020-10-06T02:28:52.000Z",
 		author: "Christian",
 		pith: "This is some cool text and stuff!",
 		id: "2o3iupoweuqo",
 	},
 	{
-		created_at: "02:36:31Z",
+		created_at: "2020-10-06T02:36:31.000Z",
 		author: "Christian",
 		pith:
 			"Here's another interesting post of mine. This time it has some <em>formatting</em>",
 		id: "2o32o467o3y364",
+	},
+	{
+		created_at: "2020-10-06T04:41:45.000Z",
+		author: "Jimmy",
+		pith: "Something new",
+		id: "2o32o46sdaf7o3y364",
 	},
 ];
 function App() {

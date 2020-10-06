@@ -31,7 +31,7 @@ const StyledEditor = styled(TextEditor)`
     font-family: ${(props) => props.theme.serif};
 
     :empty::after {
-        color: ${(props) => props.theme.textColor3};
+        color: ${(props) => props.theme.textColor2};
         content: "new message";
     }
 
