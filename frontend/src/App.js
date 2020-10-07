@@ -21,7 +21,7 @@ const theme = {
 	smallFont: "0.8rem",
 	mediumFont: "1rem",
 	largeFont: "1.25rem",
-	extraLargeFont: "1.5rem",
+	extraLargeFont: "1.4rem",
 	sans: "'Source Sans Pro', sans-serif",
 	serif: "'Source Serif Pro', serif",
 };
@@ -49,7 +49,8 @@ const postsDummy = [
 ];
 
 const documentDummy = {
-	pith: "Our list of animals",
+	pith:
+		"Project Xanadu was the first hypertext project, and aimed to link the world's information digitally",
 	ancestors: [
 		"28utwejf9pq348ut",
 		"893yt9wyg9y3q43",
@@ -60,26 +61,30 @@ const documentDummy = {
 	children: [
 		{
 			unit_id: "3498tyqe9ygq93g",
-			pith: "whales",
+			pith:
+				"Xanadu doesn't rely on the same paper metaphor that most digital publishing does today.",
 			children: [
 				{
 					unit_id: "34utqpieorghpq34",
-					pith: "blue whales",
+					pith:
+						"Each document is composed of a series of transclusions to other documents.",
 				},
 				{
 					unit_id: "1348qefioqph43uqgh",
-					pith: "grey whales",
+					pith: "The links between documents are made visible.",
 				},
 			],
 		},
 		{
 			unit_id: "3849t7093ygwe",
-			pith: "dogs",
+			pith:
+				"Xanadu is often compared to Vannevar Bush's <em>Memex</em>, a fictional machine allowing a user to index and traverse a repository of information.",
 			children: [],
 		},
 		{
 			unit_id: "3948yu9qhrgweg",
-			pith: "cats",
+			pith:
+				"A number of working prototypes of the Xanadu technology exist today.",
 			children: [],
 		},
 	],

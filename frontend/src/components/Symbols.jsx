@@ -70,6 +70,32 @@ const UpChevron = styled(DownChevron)`
     }
 `;
 
+const RightDoubleChevron = styled.div`
+    box-sizing: border-box;
+    position: relative;
+    display: block;
+    width: 22px;
+    height: 22px;
+
+    ::after,
+    ::before {
+        content: "";
+        display: block;
+        box-sizing: border-box;
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        border-right: 2px solid ${(props) => props.theme.textColor3};
+        border-top: 2px solid ${(props) => props.theme.textColor3};
+        transform: rotate(45deg);
+        top: 7px;
+        right: 6px;
+    }
+    ::after {
+        right: 11px;
+    }
+`;
+
 const VerticalLine = styled.div`
     box-sizing: border-box;
     position: relative;
@@ -108,4 +134,12 @@ const Dot = styled.div`
     }
 `;
 
-export { UpArrow, DownChevron, RightChevron, UpChevron, VerticalLine, Dot };
+export {
+    UpArrow,
+    DownChevron,
+    RightChevron,
+    UpChevron,
+    RightDoubleChevron,
+    VerticalLine,
+    Dot,
+};

@@ -5,7 +5,8 @@ const StyledContainer = styled.div`
     grid-template-columns: [ancestor] 40px [ancestor-end document] 1fr [document-end timeline] 40px [timeline-end];
     grid-template-rows: [participants] 40px [participants-end content] 1fr [content-end];
     display: grid;
-    height: 100%;
+    max-height: 100%;
+    overflow-y: scroll;
 
     @media (max-width: 768px) {
         grid-template-columns: [ancestor] 40px [ancestor-end document] 1fr [document-end];

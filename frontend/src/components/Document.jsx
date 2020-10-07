@@ -28,7 +28,7 @@ const Document = (props) => {
             </DocumentSectionLayout>
         );
     });
-    const pithUnit = <Unit big={true} pith={props.view.pith} />;
+    const pithUnit = <Unit big={true} pith={props.view.pith} inline />;
     const doc = (
         <DocumentSectionLayout level={1} pith={pithUnit}>
             {sections}

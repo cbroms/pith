@@ -15,7 +15,8 @@ const Button = styled.button`
     box-sizing: border-box;
     display: inline-block;
     padding: ${(props) => (props.noBackground ? "0" : "10px")};
-    margin: 0;
+    margin: ${(props) => (props.noBackground ? "5px 0" : "0")};
+
     vertical-align: middle;
     background-color: ${(props) =>
         props.noBackground ? "inherit" : props.theme.backgroundColor2};
