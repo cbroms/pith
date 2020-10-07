@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import styled from "styled-components";
 
 import { LargeHeading } from "./StandardUI";
+import { DiscussionIcon, DocumentIcon } from "./Symbols";
 import Chat from "./Chat";
 
 const StyledContainer = styled.div`
     display: grid;
-    grid-template-columns: [logo] 40px [logo-end discussion] 1fr [discussion-end document] 1fr [document-end];
+    grid-template-columns: [logo] 40px [logo-end discussion] 1fr [discussion-end document] 1.25fr [document-end];
     grid-template-rows: [header] 40px [header-end content] calc(100vh - 40px) [content-end];
 `;
 
@@ -106,12 +107,14 @@ const DiscussionLayout = (props) => {
                 active={!discussionActive}
                 onClick={(e) => setDiscussionActive(true)}
             >
+                <DiscussionIcon />
                 <StyledTitle active={discussionActive}>Discuss</StyledTitle>
             </StyledHeaderDiscussion>
             <StyledHeaderDocument
                 active={discussionActive}
                 onClick={(e) => setDiscussionActive(false)}
             >
+                <DocumentIcon />
                 <StyledTitle active={!discussionActive}>Document</StyledTitle>
             </StyledHeaderDocument>
             <StyledDocumentContainer>

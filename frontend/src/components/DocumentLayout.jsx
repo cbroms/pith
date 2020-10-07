@@ -3,14 +3,14 @@ import styled from "styled-components";
 
 const StyledContainer = styled.div`
     grid-template-columns: [ancestor] 40px [ancestor-end document] 1fr [document-end timeline] 40px [timeline-end];
-    grid-template-rows: [participants] 40px [participants-end content] 1fr [content-end];
+    grid-template-rows: [participants] 80px [participants-end content] 1fr [content-end];
     display: grid;
     max-height: 100%;
     overflow-y: scroll;
 
     @media (max-width: 768px) {
         grid-template-columns: [ancestor] 40px [ancestor-end document] 1fr [document-end];
-        grid-template-rows: [participants] 40px [participants-end content] 1fr [content-end timeline] 40px [timeline-end];
+        grid-template-rows: [participants] 60px [participants-end content] 1fr [content-end timeline] 40px [timeline-end];
     }
 `;
 
@@ -64,7 +64,7 @@ const DocumentLayout = (props) => {
     return (
         <StyledContainer>
             <StyledTimeline />
-            <StyledParticipantList />
+            <StyledParticipantList>{props.users}</StyledParticipantList>
             <StyledDocument>{props.document}</StyledDocument>
             <StyledAncestorList>{props.ancestors}</StyledAncestorList>
         </StyledContainer>

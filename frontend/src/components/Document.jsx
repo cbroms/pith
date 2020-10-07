@@ -4,6 +4,7 @@ import Unit from "./Unit";
 import AncestorsLayout from "./AncestorsLayout";
 import DocumentLayout from "./DocumentLayout";
 import DocumentSectionLayout from "./DocumentSectionLayout";
+import UsersLayout from "./UsersLayout";
 
 const Document = (props) => {
     const sections = props.view.children.map((child) => {
@@ -36,8 +37,11 @@ const Document = (props) => {
     );
 
     const ancestors = <AncestorsLayout ancestors={props.view.ancestors} />;
+    const users = <UsersLayout users={props.users} />;
 
-    return <DocumentLayout document={doc} ancestors={ancestors} />;
+    return (
+        <DocumentLayout document={doc} ancestors={ancestors} users={users} />
+    );
 };
 
 export default Document;

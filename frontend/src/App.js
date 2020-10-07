@@ -90,11 +90,28 @@ const documentDummy = {
 	],
 };
 
+const usersDummy = [
+	{
+		user_id: "a4tuqpirghiquehg",
+		nickname: "Christian",
+		cursor_position: { unit_id: "p2o438tuioweh", position: -1 },
+	},
+	{
+		user_id: "38tyierhfqp9348",
+		nickname: "Sydney",
+		cursor_position: { unit_id: "p2o438tuioweh", position: -1 },
+	},
+];
+
 function App() {
 	return (
 		<div className="App">
 			<ThemeProvider theme={theme}>
-				<Discussion posts={postsDummy} document={documentDummy} />
+				<Discussion
+					posts={postsDummy}
+					document={documentDummy}
+					users={usersDummy}
+				/>
 			</ThemeProvider>
 
 			{/*<Router>

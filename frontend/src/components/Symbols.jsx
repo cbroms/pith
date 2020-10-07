@@ -134,6 +134,71 @@ const Dot = styled.div`
     }
 `;
 
+const DiscussionIcon = styled.div`
+    box-sizing: border-box;
+    position: relative;
+    margin: 5px 10px;
+    display: inline-block;
+    width: 20px;
+    height: 2px;
+    background-color: ${(props) => props.theme.textColor2};
+
+    ::after,
+    ::before {
+        box-sizing: border-box;
+        position: relative;
+        display: block;
+        width: 20px;
+        height: 2px;
+        background-color: ${(props) => props.theme.textColor2};
+    }
+    ::after,
+    ::before {
+        content: "";
+        position: absolute;
+        top: -6px;
+        width: 10px;
+    }
+    ::after {
+        top: 6px;
+        width: 14px;
+    }
+`;
+
+const DocumentIcon = styled.div`
+    box-sizing: border-box;
+    position: relative;
+    margin: 5px 10px;
+    display: inline-block;
+    width: 14px;
+    right: 0;
+    height: 2px;
+    background-color: ${(props) => props.theme.textColor2};
+
+    ::after,
+    ::before {
+        box-sizing: border-box;
+        position: relative;
+        display: block;
+        width: 20px;
+        height: 2px;
+        right: 0;
+        background-color: ${(props) => props.theme.textColor2};
+    }
+    ::after,
+    ::before {
+        content: "";
+        position: absolute;
+        top: -6px;
+        width: 20px;
+    }
+    ::after {
+        top: 6px;
+        width: 10px;
+        right: 0;
+    }
+`;
+
 export {
     UpArrow,
     DownChevron,
@@ -142,4 +207,6 @@ export {
     RightDoubleChevron,
     VerticalLine,
     Dot,
+    DiscussionIcon,
+    DocumentIcon,
 };

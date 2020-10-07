@@ -5,6 +5,7 @@ const LargeHeading = styled.h2`
     font-size: ${(props) => props.theme.largeFont};
     font-weight: 400;
     margin: 0;
+    display: inline-block;
 `;
 
 const Button = styled.button`
