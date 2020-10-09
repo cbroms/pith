@@ -16,7 +16,11 @@ const StyledHeaderLogo = styled.div`
     grid-column-end: logo-end;
     grid-row-start: header;
     grid-row-end: header-end;
-    background-color: ${(props) => props.theme.backgroundColor2};
+    background-color: ${(props) => props.theme.backgroundColor1};
+
+    @media (max-width: 768px) {
+        background-color: ${(props) => props.theme.backgroundColor2};
+    }
 `;
 
 const StyledHeaderDiscussion = styled.div`

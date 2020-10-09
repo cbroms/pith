@@ -4,7 +4,10 @@ import * as dayjs from "dayjs";
 import * as calendar from "dayjs/plugin/calendar";
 import * as utc from "dayjs/plugin/utc";
 
+import { parseLinks } from "../utils/parseLinks";
+
 import ChatLayout from "./ChatLayout";
+import PostUnitLayout from "./PostUnitLayout";
 import PostLayout from "./PostLayout";
 import Unit from "./Unit";
 
@@ -13,6 +16,7 @@ dayjs.extend(utc);
 
 const Chat = (props) => {
     const postGroups = [];
+
     for (const i in props.posts) {
         const post = props.posts[i];
         if (i > 0) {
@@ -29,11 +33,11 @@ const Chat = (props) => {
             postGroups.push([post]);
         }
     }
-    const posts = postGroups.map((group) => {
-        const units = group.map((post) => {
-            return <Unit pith={post.pith} key={post.id} />;
-        });
 
+    const meta = [];
+
+    // calculate the post times before adding the transclusions
+    for (const group of postGroups) {
         const date = dayjs(group[0].created_at)
             .utc()
             .local();
@@ -45,10 +49,50 @@ const Chat = (props) => {
             sameElse: "MM/D/YY [at] h:mm a",
         });
 
+        meta.push({ date: formattedDate, author: group[0].author });
+    }
+
+    // add the referenced posts to the groups
+    for (const i in postGroups) {
+        const group = postGroups[i];
+        for (const j in group) {
+            const links = parseLinks(group[j].pith).reverse();
+
+            for (const k in links) {
+                const link = links[k];
+                const obj = {
+                    ...props.refPosts[link],
+                    id: `${group[j].id}-${props.refPosts[link].id}`,
+                    transcluded: true,
+                    transcludeNum: links.length - k,
+                };
+                postGroups[i].splice(j, 0, obj);
+            }
+        }
+    }
+
+    const posts = postGroups.map((group, i) => {
+        const units = group.map((post) => {
+            const unit = (
+                <Unit
+                    pith={post.pith}
+                    transcludeNum={post.transcludeNum}
+                    transcluded={post.transcluded}
+                />
+            );
+            return (
+                <PostUnitLayout
+                    transcluded={post.transcluded}
+                    unit={unit}
+                    key={post.id}
+                />
+            );
+        });
+
         return (
             <PostLayout
-                author={group[0].author}
-                time={formattedDate}
+                author={meta[i].author}
+                time={meta[i].date}
                 key={`${group[group.length - 1].id}-group`}
             >
                 {units}

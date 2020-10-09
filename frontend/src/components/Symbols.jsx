@@ -44,13 +44,13 @@ const DownChevron = styled.div`
         display: block;
         box-sizing: border-box;
         position: absolute;
-        width: 10px;
-        height: 10px;
+        width: 8px;
+        height: 8px;
         border-bottom: 2px solid ${(props) => props.theme.textColor2};
         border-right: 2px solid ${(props) => props.theme.textColor2};
         transform: rotate(45deg);
         left: 4px;
-        top: 2px;
+        top: 4px;
     }
 `;
 
@@ -58,7 +58,7 @@ const RightChevron = styled(DownChevron)`
     ::after {
         transform: rotate(-45deg);
         left: 6px;
-        top: 4px;
+        top: 5px;
     }
 `;
 
@@ -93,6 +93,36 @@ const RightDoubleChevron = styled.div`
     }
     ::after {
         right: 11px;
+    }
+`;
+
+const MoveRightChevron = styled.div`
+    box-sizing: border-box;
+    position: relative;
+    display: block;
+    width: 22px;
+    height: 22px;
+    border: 2px solid transparent;
+
+    ::after,
+    ::before {
+        content: "";
+        display: block;
+        box-sizing: border-box;
+        position: absolute;
+        width: 2px;
+        height: 14px;
+        border-right: 2px solid ${(props) => props.theme.textColor3};
+        top: 2px;
+        right: 0;
+    }
+    ::after {
+        width: 8px;
+        height: 8px;
+        border-bottom: 2px solid ${(props) => props.theme.textColor3};
+        transform: rotate(-45deg);
+        right: 6px;
+        top: 5px;
     }
 `;
 
@@ -194,7 +224,7 @@ const DocumentIcon = styled.div`
     }
     ::after {
         top: 6px;
-        width: 10px;
+        width: 8px;
         right: 0;
     }
 `;
@@ -205,6 +235,7 @@ export {
     RightChevron,
     UpChevron,
     RightDoubleChevron,
+    MoveRightChevron,
     VerticalLine,
     Dot,
     DiscussionIcon,

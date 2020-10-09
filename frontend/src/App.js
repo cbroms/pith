@@ -30,23 +30,45 @@ const postsDummy = [
 	{
 		created_at: "2020-10-06T02:28:52.000Z",
 		author: "Christian",
-		pith: "This is some cool text and stuff!",
+		pith:
+			"Project Xanadu was pretty interesting, we should include it in the list too.",
 		id: "2o3iupoweuqo",
 	},
 	{
 		created_at: "2020-10-06T02:36:31.000Z",
-		author: "Christian",
+		author: "Sam",
 		pith:
-			"Here's another interesting post of mine. This time it has some <em>formatting</em>",
+			"We <em>might</em> be able to try out one of the old Xanadu prototypes.",
 		id: "2o32o467o3y364",
 	},
 	{
 		created_at: "2020-10-06T04:41:45.000Z",
 		author: "Jimmy",
-		pith: "Something new",
+		pith:
+			"<cite>2o3iupoweuqo</cite> I went ahead and added Xanadu, and this <cite>2o32o467o3y364</cite> would be awesome. ",
 		id: "2o32o46sdaf7o3y364",
 	},
 ];
+
+const refPostsDummy = {
+	"2o3iupoweuqo": {
+		created_at: "2020-10-06T02:28:52.000Z",
+		author: "Christian",
+		pith:
+			"Project Xanadu was pretty interesting, we should include it in the list too.",
+	},
+	"2o32o467o3y364": {
+		created_at: "2020-10-06T02:36:31.000Z",
+		author: "Sam",
+		pith:
+			"We <em>might</em> be able to try out one of the old Xanadu prototypes.",
+	},
+	"2o32o46sdaf7o3y364": {
+		created_at: "2020-10-06T04:41:45.000Z",
+		author: "Jimmy",
+		pith: "Something new",
+	},
+};
 
 const documentDummy = {
 	pith:
@@ -108,6 +130,7 @@ function App() {
 		<div className="App">
 			<ThemeProvider theme={theme}>
 				<Discussion
+					refPosts={refPostsDummy}
 					posts={postsDummy}
 					document={documentDummy}
 					users={usersDummy}

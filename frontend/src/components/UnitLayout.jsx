@@ -5,9 +5,27 @@ const StyledContainer = styled.div`
     box-sizing: border-box;
     display: ${(props) => (props.inline ? "inline-block" : "block")};
     width: ${(props) => (props.inline ? "auto" : "100%")};
-    margin: 5px ${(props) => (props.inline ? "10px" : "0")};
+    padding: 5px 0;
+    margin: 0 ${(props) => (props.inline ? "10px" : "0")};
     font-size: ${(props) =>
         props.big ? props.theme.extraLargeFont : props.theme.mediumFont};
+
+    padding-left: ${(props) => (props.transcluded ? 10 : 0)}px;
+    border-left: ${(props) =>
+        props.transcluded ? "2px solid " + props.theme.textColor3 : "none"};
+`;
+
+const StyledRefNum = styled.span`
+    vertical-align: top;
+    margin-right: 10px;
+    font-size: ${(props) => props.theme.smallFont};
+    font-family: ${(props) => props.theme.sans};
+    font-style: normal;
+`;
+
+const StyledContent = styled.div`
+    display: inline-block;
+    width: calc(100% - 18px);
 `;
 
 const UnitLayout = (props) => {
@@ -15,8 +33,13 @@ const UnitLayout = (props) => {
         <StyledContainer
             big={props.big}
             inline={props.inline}
-            dangerouslySetInnerHTML={{ __html: props.pith }}
-        />
+            transcluded={props.transcluded}
+        >
+            {props.transcludeNum ? (
+                <StyledRefNum>{props.transcludeNum}</StyledRefNum>
+            ) : null}
+            <StyledContent>{props.content}</StyledContent>
+        </StyledContainer>
     );
 };
 
