@@ -5,6 +5,7 @@ const StyledContainer = styled.div`
     grid-template-columns: [ancestor] 40px [ancestor-end document] 1fr [document-end timeline] 40px [timeline-end];
     grid-template-rows: [participants] 80px [participants-end content] 1fr [content-end];
     display: grid;
+    height: 100%;
     max-height: 100%;
     overflow-y: scroll;
 
@@ -63,7 +64,7 @@ const StyledDocument = styled.div`
 const DocumentLayout = (props) => {
     return (
         <StyledContainer>
-            <StyledTimeline />
+            <StyledTimeline>{props.timeline}</StyledTimeline>
             <StyledParticipantList>{props.users}</StyledParticipantList>
             <StyledDocument>{props.document}</StyledDocument>
             <StyledAncestorList>{props.ancestors}</StyledAncestorList>

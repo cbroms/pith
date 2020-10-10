@@ -9,7 +9,8 @@ const StyledUnitContainer = styled.div`
     width: 100%;
     grid-template-columns: [ unit] 1fr [unit-end move] 40px [move-end];
     grid-template-rows: [content] 1fr [content-end];
-
+    margin-top: ${(props) => (props.topTransclude ? 5 : 0)}px;
+    margin-bottom: ${(props) => (props.bottomTransclude ? 5 : 0)}px;
     background-color: ${(props) =>
         props.transcluded ? props.theme.backgroundColor2 : "inherit"};
     font-style: ${(props) => (props.transcluded ? "italic" : "inherit")};
@@ -33,7 +34,11 @@ const StyledMoveButton = styled.div`
 
 const PostUnitLayout = (props) => {
     return (
-        <StyledUnitContainer transcluded={props.transcluded}>
+        <StyledUnitContainer
+            transcluded={props.transcluded}
+            topTransclude={props.topTransclude}
+            bottomTransclude={props.bottomTransclude}
+        >
             <StyledUnit>{props.unit}</StyledUnit>
             <StyledMoveButton>
                 <Button onClick={() => console.log("open")} noBackground>

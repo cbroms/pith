@@ -8,8 +8,12 @@ import DiscussionLayout from "./DiscussionLayout";
 const Discussion = (props) => {
     return (
         <DiscussionLayout>
-            <Chat refPosts={props.refPosts} posts={props.posts} />
-            <Document view={props.document} users={props.users} />
+            <Chat content={props.content} posts={props.posts} />
+            <Document
+                view={props.document}
+                users={props.users}
+                timeline={props.timeline}
+            />
         </DiscussionLayout>
     );
 };

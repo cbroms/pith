@@ -8,7 +8,6 @@ const StyledContainer = styled.div`
 
 const StyledAuthor = styled.div`
     margin-right: 10px;
-    margin-bottom: 5px;
     display: inline-block;
     font-family: ${(props) => props.theme.sans};
     font-weight: bold;
@@ -18,7 +17,6 @@ const StyledAuthor = styled.div`
 
 const StyledTime = styled.div`
     display: inline-block;
-    margin-bottom: 5px;
     font-family: ${(props) => props.theme.sans};
     font-size: ${(props) => props.theme.smallFont};
     color: ${(props) => props.theme.textColor3};

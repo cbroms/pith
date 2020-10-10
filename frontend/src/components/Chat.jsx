@@ -18,9 +18,9 @@ const Chat = (props) => {
     const postGroups = [];
 
     for (const i in props.posts) {
-        const post = props.posts[i];
+        const post = { ...props.content[props.posts[i]], id: props.posts[i] };
         if (i > 0) {
-            const prevPost = props.posts[i - 1];
+            const prevPost = props.content[props.posts[i - 1]];
             // TODO: check if some duration of time has passed between posts
             if (prevPost.author === post.author) {
                 const group = postGroups.pop();
@@ -60,11 +60,13 @@ const Chat = (props) => {
 
             for (const k in links) {
                 const link = links[k];
+
                 const obj = {
-                    ...props.refPosts[link],
-                    id: `${group[j].id}-${props.refPosts[link].id}`,
+                    ...props.content[link],
+                    id: `${group[j].id}-${props.content[link].id}`,
                     transcluded: true,
                     transcludeNum: links.length - k,
+                    totalTranscluded: links.length,
                 };
                 postGroups[i].splice(j, 0, obj);
             }
@@ -82,9 +84,15 @@ const Chat = (props) => {
             );
             return (
                 <PostUnitLayout
+                    topTransclude={post?.transcludeNum === 1}
+                    bottomTransclude={
+                        post?.totalTranscluded === post?.transcludeNum
+                    }
                     transcluded={post.transcluded}
                     unit={unit}
-                    key={post.id}
+                    key={`${post.id}-${
+                        post.transcluded ? group[group.length - 1].id : "og"
+                    }`}
                 />
             );
         });

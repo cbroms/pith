@@ -3,6 +3,7 @@ import React from "react";
 import Unit from "./Unit";
 import AncestorsLayout from "./AncestorsLayout";
 import DocumentLayout from "./DocumentLayout";
+import TimelineLayout from "./TimelineLayout";
 import DocumentSectionLayout from "./DocumentSectionLayout";
 import UsersLayout from "./UsersLayout";
 
@@ -36,11 +37,17 @@ const Document = (props) => {
         </DocumentSectionLayout>
     );
 
+    const timeline = <TimelineLayout pages={props.timeline} />;
     const ancestors = <AncestorsLayout ancestors={props.view.ancestors} />;
     const users = <UsersLayout users={props.users} />;
 
     return (
-        <DocumentLayout document={doc} ancestors={ancestors} users={users} />
+        <DocumentLayout
+            document={doc}
+            ancestors={ancestors}
+            users={users}
+            timeline={timeline}
+        />
     );
 };
 

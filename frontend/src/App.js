@@ -26,31 +26,9 @@ const theme = {
 	serif: "'Source Serif Pro', serif",
 };
 
-const postsDummy = [
-	{
-		created_at: "2020-10-06T02:28:52.000Z",
-		author: "Christian",
-		pith:
-			"Project Xanadu was pretty interesting, we should include it in the list too.",
-		id: "2o3iupoweuqo",
-	},
-	{
-		created_at: "2020-10-06T02:36:31.000Z",
-		author: "Sam",
-		pith:
-			"We <em>might</em> be able to try out one of the old Xanadu prototypes.",
-		id: "2o32o467o3y364",
-	},
-	{
-		created_at: "2020-10-06T04:41:45.000Z",
-		author: "Jimmy",
-		pith:
-			"<cite>2o3iupoweuqo</cite> I went ahead and added Xanadu, and this <cite>2o32o467o3y364</cite> would be awesome. ",
-		id: "2o32o46sdaf7o3y364",
-	},
-];
+const postsDummy = ["2o3iupoweuqo", "2o32o467o3y364", "2o32o46sdaf7o3y364"];
 
-const refPostsDummy = {
+const postUnits = {
 	"2o3iupoweuqo": {
 		created_at: "2020-10-06T02:28:52.000Z",
 		author: "Christian",
@@ -66,7 +44,8 @@ const refPostsDummy = {
 	"2o32o46sdaf7o3y364": {
 		created_at: "2020-10-06T04:41:45.000Z",
 		author: "Jimmy",
-		pith: "Something new",
+		pith:
+			"<cite>2o3iupoweuqo</cite> I went ahead and added Xanadu, and this <cite>2o32o467o3y364</cite> would be awesome. ",
 	},
 };
 
@@ -125,12 +104,41 @@ const usersDummy = [
 	},
 ];
 
+const timelineDummy = [
+	{
+		unit_id: "2o32o467o3y364",
+		start_time: "2020-10-06T02:28:52.000Z",
+		end_time: "2020-10-08T02:28:52.000Z",
+	}, // 2 days
+	{
+		unit_id: "3849t7093ygwe",
+		start_time: "2020-10-06T02:27:52.000Z",
+		end_time: "2020-10-06T02:29:52.000Z",
+	}, // 2 min
+	{
+		unit_id: "2o32o467o3y364",
+		start_time: "2020-10-08T02:28:45.000Z",
+		end_time: "2020-10-08T02:29:00.000Z",
+	}, // 45 sec
+	{
+		unit_id: "2o32o467o3y364",
+		start_time: "2020-10-08T02:29:00.000Z",
+		end_time: "2020-10-08T02:29:15.000Z",
+	}, // 15 sec
+	{
+		unit_id: "2o32o467o3y364",
+		start_time: "2020-10-08T02:29:00.000Z",
+		end_time: "2020-10-08T02:29:01.000Z",
+	}, // 15 sec
+];
+
 function App() {
 	return (
 		<div className="App">
 			<ThemeProvider theme={theme}>
 				<Discussion
-					refPosts={refPostsDummy}
+					timeline={timelineDummy}
+					content={postUnits}
 					posts={postsDummy}
 					document={documentDummy}
 					users={usersDummy}

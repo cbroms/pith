@@ -13,6 +13,8 @@ const StyledContainer = styled.div`
     padding-left: ${(props) => (props.transcluded ? 10 : 0)}px;
     border-left: ${(props) =>
         props.transcluded ? "2px solid " + props.theme.textColor3 : "none"};
+    color: ${(props) =>
+        props.transcluded ? props.theme.textColor2 : "inherit"};
 `;
 
 const StyledRefNum = styled.span`
