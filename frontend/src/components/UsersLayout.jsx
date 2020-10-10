@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 const StyledContainer = styled.div`
     box-sizing: border-box;
-    margin: 25px 0;
+    margin: 10px 0;
 `;
 
 const StyledUser = styled.div`

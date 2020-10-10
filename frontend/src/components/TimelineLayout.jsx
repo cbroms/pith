@@ -8,8 +8,11 @@ dayjs.extend(duration);
 dayjs.extend(utc);
 
 const StyledContainer = styled.div`
-    // width: 100%;
+    box-sizing: border-box;
+    width: 100%;
     height: 100%;
+    max-height: 100%;
+    max-width: 100%;
     overflow: hidden;
 `;
 
@@ -23,6 +26,8 @@ const StyledUnitRepresentation = styled.div`
 
     @media (max-width: 768px) {
         height: 20px;
+        margin: 5px 3px;
+        display: inline-block;
         width: calc(${(props) => props.scaledDuration}% - 10px);
     }
 `;

@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 const StyledContainer = styled.div`
     grid-template-columns: [ancestor] 40px [ancestor-end document] 1fr [document-end timeline] 40px [timeline-end];
-    grid-template-rows: [participants] 80px [participants-end content] 1fr [content-end];
+    grid-template-rows: [participants] 60px [participants-end content] 1fr [content-end];
     display: grid;
     height: 100%;
     max-height: 100%;
@@ -11,7 +11,7 @@ const StyledContainer = styled.div`
 
     @media (max-width: 768px) {
         grid-template-columns: [ancestor] 40px [ancestor-end document] 1fr [document-end];
-        grid-template-rows: [participants] 60px [participants-end content] 1fr [content-end timeline] 40px [timeline-end];
+        grid-template-rows: [participants] 50px [participants-end content] 1fr [content-end timeline] 40px [timeline-end];
     }
 `;
 
@@ -57,7 +57,8 @@ const StyledDocument = styled.div`
     grid-column-end: document-end;
     grid-row-start: content;
     grid-row-end: content-end;
-
+    height: 100%;
+    overflow-y: scroll;
     // background-color: SkyBlue;
 `;
 
