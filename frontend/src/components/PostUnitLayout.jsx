@@ -32,9 +32,8 @@ const StyledMoveButton = styled.div`
     grid-column-end: move-end;
     grid-row-start: content;
     grid-row-end: content-end;
-    padding: 0 10px;
+    width: 22px;
     justify-self: end;
-
     visibility: hidden;
 `;
 

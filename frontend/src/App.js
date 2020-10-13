@@ -1,31 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import "./App.css";
 
-// import LinkIcon from "./components/LinkIcon";
 import Discussion from "./components/Discussion";
-// import Discussion from "./components/Discussion";
 
-const theme = {
-	textColor1: "white",
-	textColor2: "#afafaf",
-	textColor3: "#636363",
-	hoveredBackgroundColor: "#111111",
-	backgroundColor0: "#111111",
-	backgroundColor1: "#222222",
-	backgroundColor2: "#383838",
-	backgroundColor3: "#444444",
-	smallBorder: "1px solid #afafaf",
-	smallBorderActive: "1px solid white",
-	largeBorder: "2px solid white",
-	smallFont: "0.8rem",
-	mediumFont: "1rem",
-	largeFont: "1.25rem",
-	extraLargeFont: "1.4rem",
-	sans: "'Source Sans Pro', sans-serif",
-	serif: "'Source Serif Pro', serif",
-};
+import dark from "./themes/dark";
+import light from "./themes/dark";
 
 const postsDummy = ["2o3iupoweuqo", "2o32o467o3y364", "2o32o46sdaf7o3y364"];
 
@@ -147,6 +128,20 @@ const timelineDummy = [
 ];
 
 function App() {
+	const storedDarkMode = localStorage.getItem("darkModeActive");
+	const [darkModeActive, setDarkModeActive] = useState(storedDarkMode);
+
+	let theme;
+
+	if (darkModeActive !== null) {
+		theme = darkModeActive ? dark : light;
+	} else {
+		if (window.matchMedia("(prefers-color-scheme: light)").matches) {
+			theme = light;
+		} else theme = dark; // default to dark mode
+	}
+
+	console.log(theme);
 	return (
 		<div className="App">
 			<ThemeProvider theme={theme}>

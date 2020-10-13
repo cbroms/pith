@@ -31,8 +31,8 @@ const StyledUnitRepresentation = styled.div`
     box-sizing: border-box;
     width: 20px;
     height: calc(${(props) => props.scaledDuration}% - 10px);
-    background-color: ${(props) => props.theme.backgroundColor2};
-    margin: 5px;
+
+    margin: 5px auto;
     border: 1px solid ${(props) => props.theme.textColor3};
     cursor: pointer;
 
@@ -44,7 +44,8 @@ const StyledUnitRepresentation = styled.div`
     }
 
     :hover {
-        border: 1px solid ${(props) => props.theme.textColor1};
+        //border: 1px solid ${(props) => props.theme.textColor1};
+        background-color: ${(props) => props.theme.backgroundColor2};
     }
 `;
 

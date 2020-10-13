@@ -171,6 +171,7 @@ const DiscussionIcon = styled.div`
     display: inline-block;
     width: 20px;
     height: 2px;
+    transform: scale(0.75);
     background-color: ${(props) => props.theme.textColor2};
 
     ::after,
@@ -200,6 +201,7 @@ const DocumentIcon = styled.div`
     position: relative;
     margin: 5px 10px;
     display: inline-block;
+    transform: scale(0.75);
     width: 14px;
     right: 0;
     height: 2px;
@@ -229,6 +231,63 @@ const DocumentIcon = styled.div`
     }
 `;
 
+const MenuIcon = styled.div`
+    box-sizing: border-box;
+    position: relative;
+    margin: 5px 10px;
+    display: inline-block;
+    width: 20px;
+    height: 2px;
+    background-color: ${(props) => props.theme.textColor2};
+
+    ::after,
+    ::before {
+        box-sizing: border-box;
+        position: relative;
+        display: block;
+        width: 20px;
+        height: 2px;
+        background-color: ${(props) => props.theme.textColor2};
+    }
+    ::after,
+    ::before {
+        content: "";
+        position: absolute;
+        top: -6px;
+    }
+    ::after {
+        top: 6px;
+    }
+`;
+
+const CloseIcon = styled.div`
+    box-sizing: border-box;
+    margin: 0 10px;
+    position: relative;
+    display: block;
+    width: 22px;
+    height: 22px;
+    border: 2px solid transparent;
+
+    ::after,
+    ::before {
+        content: "";
+        display: block;
+        box-sizing: border-box;
+        position: absolute;
+        width: 16px;
+        height: 2px;
+        background: currentColor;
+        transform: rotate(45deg);
+        border-radius: 5px;
+        top: 8px;
+        left: 1px;
+    }
+    ::after {
+        transform: rotate(-45deg);
+    }
+`;
+
 export {
     UpArrow,
     DownChevron,
@@ -240,4 +299,6 @@ export {
     Dot,
     DiscussionIcon,
     DocumentIcon,
+    MenuIcon,
+    CloseIcon,
 };
