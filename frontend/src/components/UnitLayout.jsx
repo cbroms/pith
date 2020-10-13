@@ -11,10 +11,18 @@ const StyledContainer = styled.div`
         props.big ? props.theme.extraLargeFont : props.theme.mediumFont};
 
     padding-left: ${(props) => (props.transcluded ? 10 : 0)}px;
+
     border-left: ${(props) =>
         props.transcluded ? "2px solid " + props.theme.textColor3 : "none"};
     color: ${(props) =>
-        props.transcluded ? props.theme.textColor2 : "inherit"};
+        props.transcluded
+            ? !props.transcludeHoverActive
+                ? props.theme.textColor2
+                : "inherit"
+            : "inherit"};
+
+    background-color: ${(props) =>
+        props.transcludeHoverActive ? props.theme.backgroundColor2 : "inherit"};
 `;
 
 const StyledRefNum = styled.span`
@@ -32,11 +40,7 @@ const StyledContent = styled.div`
 
 const UnitLayout = (props) => {
     return (
-        <StyledContainer
-            big={props.big}
-            inline={props.inline}
-            transcluded={props.transcluded}
-        >
+        <StyledContainer {...props}>
             {props.transcludeNum ? (
                 <StyledRefNum>{props.transcludeNum}</StyledRefNum>
             ) : null}

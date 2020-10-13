@@ -22,6 +22,7 @@ const StyledToggle = styled.div`
     grid-column-end: toggle-end;
     grid-row-start: content;
     grid-row-end: content-end;
+    color: ${(props) => props.theme.textColor2};
 `;
 
 const StyledUnit = styled.div`

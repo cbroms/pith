@@ -3,7 +3,12 @@ import styled from "styled-components";
 import * as dayjs from "dayjs";
 import * as duration from "dayjs/plugin/duration";
 import * as utc from "dayjs/plugin/utc";
+import * as relativeTime from "dayjs/plugin/relativeTime";
 
+import TooltipLayout from "./TooltipLayout";
+import Unit from "./Unit";
+
+dayjs.extend(relativeTime);
 dayjs.extend(duration);
 dayjs.extend(utc);
 
@@ -16,6 +21,12 @@ const StyledContainer = styled.div`
     overflow: hidden;
 `;
 
+const StyledTooltipTime = styled.div`
+    font-family: ${(props) => props.theme.sans};
+    color: ${(props) => props.theme.textColor2};
+    font-size: ${(props) => props.theme.smallFont};
+`;
+
 const StyledUnitRepresentation = styled.div`
     box-sizing: border-box;
     width: 20px;
@@ -23,6 +34,7 @@ const StyledUnitRepresentation = styled.div`
     background-color: ${(props) => props.theme.backgroundColor2};
     margin: 5px;
     border: 1px solid ${(props) => props.theme.textColor3};
+    cursor: pointer;
 
     @media (max-width: 768px) {
         height: 20px;
@@ -30,29 +42,57 @@ const StyledUnitRepresentation = styled.div`
         display: inline-block;
         width: calc(${(props) => props.scaledDuration}% - 10px);
     }
+
+    :hover {
+        border: 1px solid ${(props) => props.theme.textColor1};
+    }
 `;
 
 const TimelineLayout = (props) => {
     //  const [discussionActive, setDiscussionActive] = useState(true);
 
-    const times = props.pages.map((page) => {
+    const calculatedPages = props.pages.map((page) => {
         const startTime = dayjs(page.start_time).utc();
         const endTime = dayjs(page.end_time).utc();
 
-        let timeDiff = dayjs.duration(endTime.diff(startTime)).asSeconds();
-        timeDiff = timeDiff > 1800 ? 1800 : timeDiff;
-        timeDiff = timeDiff < 60 ? 60 : timeDiff;
-        return timeDiff; //Math.log(timeDiff);
+        // calcuate the total amount of time the page was active
+        const timeSpent = dayjs.duration(endTime.diff(startTime));
+        let timeActive = timeSpent.asSeconds();
+        timeActive = timeActive > 1800 ? 1800 : timeActive;
+        timeActive = timeActive < 60 ? 60 : timeActive;
+
+        // calcuate the time from now the page was active
+        const timeFromNow = dayjs
+            .duration(dayjs().diff(endTime.local()))
+            .humanize();
+
+        return {
+            span: timeActive,
+            diff: `${timeFromNow} ago for ${timeSpent.humanize()}`,
+            pith: page.pith,
+        };
     });
 
-    const total = times.reduce((sum, time) => sum + time);
+    const total = Object.values(calculatedPages).reduce(
+        (sum, { span }) => sum + span,
+        0
+    );
 
-    const unitSections = times.map((time, i) => {
+    const unitSections = calculatedPages.map((page, i) => {
         return (
-            <StyledUnitRepresentation
-                scaledDuration={(time / total) * 100}
-                key={`${props.pages[i].unit_id}-${time}`}
-            />
+            <span key={`${props.pages[i].unit_id}-${page.span}-${i}`}>
+                <StyledUnitRepresentation
+                    data-tip
+                    data-for={`${props.pages[i].unit_id}-${page.span}`}
+                    scaledDuration={(page.span / total) * 100}
+                />
+                <TooltipLayout id={`${props.pages[i].unit_id}-${page.span}`}>
+                    <span>
+                        <StyledTooltipTime>{page.diff}</StyledTooltipTime>
+                        <Unit pith={page.pith} charLimited />
+                    </span>
+                </TooltipLayout>
+            </span>
         );
     });
 

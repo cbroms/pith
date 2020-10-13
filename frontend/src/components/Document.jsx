@@ -10,7 +10,9 @@ import UsersLayout from "./UsersLayout";
 const Document = (props) => {
     const sections = props.view.children.map((child) => {
         const grandchildren = child.children.map((grandchild) => {
-            const pithUnit = <Unit pith={grandchild.pith} inline />;
+            const pithUnit = (
+                <Unit pith={grandchild.pith} id={grandchild.unit_id} inline />
+            );
             return (
                 <DocumentSectionLayout
                     level={3}
@@ -19,7 +21,7 @@ const Document = (props) => {
                 />
             );
         });
-        const pithUnit = <Unit pith={child.pith} inline />;
+        const pithUnit = <Unit pith={child.pith} id={child.unit_id} inline />;
         return (
             <DocumentSectionLayout
                 key={child.unit_id}
@@ -30,7 +32,14 @@ const Document = (props) => {
             </DocumentSectionLayout>
         );
     });
-    const pithUnit = <Unit big={true} pith={props.view.pith} inline />;
+    const pithUnit = (
+        <Unit
+            big={true}
+            pith={props.view.pith}
+            id={props.view.unit_id}
+            inline
+        />
+    );
     const doc = (
         <DocumentSectionLayout level={1} pith={pithUnit}>
             {sections}

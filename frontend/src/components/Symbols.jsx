@@ -46,8 +46,8 @@ const DownChevron = styled.div`
         position: absolute;
         width: 8px;
         height: 8px;
-        border-bottom: 2px solid ${(props) => props.theme.textColor2};
-        border-right: 2px solid ${(props) => props.theme.textColor2};
+        border-bottom: 2px solid;
+        border-right: 2px solid;
         transform: rotate(45deg);
         left: 4px;
         top: 4px;
@@ -140,7 +140,7 @@ const VerticalLine = styled.div`
         position: absolute;
         width: 10px;
         height: 40px;
-        border-right: 1px solid ${(props) => props.theme.textColor2};
+        border-right: 1px solid;
     }
 `;
 

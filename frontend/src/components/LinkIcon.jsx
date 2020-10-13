@@ -40,14 +40,8 @@ const StyledIcon = styled.div`
     }
 `;
 
-export const LinkIcon = ({ backward, forward, referenceNum }) => {
-    return (
-        <StyledIcon
-            backward={backward}
-            forward={forward}
-            referenceNum={referenceNum}
-        />
-    );
+export const LinkIcon = (props) => {
+    return <StyledIcon {...props} />;
 };
 
 export default LinkIcon;

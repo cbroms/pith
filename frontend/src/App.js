@@ -11,7 +11,8 @@ const theme = {
 	textColor1: "white",
 	textColor2: "#afafaf",
 	textColor3: "#636363",
-	hoveredBackgroundColor: "grey",
+	hoveredBackgroundColor: "#111111",
+	backgroundColor0: "#111111",
 	backgroundColor1: "#222222",
 	backgroundColor2: "#383838",
 	backgroundColor3: "#444444",
@@ -53,10 +54,16 @@ const documentDummy = {
 	pith:
 		"Project Xanadu was the first hypertext project, and aimed to link the world's information digitally",
 	ancestors: [
-		"28utwejf9pq348ut",
-		"893yt9wyg9y3q43",
-		"q3984tuqpwrugpu",
-		"q3p4tu3gihfefw",
+		{
+			unit_id: "28utwejf9pq348ut",
+			pith: "Some existing hypertext projects to use as inspiration",
+		},
+		{
+			unit_id: "8934tyhgpwehgqqh",
+			pith: "Inspiration for the new project",
+		},
+		{ unit_id: "a2rqghaehrhgoaer", pith: "10/11/20" },
+		{ unit_id: "3ytq384hgwaegehg", pith: "Meetings" },
 	],
 	unit_id: "28utwejf9pq348ut",
 	children: [
@@ -79,7 +86,7 @@ const documentDummy = {
 		{
 			unit_id: "3849t7093ygwe",
 			pith:
-				"Xanadu is often compared to Vannevar Bush's <em>Memex</em>, a fictional machine allowing a user to index and traverse a repository of information.",
+				"Xanadu is often compared to Vannevar Bush's <em>Memex</em> <cite>2o32o467o3y364</cite>, a fictional machine allowing a user to index and traverse a repository of information.",
 			children: [],
 		},
 		{
@@ -105,28 +112,35 @@ const usersDummy = [
 ];
 
 const timelineDummy = [
-	{
-		unit_id: "2o32o467o3y364",
-		start_time: "2020-10-06T02:28:52.000Z",
-		end_time: "2020-10-08T02:28:52.000Z",
-	}, // 2 days
+	// {
+	// 	unit_id: "2o32o467o3y364",
+	// 	start_time: "2020-10-06T02:28:52.000Z",
+	// 	end_time: "2020-10-08T02:28:52.000Z",
+	// }, // 2 days
 	{
 		unit_id: "3849t7093ygwe",
+		pith:
+			"Xanadu is often compared to Vannevar Bush's <em>Memex</em> <cite>2o32o467o3y364</cite>, a fictional machine allowing a user to index and traverse a repository of information.",
 		start_time: "2020-10-06T02:27:52.000Z",
 		end_time: "2020-10-06T02:29:52.000Z",
 	}, // 2 min
 	{
-		unit_id: "2o32o467o3y364",
+		unit_id: "3948yu9qhrgweg",
+		pith:
+			"A number of working prototypes of the Xanadu technology exist today.",
 		start_time: "2020-10-08T02:28:45.000Z",
 		end_time: "2020-10-08T02:29:00.000Z",
 	}, // 45 sec
 	{
-		unit_id: "2o32o467o3y364",
+		unit_id: "34utqpieorghpq34",
+		pith:
+			"Each document is composed of a series of transclusions to other documents.",
 		start_time: "2020-10-08T02:29:00.000Z",
 		end_time: "2020-10-08T02:29:15.000Z",
 	}, // 15 sec
 	{
-		unit_id: "2o32o467o3y364",
+		unit_id: "1348qefioqph43uqgh",
+		pith: "The links between documents are made visible.",
 		start_time: "2020-10-08T02:29:00.000Z",
 		end_time: "2020-10-08T02:29:01.000Z",
 	}, // 15 sec

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import * as dayjs from "dayjs";
 import * as calendar from "dayjs/plugin/calendar";
@@ -15,6 +15,11 @@ dayjs.extend(calendar);
 dayjs.extend(utc);
 
 const Chat = (props) => {
+    const [currentlyActive, setCurrentlyActive] = useState({
+        id: null,
+        num: null,
+    });
+
     const postGroups = [];
 
     for (const i in props.posts) {
@@ -77,9 +82,23 @@ const Chat = (props) => {
         const units = group.map((post) => {
             const unit = (
                 <Unit
+                    chat
+                    id={post.id}
                     pith={post.pith}
                     transcludeNum={post.transcludeNum}
                     transcluded={post.transcluded}
+                    transcludeHoverActive={
+                        post.transcluded
+                            ? post.id.includes(currentlyActive.id) &&
+                              currentlyActive.num === post.transcludeNum
+                            : false
+                    }
+                    linkHovered={(num) => {
+                        setCurrentlyActive({ id: post.id, num: num });
+                    }}
+                    linkUnhovered={() => {
+                        setCurrentlyActive({ id: null, num: null });
+                    }}
                 />
             );
             return (

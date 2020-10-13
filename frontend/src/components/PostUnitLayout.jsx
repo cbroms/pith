@@ -11,9 +11,13 @@ const StyledUnitContainer = styled.div`
     grid-template-rows: [content] 1fr [content-end];
     margin-top: ${(props) => (props.topTransclude ? 5 : 0)}px;
     margin-bottom: ${(props) => (props.bottomTransclude ? 5 : 0)}px;
-    background-color: ${(props) =>
-        props.transcluded ? props.theme.backgroundColor2 : "inherit"};
     font-style: ${(props) => (props.transcluded ? "italic" : "inherit")};
+
+    :hover {
+        .move {
+            visibility: visible;
+        }
+    }
 `;
 
 const StyledUnit = styled.div`
@@ -30,6 +34,8 @@ const StyledMoveButton = styled.div`
     grid-row-end: content-end;
     padding: 0 10px;
     justify-self: end;
+
+    visibility: hidden;
 `;
 
 const PostUnitLayout = (props) => {
@@ -40,7 +46,7 @@ const PostUnitLayout = (props) => {
             bottomTransclude={props.bottomTransclude}
         >
             <StyledUnit>{props.unit}</StyledUnit>
-            <StyledMoveButton>
+            <StyledMoveButton className="move">
                 <Button onClick={() => console.log("open")} noBackground>
                     <MoveRightChevron />
                 </Button>
