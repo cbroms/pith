@@ -1,233 +1,255 @@
 import React from "react";
-import { connect } from "react-redux";
 
-import NameEditor from "./NameEditor";
 import Chat from "./Chat";
-import Summary from "./Summary";
-// import Library from "./Library";
+import Document from "./Document";
 
-import { getValue } from "../api/local";
+import DiscussionLayout from "./DiscussionLayout";
 
-import { registerUser, clearUser } from "../actions/userActions";
-import {
-	joinDiscussion,
-	loadDiscussion,
-	clearDiscussion,
-	subscribeToDiscussion,
-	addPostToDiscussion,
-	addTagToBlock,
-	removeTagFromBlock,
-	saveBlock,
-	unsaveBlock,
-	blockSearch,
-	tagSearch,
-} from "../actions/discussionActions";
+const Discussion = (props) => {
+    return (
+        <DiscussionLayout>
+            <Chat content={props.content} posts={props.posts} />
+            <Document
+                view={props.document}
+                users={props.users}
+                timeline={props.timeline}
+            />
+        </DiscussionLayout>
+    );
+};
 
-import "./style/Discussion.css";
+export default Discussion;
 
-function mapStateToProps(state, ownProps) {
-	return {
-		paramDiscussionID: ownProps.match.params.discussionID,
-		userID: state.user.id,
-		discussionID: state.discussion.id,
-		loading: state.discussion.loadingDiscussion,
-		loaded: state.discussion.loadedDiscussion,
-		joined: state.discussion.joinedDiscussion,
-		disussionTitle: state.discussion.title,
-		discussionTheme: state.discussion.theme,
-		subscribed: state.discussion.subscribed,
-		badPseudonym: state.errors.discussion.badPseudonym,
-		numLoaded: state.discussion.numLoaded,
-		totalToLoad: state.discussion.totalToLoad,
-		blocks: state.discussion.blocks,
-		savedBlocks: state.discussion.savedBlocks,
-		posts: state.discussion.posts,
-		searchResults: state.discussion.searchResults,
-	};
-}
+// import React from "react";
+// import { connect } from "react-redux";
 
-class Discussion extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			autojoin: true,
-		};
+// import NameEditor from "./NameEditor";
+// import Chat from "./Chat";
+// import Summary from "./Summary";
+// // import Library from "./Library";
 
-		this.joinDiscussionWithName = this.joinDiscussionWithName.bind(this);
-		this.addPost = this.addPost.bind(this);
+// import { getValue } from "../api/local";
 
-		this.addTag = this.addTag.bind(this);
-		this.removeTag = this.removeTag.bind(this);
-		this.saveBlock = this.saveBlock.bind(this);
-		this.unsaveBlock = this.unsaveBlock.bind(this);
+// import { registerUser, clearUser } from "../actions/userActions";
+// import {
+//     joinDiscussion,
+//     loadDiscussion,
+//     clearDiscussion,
+//     subscribeToDiscussion,
+//     addPostToDiscussion,
+//     addTagToBlock,
+//     removeTagFromBlock,
+//     saveBlock,
+//     unsaveBlock,
+//     blockSearch,
+//     tagSearch,
+// } from "../actions/discussionActions";
 
-		this.blockSearch = this.blockSearch.bind(this);
-		this.tagSearch = this.tagSearch.bind(this);
-	}
+// import "./style/Discussion.css";
 
-	componentDidMount() {
-		const { dispatch } = this.props;
-		dispatch(registerUser());
-	}
+// function mapStateToProps(state, ownProps) {
+//     return {
+//         paramDiscussionID: ownProps.match.params.discussionID,
+//         userID: state.user.id,
+//         discussionID: state.discussion.id,
+//         loading: state.discussion.loadingDiscussion,
+//         loaded: state.discussion.loadedDiscussion,
+//         joined: state.discussion.joinedDiscussion,
+//         disussionTitle: state.discussion.title,
+//         discussionTheme: state.discussion.theme,
+//         subscribed: state.discussion.subscribed,
+//         badPseudonym: state.errors.discussion.badPseudonym,
+//         numLoaded: state.discussion.numLoaded,
+//         totalToLoad: state.discussion.totalToLoad,
+//         blocks: state.discussion.blocks,
+//         savedBlocks: state.discussion.savedBlocks,
+//         posts: state.discussion.posts,
+//         searchResults: state.discussion.searchResults,
+//     };
+// }
 
-	componentDidUpdate() {
-		const { dispatch } = this.props;
-		if (this.props.userID && !this.props.joined) {
-			// check if the discussion has been marked as joined in localstorage
-			let discussions = getValue("joinedDiscussions");
-			if (
-				discussions !== null &&
-				discussions.includes(this.props.paramDiscussionID)
-			) {
-				// if it's already been joined, join it again without a name so
-				// we don't have to re-enter a pseudonym
-				this.joinDiscussionWithName(null);
-			} else if (this.state.autojoin) {
-				this.setState({ autojoin: false });
-			}
-		} else if (
-			this.props.joined &&
-			!this.props.loading &&
-			!this.props.loaded
-		) {
-			// when we've joined, start loading the discussion
-			dispatch(
-				loadDiscussion(this.props.discussionID, this.props.userID)
-			);
-		} else if (
-			this.props.joined &&
-			this.props.loaded &&
-			!this.props.subscribed
-		) {
-			// once everything is loaded, we can subscribe to new events
-			dispatch(subscribeToDiscussion(this.props.discussionID));
-		}
-	}
+// class Discussion extends React.Component {
+//     constructor(props) {
+//         super(props);
+//         this.state = {
+//             autojoin: true,
+//         };
 
-	componentWillUnmount() {
-		const { dispatch } = this.props;
-		dispatch(clearUser());
-		dispatch(clearDiscussion());
-	}
+//         this.joinDiscussionWithName = this.joinDiscussionWithName.bind(this);
+//         this.addPost = this.addPost.bind(this);
 
-	joinDiscussionWithName(pseudonym) {
-		const { dispatch } = this.props;
-		dispatch(
-			joinDiscussion(
-				this.props.paramDiscussionID,
-				this.props.userID,
-				pseudonym
-			)
-		);
-	}
+//         this.addTag = this.addTag.bind(this);
+//         this.removeTag = this.removeTag.bind(this);
+//         this.saveBlock = this.saveBlock.bind(this);
+//         this.unsaveBlock = this.unsaveBlock.bind(this);
 
-	addPost(blocks) {
-		const { dispatch } = this.props;
-		dispatch(
-			addPostToDiscussion(
-				this.props.discussionID,
-				this.props.userID,
-				blocks
-			)
-		);
-	}
+//         this.blockSearch = this.blockSearch.bind(this);
+//         this.tagSearch = this.tagSearch.bind(this);
+//     }
 
-	addTag(blockID, tag) {
-		const { dispatch } = this.props;
-		dispatch(
-			addTagToBlock(
-				this.props.discussionID,
-				this.props.userID,
-				blockID,
-				tag
-			)
-		);
-	}
+//     componentDidMount() {
+//         const { dispatch } = this.props;
+//         dispatch(registerUser());
+//     }
 
-	removeTag(blockID, tag) {
-		const { dispatch } = this.props;
-		dispatch(
-			removeTagFromBlock(
-				this.props.discussionID,
-				this.props.userID,
-				blockID,
-				tag
-			)
-		);
-	}
+//     componentDidUpdate() {
+//         const { dispatch } = this.props;
+//         if (this.props.userID && !this.props.joined) {
+//             // check if the discussion has been marked as joined in localstorage
+//             let discussions = getValue("joinedDiscussions");
+//             if (
+//                 discussions !== null &&
+//                 discussions.includes(this.props.paramDiscussionID)
+//             ) {
+//                 // if it's already been joined, join it again without a name so
+//                 // we don't have to re-enter a pseudonym
+//                 this.joinDiscussionWithName(null);
+//             } else if (this.state.autojoin) {
+//                 this.setState({ autojoin: false });
+//             }
+//         } else if (
+//             this.props.joined &&
+//             !this.props.loading &&
+//             !this.props.loaded
+//         ) {
+//             // when we've joined, start loading the discussion
+//             dispatch(
+//                 loadDiscussion(this.props.discussionID, this.props.userID)
+//             );
+//         } else if (
+//             this.props.joined &&
+//             this.props.loaded &&
+//             !this.props.subscribed
+//         ) {
+//             // once everything is loaded, we can subscribe to new events
+//             dispatch(subscribeToDiscussion(this.props.discussionID));
+//         }
+//     }
 
-	saveBlock(blockID) {
-		const { dispatch } = this.props;
-		dispatch(
-			saveBlock(this.props.discussionID, this.props.userID, blockID)
-		);
-	}
+//     componentWillUnmount() {
+//         const { dispatch } = this.props;
+//         dispatch(clearUser());
+//         dispatch(clearDiscussion());
+//     }
 
-	unsaveBlock(blockID) {
-		const { dispatch } = this.props;
-		dispatch(
-			unsaveBlock(this.props.discussionID, this.props.userID, blockID)
-		);
-	}
+//     joinDiscussionWithName(pseudonym) {
+//         const { dispatch } = this.props;
+//         dispatch(
+//             joinDiscussion(
+//                 this.props.paramDiscussionID,
+//                 this.props.userID,
+//                 pseudonym
+//             )
+//         );
+//     }
 
-	blockSearch(query) {
-		const { dispatch } = this.props;
-		dispatch(blockSearch(this.props.discussionID, query));
-	}
+//     addPost(blocks) {
+//         const { dispatch } = this.props;
+//         dispatch(
+//             addPostToDiscussion(
+//                 this.props.discussionID,
+//                 this.props.userID,
+//                 blocks
+//             )
+//         );
+//     }
 
-	tagSearch(query) {
-		const { dispatch } = this.props;
-		dispatch(tagSearch(this.props.discussionID, query));
-	}
+//     addTag(blockID, tag) {
+//         const { dispatch } = this.props;
+//         dispatch(
+//             addTagToBlock(
+//                 this.props.discussionID,
+//                 this.props.userID,
+//                 blockID,
+//                 tag
+//             )
+//         );
+//     }
 
-	render() {
-		if (this.props.userID && !this.props.joined && !this.state.autojoin) {
-			return (
-				<NameEditor
-					badPseudonym={this.props.badPseudonym}
-					onSubmit={this.joinDiscussionWithName}
-				/>
-			);
-		} else if (this.props.joined && this.props.loading) {
-			return (
-				<div className="discussion-loading">
-					Loading discussion
-					{this.props.totalToLoad > 0
-						? ` (${this.props.numLoaded}/${this.props.totalToLoad})`
-						: "..."}
-				</div>
-			);
-		} else if (this.props.loaded) {
-			return (
-				<div className="discussion-wrapper">
-					<Summary />
-					<Chat
-						blocks={this.props.blocks}
-						savedBlocks={this.props.savedBlocks}
-						posts={[...this.props.posts]}
-						addPost={this.addPost}
-						addTag={this.addTag}
-						removeTag={this.removeTag}
-						saveBlock={this.saveBlock}
-						unsaveBlock={this.unsaveBlock}
-						userID={this.props.userID}
-						tagSearch={this.tagSearch}
-						blockSearch={this.blockSearch}
-						searchResults={this.props.searchResults}
-					/>
-				</div>
-			);
-		} else {
-			return null;
-		}
-	}
-}
+//     removeTag(blockID, tag) {
+//         const { dispatch } = this.props;
+//         dispatch(
+//             removeTagFromBlock(
+//                 this.props.discussionID,
+//                 this.props.userID,
+//                 blockID,
+//                 tag
+//             )
+//         );
+//     }
 
-export default connect(mapStateToProps)(Discussion);
+//     saveBlock(blockID) {
+//         const { dispatch } = this.props;
+//         dispatch(
+//             saveBlock(this.props.discussionID, this.props.userID, blockID)
+//         );
+//     }
 
-// <div className="discussion-title-wrapper">
-// 						<h1>{this.props.disussionTitle}</h1>
-// 						<div className="discussion-theme">
-// 							{this.props.discussionTheme}
-// 						</div>
-// 					</div>
+//     unsaveBlock(blockID) {
+//         const { dispatch } = this.props;
+//         dispatch(
+//             unsaveBlock(this.props.discussionID, this.props.userID, blockID)
+//         );
+//     }
+
+//     blockSearch(query) {
+//         const { dispatch } = this.props;
+//         dispatch(blockSearch(this.props.discussionID, query));
+//     }
+
+//     tagSearch(query) {
+//         const { dispatch } = this.props;
+//         dispatch(tagSearch(this.props.discussionID, query));
+//     }
+
+//     render() {
+//         if (this.props.userID && !this.props.joined && !this.state.autojoin) {
+//             return (
+//                 <NameEditor
+//                     badPseudonym={this.props.badPseudonym}
+//                     onSubmit={this.joinDiscussionWithName}
+//                 />
+//             );
+//         } else if (this.props.joined && this.props.loading) {
+//             return (
+//                 <div className="discussion-loading">
+//                     Loading discussion
+//                     {this.props.totalToLoad > 0
+//                         ? ` (${this.props.numLoaded}/${this.props.totalToLoad})`
+//                         : "..."}
+//                 </div>
+//             );
+//         } else if (this.props.loaded) {
+//             return (
+//                 <div className="discussion-wrapper">
+//                     <Summary />
+//                     <Chat
+//                         blocks={this.props.blocks}
+//                         savedBlocks={this.props.savedBlocks}
+//                         posts={[...this.props.posts]}
+//                         addPost={this.addPost}
+//                         addTag={this.addTag}
+//                         removeTag={this.removeTag}
+//                         saveBlock={this.saveBlock}
+//                         unsaveBlock={this.unsaveBlock}
+//                         userID={this.props.userID}
+//                         tagSearch={this.tagSearch}
+//                         blockSearch={this.blockSearch}
+//                         searchResults={this.props.searchResults}
+//                     />
+//                 </div>
+//             );
+//         } else {
+//             return null;
+//         }
+//     }
+// }
+
+// export default connect(mapStateToProps)(Discussion);
+
+// // <div className="discussion-title-wrapper">
+// //                         <h1>{this.props.disussionTitle}</h1>
+// //                         <div className="discussion-theme">
+// //                             {this.props.discussionTheme}
+// //                         </div>
+// //                     </div>

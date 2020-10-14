@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "styled-components";
 
 const LargeHeading = styled.h2`
@@ -6,6 +5,7 @@ const LargeHeading = styled.h2`
     font-size: ${(props) => props.theme.largeFont};
     font-weight: 400;
     margin: 0;
+    display: inline-block;
 `;
 
 const Button = styled.button`
@@ -15,12 +15,16 @@ const Button = styled.button`
     cursor: pointer;
     box-sizing: border-box;
     display: inline-block;
-    padding: 10px;
-    margin: 0;
-    background-color: ${(props) => props.theme.backgroundColor2};
+    padding: ${(props) => (props.noBackground ? "0" : "10px")};
+    margin: ${(props) => (props.noBackground ? "5px 0" : "0")};
+    color: ${(props) => props.theme.textColor2};
+    vertical-align: middle;
+    background-color: ${(props) =>
+        props.noBackground ? "inherit" : props.theme.backgroundColor2};
 
     :hover {
-        background-color: ${(props) => props.theme.backgroundColor3};
+        background-color: ${(props) =>
+            props.noBackground ? "inherit" : props.theme.backgroundColor3};
     }
 `;
 

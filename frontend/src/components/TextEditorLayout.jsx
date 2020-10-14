@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 
 import { Button } from "./StandardUI";
-import { UpArrow } from "./Arrows";
+import { UpArrow } from "./Symbols";
 
 import TextEditor from "./TextEditor";
 
@@ -31,7 +31,7 @@ const StyledEditor = styled(TextEditor)`
     font-family: ${(props) => props.theme.serif};
 
     :empty::after {
-        color: ${(props) => props.theme.textColor3};
+        color: ${(props) => props.theme.textColor2};
         content: "new message";
     }
 

@@ -1,8 +1,0 @@
-.library-wrapper {
-    max-width: var(--column-width);
-    /*height: calc(100vh - var(--column-padding) * 2);*/
-    width: 100%;
-    /*padding: var(--column-padding);*/
-    position: relative;
-    margin-bottom: 50px;
-}
