@@ -1,0 +1,6 @@
+* change load_user cursor/chat_map in documentation and in code
+* how a new unit is added (no cursor, relative and then absolute positioning)
+* search results
+* move_cursor only allows moving on current page
+* get_unit_page, remember to add full cursor and timeline
+* 
