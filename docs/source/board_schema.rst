@@ -11,4 +11,4 @@ Board Responses
 create
 =====================================
 
-.. jsonschema:: ../../schema/board/responses/create.json
+.. jsonschema:: ../../backend/src/schema/board/responses/create.json
