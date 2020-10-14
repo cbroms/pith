@@ -420,6 +420,7 @@ class DiscussionManager:
         return response
 
     @_check_discussion_id
+    # TODO: over all units in chat and document
     def search(self, discussion_id, query):
         discussion = self._get(discussion_id)
         # TODO figure out how to use indexing

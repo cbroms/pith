@@ -129,6 +129,8 @@ class DiscussionNamespace(AsyncNamespace):
     
     async def get_unit_page(self, sid, request):
         """
+        NOTE: This changes state by moving the cursor and updating the timeline.
+
         :event: :ref:`dreq_get_unit_page-label`
         :return: :ref:`dres_get_unit_page-label`
         """

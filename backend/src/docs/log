@@ -1,7 +1,7 @@
 Running Sphinx v3.2.1
 loading pickled environment... done
 building [mo]: targets for 0 po files that are out of date
-building [html]: targets for 1 source files that are out of date
+building [html]: targets for 0 source files that are out of date
 updating environment: 0 added, 1 changed, 0 removed
 reading sources... [100%] discussion_schema
 
@@ -18,6 +18,6 @@ copying static files... ... done
 copying extra files... done
 dumping search index in English (code: en)... done
 dumping object inventory... done
-build succeeded, 1 warning.
+build succeeded.
 
 The HTML pages are in build/html.

@@ -1,17 +1,19 @@
 {
   "type": "object",
   "properties": {
-    "cursors": {"type": {
-      "type": "object",
-      "additionalProperties" : {
+    "cursors": {
+      "type": "array",
+      "items": {
         "type": "object",
         "properties": {
+          "user_id": {"type": "string"},
+          "name": {"type": "string"},
           "unit_id": {"type": "string"},
           "position": {"type": "integer", "minimum": -1}
         },
-        "required": ["unit_id", "position"]
+        "required": ["user_id", "name", "unit_id", "position"]
       }
-    }},
+    },
     "current_unit": {"type": "string"},
     "timeline": {
       "type" : "array",
@@ -27,17 +29,21 @@
     }, 
     "chat_history": {
       "type": "array",
+      "items": {"type": "string"}
+    },
+    "chat_map": {
+      "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "created_at": {"type": "string"},
+          "unit_id": {"type": "string"},
           "author": {"type": "string"},
-          "unit_id": {"type": "string"}
+          "created_at": {"type": "string"}
         },
-        "required": ["created_at", "author", "units"]
+        "required": ["unit_id", "author", "created_at"]
       }
     }
   },
-  "required": ["cursors", "current_unit", "timeline", "chat_history"]
+  "required": ["cursors", "current_unit", "timeline", "chat_history", "chat_map"]
 }
 

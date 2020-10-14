@@ -95,6 +95,11 @@ unhide_unit
 add_unit
 =====================================
 
+* **pith** - Pith of the new Unit.
+* **parent** - Parent ID of the new Unit.
+* **previous** - Previous Unit ID relative to Unit. If this Unit is meant to be first, set to parent.
+* **position** - Absolute position
+
 .. jsonschema:: ../../schema/discussion/requests/add_unit.json
 
 .. _dreq_select_unit-label:
@@ -165,11 +170,8 @@ load_user
 - **cursors** - Map of active user IDs to cursor positions. 
 - **current_unit** - ID of the unit the user was last looking at.
 - **timeline** - List of the units visited via the cursor.
-- **chat_history** - List of the posts.
-
-  - **created_at** - Creation time of unit. 
-  - **author** - Nickname of the author.
-  - **units** - List of unit IDs.
+- **chat_history** - List of the unit IDs.
+- **chat_map** - Array of units in the chat history as well as their forward links.
 
 .. jsonschema:: ../../schema/discussion/responses/load_user.json
 

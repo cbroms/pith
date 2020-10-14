@@ -1,11 +1,29 @@
 {
   "type": "object",
   "properties": {
-    "units": {
+    "chat_units": {
       "type": "array",
-      "items": {"type": "string"}
+      "items": {
+        "type": "object",
+        "properties": {
+          "unit_id": {"type": "string"},
+          "pith": {"type": "string"}
+        },
+        "required": ["unit_id", "pith"] 
+      }
+    },
+    "doc_units": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "unit_id": {"type": "string"},
+          "pith": {"type": "string"}
+        },
+        "required": ["unit_id", "pith"] 
+      }
     }
   },
-  "required": ["units"]
+  "required": ["chat_units", "doc_units"]
 }
 

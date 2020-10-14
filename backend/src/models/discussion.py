@@ -93,6 +93,13 @@ class Unit(Document):
     """
 
     # if from chat
+    source_unit_id = StringField()
+    """
+    :type: *str*
+    :required: False
+    :default: None
+    """
+
     original_pith = StringField()
     """
     NOTE: Should be set to pith upon initialization.
