@@ -1,6 +1,6 @@
 {
   "type": "array",
-  "item": {
+  "items": {
     "type": "object",
     "properties": {
       "unit_id": {"type": "string"},
