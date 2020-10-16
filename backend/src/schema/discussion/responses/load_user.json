@@ -7,11 +7,17 @@
         "type": "object",
         "properties": {
           "user_id": {"type": "string"},
-          "name": {"type": "string"},
-          "unit_id": {"type": "string"},
-          "position": {"type": "integer", "minimum": -1}
+          "nickname": {"type": "string"},
+          "cursor": {
+            "type": "object",
+            "properties": {
+              "unit_id": {"type": "string"},
+              "position": {"type": "integer", "minimum": -1}
+            },
+            "required": ["unit_id", "position"]
+          }
         },
-        "required": ["user_id", "name", "unit_id", "position"]
+        "required": ["user_id", "nickname", "cursor"]
       }
     },
     "current_unit": {"type": "string"},
@@ -38,10 +44,11 @@
         "type": "object",
         "properties": {
           "unit_id": {"type": "string"},
+          "pith": {"type": "string"},
           "author": {"type": "string"},
           "created_at": {"type": "string"}
         },
-        "required": ["unit_id", "author", "created_at"]
+        "required": ["unit_id", "pith", "author", "created_at"]
       }
     }
   },
