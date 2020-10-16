@@ -184,6 +184,8 @@ get_unit_page
 - **ancestors** - Ancestors of the unit, including self.
 - **children** - List of tuples, where each tuple has a children unit ID and the list of children for that unit.
 - **backlinks** - List of tuples, where each tuple has a backlink unit ID and the list of backlinks for that unit.
+- **timeline_entry** - Entry for Unit just left.
+- **cursor** - Placement of cursor. 
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/get_unit_page.json
 
