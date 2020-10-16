@@ -13,16 +13,16 @@ const StyledContainer = styled.div`
     padding-left: ${(props) => (props.transcluded ? 10 : 0)}px;
 
     border-left: ${(props) =>
-        props.transcluded ? "2px solid " + props.theme.textColor3 : "none"};
+        props.transcluded ? "2px solid " + props.theme.shade2 : "none"};
     color: ${(props) =>
         props.transcluded
             ? !props.transcludeHoverActive
-                ? props.theme.textColor2
+                ? props.theme.shade2
                 : "inherit"
             : "inherit"};
 
     background-color: ${(props) =>
-        props.transcludeHoverActive ? props.theme.backgroundColor2 : "inherit"};
+        props.transcludeHoverActive ? props.theme.shade2 : "inherit"};
 `;
 
 const StyledRefNum = styled.span`

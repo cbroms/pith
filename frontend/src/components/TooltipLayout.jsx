@@ -6,8 +6,9 @@ import ReactTooltip from "react-tooltip";
 const StyledTooltip = styled(ReactTooltip)`
     &.type-dark {
         box-sizing: border-box;
-        background-color: ${(props) => props.theme.backgroundColor2};
-        border: 1px solid ${(props) => props.theme.textColor3};
+        background-color: ${(props) => props.theme.shade1};
+        border: 1px solid ${(props) => props.theme.shade3};
+        color: ${(props) => props.theme.shade3};
         font-size: ${(props) => props.theme.mediumFont};
         pointer-events: auto !important;
         border-radius: 0;

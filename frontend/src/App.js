@@ -6,7 +6,7 @@ import "./App.css";
 import Discussion from "./components/Discussion";
 
 import dark from "./themes/dark";
-import light from "./themes/dark";
+import light from "./themes/light";
 
 const postsDummy = ["2o3iupoweuqo", "2o32o467o3y364", "2o32o46sdaf7o3y364"];
 
@@ -84,11 +84,13 @@ const usersDummy = [
 		user_id: "a4tuqpirghiquehg",
 		nickname: "Christian",
 		cursor_position: { unit_id: "p2o438tuioweh", position: -1 },
+		active: true,
 	},
 	{
 		user_id: "38tyierhfqp9348",
 		nickname: "Sydney",
 		cursor_position: { unit_id: "p2o438tuioweh", position: -1 },
+		active: false,
 	},
 ];
 

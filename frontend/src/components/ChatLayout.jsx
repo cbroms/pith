@@ -6,7 +6,7 @@ import TextEditorLayout from "./TextEditorLayout";
 
 const StyledContainer = styled.div`
     box-sizing: border-box;
-    background-color: ${(props) => props.theme.backgroundColor1};
+    background-color: ${(props) => props.theme.shade1};
     width: 100%;
     display: grid;
     grid-template-rows: 1fr auto;
@@ -14,6 +14,10 @@ const StyledContainer = styled.div`
     height: 100%;
     align-content: stretch;
     align-items: stretch;
+
+    @media (min-width: 768px) {
+        border-right: 1px solid ${(props) => props.theme.shade2};
+    }
 `;
 
 const StyledChatOverflow = styled.div`
@@ -31,7 +35,7 @@ const StyledChat = styled.div`
 
 const StyledChatEditor = styled.div`
     position: relative;
-    border-top: 3px solid ${(props) => props.theme.backgroundColor2};
+    border-top: 1px solid ${(props) => props.theme.shade2};
     margin-top: 20px;
 `;
 

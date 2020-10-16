@@ -11,6 +11,13 @@ const StyledButton = styled(Button)`
     height: calc(100% - 2px);
     right: 1px;
     top: 1px;
+    padding-top: 0;
+    background-color: ${(props) => props.theme.shade1};
+
+    :hover {
+        background-color: ${(props) => props.theme.shade1};
+        color: ${(props) => props.theme.shade3};
+    }
 `;
 
 const StyledContainer = styled.div`
@@ -21,23 +28,23 @@ const StyledContainer = styled.div`
 const StyledEditor = styled(TextEditor)`
     box-sizing: border-box;
     display: inline-block;
-    border: ${(props) => props.theme.smallBorder};
-    background-color: ${(props) => props.theme.backgroundColor2};
+   // border: ${(props) => props.theme.smallBorder};
+   //background-color: IndianRed;
     min-height: 40px;
-    padding: 10px;
+   // padding: 10px 0;
     padding-right: 50px;
     width: 100%;
     margin: 0;
     font-family: ${(props) => props.theme.serif};
 
     :empty::after {
-        color: ${(props) => props.theme.textColor2};
+        color: ${(props) => props.theme.shade2};
         content: "new message";
     }
 
     :focus {
         outline: none;
-        border: ${(props) => props.theme.smallBorderActive};
+       // border: ${(props) => props.theme.smallBorderActive};
     }
 `;
 

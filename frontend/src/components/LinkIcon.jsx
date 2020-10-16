@@ -25,18 +25,18 @@ const StyledIcon = styled.div`
         right: 0;
     }
     
-    color: ${(props) => props.theme.textColor3};
+    color: ${(props) => props.theme.shade2};
 
     ::after {
        padding-left: ${(props) => (props.backward ? 6 : 3)}px;
        content: "${(props) =>
            props.referenceNum ? props.referenceNum : "•"}"; 
-       color: ${(props) => props.theme.textColor2};
+       color: ${(props) => props.theme.shade2};
     }
 
     :hover {
         cursor: pointer;
-        background-color: ${(props) => props.theme.hoveredBackgroundColor};
+        background-color: ${(props) => props.theme.shade2};
     }
 `;
 
