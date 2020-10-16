@@ -129,6 +129,8 @@ class DiscussionNamespace(AsyncNamespace):
     
     async def get_unit_page(self, sid, request):
         """
+        NOTE: This changes state by moving the cursor and updating the timeline.
+
         :event: :ref:`dreq_get_unit_page-label`
         :return: :ref:`dres_get_unit_page-label`
         """
@@ -137,8 +139,9 @@ class DiscussionNamespace(AsyncNamespace):
         unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
+        user_id = session["user_id"]
 
-        result = gm.discussion_manager.get_unit_page(discussion_id, unit_id)
+        result = gm.discussion_manager.get_unit_page(discussion_id, user_id, unit_id)
 
         if "error" in result:
           return result
@@ -355,11 +358,13 @@ class DiscussionNamespace(AsyncNamespace):
         if validate(instance=request, schema=dreq.add_unit):
           return {"error": error.BAD_REQUEST}
         pith = request["pith"]
+        parent = request["parent"]
+        previous = request["previous"]
+        position = request["position"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
-        user_id = session["user_id"]
 
-        result = gm.discussion_manager.add_unit(discussion_id, user_id, pith)
+        result = gm.discussion_manager.add_unit(discussion_id, pith, parent, previous, position)
 
         if "error" in result:
           return result
@@ -397,7 +402,7 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def move_units(self, sid, request): 
         """
-        NOTE: Call `select_unit` before this.
+        NOTE: Call `select_unit` and `move_cursor` before this.
 
         :event: :ref:`dreq_move_units-label`
         :emit: *repositioned_unit* (:ref:`dres_repositioned_unit-label`, position lock released) OR fail
@@ -421,7 +426,7 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def merge_units(self, sid, request): 
         """
-        NOTE: Call `select_unit` before this.
+        NOTE: Call `select_unit` and `move_cursor` before this.
 
         :event: :ref:`dreq_merge_units-label`
         :emit: *repositioned_unit* (:ref:`dres_repositioned_unit-label`, position lock released) AND *added_unit* (for parent unit, :ref:`dres_added_unit-label`) OR fail 

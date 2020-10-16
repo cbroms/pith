@@ -1,8 +1,11 @@
 {
   "type": "object",
   "properties": {
-    "pith": {"type": "string"}
+    "pith": {"type": "string"},
+    "parent": {"type": "string"},
+    "previous": {"type": "string"},
+    "position": {"type": "integer", "minimum": 0}
   },
-  "required": ["pith"]
+  "required": ["pith", "parent", "previous", "position"]
 }
 

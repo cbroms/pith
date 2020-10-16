@@ -56,12 +56,14 @@ class DiscussionManager:
     def _time_entry(self, discussion_id, user_id):
         discussion = self._get(discussion_id)
         user = discussion.get().users.filter(id=user_id).get()
+        now = datetime.utcnow().strftime(constants.DATE_TIME_FMT)
         time_interval = TimeInterval(
           unit_id=user.viewed_unit,
           start_time=user.start_time,
-          end_time=datetime.utcnow().strftime(constants.DATE_TIME_FMT)) 
+          end_time=now) 
         discussion.filter(users__id=user_id).update(
           push__users__S__timeline=time_interval
+          set__users__S__start_time=now
         )
 
     def _release_edit(self, unit_id):
@@ -101,6 +103,13 @@ class DiscussionManager:
         parent.update(push__children=units)
 
         return response
+
+    def _get_position(self, parent, unit_id):
+      children = self._get_unit(parent).get().children
+      if unit_id in children:
+        return children.index(unit_id)
+      else:
+        return -1
 
     """
     Verification functions. Require specific arguments in most cases.
@@ -284,30 +293,57 @@ class DiscussionManager:
         discussion = self._get(discussion_id).get()
         user = discussion.get().users.filter(id=user_id).get()
 
-        cursors = {}
+        cursors = []
         for p in discussion.users:
           if p.active:
-            cursors[p.id] = p.cursor
+            cursors.append({
+              "user_id": p.id,
+              "nickname": p.name, 
+              "cursor": p.cursor
+            })
 
-        chat_history = []
+        timeline = []
+        for i in user.timeline: 
+          timeline.append({
+            "unit_id": i.unit_id,
+            "pith": self._get_unit(i.unit_id).pith,
+            "start_time": i.start_time,
+            "end_time": i.end_time,
+          })
+
+        unit_ids = []
         for u in discussion.chat:
+          unit = self._get_unit(u)
+          unit_ids.append(u)
+          unit_ids += unit.forward_links 
+        unit_ids = list(set(unit_ids))
+
+        chat_map = []
+        for u in unit_ids:
           unit = self._get_unit(u)
           chat_history.append({
             "unit_id": u,
-            "created_at": unit.created_at,
-            "author": unit.author
+            "pith": unit.pith,
+            "author": unit.author, # if from document, may not be recorded
+            "created_at": unit.created_at
           })
 
         response = {
           "cursors": cursors,
           "current_unit": user.viewed_unit, 
-          "chat_history": chat_history 
+          "timeline": timeline,
+          "chat_history": discussion.chat, 
+          "chat_map": chat_map
         }
         return response 
 
     @_check_discussion_id
     @_check_unit_id
-    def get_unit_page(self, discussion_id, unit_id):
+    def get_unit_page(self, discussion_id, user_id, unit_id):
+        """
+        This is the trigger for updating the timeline.
+        """
+        # perform unit-based operations
         unit = self._get_unit(unit_id)
 
         children = []
@@ -334,7 +370,7 @@ class DiscussionManager:
           grandbacklinks = []
           for g in b_unit.get().backward_links:
             g_unit = self._get_unit(g)
-            grandchildren.append({
+            grandbacklinks.append({
               "unit_id": g,
               "pith": g_unit.pith,
               "hidden": g_unit.hidden,
@@ -346,12 +382,37 @@ class DiscussionManager:
             "backlinks": grandbacklinks 
           })
 
+        # update cursor
+        discussion.filter(users__id=user_id).update(
+          set__users__S__cursor__unit_id=unit_id, # new page
+          set__users__S__cursor__position=-1 # for now, default to end
+        )
+        # uses old viewed unit
+        self._time_entry(discussion_id, user_id)
+        user = discussion.get().users.filter(id=user_id).get()
+        cursor = user.cursor
+        time_interval = user.timeline[-1]
+        time_entry = {
+          "unit_id": time_interval.unit_id,
+          "pith": self._get_unit(unit_id).get().pith, 
+          "start_time": time_interval.start_time,
+          "end_time": time_interval.end_time,
+        }
+
+        # update viewed unit to current
+        discussion.filter(users__id=user_id).update(
+          set__users__S__viewed_unit = unit_id
+        )
+
         response = {
           "pith": unit.get().pith,
           "ancestors": self._get_ancestors(unit_id),
           "children": children,
-          "backlinks": backlinks
+          "backlinks": backlinks,
+          "timeline_entry": timeline_entry,
+          "cursor": cursor,
         }
+
         return response
 
     @_check_discussion_id
@@ -402,69 +463,108 @@ class DiscussionManager:
           forward_links=forward_links
         )
         unit.original_text = unit.pith
-
-        """
-        TODO: backlinks
-        """
-
+        unit_id = unit.id
         unit.save()
-
         discussion.update(push__chat=unit)
 
-        response = {
+        # make backlinks
+        backlinks = []
+        for f in forward_links:
+          forward_unit = self._get_unit(f).update(
+            push__backward_links = unit_id
+          )
+          backlinks.append({
+            "unit_id": f,
+            "backlink": unit_id
+          })
+
+        post = {
           "created_at": unit.created_at,
           "author": discussion.get().users.filter(id=user_id).get().name, 
           "unit_id": unit.id,
           "pith": unit.pith 
         }
-        return response
+        return post, backlinks
 
     @_check_discussion_id
+    # TODO: over all units in chat and document
     def search(self, discussion_id, query):
+        """
+        https://docs.mongodb.com/manual/reference/operator/query/text/
+        """
         discussion = self._get(discussion_id)
-        # TODO figure out how to use indexing
+        results = Unit.find({"$text": {"$search": query}})
+        chat = []
+        doc = []
+        for r in results:
+          unit = self._get_unit(r).get()
+          entry = {
+            "unit_id": r,
+            "pith": unit.pith 
+          }
+          if unit.in_chat:
+            chat.append(entry)
+          else:
+            doc.append(entry)
+
+        response = {
+          "chat_units": chat,
+          "doc_units": doc
+        }
+        return response
       
     @_check_discussion_id
     @_check_unit_id
     def send_to_doc(self, discussion_id, user_id, unit_id):
+        """
+        NOTE: 
+        The document unit does not copy over the chat unit's backward links.
+        Instead, we have a pointer to the chat unit, so we can use that to find
+        "backlinks".
+        """
         discussion = self._get(discussion_id)
         user = discussion.get().users.filter(id=user_id).get()
         chat_unit = self._get_unit(unit_id).get()
 
         position = user.cursor.position if user.cursor.position != -1 else \
           len(self._get_unit(user.cursor.unit_id).children)
+        forward_links = chat_unit.forward_links
+
         unit = Unit(
           pith=chat_unit.pith,
-          forward_links=chat_unit.forward_links,
+          forward_links=forward_links,
           parent=user.cursor.unit_id,
           position=position,
+          source_unit_id = unit_id, # from chat
+          original_text = chat_unit.pith
         )
-        unit.original_text = unit.pith
         unit.save()
 
-        """
-        TODO: backlinks
-        """
+        backlinks = []
+        for f in forward_links:
+          forward_unit = self._get_unit(f).update(
+            push__backward_links = unit_id
+          )
+          backlinks.append({
+            "unit_id": f,
+            "backlink": unit_id
+          })
         
-        response = {
+        added = {
           "unit_id": unit.id,
           "pith": unit.pith,
           "created_at": unit.created_at,
           "parent": unit.parent,
           "position": unit.position,
         }
-        return response      
+        return added, backlinks 
 
     @_check_discussion_id
     @_check_user_id
     @_check_unit_id
     @_verify_position
     def move_cursor(self, discussion_id, user_id, unit_id, position):
-        """
-        Update timeline.
-        """
         discussion = self._get(discussion_id)
-        self._time_entry(discussion_id, user_id)
         discussion.filter(users__id=user_id).update(
           set__users__S__cursor__unit_id=unit_id,
           set__users__S__cursor__position=position
@@ -503,37 +603,50 @@ class DiscussionManager:
         return response
 
     @_check_discussion_id
-    @_check_user_id
-    def added_unit(self, discussion_id, user_id, pith):
+    def add_unit(self, discussion_id, pith, parent, previous, position):
         """
+          Try to use previous to place new unit, otherwise use position.
           Releases edit lock.
         """
         discussion = self._get(discussion_id)
-        user = discussion.get().users.filter(id=user_id).get()
 
-        position = user.cursor.position if user.cursor.position != -1 else \
-          len(self._get_unit(user.cursor.unit_id).children)
+        if (parent == previous): # previous is parent pith
+          final_position = 0 # head
+        else:
+          previous_position = self.get_position(parent, previous)
+          if previous_position > -1:
+            final_position = previous_position + 1
+          else:
+            final_position = position 
+
         unit = Unit(
           pith=pith,
           forward_links=self._retrieve_links(pith),
-          parent=user.cursor.unit_id,
-          position=position,
+          parent=parent,
+          position=final_position,
+          original_text = pith
         )
-        unit.original_text = unit.pith
         unit.save()
 
-        """
-        TODO: backlinks
-        """
+        # make backlinks
+        backlinks = []
+        for f in forward_links:
+          forward_unit = self._get_unit(f).update(
+            push__backward_links = unit_id
+          )
+          backlinks.append({
+            "unit_id": f,
+            "backlink": unit_id
+          })
 
-        response = {
+        added = {
           "unit_id": unit.id,
           "pith": unit.pith,
           "created_at": unit.created_at,
           "parent": unit.parent,
           "position": unit.position,
         }
-        return response      
+        return added, backlinks  
 
     @_check_discussion_id
     @_check_user_id
@@ -616,20 +729,32 @@ class DiscussionManager:
         unit = self._get_unit(unit_id) 
         old_forward_links = unit.get().forward_links
         forward_links = self._retrieve_links(pith)
-        unit.update(pith=pith).update(forward_links=forward_links)
+        unit.update(
+          pith=pith, 
+          forward_links=forward_links
+        )
 
+        # handle backlinks
         removed_links = set(old_forward_links).difference(set(forward_links)) 
+        for r in removed_links: # remove backlink 
+          unit = self._get_unit(f).update(
+            pull__backward_links = r
+          )
         added_links = set(forward_links).difference(set(old_forward_links))
+        for a in added_links: # add backlink 
+          unit = self._get_unit(f).update(
+            push__backward_links = r
+          )
 
         edited_unit = {
           "unit_id": unit_id,
           "pith": pith
         }
-        removed_backlink = None if len(removed_links) == 0 else [
+        removed_backlinks = None if len(removed_links) == 0 else [
           {"unit_id": r, "backlink": unit_id} for r in removed_links
         ] 
-        added_backlink = None if len(added_links) == 0 else [
+        added_backlinks = None if len(added_links) == 0 else [
           {"unit_id": a, "backlink": unit_id} for a in added_links
         ]
-        response = (edited_unit, removed_backlink, added_backlink)
+        response = (edited_unit, removed_backlinks, added_backlinks)
         return response

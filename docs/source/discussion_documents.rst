@@ -29,6 +29,8 @@ Unit
       :annotation: = Parent Unit.
     .. autoattribute:: position
       :annotation: = Position in parent Unit.
+    .. autoattribute:: source_unit_id
+      :annotation: = Which chat Unit this Unit was copied from. 
     .. autoattribute:: original_pith
       :annotation: = Original pith of Unit, useful if pith was changed.
     .. autoattribute:: edit_count
