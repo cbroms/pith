@@ -316,7 +316,7 @@ class DiscussionManager:
         for i in user.timeline: 
           timeline.append({
             "unit_id": i.unit_id,
-            "pith": self._get_unit(i.unit_id).pith,
+            "pith": self._get_unit(i.unit_id).get().pith,
             "start_time": i.start_time,
             "end_time": i.end_time,
           })
@@ -623,7 +623,7 @@ class DiscussionManager:
           if (previous == parent): # previous is parent pith
             final_position = 0 # head
           else:
-            previous_position = self.get_position(parent, previous)
+            previous_position = self._get_position(parent, previous)
             if previous_position > -1:
               final_position = previous_position + 1
             else:

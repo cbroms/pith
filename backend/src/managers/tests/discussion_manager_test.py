@@ -329,11 +329,250 @@ class DiscussionManagerTest(unittest.TestCase):
 
         self.discussion_manager.leave(
           discussion_id=discussion_id, user_id=user_id)
+
+    def test_timeline(self) -> None:
+        discussion_id = self.board_manager.create()["discussion_id"]
+        discussion = self.discussion_manager._get(discussion_id)
+        root = discussion.get().document
+
+        nickname = "whales"
+        user_id = self.discussion_manager.create_user(
+          discussion_id=discussion_id, nickname=nickname)["user_id"]
+        self.discussion_manager.join(
+          discussion_id=discussion_id, user_id=user_id)
+
+        res = self.discussion_manager.load_user(
+          discussion_id=discussion_id, user_id=user_id
+        )
+        self.assertEqual(len(res["timeline"]), 0)
+
+        # make tree of units
+        
+        added, backlinks = self.discussion_manager.add_unit(
+          discussion_id=discussion_id, 
+          pith="", parent=root, previous=root, position=0
+        )
+        unit_id1 = added["unit_id"]
+        added, backlinks = self.discussion_manager.add_unit(
+          discussion_id=discussion_id, 
+          pith="", parent=root, previous=root, position=0
+        )
+        unit_id2 = added["unit_id"]
+        added, backlinks = self.discussion_manager.add_unit(
+          discussion_id=discussion_id, 
+          pith="", parent=root, previous=root, position=0
+        )
+        unit_id3 = added["unit_id"]
+        added, backlinks = self.discussion_manager.add_unit(
+          discussion_id=discussion_id, 
+          pith="", parent=unit_id1, previous=root, position=0
+        )
+        unit_id4 = added["unit_id"]
+        added, backlinks = self.discussion_manager.add_unit(
+          discussion_id=discussion_id, 
+          pith="", parent=unit_id1, previous=root, position=0
+        )
+        unit_id5 = added["unit_id"]
+        
+        timeline = []
+
+        res = self.discussion_manager.get_unit_page(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id1
+        )
+        timeline.append(res["timeline_entry"])
+        time.sleep(1)
+        res = self.discussion_manager.get_unit_page(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4
+        )
+        timeline.append(res["timeline_entry"])
+        time.sleep(1)
+        res = self.discussion_manager.get_unit_page(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id3
+        )
+        timeline.append(res["timeline_entry"])
+        time.sleep(1)
+        res = self.discussion_manager.get_unit_page(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id2
+        )
+        timeline.append(res["timeline_entry"])
+        time.sleep(2)
+        res = self.discussion_manager.get_unit_page(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id5
+        )
+        timeline.append(res["timeline_entry"])
+        time.sleep(1)
+
+        self.discussion_manager.leave(
+          discussion_id=discussion_id, user_id=user_id)
+        self.discussion_manager.join(
+          discussion_id=discussion_id, user_id=user_id)
+        res = self.discussion_manager.load_user(
+          discussion_id=discussion_id, user_id=user_id
+        )
+        self.assertEqual(res["timeline"][:-1], timeline) # don't include most recently made (from leave)
+        self.assertEqual(res["timeline"][-1]["unit_id"], unit_id5) # we got last one
+        self.assertEqual(res["current_unit"], unit_id5)
+
+        self.discussion_manager.leave(
+          discussion_id=discussion_id, user_id=user_id)
+
+    def test_cursor_move(self) -> None:
+        discussion_id = self.board_manager.create()["discussion_id"]
+        discussion = self.discussion_manager._get(discussion_id)
+        root = discussion.get().document
+
+        nickname = "whales"
+        user_id = self.discussion_manager.create_user(
+          discussion_id=discussion_id, nickname=nickname)["user_id"]
+        self.discussion_manager.join(
+          discussion_id=discussion_id, user_id=user_id)
+      
+        # make tree of units
+        """
+        1 -> [4, 5]
+        2
+        3
+        """
+        
+        added, backlinks = self.discussion_manager.add_unit(
+          discussion_id=discussion_id, 
+          pith="", parent=root, previous=root, position=0
+        )
+        unit_id1 = added["unit_id"]
+        added, backlinks = self.discussion_manager.add_unit(
+          discussion_id=discussion_id, 
+          pith="", parent=root, previous=root, position=0
+        )
+        unit_id2 = added["unit_id"]
+        added, backlinks = self.discussion_manager.add_unit(
+          discussion_id=discussion_id, 
+          pith="", parent=root, previous=root, position=0
+        )
+        unit_id3 = added["unit_id"]
+        added, backlinks = self.discussion_manager.add_unit(
+          discussion_id=discussion_id, 
+          pith="", parent=unit_id1, previous=root, position=0
+        )
+        unit_id4 = added["unit_id"]
+        added, backlinks = self.discussion_manager.add_unit(
+          discussion_id=discussion_id, 
+          pith="", parent=unit_id1, previous=root, position=0
+        )
+        unit_id5 = added["unit_id"]
+        
+        res = self.discussion_manager.get_unit_page(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id5
+        )
+        self.assertEqual(res["cursor"].unit_id, unit_id5)
+        self.assertEqual(res["cursor"].position, -1)
+
+        # select units to move
+        self.discussion_manager.select_unit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id2
+        )
+        self.discussion_manager.select_unit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id3
+        )
+        # perform the move
+        """
+        1 -> [4, 5 -> [2, 3]]
+        """
+        res = self.discussion_manager.move_units(
+          discussion_id=discussion_id, user_id=user_id, units=[unit_id2, unit_id3]
+        )
+        self.assertEqual(len(res), 2)
+
+        self.discussion_manager.move_cursor(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id3, position=0
+        )
+
+        # select units to move
+        self.discussion_manager.select_unit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id2
+        )
+        self.discussion_manager.select_unit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4
+        )
+        """
+        1 -> [5 -> [3 -> 6 -> [2, 4]]]
+        """
+        moved, added = self.discussion_manager.merge_units(
+          discussion_id=discussion_id, user_id=user_id, units=[unit_id2, unit_id4]
+        )
+        unit_id6 = added["unit_id"]
+        self.assertEqual(len(moved), 2)
+
+        # now do an illegal move
+        res = self.discussion_manager.get_unit_page(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4
+        )
+        # select units to move
+        self.discussion_manager.select_unit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id2
+        )
+        self.discussion_manager.select_unit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id5
+        )
+        res = self.discussion_manager.move_units(
+          discussion_id=discussion_id, user_id=user_id, units=[unit_id2, unit_id5]
+        )
+        self.assertEqual(res["error"], error.BAD_PARENT)
+        # lock is not released, so let's do a legal move
+        """
+        1 -> [7 -> [2, 5 -> [3 -> 6 -> [4]]]]
+        """
+        res = self.discussion_manager.get_unit_page(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id1
+        )
+        moved, added = self.discussion_manager.merge_units(
+          discussion_id=discussion_id, user_id=user_id, units=[unit_id2, unit_id5]
+        )
+        unit_id7 = added["unit_id"]
+
+        # do a move flatten 
+        self.discussion_manager.select_unit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id7
+        )
+        self.discussion_manager.select_unit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id2
+        )
+        self.discussion_manager.select_unit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id5
+        )
+        self.discussion_manager.select_unit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id3
+        )
+        self.discussion_manager.select_unit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id6
+        )
+        self.discussion_manager.select_unit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4
+        )
+        res = self.discussion_manager.move_units(
+          discussion_id=discussion_id, user_id=user_id, units=[
+            unit_id2, unit_id3, unit_id4, unit_id5, unit_id6, unit_id7
+          ]
+        )
+        self.assertTrue(len(res), 6)
+        self.discussion_manager.move_cursor(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id7, position=1
+        )
+
+        self.discussion_manager.leave(
+          discussion_id=discussion_id, user_id=user_id)
+        res = self.discussion_manager.join(
+          discussion_id=discussion_id, user_id=user_id)
+
+        # we are where we left off
+        self.assertEqual(res["cursor"].unit_id, unit_id7)
+        self.assertEqual(res["cursor"].position, 1)
+
+        self.discussion_manager.leave(
+          discussion_id=discussion_id, user_id=user_id)
+
 """
-- test ancestry of units in move/merge
-- timeline with get_unit_page and load_user (join/leave)
-- cursor with get_unit_page, load_user, move_cursor
-- test where cursor affects and does not affect
+- get unit_ids from pith
+- how edit/add/post/send_to_doc changes refs
 - hide/unhide unit with state
 - might want to do a backlink/forward link invariance check
 - might want to do a tree invariance check?
