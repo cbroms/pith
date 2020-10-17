@@ -46,14 +46,18 @@ class DiscussionManager:
         return Unit.objects(id=unit_id)
 
     def _get_ancestors(self, unit_id):
-      curr = unit_id
-      while curr != "": 
-        ancestors.append(curr)
-        unit = self._get_unit(curr).get()    
-        curr = unit.parent
-      return ancestors
+        ancestors = []
+        curr = unit_id
+        while curr != "": # root 
+          ancestors.append(curr)
+          unit = self._get_unit(curr).get()
+          curr = unit.parent
+        return ancestors
 
     def _time_entry(self, discussion_id, user_id):
+        """
+        NOTE: Requires viewed_unit to be properly set.
+        """
         discussion = self._get(discussion_id)
         user = discussion.get().users.filter(id=user_id).get()
         now = datetime.utcnow().strftime(constants.DATE_TIME_FMT)
@@ -62,8 +66,8 @@ class DiscussionManager:
           start_time=user.start_time,
           end_time=now) 
         discussion.filter(users__id=user_id).update(
-          push__users__S__timeline=time_interval
-          set__users__S__start_time=now
+          push__users__S__timeline=time_interval,
+          set__users__S__start_time=now # update start time for new unit
         )
 
     def _release_edit(self, unit_id):
@@ -87,8 +91,10 @@ class DiscussionManager:
           old_parent = unit.get().parent
           old_position = unit.get().position
 
-          unit.update(parent=parent)
-          unit.update(position=counter)
+          unit.update(
+            set__parent=parent_id,
+            set__position=counter
+          )
           counter += 1
           self._release_position(unit_id)
 
@@ -123,9 +129,11 @@ class DiscussionManager:
       def helper(self, **kwargs):
         discussion_id = kwargs["discussion_id"]
         try:
-          Discussion.objects.get(id=discussion_id)
+          self._get(discussion_id).get()
+          #Discussion.objects.get(id=discussion_id)
           return func(self, **kwargs)
         except DoesNotExist:
+          logging.info("{} DISC ERR".format(func))
           return {"error": error.BAD_DISCUSSION_ID} 
       return helper
           
@@ -179,7 +187,7 @@ class DiscussionManager:
       def helper(self, **kwargs):
         unit_id = kwargs["unit_id"]
         position = kwargs["position"]
-        unit = self._get_unit(unit_id)
+        unit = self._get_unit(unit_id).get()
         if position > len(unit.children) or position < -1:
           return {"error": error.BAD_POSITION}
         else: 
@@ -194,7 +202,7 @@ class DiscussionManager:
       def helper(self, **kwargs):
         unit_id = kwargs["unit_id"]
         user_id = kwargs["user_id"]
-        unit = self._get_unit(unit_id)
+        unit = self._get_unit(unit_id).get()
         if unit.edit_privilege != user_id:
           return {"error": error.BAD_EDIT_TRY}
         else:
@@ -210,7 +218,7 @@ class DiscussionManager:
         units = kwargs["units"]
         user_id = kwargs["user_id"]
         for unit_id in units:
-          unit = self._get_unit(unit_id)
+          unit = self._get_unit(unit_id).get()
           if unit.position_privilege != user_id:
             return {"error": error.BAD_POSITION_TRY}
         return func(self, **kwargs)
@@ -223,8 +231,10 @@ class DiscussionManager:
       NOTE: Requires _check_user_id _check_units on units. 
       """
       def helper(self, **kwargs):
+        discussion_id = kwargs["discussion_id"]
         user_id = kwargs["user_id"]
         units = kwargs["units"]
+        discussion = self._get(discussion_id)
         user = discussion.get().users.filter(id=user_id).get()
         parent_id = user.cursor.unit_id
         ancestors = self._get_ancestors(parent_id)
@@ -291,7 +301,7 @@ class DiscussionManager:
     @_check_user_id
     def load_user(self, discussion_id, user_id):
         discussion = self._get(discussion_id).get()
-        user = discussion.get().users.filter(id=user_id).get()
+        user = discussion.users.filter(id=user_id).get()
 
         cursors = []
         for p in discussion.users:
@@ -313,15 +323,15 @@ class DiscussionManager:
 
         unit_ids = []
         for u in discussion.chat:
-          unit = self._get_unit(u)
+          unit = self._get_unit(u).get()
           unit_ids.append(u)
           unit_ids += unit.forward_links 
         unit_ids = list(set(unit_ids))
 
         chat_map = []
         for u in unit_ids:
-          unit = self._get_unit(u)
-          chat_history.append({
+          unit = self._get_unit(u).get()
+          chat_map.append({
             "unit_id": u,
             "pith": unit.pith,
             "author": unit.author, # if from document, may not be recorded
@@ -343,15 +353,16 @@ class DiscussionManager:
         """
         This is the trigger for updating the timeline.
         """
+        discussion = self._get(discussion_id)
         # perform unit-based operations
-        unit = self._get_unit(unit_id)
+        unit = self._get_unit(unit_id).get()
 
         children = []
-        for c in unit.get().children:
-          c_unit = self._get_unit(c)
+        for c in unit.children:
+          c_unit = self._get_unit(c).get()
           grandchildren = []
-          for g in c_unit.get().children:
-            g_unit = self._get_unit(g)
+          for g in c_unit.children:
+            g_unit = self._get_unit(g).get()
             grandchildren.append({
               "unit_id": g,
               "pith": g_unit.pith,
@@ -365,11 +376,11 @@ class DiscussionManager:
           })
 
         backlinks = []
-        for b in unit.get().backward_links:
-          b_unit = self._get_unit(b)
+        for b in unit.backward_links:
+          b_unit = self._get_unit(b).get()
           grandbacklinks = []
-          for g in b_unit.get().backward_links:
-            g_unit = self._get_unit(g)
+          for g in b_unit.backward_links:
+            g_unit = self._get_unit(g).get()
             grandbacklinks.append({
               "unit_id": g,
               "pith": g_unit.pith,
@@ -391,10 +402,10 @@ class DiscussionManager:
         self._time_entry(discussion_id, user_id)
         user = discussion.get().users.filter(id=user_id).get()
         cursor = user.cursor
-        time_interval = user.timeline[-1]
-        time_entry = {
+        time_interval = user.timeline[-1] # newly made
+        timeline_entry = {
           "unit_id": time_interval.unit_id,
-          "pith": self._get_unit(unit_id).get().pith, 
+          "pith": self._get_unit(time_interval.unit_id).get().pith, 
           "start_time": time_interval.start_time,
           "end_time": time_interval.end_time,
         }
@@ -405,12 +416,12 @@ class DiscussionManager:
         )
 
         response = {
-          "pith": unit.get().pith,
+          "pith": unit.pith,
           "ancestors": self._get_ancestors(unit_id),
           "children": children,
           "backlinks": backlinks,
           "timeline_entry": timeline_entry,
-          "cursor": cursor,
+          "cursor": cursor
         }
 
         return response
@@ -460,17 +471,17 @@ class DiscussionManager:
           parent="",
           author=user_id,
           in_chat=True,
-          forward_links=forward_links
+          forward_links=forward_links,
+          original_pith=pith,
         )
-        unit.original_text = unit.pith
         unit_id = unit.id
         unit.save()
-        discussion.update(push__chat=unit)
+        discussion.update(push__chat=unit_id)
 
         # make backlinks
         backlinks = []
         for f in forward_links:
-          forward_unit = self._get_unit(f).update(
+          self._get_unit(f).update(
             push__backward_links = unit_id
           )
           backlinks.append({
@@ -481,28 +492,26 @@ class DiscussionManager:
         post = {
           "created_at": unit.created_at,
           "author": discussion.get().users.filter(id=user_id).get().name, 
-          "unit_id": unit.id,
+          "unit_id": unit_id,
           "pith": unit.pith 
         }
         return post, backlinks
 
     @_check_discussion_id
-    # TODO: over all units in chat and document
     def search(self, discussion_id, query):
         """
         https://docs.mongodb.com/manual/reference/operator/query/text/
         """
         discussion = self._get(discussion_id)
-        results = Unit.find({"$text": {"$search": query}})
+        results = Unit.objects()._collection.find({"$text": {"$search": query}})
         chat = []
         doc = []
-        for r in results:
-          unit = self._get_unit(r).get()
+        for unit in results: # dict form
           entry = {
-            "unit_id": r,
-            "pith": unit.pith 
+            "unit_id": unit["_id"],
+            "pith": unit["pith"] 
           }
-          if unit.in_chat:
+          if unit["in_chat"]:
             chat.append(entry)
           else:
             doc.append(entry)
@@ -527,7 +536,7 @@ class DiscussionManager:
         chat_unit = self._get_unit(unit_id).get()
 
         position = user.cursor.position if user.cursor.position != -1 else \
-          len(self._get_unit(user.cursor.unit_id).children)
+          len(self._get_unit(user.cursor.unit_id).get().children)
         forward_links = chat_unit.forward_links
 
         unit = Unit(
@@ -535,14 +544,14 @@ class DiscussionManager:
           forward_links=forward_links,
           parent=user.cursor.unit_id,
           position=position,
-          source_unit_id = unit_id, # from chat
-          original_text = chat_unit.pith
+          source_unit_id=unit_id, # from chat
+          original_pith=chat_unit.pith
         )
         unit.save()
 
         backlinks = []
         for f in forward_links:
-          forward_unit = self._get_unit(f).update(
+          self._get_unit(f).update(
             push__backward_links = unit_id
           )
           backlinks.append({
@@ -580,7 +589,7 @@ class DiscussionManager:
     @_check_discussion_id
     @_check_unit_id
     @_verify_edit_privilege
-    def hide_unit(self, discussion_id, unit_id):
+    def hide_unit(self, discussion_id, user_id, unit_id):
         """ 
           Assumes we have edit lock through `request_to_edit`.
           Releases edit lock.
@@ -610,28 +619,32 @@ class DiscussionManager:
         """
         discussion = self._get(discussion_id)
 
-        if (parent == previous): # previous is parent pith
-          final_position = 0 # head
-        else:
-          previous_position = self.get_position(parent, previous)
-          if previous_position > -1:
-            final_position = previous_position + 1
+        if previous:
+          if (previous == parent): # previous is parent pith
+            final_position = 0 # head
           else:
-            final_position = position 
+            previous_position = self.get_position(parent, previous)
+            if previous_position > -1:
+              final_position = previous_position + 1
+            else:
+              final_position = position 
+        else:
+          final_position = position 
 
         unit = Unit(
           pith=pith,
           forward_links=self._retrieve_links(pith),
           parent=parent,
           position=final_position,
-          original_text = pith
+          original_pith=pith
         )
         unit.save()
+        unit_id = unit.id
 
         # make backlinks
         backlinks = []
-        for f in forward_links:
-          forward_unit = self._get_unit(f).update(
+        for f in unit.forward_links:
+          self._get_unit(f).update(
             push__backward_links = unit_id
           )
           backlinks.append({
@@ -640,7 +653,7 @@ class DiscussionManager:
           })
 
         added = {
-          "unit_id": unit.id,
+          "unit_id": unit_id,
           "pith": unit.pith,
           "created_at": unit.created_at,
           "parent": unit.parent,
@@ -657,7 +670,7 @@ class DiscussionManager:
         """
         discussion = self._get(discussion_id)
         unit = self._get_unit(unit_id) 
-        if unit.position_privilege is not None: 
+        if unit.get().position_privilege is not None: 
           return {"error": error.FAILED_POSITION_ACQUIRE}
         unit.update(position_privilege=user_id)
 
@@ -678,6 +691,7 @@ class DiscussionManager:
           Releases position lock.
           Removes each of the units from old parent and puts under new parent.
         """
+        discussion = self._get(discussion_id)
         user = discussion.get().users.filter(id=user_id).get()
         parent_id = user.cursor.unit_id
         return self._move_units(discussion_id, user_id, units, parent_id)
@@ -692,12 +706,20 @@ class DiscussionManager:
           Releases position lock.
           Removes each of the units from old parent and puts under new parent.
         """
-        added_unit = self.added_unit(discussion_id, user_id, "") # empty pith
+        discussion = self._get(discussion_id)
+        user = discussion.get().users.filter(id=user_id).get()
+        parent_id = user.cursor.unit_id
+        position = user.cursor.position if user.cursor.position != -1 else \
+          len(self._get_unit(user.cursor.unit_id).get().children)
+
+        added_unit, backlinks = self.add_unit(
+          discussion_id=discussion_id, pith="", 
+          parent=parent_id, previous=None, position=position
+        )  
         repositioned_units = self._move_units(discussion_id, user_id, units, 
           added_unit["unit_id"])
 
-        response = (repositioned_units, added_unit)
-        return response
+        return repositioned_units, added_unit
 
     @_check_discussion_id
     @_check_user_id
@@ -708,7 +730,7 @@ class DiscussionManager:
         """
         discussion = self._get(discussion_id)
         unit = self._get_unit(unit_id) 
-        if unit.edit_privilege is not None: 
+        if unit.get().edit_privilege is not None: 
           return {"error": error.FAILED_EDIT_ACQUIRE}
         unit.update(edit_privilege=user_id)
 
@@ -722,7 +744,7 @@ class DiscussionManager:
     @_check_discussion_id
     @_check_unit_id
     @_verify_edit_privilege
-    def edit_unit(self, discussion_id, unit_id, pith):
+    def edit_unit(self, discussion_id, user_id, unit_id, pith):
         """
           Releases edit lock.
         """
@@ -731,19 +753,21 @@ class DiscussionManager:
         forward_links = self._retrieve_links(pith)
         unit.update(
           pith=pith, 
-          forward_links=forward_links
+          forward_links=forward_links,
+          edit_count=unit.get().edit_count + 1 # increment
         )
+        self._release_edit(unit_id)
 
         # handle backlinks
         removed_links = set(old_forward_links).difference(set(forward_links)) 
         for r in removed_links: # remove backlink 
-          unit = self._get_unit(f).update(
-            pull__backward_links = r
+          unit = self._get_unit(r).update(
+            pull__backward_links = unit_id
           )
         added_links = set(forward_links).difference(set(old_forward_links))
         for a in added_links: # add backlink 
-          unit = self._get_unit(f).update(
-            push__backward_links = r
+          unit = self._get_unit(a).update(
+            push__backward_links = unit_id
           )
 
         edited_unit = {

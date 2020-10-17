@@ -30,7 +30,7 @@ async def create(sid, request):
 
     if "error" in result:
       return result
-    serialized = dumps(response, cls=GenericEncoder)
+    serialized = dumps(result, cls=GenericEncoder)
     if validate(instance=serialized, schema=bres.create):
       return {"error": error.BAD_RESPONSE}
     return serialized
@@ -47,7 +47,11 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = session["active_discussion_id"]
         user_id = session["user_id"]
         if discussion_id:
-          gm.discussion_manager.leave(discussion_id, user_id)
+          # TODO: as stringent as on_leave
+          gm.discussion_manager.leave(
+            discussion_id=discussion_id, 
+            user_id=user_id
+          )
 
     async def create_user(self, sid, request):
         """
@@ -59,7 +63,10 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = request["discussion_id"]
         nickname = request["nickname"]
 
-        result = gm.discussion_manager.create_user(discussion_id, nickname)
+        result = gm.discussion_manager.create_user(
+          discussion_id=discussion_id,
+          nickname=nickname
+        )
 
         if "error" in result:
           return result
@@ -78,7 +85,10 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = request["discussion_id"]
         user_id = request["user_id"]
 
-        result = gm.discussion_manager.join(discussion_id, user_id)
+        result = gm.discussion_manager.join(
+          discussion_id=discussion_id, 
+          user_id=user_id
+        )
 
         if "error" in result:
           return result
@@ -100,7 +110,10 @@ class DiscussionNamespace(AsyncNamespace):
         user_id = session["user_id"]
         discussion_id = session["discussion_id"]
 
-        result = gm.discussion_manager.leave(discussion_id, user_id)
+        result = gm.discussion_manager.leave(
+          discussion_id=discussion_id, 
+          user_id=user_id
+        )
 
         if "error" in result:
           return result
@@ -118,7 +131,10 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
 
-        result = gm.discussion_manager.load_user(discussion_id, user_id)
+        result = gm.discussion_manager.load_user(
+          discussion_id=discussion_id, 
+          user_id=user_id
+        )
 
         if "error" in result:
           return result
@@ -141,7 +157,11 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
 
-        result = gm.discussion_manager.get_unit_page(discussion_id, user_id, unit_id)
+        result = gm.discussion_manager.get_unit_page(
+          discussion_id=discussion_id, 
+          user_id=user_id, 
+          unit_id=unit_id
+        )
 
         if "error" in result:
           return result
@@ -161,7 +181,10 @@ class DiscussionNamespace(AsyncNamespace):
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
 
-        result = gm.discussion_manager.get_ancestors(discussion_id, unit_id)
+        result = gm.discussion_manager.get_ancestors(
+          discussion_id=discussion_id, 
+          unit_id=unit_id
+        )
 
         if "error" in result:
           return result
@@ -182,7 +205,10 @@ class DiscussionNamespace(AsyncNamespace):
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
 
-        result = gm.discussion_manager.get_unit_content(discussion_id, unit_id)
+        result = gm.discussion_manager.get_unit_content(
+          discussion_id=discussion_id, 
+          unit_id=unit_id
+        )
 
         if "error" in result:
           return result
@@ -202,7 +228,10 @@ class DiscussionNamespace(AsyncNamespace):
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
 
-        result = gm.discussion_manager.get_unit_context(discussion_id, unit_id)
+        result = gm.discussion_manager.get_unit_context(
+          discussion_id=discussion_id, 
+          unit_id=unit_id
+        )
 
         if "error" in result:
           return result
@@ -223,7 +252,11 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
 
-        result = gm.discussion_manager.post(discussion_id, user_id, pith)
+        result = gm.discussion_manager.post(
+          discussion_id=discussion_id, 
+          user_id=user_id, 
+          pith=pith
+        )
 
         if "error" in result:
           return result
@@ -249,7 +282,10 @@ class DiscussionNamespace(AsyncNamespace):
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
 
-        result = gm.discussion_manager.search(discussion_id, query)
+        result = gm.discussion_manager.search(
+          discussion_id=discussion_id, 
+          query=query
+        )
 
         if "error" in result:
           return result
@@ -270,7 +306,11 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
 
-        result = gm.discussion_manager.send_to_doc(discussion_id, user_id, unit_id)
+        result = gm.discussion_manager.send_to_doc(
+          discussion_id=discussion_id, 
+          user_id=user_id, 
+          unit_id=unit_id
+        )
 
         if "error" in result:
           return result
@@ -298,7 +338,12 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
 
-        result = gm.discussion_manager.move_cursor(discussion_id, user_id, unit_id, position)
+        result = gm.discussion_manager.move_cursor(
+          discussion_id=discussion_id, 
+          user_id=user_id, 
+          unit_id=unit_id, 
+          position=position
+        )
 
         if "error" in result:
           return result
@@ -321,7 +366,11 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
 
-        result = gm.discussion_manager.hide_unit(discussion_id, user_id, unit_id)
+        result = gm.discussion_manager.hide_unit(
+          discussion_id=discussion_id, 
+          user_id=user_id, 
+          unit_id=unit_id
+        )
 
         if "error" in result:
           return result 
@@ -341,7 +390,10 @@ class DiscussionNamespace(AsyncNamespace):
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
 
-        result = gm.discussion_manager.hide_unit(discussion_id, unit_id)
+        result = gm.discussion_manager.hide_unit(
+          discussion_id=discussion_id, 
+          unit_id=unit_id
+        )
 
         if "error" in result:
           return result
@@ -364,7 +416,13 @@ class DiscussionNamespace(AsyncNamespace):
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
 
-        result = gm.discussion_manager.add_unit(discussion_id, pith, parent, previous, position)
+        result = gm.discussion_manager.add_unit(
+          discussion_id=discussion_id, 
+          pith=pith, 
+          parent=parent, 
+          previous=previous, 
+          position=position
+        )
 
         if "error" in result:
           return result
@@ -391,7 +449,11 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
 
-        result = gm.discussion_manager.select_unit(discussion_id, user_id, unit_id)
+        result = gm.discussion_manager.select_unit(
+          discussion_id=discussion_id, 
+          user_id=user_id, 
+          unit_id=unit_id
+        )
 
         if "error" in result:
           return result
@@ -415,7 +477,12 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
 
-        result = gm.discussion_manager.move_units(discussion_id, user_id, units, parent)
+        result = gm.discussion_manager.move_units(
+          discussion_id=discussion_id, 
+          user_id=user_id, 
+          units=units, 
+          parent=parent
+        )
 
         if "error" in result:
           return result
@@ -440,7 +507,12 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
 
-        result = gm.discussion_manager.merge_units(discussion_id, user_id, units, parent)
+        result = gm.discussion_manager.merge_units(
+          discussion_id=discussion_id, 
+          user_id=user_id, 
+          units=units, 
+          parent=parent
+        )
 
         if "error" in result:
           return result
@@ -468,7 +540,11 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
 
-        result = gm.discussion_manager.request_to_edit(discussion_id, user_id, unit_id)
+        result = gm.discussion_manager.request_to_edit(
+          discussion_id=discussion_id, 
+          user_id=user_id, 
+          unit_id=unit_id
+        )
 
         if "error" in result:
           return result
@@ -492,7 +568,12 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
 
-        result = gm.discussion_manager.edit_unit(discussion_id, user_id, unit_id, pith)
+        result = gm.discussion_manager.edit_unit(
+          discussion_id=discussion_id, 
+          user_id=user_id, 
+          unit_id=unit_id, 
+          pith=pith
+        )
 
         if "error" in result:
           return result

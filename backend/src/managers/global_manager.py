@@ -9,6 +9,10 @@ import constants
 from managers.board_manager import BoardManager
 from managers.discussion_manager import DiscussionManager
 
+from models.discussion import (
+  Unit,
+)
+
 
 class GlobalManager:
 
@@ -30,6 +34,10 @@ class GlobalManager:
         loop = asyncio.get_event_loop()
         self.redis_queue = loop.run_until_complete(create_pool(constants.ARQ_REDIS))
 
+        # set up index
+        Unit.create_index([('pith', 'text')])
+
         # these get all the other variables
         self.discussion_manager = DiscussionManager(self)
         self.board_manager = BoardManager(self)
+
