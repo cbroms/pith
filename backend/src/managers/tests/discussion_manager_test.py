@@ -433,7 +433,6 @@ class DiscussionManagerTest(unittest.TestCase):
         2
         3
         """
-        
         added, backlinks = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="", parent=root, previous=root, position=0
@@ -460,12 +459,50 @@ class DiscussionManagerTest(unittest.TestCase):
         )
         unit_id5 = added["unit_id"]
         
-        res = self.discussion_manager.get_unit_page(
+        self.discussion_manager.get_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id5
         )
         self.assertEqual(res["cursor"].unit_id, unit_id5)
         self.assertEqual(res["cursor"].position, -1)
+        # check tree structure
+        """
+        1 -> [4, 5]
+        2
+        3
+        """
+        children_root = self.discussion_manager._get_unit(root).get().children
+        parent1 = self.discussion_manager._get_unit(unit_id1).get().parent
+        children1 = self.discussion_manager._get_unit(unit_id1).get().children
+        parent2 = self.discussion_manager._get_unit(unit_id2).get().parent
+        children2 = self.discussion_manager._get_unit(unit_id2).get().children
+        parent3 = self.discussion_manager._get_unit(unit_id3).get().parent
+        children3 = self.discussion_manager._get_unit(unit_id3).get().children
+        parent4 = self.discussion_manager._get_unit(unit_id4).get().parent
+        children4 = self.discussion_manager._get_unit(unit_id4).get().children
+        parent5 = self.discussion_manager._get_unit(unit_id5).get().parent
+        children5 = self.discussion_manager._get_unit(unit_id5).get().children
 
+        self.assertTrue(unit_id1 in children_root)
+        self.assertTrue(unit_id2 in children_root)
+        self.assertTrue(unit_id3 in children_root)
+        self.assertEqual(parent1, root)
+        self.assertEqual(parent2, root)
+        self.assertEqual(parent3, root)
+
+        self.assertEqual(len(children1), 2)
+        self.assertTrue(unit_id4 in children1)
+        self.assertTrue(unit_id5 in children1)
+        self.assertEqual(parent4, unit_id1)
+        self.assertEqual(parent5, unit_id1)
+        
+        self.assertEqual(len(children2), 0)
+        self.assertEqual(len(children3), 0)
+        self.assertEqual(len(children4), 0)
+        self.assertEqual(len(children5), 0)
+
+        """
+        1 -> [4, 5 -> [2, 3]]
+        """
         # select units to move
         self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id2
@@ -474,18 +511,52 @@ class DiscussionManagerTest(unittest.TestCase):
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id3
         )
         # perform the move
-        """
-        1 -> [4, 5 -> [2, 3]]
-        """
         res = self.discussion_manager.move_units(
           discussion_id=discussion_id, user_id=user_id, units=[unit_id2, unit_id3]
         )
         self.assertEqual(len(res), 2)
+        # check tree structure
+        """
+        1 -> [4, 5 -> [2, 3]]
+        """
+        children_root = self.discussion_manager._get_unit(root).get().children
+        parent1 = self.discussion_manager._get_unit(unit_id1).get().parent
+        children1 = self.discussion_manager._get_unit(unit_id1).get().children
+        parent2 = self.discussion_manager._get_unit(unit_id2).get().parent
+        children2 = self.discussion_manager._get_unit(unit_id2).get().children
+        parent3 = self.discussion_manager._get_unit(unit_id3).get().parent
+        children3 = self.discussion_manager._get_unit(unit_id3).get().children
+        parent4 = self.discussion_manager._get_unit(unit_id4).get().parent
+        children4 = self.discussion_manager._get_unit(unit_id4).get().children
+        parent5 = self.discussion_manager._get_unit(unit_id5).get().parent
+        children5 = self.discussion_manager._get_unit(unit_id5).get().children
+
+        self.assertTrue(unit_id1 in children_root)
+        self.assertEqual(parent1, root)
+
+        self.assertEqual(len(children1), 2)
+        self.assertTrue(unit_id4 in children1)
+        self.assertTrue(unit_id5 in children1)
+        self.assertEqual(parent4, unit_id1)
+        self.assertEqual(parent5, unit_id1)
+
+        self.assertEqual(len(children5), 2)
+        self.assertTrue(unit_id2 in children5)
+        self.assertTrue(unit_id3 in children5)
+        self.assertEqual(parent2, unit_id5)
+        self.assertEqual(parent3, unit_id5)
+        
+        self.assertEqual(len(children2), 0)
+        self.assertEqual(len(children3), 0)
+        self.assertEqual(len(children4), 0)
 
         self.discussion_manager.move_cursor(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id3, position=0
         )
 
+        """
+        1 -> [5 -> [3 -> [6 -> [2, 4]]]]
+        """
         # select units to move
         self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id2
@@ -493,19 +564,61 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4
         )
-        """
-        1 -> [5 -> [3 -> 6 -> [2, 4]]]
-        """
+        # perform the merge
         moved, added = self.discussion_manager.merge_units(
           discussion_id=discussion_id, user_id=user_id, units=[unit_id2, unit_id4]
         )
         unit_id6 = added["unit_id"]
         self.assertEqual(len(moved), 2)
+        # check tree structure
+        """
+        1 -> [5 -> [3 -> [6 -> [2, 4]]]]
+        """
+        children_root = self.discussion_manager._get_unit(root).get().children
+        parent1 = self.discussion_manager._get_unit(unit_id1).get().parent
+        children1 = self.discussion_manager._get_unit(unit_id1).get().children
+        parent2 = self.discussion_manager._get_unit(unit_id2).get().parent
+        children2 = self.discussion_manager._get_unit(unit_id2).get().children
+        parent3 = self.discussion_manager._get_unit(unit_id3).get().parent
+        children3 = self.discussion_manager._get_unit(unit_id3).get().children
+        parent4 = self.discussion_manager._get_unit(unit_id4).get().parent
+        children4 = self.discussion_manager._get_unit(unit_id4).get().children
+        parent5 = self.discussion_manager._get_unit(unit_id5).get().parent
+        children5 = self.discussion_manager._get_unit(unit_id5).get().children
+        parent6 = self.discussion_manager._get_unit(unit_id6).get().parent
+        children6 = self.discussion_manager._get_unit(unit_id6).get().children
 
-        # now do an illegal move
+        self.assertTrue(unit_id1 in children_root)
+        self.assertEqual(parent1, root)
+
+        self.assertEqual(len(children1), 1)
+        self.assertTrue(unit_id5 in children1)
+        self.assertEqual(parent5, unit_id1)
+
+        self.assertEqual(len(children5), 1)
+        self.assertTrue(unit_id3 in children5)
+        self.assertEqual(parent3, unit_id5)
+        
+        self.assertEqual(len(children3), 1)
+        self.assertTrue(unit_id6 in children3)
+        self.assertEqual(parent6, unit_id3)
+
+        self.assertEqual(len(children6), 2)
+        self.assertTrue(unit_id2 in children6)
+        self.assertTrue(unit_id4 in children6)
+        self.assertEqual(parent2, unit_id6)
+        self.assertEqual(parent4, unit_id6)
+
+        self.assertEqual(len(children2), 0)
+        self.assertEqual(len(children4), 0)
+
         res = self.discussion_manager.get_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4
         )
+
+        """
+        1 -> [7 -> [2, 5 -> [3 -> 6 -> [4]]]]
+        """
         # select units to move
         self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id2
@@ -513,14 +626,12 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id5
         )
+        # perform the illegal move
         res = self.discussion_manager.move_units(
           discussion_id=discussion_id, user_id=user_id, units=[unit_id2, unit_id5]
         )
         self.assertEqual(res["error"], error.BAD_PARENT)
-        # lock is not released, so let's do a legal move
-        """
-        1 -> [7 -> [2, 5 -> [3 -> 6 -> [4]]]]
-        """
+        # perform the legal merge
         res = self.discussion_manager.get_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id1
         )
@@ -528,8 +639,58 @@ class DiscussionManagerTest(unittest.TestCase):
           discussion_id=discussion_id, user_id=user_id, units=[unit_id2, unit_id5]
         )
         unit_id7 = added["unit_id"]
+        # check tree structure
+        """
+        1 -> [7 -> [2, 5 -> [3 -> 6 -> [4]]]]
+        """
+        children_root = self.discussion_manager._get_unit(root).get().children
+        parent1 = self.discussion_manager._get_unit(unit_id1).get().parent
+        children1 = self.discussion_manager._get_unit(unit_id1).get().children
+        parent2 = self.discussion_manager._get_unit(unit_id2).get().parent
+        children2 = self.discussion_manager._get_unit(unit_id2).get().children
+        parent3 = self.discussion_manager._get_unit(unit_id3).get().parent
+        children3 = self.discussion_manager._get_unit(unit_id3).get().children
+        parent4 = self.discussion_manager._get_unit(unit_id4).get().parent
+        children4 = self.discussion_manager._get_unit(unit_id4).get().children
+        parent5 = self.discussion_manager._get_unit(unit_id5).get().parent
+        children5 = self.discussion_manager._get_unit(unit_id5).get().children
+        parent6 = self.discussion_manager._get_unit(unit_id6).get().parent
+        children6 = self.discussion_manager._get_unit(unit_id6).get().children
+        parent7 = self.discussion_manager._get_unit(unit_id7).get().parent
+        children7 = self.discussion_manager._get_unit(unit_id7).get().children
 
-        # do a move flatten 
+        self.assertTrue(unit_id1 in children_root)
+        self.assertEqual(parent1, root)
+
+        self.assertEqual(len(children1), 1)
+        self.assertTrue(unit_id7 in children1)
+        self.assertEqual(parent7, unit_id1)
+
+        self.assertEqual(len(children7), 2)
+        self.assertTrue(unit_id2 in children7)
+        self.assertTrue(unit_id5 in children7)
+        self.assertEqual(parent2, unit_id7)
+        self.assertEqual(parent5, unit_id7)
+
+        self.assertEqual(len(children5), 1)
+        self.assertTrue(unit_id3 in children5)
+        self.assertEqual(parent3, unit_id5)
+
+        self.assertEqual(len(children3), 1)
+        self.assertTrue(unit_id6 in children3)
+        self.assertEqual(parent6, unit_id3)
+
+        self.assertEqual(len(children6), 1)
+        self.assertTrue(unit_id4 in children6)
+        self.assertEqual(parent4, unit_id6)
+
+        self.assertEqual(len(children2), 0)
+        self.assertEqual(len(children4), 0)
+
+        """
+        1 -> [2, 3, 4, 5, 6, 7]
+        """
+        # select units to move
         self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id7
         )
@@ -548,12 +709,57 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4
         )
+        # do a move flatten 
         res = self.discussion_manager.move_units(
           discussion_id=discussion_id, user_id=user_id, units=[
             unit_id2, unit_id3, unit_id4, unit_id5, unit_id6, unit_id7
           ]
         )
         self.assertTrue(len(res), 6)
+        # check tree structure
+        """
+        1 -> [2, 3, 4, 5, 6, 7]
+        """
+        children_root = self.discussion_manager._get_unit(root).get().children
+        parent1 = self.discussion_manager._get_unit(unit_id1).get().parent
+        children1 = self.discussion_manager._get_unit(unit_id1).get().children
+        parent2 = self.discussion_manager._get_unit(unit_id2).get().parent
+        children2 = self.discussion_manager._get_unit(unit_id2).get().children
+        parent3 = self.discussion_manager._get_unit(unit_id3).get().parent
+        children3 = self.discussion_manager._get_unit(unit_id3).get().children
+        parent4 = self.discussion_manager._get_unit(unit_id4).get().parent
+        children4 = self.discussion_manager._get_unit(unit_id4).get().children
+        parent5 = self.discussion_manager._get_unit(unit_id5).get().parent
+        children5 = self.discussion_manager._get_unit(unit_id5).get().children
+        parent6 = self.discussion_manager._get_unit(unit_id6).get().parent
+        children6 = self.discussion_manager._get_unit(unit_id6).get().children
+        parent7 = self.discussion_manager._get_unit(unit_id7).get().parent
+        children7 = self.discussion_manager._get_unit(unit_id7).get().children
+
+        self.assertTrue(unit_id1 in children_root)
+        self.assertEqual(parent1, root)
+
+        self.assertEqual(len(children1), 6)
+        self.assertTrue(unit_id2 in children1)
+        self.assertTrue(unit_id3 in children1)
+        self.assertTrue(unit_id4 in children1)
+        self.assertTrue(unit_id5 in children1)
+        self.assertTrue(unit_id6 in children1)
+        self.assertTrue(unit_id7 in children1)
+        self.assertEqual(parent2, unit_id1)
+        self.assertEqual(parent3, unit_id1)
+        self.assertEqual(parent4, unit_id1)
+        self.assertEqual(parent5, unit_id1)
+        self.assertEqual(parent6, unit_id1)
+        self.assertEqual(parent7, unit_id1)
+
+        self.assertEqual(len(children2), 0)
+        self.assertEqual(len(children3), 0)
+        self.assertEqual(len(children4), 0)
+        self.assertEqual(len(children5), 0)
+        self.assertEqual(len(children6), 0)
+        self.assertEqual(len(children7), 0)
+
         self.discussion_manager.move_cursor(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id7, position=1
         )
@@ -570,12 +776,50 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.leave(
           discussion_id=discussion_id, user_id=user_id)
 
+    def test_extract_pith(self) -> None:
+      res = self.discussion_manager._retrieve_links(
+        "<cite>tears</cite> Something seems to be alright <cite>happy</cite>."
+        " Everything is good <cite>fine</cite>."
+      )
+      self.assertEqual(res, ["tears", "happy", "fine"])
+
+    def test_hiding(self) -> None:
+        discussion_id = self.board_manager.create()["discussion_id"]
+        discussion = self.discussion_manager._get(discussion_id)
+        root = discussion.get().document
+
+        nickname = "monkeys"
+        user_id = self.discussion_manager.create_user(
+          discussion_id=discussion_id, nickname=nickname)["user_id"]
+        self.discussion_manager.join(
+          discussion_id=discussion_id, user_id=user_id)
+
+        added, backlinks = self.discussion_manager.add_unit(
+          discussion_id=discussion_id, 
+          pith="Monkeys are the best. Whales are the worst.", 
+          parent=root, previous=root, position=0
+        )
+        unit_id = added["unit_id"]
+
+        self.discussion_manager.request_to_edit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id
+        )        
+        res = self.discussion_manager.hide_unit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id)
+        self.assertTrue(self.discussion_manager._get_unit(unit_id).get().hidden)
+
+        res = self.discussion_manager.unhide_unit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id)
+        self.assertFalse(self.discussion_manager._get_unit(unit_id).get().hidden)
+
+        self.discussion_manager.leave(
+          discussion_id=discussion_id, user_id=user_id)
+
 """
-- get unit_ids from pith
-- how edit/add/post/send_to_doc changes refs
-- hide/unhide unit with state
-- might want to do a backlink/forward link invariance check
 - might want to do a tree invariance check?
+
+- how edit/add/post/send_to_doc changes refs
+- might want to do a backlink/forward link invariance check
 """
 
 if __name__ == "__main__":
