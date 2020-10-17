@@ -3,28 +3,29 @@ import styled from "styled-components";
 
 const StyledContainer = styled.div`
     box-sizing: border-box;
-    margin: 10px 0;
 `;
 
 const StyledUser = styled.div`
+    font-family: ${(props) => props.theme.sans};
     box-sizing: border-box;
     display: inline-block;
-    margin: 0 5px;
+   // padding: 2px;
+    margin: 5px;
     text-align: center;
     width: 25px;
     height: 25px;
-    border: 1px solid ${(props) => props.theme.textColor3};
-    background-color: ${(props) => props.theme.backgroundColor2};
-    // display: ${(props) => (props.inline ? "inline-block" : "block")};
-    // width: ${(props) => (props.inline ? "auto" : "100%")};
-    // margin: 5px ${(props) => (props.inline ? "10px" : "0")};
-   
+    border: 1px solid ${(props) =>
+        props.active ? props.theme.shade3 : props.theme.shade2};
+  //  background-color: ${(props) => props.theme.shade2};
+    color: ${(props) =>
+        props.active ? props.theme.shade3 : props.theme.shade2};
+    font-weight: 600;
 `;
 
 const UsersLayout = (props) => {
-    const users = props.users.map((user) => {
+    const users = props.users.reverse().map((user) => {
         return (
-            <StyledUser key={user.user_id}>
+            <StyledUser key={user.user_id} active={user.active}>
                 {user.nickname[0].toUpperCase()}
             </StyledUser>
         );

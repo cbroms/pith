@@ -12,14 +12,14 @@ const StyledAuthor = styled.div`
     font-family: ${(props) => props.theme.sans};
     font-weight: bold;
     font-size: ${(props) => props.theme.smallFont};
-    color: ${(props) => props.theme.textColor3};
+    color: ${(props) => props.theme.shade2};
 `;
 
 const StyledTime = styled.div`
     display: inline-block;
     font-family: ${(props) => props.theme.sans};
     font-size: ${(props) => props.theme.smallFont};
-    color: ${(props) => props.theme.textColor3};
+    color: ${(props) => props.theme.shade2};
 `;
 
 const PostLayout = (props) => {

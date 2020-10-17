@@ -6,7 +6,7 @@ const UpArrow = styled.div`
     display: block;
     width: 22px;
     height: 22px;
-    color: ${(props) => props.theme.textColor2};
+    color: inherit;
 
     ::after,
     ::before {
@@ -26,7 +26,7 @@ const UpArrow = styled.div`
     }
     ::before {
         width: 2px;
-        height: 16px;
+        height: 14px;
         left: 10px;
         background: currentColor;
     }
@@ -85,8 +85,8 @@ const RightDoubleChevron = styled.div`
         position: absolute;
         width: 8px;
         height: 8px;
-        border-right: 2px solid ${(props) => props.theme.textColor3};
-        border-top: 2px solid ${(props) => props.theme.textColor3};
+        border-right: 2px solid ${(props) => props.theme.shade2};
+        border-top: 2px solid ${(props) => props.theme.shade2};
         transform: rotate(45deg);
         top: 7px;
         right: 6px;
@@ -112,14 +112,14 @@ const MoveRightChevron = styled.div`
         position: absolute;
         width: 2px;
         height: 14px;
-        border-right: 2px solid ${(props) => props.theme.textColor3};
+        border-right: 2px solid ${(props) => props.theme.shade2};
         top: 2px;
         right: 0;
     }
     ::after {
         width: 8px;
         height: 8px;
-        border-bottom: 2px solid ${(props) => props.theme.textColor3};
+        border-bottom: 2px solid ${(props) => props.theme.shade2};
         transform: rotate(-45deg);
         right: 6px;
         top: 5px;
@@ -148,19 +148,15 @@ const Dot = styled.div`
     box-sizing: border-box;
     position: relative;
     display: block;
-    width: 22px;
-    height: 22px;
-    color: ${(props) => props.theme.textColor2};
+    width: 11px;
+    margin: 6px 4px;
+    height: 11px;
+    border: 2px solid ${(props) => props.theme.shade2};
+   // background-color: ${(props) => props.theme.shade2};
+    border-radius: 50%;
 
-    ::after {
-        content: "•";
-        display: block;
-        box-sizing: border-box;
-        position: absolute;
-        width: 10px;
-        height: 10px;
-        left: 7px;
-        top: 0;
+    :hover {
+         border: 1px solid ${(props) => props.theme.shade3};
     }
 `;
 
@@ -172,7 +168,7 @@ const DiscussionIcon = styled.div`
     width: 20px;
     height: 2px;
     transform: scale(0.75);
-    background-color: ${(props) => props.theme.textColor2};
+    background-color: ${(props) => props.theme.shade2};
 
     ::after,
     ::before {
@@ -181,7 +177,7 @@ const DiscussionIcon = styled.div`
         display: block;
         width: 20px;
         height: 2px;
-        background-color: ${(props) => props.theme.textColor2};
+        background-color: ${(props) => props.theme.shade2};
     }
     ::after,
     ::before {
@@ -205,7 +201,7 @@ const DocumentIcon = styled.div`
     width: 14px;
     right: 0;
     height: 2px;
-    background-color: ${(props) => props.theme.textColor2};
+    background-color: ${(props) => props.theme.shade2};
 
     ::after,
     ::before {
@@ -215,7 +211,7 @@ const DocumentIcon = styled.div`
         width: 20px;
         height: 2px;
         right: 0;
-        background-color: ${(props) => props.theme.textColor2};
+        background-color: ${(props) => props.theme.shade2};
     }
     ::after,
     ::before {
@@ -236,18 +232,18 @@ const MenuIcon = styled.div`
     position: relative;
     margin: 5px 10px;
     display: inline-block;
-    width: 20px;
+    width: 16px;
     height: 2px;
-    background-color: ${(props) => props.theme.textColor2};
+    background-color: ${(props) => props.theme.shade2};
 
     ::after,
     ::before {
         box-sizing: border-box;
         position: relative;
         display: block;
-        width: 20px;
+        width: 16px;
         height: 2px;
-        background-color: ${(props) => props.theme.textColor2};
+        background-color: ${(props) => props.theme.shade2};
     }
     ::after,
     ::before {

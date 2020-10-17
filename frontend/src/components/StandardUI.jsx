@@ -17,14 +17,14 @@ const Button = styled.button`
     display: inline-block;
     padding: ${(props) => (props.noBackground ? "0" : "10px")};
     margin: ${(props) => (props.noBackground ? "5px 0" : "0")};
-    color: ${(props) => props.theme.textColor2};
+    color: ${(props) => props.theme.shade2};
     vertical-align: middle;
     background-color: ${(props) =>
-        props.noBackground ? "inherit" : props.theme.backgroundColor2};
+        props.noBackground ? "inherit" : props.theme.shade2};
 
     :hover {
         background-color: ${(props) =>
-            props.noBackground ? "inherit" : props.theme.backgroundColor3};
+            props.noBackground ? "inherit" : props.theme.shade2};
     }
 `;
 

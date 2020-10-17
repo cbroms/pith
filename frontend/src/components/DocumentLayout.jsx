@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 const StyledContainer = styled.div`
     grid-template-columns: [ancestor] 40px [ancestor-end document] 1fr [document-end timeline] 40px [timeline-end];
-    grid-template-rows: [participants] 60px [participants-end content] 1fr [content-end];
+    grid-template-rows: [participants] 40px [participants-end content] 1fr [content-end];
     display: grid;
     height: 100%;
     max-height: 100%;
@@ -29,6 +29,7 @@ const StyledParticipantList = styled.div`
     grid-row-start: participants;
     grid-row-end: participants-end;
     // background-color: Khaki;
+    justify-self: end;
 
     @media (max-width: 768px) {
         grid-column-start: ancestor;
@@ -41,7 +42,7 @@ const StyledTimeline = styled.div`
     grid-column-end: timeline-end;
     grid-row-start: content;
     grid-row-end: content-end;
-
+    justify-self: end;
     // background-color: Khaki;
 
     @media (max-width: 768px) {

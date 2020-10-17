@@ -12,10 +12,10 @@ const StyledContainer = styled.div`
 const StyledAncestorLayer = styled.div`
     width: 40px;
     cursor: pointer;
-    color: ${(props) => props.theme.textColor3};
+    color: ${(props) => props.theme.shade2};
 
     :hover {
-        color: ${(props) => props.theme.textColor1};
+        color: ${(props) => props.theme.shade3};
     }
 `;
 

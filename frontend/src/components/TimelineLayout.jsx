@@ -23,17 +23,17 @@ const StyledContainer = styled.div`
 
 const StyledTooltipTime = styled.div`
     font-family: ${(props) => props.theme.sans};
-    color: ${(props) => props.theme.textColor2};
+    color: ${(props) => props.theme.shade2};
     font-size: ${(props) => props.theme.smallFont};
 `;
 
 const StyledUnitRepresentation = styled.div`
     box-sizing: border-box;
-    width: 20px;
+    width: 10px;
     height: calc(${(props) => props.scaledDuration}% - 10px);
-
-    margin: 5px auto;
-    border: 1px solid ${(props) => props.theme.textColor3};
+    background-color:  ${(props) => props.theme.shade2};
+    margin: 5px;
+    //border-right: 1px solid ${(props) => props.theme.shade2};
     cursor: pointer;
 
     @media (max-width: 768px) {
@@ -44,8 +44,8 @@ const StyledUnitRepresentation = styled.div`
     }
 
     :hover {
-        //border: 1px solid ${(props) => props.theme.textColor1};
-        background-color: ${(props) => props.theme.backgroundColor2};
+        //border-right: 1px solid ${(props) => props.theme.shade3};
+        background-color: ${(props) => props.theme.shade3};
     }
 `;
 
