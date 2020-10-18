@@ -81,9 +81,11 @@ class DiscussionManager:
     def _retrieve_links(self, pith):
       return constants.link_pattern.findall(pith)
 
-    def _move_units(self, discussion_id, user_id, units, parent_id):
+    def _move_units(self, discussion_id, user_id, units, parent_id, position):
+        discussion = self._get(discussion_id)
+        user = discussion.get().users.filter(id=user_id).get()
         parent = self._get_unit(parent_id)
-        counter = len(parent.get().children)
+        counter = position
 
         response = []
         for unit_id in units:
@@ -95,6 +97,10 @@ class DiscussionManager:
             set__parent=parent_id,
             set__position=counter
           )
+          self._get_unit(old_parent).update(
+            pull__children=unit_id
+          )
+
           counter += 1
           self._release_position(unit_id)
 
@@ -106,7 +112,8 @@ class DiscussionManager:
             "old_position": old_position,
           })
 
-        parent.update(push__children=units)
+        children = parent.get().children
+        parent.update(set__children=children[:position] + units + children[position:])
 
         return response
 
@@ -538,25 +545,30 @@ class DiscussionManager:
         position = user.cursor.position if user.cursor.position != -1 else \
           len(self._get_unit(user.cursor.unit_id).get().children)
         forward_links = chat_unit.forward_links
+        parent_id = user.cursor.unit_id
 
         unit = Unit(
           pith=chat_unit.pith,
           forward_links=forward_links,
-          parent=user.cursor.unit_id,
+          parent=parent_id,
           position=position,
           source_unit_id=unit_id, # from chat
           original_pith=chat_unit.pith
         )
         unit.save()
 
+        parent = self._get_unit(parent_id)
+        children = parent.get().children
+        parent.update(set__children=children[:position] + [unit.id] + children[position:])
+
         backlinks = []
         for f in forward_links:
           self._get_unit(f).update(
-            push__backward_links = unit_id
+            push__backward_links = unit.id
           )
           backlinks.append({
             "unit_id": f,
-            "backlink": unit_id
+            "backlink": unit.id
           })
         
         added = {
@@ -641,6 +653,10 @@ class DiscussionManager:
         unit.save()
         unit_id = unit.id
 
+        parent_ptr = self._get_unit(parent)
+        children = parent_ptr.get().children
+        parent_ptr.update(set__children=children[:final_position] + [unit_id] + children[final_position:])
+
         # make backlinks
         backlinks = []
         for f in unit.forward_links:
@@ -694,7 +710,9 @@ class DiscussionManager:
         discussion = self._get(discussion_id)
         user = discussion.get().users.filter(id=user_id).get()
         parent_id = user.cursor.unit_id
-        return self._move_units(discussion_id, user_id, units, parent_id)
+        position = user.cursor.position if user.cursor.position != -1 else \
+          len(self._get_unit(user.cursor.unit_id).get().children)
+        return self._move_units(discussion_id, user_id, units, parent_id, position)
 
     @_check_discussion_id
     @_check_user_id
@@ -717,7 +735,7 @@ class DiscussionManager:
           parent=parent_id, previous=None, position=position
         )  
         repositioned_units = self._move_units(discussion_id, user_id, units, 
-          added_unit["unit_id"])
+          added_unit["unit_id"], 0) # put at head
 
         return repositioned_units, added_unit
 

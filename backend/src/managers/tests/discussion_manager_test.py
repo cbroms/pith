@@ -459,7 +459,7 @@ class DiscussionManagerTest(unittest.TestCase):
         )
         unit_id5 = added["unit_id"]
         
-        self.discussion_manager.get_unit_page(
+        res = self.discussion_manager.get_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id5
         )
         self.assertEqual(res["cursor"].unit_id, unit_id5)
@@ -760,18 +760,25 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertEqual(len(children6), 0)
         self.assertEqual(len(children7), 0)
 
-        self.discussion_manager.move_cursor(
-          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id7, position=1
+        res = self.discussion_manager.move_cursor(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id7, position=0
         )
+
+        user = discussion.get().users.filter(id=user_id).get()
+        self.assertEqual(user.cursor.unit_id, unit_id7)
 
         self.discussion_manager.leave(
           discussion_id=discussion_id, user_id=user_id)
+
+        user = discussion.get().users.filter(id=user_id).get()
+        self.assertEqual(user.cursor.unit_id, unit_id7)
+
         res = self.discussion_manager.join(
           discussion_id=discussion_id, user_id=user_id)
 
         # we are where we left off
         self.assertEqual(res["cursor"].unit_id, unit_id7)
-        self.assertEqual(res["cursor"].position, 1)
+        self.assertEqual(res["cursor"].position, 0)
 
         self.discussion_manager.leave(
           discussion_id=discussion_id, user_id=user_id)
@@ -809,18 +816,232 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertTrue(self.discussion_manager._get_unit(unit_id).get().hidden)
 
         res = self.discussion_manager.unhide_unit(
-          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id)
+          discussion_id=discussion_id, unit_id=unit_id)
         self.assertFalse(self.discussion_manager._get_unit(unit_id).get().hidden)
 
         self.discussion_manager.leave(
           discussion_id=discussion_id, user_id=user_id)
 
-"""
-- might want to do a tree invariance check?
+    def test_network(self) -> None:
+        discussion_id = self.board_manager.create()["discussion_id"]
+        discussion = self.discussion_manager._get(discussion_id)
+        root = discussion.get().document
 
-- how edit/add/post/send_to_doc changes refs
-- might want to do a backlink/forward link invariance check
-"""
+        nickname = "whales"
+        user_id = self.discussion_manager.create_user(
+          discussion_id=discussion_id, nickname=nickname)["user_id"]
+        self.discussion_manager.join(
+          discussion_id=discussion_id, user_id=user_id)
+
+        """
+        1
+        """
+        added, backlinks = self.discussion_manager.add_unit(
+          discussion_id=discussion_id, 
+          pith="", parent=root, previous=root, position=0
+        )
+        unit_id1 = added["unit_id"]
+
+        forward1 = self.discussion_manager._get_unit(unit_id1).get().forward_links
+        backward1 = self.discussion_manager._get_unit(unit_id1).get().backward_links
+
+        self.assertEqual(len(forward1), 0)
+        self.assertEqual(len(backward1), 0)
+
+        """
+        1
+        2 -> 1
+        """
+        res, back = self.discussion_manager.post(discussion_id=discussion_id, 
+          user_id=user_id, pith="<cite>{}</cite>".format(unit_id1))
+        unit_id2 = res["unit_id"]
+
+        forward1 = self.discussion_manager._get_unit(unit_id1).get().forward_links
+        backward1 = self.discussion_manager._get_unit(unit_id1).get().backward_links
+        forward2 = self.discussion_manager._get_unit(unit_id2).get().forward_links
+        backward2 = self.discussion_manager._get_unit(unit_id2).get().backward_links
+
+        self.assertEqual(len(forward1), 0)
+        self.assertEqual(len(backward1), 1)
+        self.assertTrue(unit_id2 in backward1)
+
+        self.assertEqual(len(forward2), 1)
+        self.assertTrue(unit_id1 in forward2)
+        self.assertEqual(len(backward2), 0)
+
+        """
+        1
+        2 -> 1
+        3 -> 1, 2
+        """
+        added, backlinks = self.discussion_manager.add_unit(
+          discussion_id=discussion_id, 
+          pith="<cite>{}</cite> <cite>{}</cite>".format(unit_id1, unit_id2), 
+          parent=root, previous=root, position=0
+        )
+        unit_id3 = added["unit_id"]
+        
+        forward1 = self.discussion_manager._get_unit(unit_id1).get().forward_links
+        backward1 = self.discussion_manager._get_unit(unit_id1).get().backward_links
+        forward2 = self.discussion_manager._get_unit(unit_id2).get().forward_links
+        backward2 = self.discussion_manager._get_unit(unit_id2).get().backward_links
+        forward3 = self.discussion_manager._get_unit(unit_id3).get().forward_links
+        backward3 = self.discussion_manager._get_unit(unit_id3).get().backward_links
+
+        self.assertEqual(len(forward1), 0)
+        self.assertEqual(len(backward1), 2)
+        self.assertTrue(unit_id2 in backward1)
+        self.assertTrue(unit_id3 in backward1)
+
+        self.assertEqual(len(forward2), 1)
+        self.assertTrue(unit_id1 in forward2)
+        self.assertEqual(len(backward2), 1)
+        self.assertTrue(unit_id3 in backward2)
+
+        self.assertEqual(len(forward3), 2)
+        self.assertTrue(unit_id1 in forward3)
+        self.assertTrue(unit_id2 in forward3)
+        self.assertEqual(len(backward3), 0)
+
+        """
+        1
+        2 -> 1
+        3 -> 1, 2
+        4(2 -> 1)
+        """
+        res, back = self.discussion_manager.send_to_doc(discussion_id=discussion_id,
+          user_id=user_id, unit_id=unit_id2)        
+        unit_id4 = res["unit_id"]
+
+        forward1 = self.discussion_manager._get_unit(unit_id1).get().forward_links
+        backward1 = self.discussion_manager._get_unit(unit_id1).get().backward_links
+        forward2 = self.discussion_manager._get_unit(unit_id2).get().forward_links
+        backward2 = self.discussion_manager._get_unit(unit_id2).get().backward_links
+        forward3 = self.discussion_manager._get_unit(unit_id3).get().forward_links
+        backward3 = self.discussion_manager._get_unit(unit_id3).get().backward_links
+        forward4 = self.discussion_manager._get_unit(unit_id4).get().forward_links
+        backward4 = self.discussion_manager._get_unit(unit_id4).get().backward_links
+        source4 = self.discussion_manager._get_unit(unit_id4).get().source_unit_id
+
+        self.assertEqual(source4, unit_id2)
+
+        self.assertEqual(len(forward1), 0)
+        self.assertEqual(len(backward1), 3)
+        self.assertTrue(unit_id2 in backward1)
+        self.assertTrue(unit_id3 in backward1)
+        self.assertTrue(unit_id4 in backward1)
+
+        self.assertEqual(len(forward2), 1)
+        self.assertTrue(unit_id1 in forward2)
+        self.assertEqual(len(backward2), 1)
+        self.assertTrue(unit_id3 in backward2)
+
+        self.assertEqual(len(forward3), 2)
+        self.assertTrue(unit_id1 in forward3)
+        self.assertTrue(unit_id2 in forward3)
+        self.assertEqual(len(backward3), 0)
+
+        self.assertEqual(len(forward4), 1)
+        self.assertTrue(unit_id1 in forward4)
+        self.assertEqual(len(backward4), 0) # is not directly backward-referenced
+
+        """
+        1
+        2 -> 1
+        3 -> 1, 2
+        4 -> 2, 3
+        """
+        self.discussion_manager.request_to_edit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4
+        )        
+        edited, removed, added = self.discussion_manager.edit_unit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4,
+          pith="<cite>{}</cite> <cite>{}</cite>".format(unit_id2, unit_id3)
+        ) # now cites original post 
+
+        forward1 = self.discussion_manager._get_unit(unit_id1).get().forward_links
+        backward1 = self.discussion_manager._get_unit(unit_id1).get().backward_links
+        forward2 = self.discussion_manager._get_unit(unit_id2).get().forward_links
+        backward2 = self.discussion_manager._get_unit(unit_id2).get().backward_links
+        forward3 = self.discussion_manager._get_unit(unit_id3).get().forward_links
+        backward3 = self.discussion_manager._get_unit(unit_id3).get().backward_links
+        forward4 = self.discussion_manager._get_unit(unit_id4).get().forward_links
+        backward4 = self.discussion_manager._get_unit(unit_id4).get().backward_links
+        source4 = self.discussion_manager._get_unit(unit_id4).get().source_unit_id
+
+        self.assertEqual(source4, unit_id2)
+
+        self.assertEqual(len(forward1), 0)
+        self.assertEqual(len(backward1), 2)
+        self.assertTrue(unit_id2 in backward1)
+        self.assertTrue(unit_id3 in backward1)
+
+        self.assertEqual(len(forward2), 1)
+        self.assertTrue(unit_id1 in forward2)
+        self.assertEqual(len(backward2), 2)
+        self.assertTrue(unit_id3 in backward2)
+        self.assertTrue(unit_id4 in backward2)
+
+        self.assertEqual(len(forward3), 2)
+        self.assertTrue(unit_id1 in forward3)
+        self.assertTrue(unit_id2 in forward3)
+        self.assertEqual(len(backward3), 1)
+        self.assertTrue(unit_id4 in backward3)
+
+        self.assertEqual(len(forward4), 2)
+        self.assertTrue(unit_id2 in forward4)
+        self.assertTrue(unit_id3 in forward4)
+        self.assertEqual(len(backward4), 0)
+
+        """
+        1
+        2 -> 1
+        3 -> 2, 4
+        4 -> 2, 3
+        """
+        self.discussion_manager.request_to_edit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id3
+        )        
+        edited, removed, added = self.discussion_manager.edit_unit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id3,
+          pith="<cite>{}</cite> <cite>{}</cite>".format(unit_id2, unit_id4)
+        )        
+
+        forward1 = self.discussion_manager._get_unit(unit_id1).get().forward_links
+        backward1 = self.discussion_manager._get_unit(unit_id1).get().backward_links
+        forward2 = self.discussion_manager._get_unit(unit_id2).get().forward_links
+        backward2 = self.discussion_manager._get_unit(unit_id2).get().backward_links
+        forward3 = self.discussion_manager._get_unit(unit_id3).get().forward_links
+        backward3 = self.discussion_manager._get_unit(unit_id3).get().backward_links
+        forward4 = self.discussion_manager._get_unit(unit_id4).get().forward_links
+        backward4 = self.discussion_manager._get_unit(unit_id4).get().backward_links
+
+        self.assertEqual(source4, unit_id2)
+
+        self.assertEqual(len(forward1), 0)
+        self.assertEqual(len(backward1), 1)
+        self.assertTrue(unit_id2 in backward1)
+
+        self.assertEqual(len(forward2), 1)
+        self.assertTrue(unit_id1 in forward2)
+        self.assertEqual(len(backward2), 2)
+        self.assertTrue(unit_id3 in backward2)
+        self.assertTrue(unit_id4 in backward2)
+
+        self.assertEqual(len(forward3), 2)
+        self.assertTrue(unit_id2 in forward3)
+        self.assertTrue(unit_id4 in forward3)
+        self.assertEqual(len(backward3), 1)
+        self.assertTrue(unit_id4 in backward3)
+
+        self.assertEqual(len(forward4), 2)
+        self.assertTrue(unit_id2 in forward4)
+        self.assertTrue(unit_id3 in forward4)
+        self.assertEqual(len(backward4), 1)
+        self.assertTrue(unit_id3 in backward4)
+
+        self.discussion_manager.leave(
+          discussion_id=discussion_id, user_id=user_id)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
