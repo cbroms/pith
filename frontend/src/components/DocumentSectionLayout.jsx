@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 
 import { DownChevron, RightChevron, RightDoubleChevron } from "./Symbols";
@@ -12,8 +12,7 @@ const StyledUnitContainer = styled.div`
     display: grid;
     width: 100%;
     grid-template-columns: [toggle] ${(props) => (props.level === 2 ? 30 : 0)}px [toggle-end unit] 1fr [unit-end];
-    grid-template-rows: [content] 1fr [content-end];
-    margin: 5px 0;
+    grid-template-rows: [drag-marker] 12px [drag-marker-end content] 1fr [content-end];
 `;
 
 const StyledToggle = styled.div`
@@ -34,13 +33,7 @@ const StyledUnitAndEnter = styled.div`
     display: grid;
     width: 100%;
     grid-template-columns: [unit] 1fr [unit-end open] 40px [open-end];
-
-    grid-template-rows: [drag-marker] 5px [drag-marker-end content] 1fr ${(
-            props
-        ) =>
-            props.last
-                ? "[content-end end-drag-marker] 5px [end-drag-marker-end]"
-                : "[content-end]"};
+    grid-template-rows: [content] 1fr [content-end];
 `;
 const StyledUnit = styled.div`
     box-sizing: border-box;
@@ -51,8 +44,8 @@ const StyledUnit = styled.div`
 
     border: ${(props) =>
         props.over
-            ? "1px solid " + props.theme.shade3
-            : "1px solid transparent"};
+            ? "2px solid " + props.theme.shade3
+            : "2px solid transparent"};
 
     :active {
         cursor: grabbing;
@@ -68,68 +61,77 @@ const StyledEnter = styled.div`
 
 const StyledDragMarker = styled.div`
     box-sizing: border-box;
-    grid-column-start: unit;
+    grid-column-start: toggle;
     grid-column-end: open-end;
     grid-row-start: drag-marker;
     grid-row-end: drag-marker-end;
-
-    background-color: ${(props) =>
-        props.over ? props.theme.shade3 : "inherit"};
 `;
 
 const StyledEndDragMarker = styled.div`
     box-sizing: border-box;
-    grid-column-start: unit;
-    grid-column-end: open-end;
-    grid-row-start: end-drag-marker;
-    grid-row-end: end-drag-marker-end;
+    width: 100%;
+    height: 12px;
+`;
 
+const StyledDragMarkerLine = styled.div`
+    margin: 4px 0;
+    height: 3px;
     background-color: ${(props) =>
         props.over ? props.theme.shade3 : "inherit"};
 `;
 
-const StyledEnterButton = styled(Button)`
+const StyledButton = styled(Button)`
     margin: 5px auto;
     display: block;
 `;
 
-const StyledToggleButton = styled(Button)`
-    margin-top: 15px;
-`;
-
 const DocumentSectionLayout = (props) => {
+    const ref = useRef();
+
     const [isOpen, toggleOpen] = useState(props.level !== 2);
+
+    useEffect(() => {
+        // automatically open the expanded view if a child is added
+        if (
+            props.level === 2 &&
+            props.children.length > 0 &&
+            ref.current < props.children.length
+        ) {
+            toggleOpen(true);
+        }
+        ref.current = props.children?.length;
+    }, [props.children]);
 
     const toggleButton =
         props.level === 2 ? (
-            <StyledToggleButton
-                onClick={() => toggleOpen(!isOpen)}
-                noBackground
-            >
+            <StyledButton onClick={() => toggleOpen(!isOpen)} noBackground>
                 {isOpen ? <DownChevron /> : <RightChevron />}
-            </StyledToggleButton>
+            </StyledButton>
         ) : null;
 
     const enterButton =
         props.level > 1 ? (
-            <StyledEnterButton onClick={() => console.log("open")} noBackground>
+            <StyledButton onClick={() => console.log("open")} noBackground>
                 <RightDoubleChevron />
-            </StyledEnterButton>
+            </StyledButton>
         ) : null;
 
     return (
         <StyledContainer level={props.level}>
-            <StyledUnitContainer level={props.level}>
-                <StyledToggle>{toggleButton}</StyledToggle>
-                <StyledUnitAndEnter last={props.last}>
-                    <StyledDragMarker
-                        draggable
+            <StyledUnitContainer level={props.level} last={props.last}>
+                <StyledDragMarker
+                    draggable
+                    onDragOver={props.onDragOver}
+                    onDragEnter={(e) => props.onDragEnter(e, false, false)}
+                >
+                    <StyledDragMarkerLine
                         over={
                             props.over && !props.overAtEnd && !props.overAsChild
                         }
-                        onDragOver={props.onDragOver}
-                        onDragEnter={(e) => props.onDragEnter(e, false, false)}
                     />
+                </StyledDragMarker>
+                <StyledToggle>{toggleButton}</StyledToggle>
+                <StyledUnitAndEnter>
                     <StyledUnit
                         onDragEnter={(e) => props.onDragEnter(e, true, false)}
                         draggable
@@ -141,19 +143,20 @@ const DocumentSectionLayout = (props) => {
                         {props.pith}
                     </StyledUnit>
                     <StyledEnter>{enterButton}</StyledEnter>
-                    {props.last ? (
-                        <StyledEndDragMarker
-                            draggable
-                            over={props.over && props.overAtEnd}
-                            onDragOver={props.onDragOver}
-                            onDragEnter={(e) =>
-                                props.onDragEnter(e, false, true)
-                            }
-                        />
-                    ) : null}
                 </StyledUnitAndEnter>
             </StyledUnitContainer>
             {isOpen ? props.children : null}
+            {props.last ? (
+                <StyledEndDragMarker
+                    draggable
+                    onDragOver={props.onDragOver}
+                    onDragEnter={(e) => props.onDragEnter(e, false, true)}
+                >
+                    <StyledDragMarkerLine
+                        over={props.over && props.overAtEnd}
+                    />
+                </StyledEndDragMarker>
+            ) : null}
         </StyledContainer>
     );
 };
