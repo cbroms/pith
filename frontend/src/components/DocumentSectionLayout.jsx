@@ -34,12 +34,13 @@ const StyledUnitAndEnter = styled.div`
     display: grid;
     width: 100%;
     grid-template-columns: [unit] 1fr [unit-end open] 40px [open-end];
-    grid-template-rows: [content] 1fr [content-end];
 
-    border: 1px solid transparent;
-    :hover {
-        border: 1px solid ${(props) => props.theme.shade2};
-    }
+    grid-template-rows: [drag-marker] 5px [drag-marker-end content] 1fr ${(
+            props
+        ) =>
+            props.last
+                ? "[content-end end-drag-marker] 5px [end-drag-marker-end]"
+                : "[content-end]"};
 `;
 const StyledUnit = styled.div`
     box-sizing: border-box;
@@ -47,6 +48,15 @@ const StyledUnit = styled.div`
     grid-column-end: unit-end;
     grid-row-start: content;
     grid-row-end: content-end;
+
+    border: ${(props) =>
+        props.over
+            ? "1px solid " + props.theme.shade3
+            : "1px solid transparent"};
+
+    :active {
+        cursor: grabbing;
+    }
 `;
 
 const StyledEnter = styled.div`
@@ -56,9 +66,35 @@ const StyledEnter = styled.div`
     grid-row-end: content-end;
 `;
 
-const StyledButton = styled(Button)`
+const StyledDragMarker = styled.div`
+    box-sizing: border-box;
+    grid-column-start: unit;
+    grid-column-end: open-end;
+    grid-row-start: drag-marker;
+    grid-row-end: drag-marker-end;
+
+    background-color: ${(props) =>
+        props.over ? props.theme.shade3 : "inherit"};
+`;
+
+const StyledEndDragMarker = styled.div`
+    box-sizing: border-box;
+    grid-column-start: unit;
+    grid-column-end: open-end;
+    grid-row-start: end-drag-marker;
+    grid-row-end: end-drag-marker-end;
+
+    background-color: ${(props) =>
+        props.over ? props.theme.shade3 : "inherit"};
+`;
+
+const StyledEnterButton = styled(Button)`
     margin: 5px auto;
     display: block;
+`;
+
+const StyledToggleButton = styled(Button)`
+    margin-top: 15px;
 `;
 
 const DocumentSectionLayout = (props) => {
@@ -66,25 +102,55 @@ const DocumentSectionLayout = (props) => {
 
     const toggleButton =
         props.level === 2 ? (
-            <Button onClick={() => toggleOpen(!isOpen)} noBackground>
+            <StyledToggleButton
+                onClick={() => toggleOpen(!isOpen)}
+                noBackground
+            >
                 {isOpen ? <DownChevron /> : <RightChevron />}
-            </Button>
+            </StyledToggleButton>
         ) : null;
 
     const enterButton =
         props.level > 1 ? (
-            <StyledButton onClick={() => console.log("open")} noBackground>
+            <StyledEnterButton onClick={() => console.log("open")} noBackground>
                 <RightDoubleChevron />
-            </StyledButton>
+            </StyledEnterButton>
         ) : null;
 
     return (
         <StyledContainer level={props.level}>
             <StyledUnitContainer level={props.level}>
                 <StyledToggle>{toggleButton}</StyledToggle>
-                <StyledUnitAndEnter>
-                    <StyledUnit>{props.pith}</StyledUnit>
+                <StyledUnitAndEnter last={props.last}>
+                    <StyledDragMarker
+                        draggable
+                        over={
+                            props.over && !props.overAtEnd && !props.overAsChild
+                        }
+                        onDragOver={props.onDragOver}
+                        onDragEnter={(e) => props.onDragEnter(e, false, false)}
+                    />
+                    <StyledUnit
+                        onDragEnter={(e) => props.onDragEnter(e, true, false)}
+                        draggable
+                        onDragOver={props.onDragOver}
+                        onDragStart={props.onDragStart}
+                        onDragEnd={props.onDragEnd}
+                        over={props.over && props.overAsChild}
+                    >
+                        {props.pith}
+                    </StyledUnit>
                     <StyledEnter>{enterButton}</StyledEnter>
+                    {props.last ? (
+                        <StyledEndDragMarker
+                            draggable
+                            over={props.over && props.overAtEnd}
+                            onDragOver={props.onDragOver}
+                            onDragEnter={(e) =>
+                                props.onDragEnter(e, false, true)
+                            }
+                        />
+                    ) : null}
                 </StyledUnitAndEnter>
             </StyledUnitContainer>
             {isOpen ? props.children : null}

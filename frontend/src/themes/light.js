@@ -1,7 +1,7 @@
 const light = {
     type: "light",
     animation: ".3s ease-out",
-    shade1: "#c6c6c6",
+    shade1: "#e2e2e2",
     shade2: "#7c7c7c",
     shade3: "#0f0f0f",
     backgroundColor0: "#e8e8e8",
@@ -11,7 +11,7 @@ const light = {
     smallFont: "0.8rem",
     mediumFont: "1rem",
     largeFont: "1.25rem",
-    extraLargeFont: "1.4rem",
+    extraLargeFont: "1.5rem",
     sans: "'Source Sans Pro', sans-serif",
     serif: "'Source Serif Pro', serif",
 };

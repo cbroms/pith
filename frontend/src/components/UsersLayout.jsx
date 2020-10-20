@@ -23,7 +23,7 @@ const StyledUser = styled.div`
 `;
 
 const UsersLayout = (props) => {
-    const users = props.users.reverse().map((user) => {
+    const users = props.users.map((user) => {
         return (
             <StyledUser key={user.user_id} active={user.active}>
                 {user.nickname[0].toUpperCase()}
