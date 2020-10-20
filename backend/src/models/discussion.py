@@ -22,9 +22,9 @@ import uuid
 
 
 class Unit(Document):
-  """
-  Text-searchable over `pith`.
-  """
+    """
+    Text-searchable over `pith`.
+    """
 
     id = StringField(default=lambda: uuid.uuid4().hex, primary_key=True)
     """
@@ -143,7 +143,6 @@ class Unit(Document):
     :requires: False
     :nullable: True
     """
-Unit.create_index([('pith', 'text')])
 
 class Cursor(EmbeddedDocument):
     """
