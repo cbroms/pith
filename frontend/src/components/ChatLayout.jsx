@@ -2,7 +2,6 @@ import React from "react";
 import styled from "styled-components";
 
 import UnitLayout from "./UnitLayout";
-import TextEditorLayout from "./TextEditorLayout";
 
 const StyledContainer = styled.div`
     box-sizing: border-box;
@@ -45,9 +44,7 @@ const ChatLayout = (props) => {
             <StyledChatOverflow>
                 <StyledChat>{props.children}</StyledChat>
             </StyledChatOverflow>
-            <StyledChatEditor>
-                <TextEditorLayout />
-            </StyledChatEditor>
+            <StyledChatEditor>{props.editor}</StyledChatEditor>
         </StyledContainer>
     );
 };

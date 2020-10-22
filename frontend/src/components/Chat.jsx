@@ -10,6 +10,7 @@ import ChatLayout from "./ChatLayout";
 import PostUnitLayout from "./PostUnitLayout";
 import PostLayout from "./PostLayout";
 import Unit from "./Unit";
+import TextEditor from "./TextEditor";
 
 dayjs.extend(calendar);
 dayjs.extend(utc);
@@ -126,7 +127,15 @@ const Chat = (props) => {
             </PostLayout>
         );
     });
-    return <ChatLayout>{posts}</ChatLayout>;
+
+    const editor = (
+        <TextEditor
+            openSearch={props.openSearch}
+            closeSearch={props.closeSearch}
+            setQuery={props.setQuery}
+        />
+    );
+    return <ChatLayout editor={editor}>{posts}</ChatLayout>;
 };
 
 export default Chat;

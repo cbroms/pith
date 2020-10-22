@@ -1,10 +1,10 @@
 import React from "react";
+import ContentEditable from "react-contenteditable";
+
 import styled from "styled-components";
 
 import { Button } from "./StandardUI";
 import { UpArrow } from "./Symbols";
-
-import TextEditor from "./TextEditor";
 
 const StyledButton = styled(Button)`
     position: absolute;
@@ -25,7 +25,7 @@ const StyledContainer = styled.div`
     margin: 20px 0;
 `;
 
-const StyledEditor = styled(TextEditor)`
+const StyledEditor = styled(ContentEditable)`
     box-sizing: border-box;
     display: inline-block;
    // border: ${(props) => props.theme.smallBorder};
@@ -39,7 +39,7 @@ const StyledEditor = styled(TextEditor)`
 
     :empty::after {
         color: ${(props) => props.theme.shade2};
-        content: "new message";
+        content: "type a message...";
     }
 
     :focus {
@@ -51,7 +51,7 @@ const StyledEditor = styled(TextEditor)`
 const TextEditorLayout = (props) => {
     return (
         <StyledContainer>
-            <StyledEditor />
+            <StyledEditor {...props} />
             <StyledButton>
                 <UpArrow />
             </StyledButton>

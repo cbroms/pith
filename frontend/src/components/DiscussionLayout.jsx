@@ -95,6 +95,33 @@ const StyledMenuContainer = styled.div`
     background-color: ${(props) => props.theme.shade1};
 `;
 
+const StyledSearchContainer = styled.div`
+    box-sizing: border-box;
+    transition: max-height ${(props) => props.theme.animation};
+
+    grid-column-start: document;
+    grid-column-end: document-end;
+    grid-row-start: header;
+    grid-row-end: content-end;
+    z-index: 10;
+    max-height: ${(props) => (props.active ? "100%" : "0px")};
+
+    background-color: ${(props) => props.theme.shade1};
+`;
+
+const StyledSearchContent = styled.div`
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+
+    transition: opacity ${(props) => props.theme.animation};
+    opacity: ${(props) => (props.active ? 1 : 0)};
+
+    @media (min-width: 768px) {
+        border-right: 1px solid ${(props) => props.theme.shade2};
+    }
+`;
+
 const StyledMenuContent = styled.div`
     box-sizing: border-box;
     height: 100%;
@@ -182,7 +209,6 @@ const DiscussionLayout = (props) => {
                 active={!discussionActive}
                 onClick={(e) => setDiscussionActive(true)}
             >
-                {/* <DiscussionIcon />*/}
                 <StyledTitle active={discussionActive}>Chat</StyledTitle>
             </StyledHeaderDiscussion>
             <StyledHeaderDocument
@@ -190,7 +216,6 @@ const DiscussionLayout = (props) => {
                 active={discussionActive}
                 onClick={(e) => setDiscussionActive(false)}
             >
-                {/* <DocumentIcon />*/}
                 <StyledTitle active={!discussionActive}>Doc</StyledTitle>
             </StyledHeaderDocument>
             <StyledMenuContainer active={menuActive}>
@@ -198,6 +223,11 @@ const DiscussionLayout = (props) => {
                     {props.menu}
                 </StyledMenuContent>
             </StyledMenuContainer>
+            <StyledSearchContainer active={props.searchActive}>
+                <StyledSearchContent active={props.searchActive}>
+                    {props.search}
+                </StyledSearchContent>
+            </StyledSearchContainer>
             <StyledDocumentContainer>{props.document}</StyledDocumentContainer>
             <StyledDiscussionContainer active={discussionActive}>
                 <StyledDiscussionContent menuActive={menuActive}>

@@ -1,13 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
 
 import Chat from "./Chat";
 import Document from "./Document";
 import Menu from "./Menu";
+import Search from "./Search";
 
 import DiscussionLayout from "./DiscussionLayout";
 
 const Discussion = (props) => {
-    const chat = <Chat content={props.content} posts={props.posts} />;
+    const [chatSearchOpen, setChatSearchOpen] = useState(false);
+    const [query, setQuery] = useState("");
+
+    const chat = (
+        <Chat
+            content={props.content}
+            posts={props.posts}
+            openSearch={() => setChatSearchOpen(true)}
+            closeSearch={() => setChatSearchOpen(false)}
+            setQuery={(query) => setQuery(query)}
+        />
+    );
     const doc = (
         <Document
             view={props.document}
@@ -15,9 +27,18 @@ const Discussion = (props) => {
             timeline={props.timeline}
         />
     );
+    const search = <Search query={query} />;
 
     const menu = <Menu setDarkMode={props.setDarkMode} />;
-    return <DiscussionLayout chat={chat} document={doc} menu={menu} />;
+    return (
+        <DiscussionLayout
+            chat={chat}
+            document={doc}
+            menu={menu}
+            search={search}
+            searchActive={chatSearchOpen}
+        />
+    );
 };
 
 export default Discussion;
