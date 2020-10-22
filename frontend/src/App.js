@@ -148,6 +148,7 @@ function App() {
 		<div className="App">
 			<ThemeProvider theme={theme}>
 				<Discussion
+					setDarkMode={(val) => setDarkModeActive(val)}
 					timeline={timelineDummy}
 					content={postUnits}
 					posts={postsDummy}

@@ -2,20 +2,22 @@ import React from "react";
 
 import Chat from "./Chat";
 import Document from "./Document";
+import Menu from "./Menu";
 
 import DiscussionLayout from "./DiscussionLayout";
 
 const Discussion = (props) => {
-    return (
-        <DiscussionLayout>
-            <Chat content={props.content} posts={props.posts} />
-            <Document
-                view={props.document}
-                users={props.users}
-                timeline={props.timeline}
-            />
-        </DiscussionLayout>
+    const chat = <Chat content={props.content} posts={props.posts} />;
+    const doc = (
+        <Document
+            view={props.document}
+            users={props.users}
+            timeline={props.timeline}
+        />
     );
+
+    const menu = <Menu setDarkMode={props.setDarkMode} />;
+    return <DiscussionLayout chat={chat} document={doc} menu={menu} />;
 };
 
 export default Discussion;

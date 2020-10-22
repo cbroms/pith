@@ -99,7 +99,6 @@ const StyledMenuContent = styled.div`
     box-sizing: border-box;
     height: 100%;
     width: 100%;
-    padding: ${(props) => (props.active ? 20 : 0)}px;
 
     transition: opacity ${(props) => props.theme.animation};
     opacity: ${(props) => (props.active ? 1 : 0)};
@@ -195,14 +194,14 @@ const DiscussionLayout = (props) => {
                 <StyledTitle active={!discussionActive}>Doc</StyledTitle>
             </StyledHeaderDocument>
             <StyledMenuContainer active={menuActive}>
-                <StyledMenuContent active={menuActive} />
+                <StyledMenuContent active={menuActive}>
+                    {props.menu}
+                </StyledMenuContent>
             </StyledMenuContainer>
-            <StyledDocumentContainer>
-                {props.children[1]}
-            </StyledDocumentContainer>
+            <StyledDocumentContainer>{props.document}</StyledDocumentContainer>
             <StyledDiscussionContainer active={discussionActive}>
                 <StyledDiscussionContent menuActive={menuActive}>
-                    {props.children[0]}
+                    {props.chat}
                 </StyledDiscussionContent>
             </StyledDiscussionContainer>
         </StyledContainer>
