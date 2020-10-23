@@ -2,10 +2,14 @@ import React, { useState } from "react";
 import styled from "styled-components";
 
 import { LargeHeading } from "./StandardUI";
-import { DiscussionIcon, DocumentIcon, MenuIcon, CloseIcon } from "./Symbols";
-import Chat from "./Chat";
+import { MenuIcon, CloseIcon } from "./Symbols";
 
 const StyledContainer = styled.div`
+    background-color: ${(props) => props.theme.shade1};
+    color: ${(props) => props.theme.shade3};
+`;
+
+const StyledContent = styled.div`
     display: grid;
     grid-template-columns: [logo] 40px [logo-end discussion] 1fr [discussion-end document] 1.25fr [document-end];
     grid-template-rows: [header] 40px [header-end content] calc(100vh - 40px) [content-end];
@@ -17,8 +21,8 @@ const StyledContainer = styled.div`
             [content-end];
     }
 
-    background-color: ${(props) => props.theme.shade1};
-    color: ${(props) => props.theme.shade3};
+    max-width: 2000px;
+    margin: 0 auto;
 `;
 
 const StyledHeaderLogo = styled.div`
@@ -198,42 +202,46 @@ const DiscussionLayout = (props) => {
 
     return (
         <StyledContainer>
-            <StyledHeaderLogo
-                active={menuActive}
-                onClick={(e) => setMenuActive(!menuActive)}
-            >
-                {menuActive ? <CloseIcon /> : <MenuIcon />}
-            </StyledHeaderLogo>
-            <StyledHeaderDiscussion
-                menuActive={menuActive}
-                active={!discussionActive}
-                onClick={(e) => setDiscussionActive(true)}
-            >
-                <StyledTitle active={discussionActive}>Chat</StyledTitle>
-            </StyledHeaderDiscussion>
-            <StyledHeaderDocument
-                menuActive={menuActive}
-                active={discussionActive}
-                onClick={(e) => setDiscussionActive(false)}
-            >
-                <StyledTitle active={!discussionActive}>Doc</StyledTitle>
-            </StyledHeaderDocument>
-            <StyledMenuContainer active={menuActive}>
-                <StyledMenuContent active={menuActive}>
-                    {props.menu}
-                </StyledMenuContent>
-            </StyledMenuContainer>
-            <StyledSearchContainer active={props.searchActive}>
-                <StyledSearchContent active={props.searchActive}>
-                    {props.search}
-                </StyledSearchContent>
-            </StyledSearchContainer>
-            <StyledDocumentContainer>{props.document}</StyledDocumentContainer>
-            <StyledDiscussionContainer active={discussionActive}>
-                <StyledDiscussionContent menuActive={menuActive}>
-                    {props.chat}
-                </StyledDiscussionContent>
-            </StyledDiscussionContainer>
+            <StyledContent>
+                <StyledHeaderLogo
+                    active={menuActive}
+                    onClick={(e) => setMenuActive(!menuActive)}
+                >
+                    {menuActive ? <CloseIcon /> : <MenuIcon />}
+                </StyledHeaderLogo>
+                <StyledHeaderDiscussion
+                    menuActive={menuActive}
+                    active={!discussionActive}
+                    onClick={(e) => setDiscussionActive(true)}
+                >
+                    <StyledTitle active={discussionActive}>Chat</StyledTitle>
+                </StyledHeaderDiscussion>
+                <StyledHeaderDocument
+                    menuActive={menuActive}
+                    active={discussionActive}
+                    onClick={(e) => setDiscussionActive(false)}
+                >
+                    <StyledTitle active={!discussionActive}>Doc</StyledTitle>
+                </StyledHeaderDocument>
+                <StyledMenuContainer active={menuActive}>
+                    <StyledMenuContent active={menuActive}>
+                        {props.menu}
+                    </StyledMenuContent>
+                </StyledMenuContainer>
+                <StyledSearchContainer active={props.searchActive}>
+                    <StyledSearchContent active={props.searchActive}>
+                        {props.search}
+                    </StyledSearchContent>
+                </StyledSearchContainer>
+                <StyledDocumentContainer>
+                    {props.document}
+                </StyledDocumentContainer>
+                <StyledDiscussionContainer active={discussionActive}>
+                    <StyledDiscussionContent menuActive={menuActive}>
+                        {props.chat}
+                    </StyledDiscussionContent>
+                </StyledDiscussionContainer>
+            </StyledContent>
         </StyledContainer>
     );
 };

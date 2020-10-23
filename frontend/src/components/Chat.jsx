@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import styled from "styled-components";
+
 import * as dayjs from "dayjs";
 import * as calendar from "dayjs/plugin/calendar";
 import * as utc from "dayjs/plugin/utc";
@@ -44,9 +44,7 @@ const Chat = (props) => {
 
     // calculate the post times before adding the transclusions
     for (const group of postGroups) {
-        const date = dayjs(group[0].created_at)
-            .utc()
-            .local();
+        const date = dayjs(group[0].created_at).utc().local();
 
         const formattedDate = dayjs(date).calendar(null, {
             sameDay: "[Today at] h:mm a",

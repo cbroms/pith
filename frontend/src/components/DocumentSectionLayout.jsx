@@ -100,7 +100,7 @@ const DocumentSectionLayout = (props) => {
             toggleOpen(true);
         }
         ref.current = props.children?.length;
-    }, [props.children]);
+    }, [props.children, props.level]);
 
     const toggleButton =
         props.level === 2 ? (

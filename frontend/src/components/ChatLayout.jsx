@@ -1,8 +1,6 @@
 import React from "react";
 import styled from "styled-components";
 
-import UnitLayout from "./UnitLayout";
-
 const StyledContainer = styled.div`
     box-sizing: border-box;
     background-color: ${(props) => props.theme.shade1};

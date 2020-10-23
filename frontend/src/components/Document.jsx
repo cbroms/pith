@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React from "react";
 
 import Unit from "./Unit";
 import AncestorsLayout from "./AncestorsLayout";
