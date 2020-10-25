@@ -32,9 +32,19 @@ const StyledUnitAndEnter = styled.div`
 
     display: grid;
     width: 100%;
-    grid-template-columns: [unit] 1fr [unit-end open] 40px [open-end];
+    grid-template-columns: ${(props) =>
+        props.level !== 1
+            ? "[grab] 5px [grab-end unit]"
+            : "[unit]"} 1fr [unit-end open] 40px [open-end];
     grid-template-rows: [content] 1fr [content-end];
+
+    // :hover {
+    //     .grabber {
+    //         background-color: ${(props) => props.theme.shade2};
+    //     }
+    // }
 `;
+
 const StyledUnit = styled.div`
     box-sizing: border-box;
     grid-column-start: unit;
@@ -45,6 +55,8 @@ const StyledUnit = styled.div`
     border: ${(props) =>
         props.over
             ? "2px solid " + props.theme.shade3
+            : !props.draggable && (props.level !== 1 || props.focused)
+            ? "2px solid " + props.theme.shade2
             : "2px solid transparent"};
 
     :active {
@@ -57,6 +69,26 @@ const StyledEnter = styled.div`
     grid-column-end: open-end;
     grid-row-start: content;
     grid-row-end: content-end;
+`;
+
+const StyledGrab = styled.div`
+    grid-column-start: grab;
+    grid-column-end: grab-end;
+    grid-row-start: content;
+    grid-row-end: content-end;
+
+    cursor: grab;
+    height: 100%;
+
+    :active {
+        cursor: grabbing;
+    }
+
+    border-right: 5px solid ${(props) => props.theme.shade2};
+
+    :hover {
+        border-right: 5px solid ${(props) => props.theme.shade3};
+    }
 `;
 
 const StyledDragMarker = styled.div`
@@ -120,7 +152,7 @@ const DocumentSectionLayout = (props) => {
         <StyledContainer level={props.level}>
             <StyledUnitContainer level={props.level} last={props.last}>
                 <StyledDragMarker
-                    draggable
+                    draggable={props.draggable}
                     onDragOver={props.onDragOver}
                     onDragEnter={(e) => props.onDragEnter(e, false, false)}
                 >
@@ -131,13 +163,22 @@ const DocumentSectionLayout = (props) => {
                     />
                 </StyledDragMarker>
                 <StyledToggle>{toggleButton}</StyledToggle>
-                <StyledUnitAndEnter>
+                <StyledUnitAndEnter
+                    level={props.level}
+                    draggable={props.draggable}
+                    onDragStart={props.onDragStart}
+                    onDragEnd={props.onDragEnd}
+                    onDragOver={props.onDragOver}
+                >
+                    {props.level !== 1 ? (
+                        <StyledGrab className="grabber" level={props.level} />
+                    ) : null}
                     <StyledUnit
+                        focused={props.focused}
+                        level={props.level}
                         onDragEnter={(e) => props.onDragEnter(e, true, false)}
-                        draggable
+                        draggable={props.draggable}
                         onDragOver={props.onDragOver}
-                        onDragStart={props.onDragStart}
-                        onDragEnd={props.onDragEnd}
                         over={props.over && props.overAsChild}
                     >
                         {props.pith}
@@ -148,7 +189,7 @@ const DocumentSectionLayout = (props) => {
             {isOpen ? props.children : null}
             {props.last ? (
                 <StyledEndDragMarker
-                    draggable
+                    draggable={props.draggable}
                     onDragOver={props.onDragOver}
                     onDragEnter={(e) => props.onDragEnter(e, false, true)}
                 >

@@ -14,12 +14,19 @@ class Document extends React.Component {
             documentCopy: props.view.children,
             dragged: null,
             dragTarget: null,
+            focused: null,
         };
 
         this.handleDragEnd = this.handleDragEnd.bind(this);
         this.handleDragEnter = this.handleDragEnter.bind(this);
         this.handleDragStart = this.handleDragStart.bind(this);
+
+        // this.handleFocus = this.handleFocus.bind(this)
     }
+
+    // handleFocus(id) {
+    //     if (this.state.focus !== id) this.setState({focus: id})
+    // }
 
     handleDragStart(e, childPosition, grandchildPosition) {
         this.setState({
@@ -139,6 +146,11 @@ class Document extends React.Component {
                 (grandchild, grandchildIndex) => {
                     const pithUnit = (
                         <Unit
+                            editable
+                            onFocus={() =>
+                                this.setState({ focused: grandchild.unit_id })
+                            }
+                            onBlur={() => this.setState({ focused: null })}
                             pith={grandchild.pith}
                             id={grandchild.unit_id}
                             inline
@@ -154,7 +166,9 @@ class Document extends React.Component {
 
                     return (
                         <DocumentSectionLayout
-                            draggable
+                            draggable={
+                                this.state.focused !== grandchild.unit_id
+                            }
                             onDragEnd={this.handleDragEnd}
                             onDragStart={(e) =>
                                 this.handleDragStart(
@@ -185,7 +199,14 @@ class Document extends React.Component {
                 }
             );
             const pithUnit = (
-                <Unit pith={child.pith} id={child.unit_id} inline />
+                <Unit
+                    onFocus={() => this.setState({ focused: child.unit_id })}
+                    onBlur={() => this.setState({ focused: null })}
+                    pith={child.pith}
+                    id={child.unit_id}
+                    inline
+                    editable
+                />
             );
             const over =
                 this.state.dragTarget?.child === childIndex &&
@@ -195,7 +216,7 @@ class Document extends React.Component {
             const overAtEnd = over && this.state.dragTarget?.atEnd;
             return (
                 <DocumentSectionLayout
-                    draggable
+                    draggable={this.state.focused !== child.unit_id}
                     onDragOver={(e) => e.preventDefault()}
                     onDragStart={(e) =>
                         this.handleDragStart(e, childIndex, null)
@@ -224,6 +245,11 @@ class Document extends React.Component {
         });
         const pithUnit = (
             <Unit
+                editable
+                onFocus={() =>
+                    this.setState({ focused: this.props.view.unit_id })
+                }
+                onBlur={() => this.setState({ focused: null })}
                 big={true}
                 pith={this.props.view.pith}
                 id={this.props.view.unit_id}
@@ -232,6 +258,7 @@ class Document extends React.Component {
         );
         const doc = (
             <DocumentSectionLayout
+                focused={this.state.focused === this.props.view.unit_id}
                 level={1}
                 pith={pithUnit}
                 onDragEnter={() => null}

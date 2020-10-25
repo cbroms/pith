@@ -21,7 +21,18 @@ class TextEditor extends React.Component {
   ref = React.createRef();
 
   sanitizeConf = {
-    ALLOWED_TAGS: ["b", "i", "em", "strong", "a", "p", "u"],
+    ALLOWED_TAGS: [
+      "b",
+      "i",
+      "em",
+      "strong",
+      "span",
+      "div",
+      "cite",
+      "a",
+      "p",
+      "u",
+    ],
   };
 
   sanitizeCompleteConf = {
@@ -118,12 +129,17 @@ class TextEditor extends React.Component {
   render() {
     return (
       <TextEditorLayout
+        showButton={this.props.showButton}
         innerRef={this.ref}
         className={this.props.className}
         html={this.state.html} // innerHTML of the editable div
         disabled={!this.state.editable} // use true to disable edition
         onChange={this.handleChange} // handle innerHTML change
-        onBlur={this.sanitize}
+        onFocus={this.props.onFocus || null}
+        onBlur={() => {
+          this.sanitize();
+          if (this.props.onBlur) this.props.onBlur();
+        }}
         onKeyDown={this.handleKeyDown}
       />
     );

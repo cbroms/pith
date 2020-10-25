@@ -22,17 +22,14 @@ const StyledButton = styled(Button)`
 
 const StyledContainer = styled.div`
     position: relative;
-    margin: 20px 0;
+    width: 100%;
+    margin: ${(props) => (props.showButton ? 20 : 0)}px 0;
 `;
 
 const StyledEditor = styled(ContentEditable)`
     box-sizing: border-box;
     display: inline-block;
-   // border: ${(props) => props.theme.smallBorder};
-   //background-color: IndianRed;
-    min-height: 40px;
-   // padding: 10px 0;
-    padding-right: 50px;
+    padding-right: ${(props) => (props.showButton ? 50 : 0)}px;
     width: 100%;
     margin: 0;
     font-family: ${(props) => props.theme.serif};
@@ -44,17 +41,18 @@ const StyledEditor = styled(ContentEditable)`
 
     :focus {
         outline: none;
-       // border: ${(props) => props.theme.smallBorderActive};
     }
 `;
 
 const TextEditorLayout = (props) => {
     return (
-        <StyledContainer>
+        <StyledContainer showButton={props.showButton}>
             <StyledEditor {...props} />
-            <StyledButton>
-                <UpArrow />
-            </StyledButton>
+            {props.showButton ? (
+                <StyledButton>
+                    <UpArrow />
+                </StyledButton>
+            ) : null}
         </StyledContainer>
     );
 };
