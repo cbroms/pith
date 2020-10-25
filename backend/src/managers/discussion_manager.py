@@ -792,10 +792,10 @@ class DiscussionManager:
           "unit_id": unit_id,
           "pith": pith
         }
-        removed_backlinks = None if len(removed_links) == 0 else [
+        removed_backlinks = [
           {"unit_id": r, "backlink": unit_id} for r in removed_links
         ] 
-        added_backlinks = None if len(added_links) == 0 else [
+        added_backlinks = [
           {"unit_id": a, "backlink": unit_id} for a in added_links
         ]
         response = (edited_unit, removed_backlinks, added_backlinks)

@@ -1,7 +1,3 @@
-"""
-TODO: finish applying meta where needed. Consider if this is best method.
-"""
-
 from aiohttp import web
 from json import dumps
 from jsonschema import validate
@@ -243,7 +239,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def post(self, sid, request):
         """
         :event: :ref:`dreq_post-label`
-        :emit: *created_post* (:ref:`dres_post-label`) AND OPT *added_backlinks* (:ref:`dres_added_backlinks-label`)
+        :emit: *created_post* (:ref:`dres_post-label`) AND *added_backlinks* (:ref:`dres_added_backlinks-label`)
         """
         if validate(instance=request, schema=dreq.post):
           return {"error": error.BAD_REQUEST}
@@ -297,7 +293,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def send_to_doc(self, sid, request):
         """
         :event: :ref:`dreq_send_to_doc-label`
-        :emit: *added_unit* (:ref:`dres_added_unit-label`) AND OPT *added_backlinks* (:ref:`dres_added_backlinks-label`)
+        :emit: *added_unit* (:ref:`dres_added_unit-label`) AND *added_backlinks* (:ref:`dres_added_backlinks-label`)
         """
         if validate(instance=request, schema=dreq.send_to_doc):
           return {"error": error.BAD_REQUEST}
@@ -405,7 +401,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def add_unit(self, sid, request): 
         """
         :event: :ref:`dreq_add_unit-label`
-        :emit: *added_unit* (:ref:`dres_added_unit-label`) AND OPT *added_backlinks* (:ref:`dres_added_backlinks-label`)
+        :emit: *added_unit* (:ref:`dres_added_unit-label`) AND *added_backlinks* (:ref:`dres_added_backlinks-label`)
         """
         if validate(instance=request, schema=dreq.add_unit):
           return {"error": error.BAD_REQUEST}
@@ -558,7 +554,7 @@ class DiscussionNamespace(AsyncNamespace):
         NOTE: Call `request_to_edit` before this.
 
         :event: :ref:`dreq_edit_unit-label`
-        :emit: *edited_unit* (:ref:`dres_edited_unit-label`, edit lock released) AND OPT *removed_backlinks* (:ref:`dres_removed_backlinks-label`) AND OPT *added_backlinks* (:ref:`dres_added_backlinks-label`) 
+        :emit: *edited_unit* (:ref:`dres_edited_unit-label`, edit lock released) AND *removed_backlinks* (:ref:`dres_removed_backlinks-label`) AND *added_backlinks* (:ref:`dres_added_backlinks-label`) 
         """
         if validate(instance=request, schema=dreq.edit_unit):
           return {"error": error.BAD_REQUEST}
@@ -584,17 +580,15 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": error.BAD_RESPONSE}
         await self.emit("edited_unit", serialized, room=discussion_id)
         # removed backlinks
-        if removed_backlinks:
-          serialized = dumps(removed_backlinks, cls=GenericEncoder)
-          if validate(instance=serialized, schema=dres.removed_backlinks):
-            return {"error": error.BAD_RESPONSE}
-          await self.emit("removed_backlinks", serialized, room=discussion_id)
+        serialized = dumps(removed_backlinks, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.removed_backlinks):
+          return {"error": error.BAD_RESPONSE}
+        await self.emit("removed_backlinks", serialized, room=discussion_id)
         # added backlinks
-        if added_backlinks:
-          serialized = dumps(added_backlinks, cls=GenericEncoder)
-          if validate(instance=serialized, schema=dres.added_backlinks):
-            return {"error": error.BAD_RESPONSE}
-          await self.emit("added_backlinks", serialized, room=discussion_id)
+        serialized = dumps(added_backlinks, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.added_backlinks):
+          return {"error": error.BAD_RESPONSE}
+        await self.emit("added_backlinks", serialized, room=discussion_id)
 
 # TODO: later people can add backlinks directly.
 

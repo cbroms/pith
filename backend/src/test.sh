@@ -10,7 +10,7 @@ mypy .
 python3.8 managers/global_manager.py
 
 # functionality tests
-#python3.8 utils/tests/test_utils.py
+python3.8 utils/tests/test_utils.py
 #python3.8 search/tests/test_search.py
 
 # manager tests
@@ -18,4 +18,4 @@ python3.8 managers/tests/board_manager_test.py
 python3.8 managers/tests/discussion_manager_test.py
 
 # interface tests
-#python3.8 tests/app_test.py
+python3.8 tests/app_test.py
