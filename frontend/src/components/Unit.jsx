@@ -1,9 +1,12 @@
 import React from "react";
+import ReactDOMServer from "react-dom/server";
 
 import { splitAtLinks, parseLinks } from "../utils/parseLinks";
 
-import TooltipLayout from "./TooltipLayout";
 import LinkIcon from "./LinkIcon";
+import TextEditor from "./TextEditor";
+
+import TooltipLayout from "./TooltipLayout";
 import UnitLayout from "./UnitLayout";
 
 const Unit = (props) => {
@@ -64,6 +67,20 @@ const Unit = (props) => {
                     </span>
                 );
             }
+        }
+        if (props.editable) {
+            // if the unit is editable, we need to feed the content to the TextEditor
+            // component. it requires that we first render the component to a string of
+            // html, then pass that to the TextEditor component
+            const contentStr = ReactDOMServer.renderToString(content);
+            content = (
+                <TextEditor
+                    showButton={props.showButton}
+                    content={contentStr}
+                    onFocus={props.onFocus}
+                    onBlur={props.onBlur}
+                />
+            );
         }
     }
 
