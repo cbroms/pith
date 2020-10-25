@@ -52,7 +52,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def create_user(self, sid, request):
         """
         :event: :ref:`dreq_create_user-label`
-        :return: :ref:`dres_create_user-label` 
+        :return: :ref:`dres_created_user-label` 
         """
         if validate(instance=request, schema=dreq.create_user):
           return {"error": error.BAD_REQUEST}
@@ -67,14 +67,14 @@ class DiscussionNamespace(AsyncNamespace):
         if "error" in result:
           return result
         serialized = dumps(result, cls=GenericEncoder)
-        if validate(instance=serialized, schema=dres.create_user):
+        if validate(instance=serialized, schema=dres.created_user):
           return {"error": error.BAD_RESPONSE}
         return serialized
 
     async def on_join(self, sid, request):
         """
         :event: :ref:`dreq_join-label`
-        :emit: *joined_user* (:ref:`dres_join-label`)
+        :emit: *joined_user* (:ref:`dres_joined_user-label`)
         """
         if validate(instance=request, schema=dreq.join):
           return {"error": error.BAD_REQUEST}
@@ -89,7 +89,7 @@ class DiscussionNamespace(AsyncNamespace):
         if "error" in result:
           return result
         serialized = dumps(result, cls=GenericEncoder)
-        if validate(instance=serialized, schema=dres.join):
+        if validate(instance=serialized, schema=dres.joined_user):
           return {"error": error.BAD_RESPONSE}
         self.enter_room(sid, discussion_id)
         await self.emit("joined_user", serialized, room=discussion_id)
@@ -100,7 +100,7 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def on_leave(self, sid, request):
         """
-        :emit: *left_user* (:ref:`dres_leave-label`)
+        :emit: *left_user* (:ref:`dres_left_user-label`)
         """
         session = await self.get_session(sid)
         user_id = session["user_id"]
@@ -114,14 +114,14 @@ class DiscussionNamespace(AsyncNamespace):
         if "error" in result:
           return result
         serialized = dumps(result, cls=GenericEncoder)
-        if validate(instance=serialized, schema=dres.leave):
+        if validate(instance=serialized, schema=dres.left_user):
           return {"error": error.BAD_RESPONSE}
         await self.emit("left_user", serialized, room=discussion_id)
         self.leave_room(sid, discussion_id)
 
     async def load_user(self, sid, request):
         """
-        :return: :ref:`dres_load_user-label`
+        :return: :ref:`dres_loaded_user-label`
         """
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
@@ -135,7 +135,7 @@ class DiscussionNamespace(AsyncNamespace):
         if "error" in result:
           return result
         serialized = dumps(result, cls=GenericEncoder)
-        if validate(instance=serialized, schema=dres.load_uuser):
+        if validate(instance=serialized, schema=dres.loaded_user):
           return {"error": error.BAD_RESPONSE}
         return serialized
     
@@ -144,6 +144,7 @@ class DiscussionNamespace(AsyncNamespace):
         NOTE: This changes state by moving the cursor and updating the timeline.
 
         :event: :ref:`dreq_get_unit_page-label`
+        :emit: *moved_cursor* (:ref:`dres_moved_cursor-label`)
         :return: :ref:`dres_get_unit_page-label`
         """
         if validate(instance=request, schema=dreq.get_unit_page):
@@ -161,7 +162,15 @@ class DiscussionNamespace(AsyncNamespace):
 
         if "error" in result:
           return result
-        serialized = dumps(result, cls=GenericEncoder)
+        unit_page, cursor = result
+
+        # do cursor first
+        serialized = dumps(cursor, cls=GenericEncoder)
+        if validate(instance=serialized, schema=dres.moved_cursor):
+          return {"error": error.BAD_RESPONSE}
+        await self.emit("moved_cursor", serialized, room=discussion_id)
+
+        serialized = dumps(unit_page, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.get_unit_page):
           return {"error": error.BAD_RESPONSE}
         return serialized
@@ -239,7 +248,7 @@ class DiscussionNamespace(AsyncNamespace):
     async def post(self, sid, request):
         """
         :event: :ref:`dreq_post-label`
-        :emit: *created_post* (:ref:`dres_post-label`) AND *added_backlinks* (:ref:`dres_added_backlinks-label`)
+        :emit: *created_post* (:ref:`dres_created_post-label`) AND *added_backlinks* (:ref:`dres_added_backlinks-label`)
         """
         if validate(instance=request, schema=dreq.post):
           return {"error": error.BAD_REQUEST}
@@ -258,7 +267,7 @@ class DiscussionNamespace(AsyncNamespace):
           return result
         created_post, added_backlinks = result
         serialized = dumps(created_post, cls=GenericEncoder)
-        if validate(instance=serialized, schema=dres.post):
+        if validate(instance=serialized, schema=dres.created_post):
           return {"error": error.BAD_RESPONSE}
         await self.emit("created_post", serialized, room=discussion_id)
 
@@ -324,9 +333,9 @@ class DiscussionNamespace(AsyncNamespace):
     async def move_cursor(self, sid, request): 
         """
         :event: :ref:`dreq_move_cursor-label`
-        :emit: *moved_cursor* (:ref:`dres_move_cursor-label`)
+        :emit: *moved_cursor* (:ref:`dres_moved_cursor-label`)
         """
-        if validate(instance=request, schema=dreq.move_cursor):
+        if validate(instance=request, schema=dreq.moved_cursor):
           return {"error": error.BAD_REQUEST}
         unit_id = request["unit_id"]
         position = request["position"]
@@ -344,7 +353,7 @@ class DiscussionNamespace(AsyncNamespace):
         if "error" in result:
           return result
         serialized = dumps(result, cls=GenericEncoder)
-        if validate(instance=serialized, schema=dres.move_cursor):
+        if validate(instance=serialized, schema=dres.moved_cursor):
           return {"error": error.BAD_RESPONSE}
         await self.emit("moved_cursor", serialized, room=discussion_id)
 
@@ -353,7 +362,7 @@ class DiscussionNamespace(AsyncNamespace):
         NOTE: Call `request_to_edit` before this.
 
         :event: :ref:`dreq_hide_unit-label`
-        :emit: *hid_unit* (:ref:`dres_hide_unit-label`, edit lock released)
+        :emit: *hid_unit* (:ref:`dres_hid_unit-label`, edit lock released)
         """
         if validate(instance=request, schema=dreq.hide_unit):
           return {"error": error.BAD_REQUEST}
@@ -371,14 +380,14 @@ class DiscussionNamespace(AsyncNamespace):
         if "error" in result:
           return result 
         serialized = dumps(result, cls=GenericEncoder)
-        if validate(instance=serialized, schema=dres.hide_unit):
+        if validate(instance=serialized, schema=dres.hid_unit):
           return {"error": error.BAD_RESPONSE}
         await self.emit("hid_unit", serialized, room=discussion_id)
 
     async def unhide_unit(self, sid, request): 
         """
         :event: :ref:`dreq_unhide_unit-label`
-        :emit: *unhid_unit* (:ref:`dres_unhide_unit-label`)
+        :emit: *unhid_unit* (:ref:`dres_unhid_unit-label`)
         """
         if validate(instance=request, schema=dreq.unhide_unit):
           return {"error": error.BAD_REQUEST}
@@ -386,7 +395,7 @@ class DiscussionNamespace(AsyncNamespace):
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
 
-        result = gm.discussion_manager.hide_unit(
+        result = gm.discussion_manager.unhide_unit(
           discussion_id=discussion_id, 
           unit_id=unit_id
         )
@@ -394,7 +403,7 @@ class DiscussionNamespace(AsyncNamespace):
         if "error" in result:
           return result
         serialized = dumps(result, cls=GenericEncoder)
-        if validate(instance=serialized, schema=dres.unhide_unit):
+        if validate(instance=serialized, schema=dres.unhid_unit):
           return {"error": error.BAD_RESPONSE}
         await self.emit("unhid_unit", serialized, room=discussion_id)
 
@@ -460,7 +469,7 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def move_units(self, sid, request): 
         """
-        NOTE: Call `select_unit` and `move_cursor` before this.
+        NOTE: Call `select_unit` before this.
 
         :event: :ref:`dreq_move_units-label`
         :emit: *repositioned_unit* (:ref:`dres_repositioned_unit-label`, position lock released) OR fail
@@ -489,7 +498,7 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def merge_units(self, sid, request): 
         """
-        NOTE: Call `select_unit` and `move_cursor` before this.
+        NOTE: Call `select_unit` before this.
 
         :event: :ref:`dreq_merge_units-label`
         :emit: *repositioned_unit* (:ref:`dres_repositioned_unit-label`, position lock released) AND *added_unit* (for parent unit, :ref:`dres_added_unit-label`) OR fail 

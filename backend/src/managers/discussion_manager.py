@@ -435,8 +435,12 @@ class DiscussionManager:
           "timeline_entry": timeline_entry,
           "cursor": cursor
         }
+        cursor_response = {
+          "user_id": user_id,
+          "cursor": cursor,
+        }
 
-        return response
+        return response, cursor_response
 
     @_check_discussion_id
     @_check_unit_id
@@ -556,7 +560,6 @@ class DiscussionManager:
           pith=chat_unit.pith,
           forward_links=forward_links,
           parent=parent_id,
-          #position=position,
           source_unit_id=unit_id, # from chat
           original_pith=chat_unit.pith
         )
@@ -652,8 +655,6 @@ class DiscussionManager:
           pith=pith,
           forward_links=self._retrieve_links(pith),
           parent=parent,
-          #position=final_position,
-          original_pith=pith
         )
         unit.save()
         unit_id = unit.id
@@ -677,8 +678,8 @@ class DiscussionManager:
           "unit_id": unit_id,
           "pith": unit.pith,
           "created_at": unit.created_at,
-          "parent": parent, #unit.parent,
-          "position": self._get_position(parent, unit_id)#unit.position,
+          "parent": parent,
+          "position": self._get_position(parent, unit_id)
         }
         return added, backlinks  
 

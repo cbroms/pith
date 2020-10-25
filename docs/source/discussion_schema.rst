@@ -141,30 +141,30 @@ edit_unit
 Discussion Responses
 *************************************
 
-.. _dres_create_user-label:
+.. _dres_created_user-label:
 
-create_user
+created_user
 =====================================
 
-.. jsonschema:: ../../backend/src/schema/discussion/responses/create_user.json
+.. jsonschema:: ../../backend/src/schema/discussion/responses/created_user.json
 
-.. _dres_join-label:
+.. _dres_joined_user-label:
 
-join
+joined_user
 =====================================
 
-.. jsonschema:: ../../backend/src/schema/discussion/responses/join.json
+.. jsonschema:: ../../backend/src/schema/discussion/responses/joined_user.json
 
-.. _dres_leave-label:
+.. _dres_left_user-label:
 
-leave
+left_user
 =====================================
 
-.. jsonschema:: ../../backend/src/schema/discussion/responses/leave.json
+.. jsonschema:: ../../backend/src/schema/discussion/responses/left_user.json
 
-.. _dres_load_user-label:
+.. _dres_loaded_user-label:
 
-load_user
+loaded_user
 =====================================
 
 - **cursors** - Map of active user IDs to cursor positions. 
@@ -173,7 +173,7 @@ load_user
 - **chat_history** - List of the unit IDs.
 - **chat_map** - Array of units in the chat history as well as their forward links.
 
-.. jsonschema:: ../../backend/src/schema/discussion/responses/load_user.json
+.. jsonschema:: ../../backend/src/schema/discussion/responses/loaded_user.json
 
 .. _dres_get_unit_page-label:
 
@@ -218,9 +218,9 @@ get_unit_context
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/get_unit_context.json
 
-.. _dres_post-label:
+.. _dres_created_post-label:
 
-post
+created_post
 =====================================
 
 - **created_at** - Creation time of unit. 
@@ -228,7 +228,7 @@ post
 - **unit_id** - ID of the unit.
 - **pith** - Pith of the unit. 
 
-.. jsonschema:: ../../backend/src/schema/discussion/responses/post.json
+.. jsonschema:: ../../backend/src/schema/discussion/responses/created_post.json
 
 .. _dres_search-label:
 
@@ -239,26 +239,26 @@ search
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/search.json
 
-.. _dres_move_cursor-label:
+.. _dres_moved_cursor-label:
 
-move_cursor
+moved_cursor
 =====================================
 
-.. jsonschema:: ../../backend/src/schema/discussion/responses/move_cursor.json
+.. jsonschema:: ../../backend/src/schema/discussion/responses/moved_cursor.json
 
-.. _dres_hide_unit-label:
+.. _dres_hid_unit-label:
 
-hide_unit
+hid_unit
 =====================================
 
-.. jsonschema:: ../../backend/src/schema/discussion/responses/hide_unit.json
+.. jsonschema:: ../../backend/src/schema/discussion/responses/hid_unit.json
 
-.. _dres_unhide_unit-label:
+.. _dres_unhid_unit-label:
 
-unhide_unit
+unhid_unit
 =====================================
 
-.. jsonschema:: ../../backend/src/schema/discussion/responses/unhide_unit.json
+.. jsonschema:: ../../backend/src/schema/discussion/responses/unhid_unit.json
 
 .. _dres_added_unit-label:
 

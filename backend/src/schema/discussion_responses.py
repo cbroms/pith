@@ -5,14 +5,14 @@ import os
 path = os.path.dirname(os.path.realpath(__file__))
 
 
-with open(path + "/discussion/responses/create_user.json") as file:
-  create_user = load(file)
+with open(path + "/discussion/responses/created_user.json") as file:
+  created_user = load(file)
 
-with open(path + "/discussion/responses/join.json") as file:
-  join = load(file)
+with open(path + "/discussion/responses/joined_user.json") as file:
+  joined_user = load(file)
 
-with open(path + "/discussion/responses/leave.json") as file:
-  leave = load(file)
+with open(path + "/discussion/responses/left_user.json") as file:
+  left_user = load(file)
 
 """
 * **cursors** - Map of active user IDs to cursor positions. 
@@ -24,8 +24,8 @@ with open(path + "/discussion/responses/leave.json") as file:
   * **author** - Nickname of the author.
   * **units** - List of unit IDs.
 """
-with open(path + "/discussion/responses/load_user.json") as file:
-  load_user = load(file)
+with open(path + "/discussion/responses/loaded_user.json") as file:
+  loaded_user = load(file)
 
 """
 - **pith** - Pith of the unit.
@@ -61,8 +61,8 @@ with open(path + "/discussion/responses/get_unit_context.json") as file:
 - **author** - Nickname of the author. 
 - **piths** - List of pith strings, one per unit.
 """
-with open(path + "/discussion/responses/post.json") as file:
-  post = load(file)
+with open(path + "/discussion/responses/created_post.json") as file:
+  created_post = load(file)
 
 """
 - **units** - List of unit IDs, sorted in order of relevance.
@@ -70,14 +70,14 @@ with open(path + "/discussion/responses/post.json") as file:
 with open(path + "/discussion/responses/search.json") as file:
   search = load(file)
 
-with open(path + "/discussion/responses/move_cursor.json") as file:
-  move_cursor = load(file)
+with open(path + "/discussion/responses/moved_cursor.json") as file:
+  moved_cursor = load(file)
 
-with open(path + "/discussion/responses/hide_unit.json") as file:
-  hide_unit = load(file)
+with open(path + "/discussion/responses/hid_unit.json") as file:
+  hid_unit = load(file)
 
-with open(path + "/discussion/responses/unhide_unit.json") as file:
-  unhide_unit = load(file)
+with open(path + "/discussion/responses/unhid_unit.json") as file:
+  unhid_unit = load(file)
 
 """
 - **unit_id** - Unit ID.
