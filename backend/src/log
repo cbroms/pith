@@ -1,18 +1,19 @@
-./app.py:17:1 'utils.utils.sum_dicts' imported but unused
+./app.py:13:1 'utils.utils.sum_dicts' imported but unused
 ./worker_functions.py:1:1 'json.dumps' imported but unused
 ./models/discussion.py:4:1 'mongoengine.PULL' imported but unused
 ./models/discussion.py:9:1 'mongoengine.fields.DictField' imported but unused
 ./models/discussion.py:9:1 'mongoengine.fields.ReferenceField' imported but unused
+./tests/app_test.py:1:1 'json.loads' imported but unused
 ./managers/discussion_manager.py:9:1 'typing.Any' imported but unused
 ./managers/discussion_manager.py:9:1 'typing.Dict' imported but unused
 ./managers/discussion_manager.py:9:1 'typing.List' imported but unused
 ./managers/discussion_manager.py:9:1 'typing.Optional' imported but unused
 ./managers/discussion_manager.py:9:1 'typing.Tuple' imported but unused
 ./managers/discussion_manager.py:19:1 'utils.utils' imported but unused
-./managers/discussion_manager.py:86:9 local variable 'user' is assigned to but never used
-./managers/discussion_manager.py:454:9 local variable 'discussion' is assigned to but never used
-./managers/discussion_manager.py:512:9 local variable 'discussion' is assigned to but never used
-./managers/discussion_manager.py:632:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:93:9 local variable 'user' is assigned to but never used
+./managers/discussion_manager.py:459:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:517:9 local variable 'discussion' is assigned to but never used
+./managers/discussion_manager.py:637:9 local variable 'discussion' is assigned to but never used
 ./managers/board_manager.py:1:1 'datetime' imported but unused
 ./managers/board_manager.py:2:1 'logging' imported but unused
 ./managers/board_manager.py:3:1 'typing.Any' imported but unused
@@ -26,7 +27,7 @@
 ./managers/tests/discussion_manager_test.py:1:1 'asyncio' imported but unused
 ./managers/tests/discussion_manager_test.py:244:9 local variable 'unit_id1' is assigned to but never used
 ./managers/tests/discussion_manager_test.py:249:9 local variable 'unit_id2' is assigned to but never used
-./managers/tests/discussion_manager_test.py:818:9 local variable 'res' is assigned to but never used
+./managers/tests/discussion_manager_test.py:812:9 local variable 'res' is assigned to but never used
 ./managers/tests/board_manager_test.py:3:1 'uuid' imported but unused
 ./managers/tests/board_manager_test.py:6:1 'models.discussion.Discussion' imported but unused
 worker_functions.py:2: error: Cannot find implementation or library stub for module named 'managers.global_manager'
@@ -36,18 +37,18 @@ worker.py:4: error: Module 'worker_functions' has no attribute 'expire_discussio
 worker.py:20: error: Incompatible types in assignment (expression has type "Callable[[Any], Any]", base class "Worker" defined the type as "Optional[StartupShutdown]")
 worker.py:21: error: Incompatible types in assignment (expression has type "Callable[[Any], Any]", base class "Worker" defined the type as "Optional[StartupShutdown]")
 worker.py:22: error: Incompatible types in assignment (expression has type "List[Any]", base class "Worker" defined the type as "Dict[str, Union[Function, CronJob]]")
-app.py:7: error: Skipping analyzing 'jsonschema': found module but no type hints or library stubs
-app.py:9: error: Skipping analyzing 'socketio': found module but no type hints or library stubs
-app.py:13: error: Cannot find implementation or library stub for module named 'managers.global_manager'
-app.py:14: error: Cannot find implementation or library stub for module named 'schema.board_responses'
-app.py:14: error: Cannot find implementation or library stub for module named 'schema'
-app.py:15: error: Cannot find implementation or library stub for module named 'schema.discussion_requests'
-app.py:16: error: Cannot find implementation or library stub for module named 'schema.discussion_responses'
-app.py:17: error: Cannot find implementation or library stub for module named 'utils.utils'
+app.py:3: error: Skipping analyzing 'jsonschema': found module but no type hints or library stubs
+app.py:5: error: Skipping analyzing 'socketio': found module but no type hints or library stubs
+app.py:9: error: Cannot find implementation or library stub for module named 'managers.global_manager'
+app.py:10: error: Cannot find implementation or library stub for module named 'schema.board_responses'
+app.py:10: error: Cannot find implementation or library stub for module named 'schema'
+app.py:11: error: Cannot find implementation or library stub for module named 'schema.discussion_requests'
+app.py:12: error: Cannot find implementation or library stub for module named 'schema.discussion_responses'
+app.py:13: error: Cannot find implementation or library stub for module named 'utils.utils'
 Found 14 errors in 4 files (checked 7 source files)
 .....
 ----------------------------------------------------------------------
-Ran 5 tests in 0.001s
+Ran 5 tests in 0.004s
 
 OK
 ['make', 'believ', 'and', 'play', 'hard']
@@ -56,75 +57,67 @@ DEBUG:asyncio:Using selector: EpollSelector
 DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
 .
 ----------------------------------------------------------------------
-Ran 1 test in 0.042s
+Ran 1 test in 0.036s
 
 OK
 ERROR:asyncio:Task was destroyed but it is pending!
-task: <Task pending name='Task-3' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f2129400580>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
+task: <Task pending name='Task-3' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f2b3da79fd0>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
 INFO:engineio.server:Server initialized for aiohttp.
 DEBUG:asyncio:Using selector: EpollSelector
 DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
-INFO:root:<function nothing at 0x7f4d32fc70d0> DISC ERR
+INFO:root:<function nothing at 0x7f02b921c0d0> DISC ERR
 .INFO:engineio.server:Server initialized for aiohttp.
 DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
 .INFO:engineio.server:Server initialized for aiohttp.
 DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
 .INFO:engineio.server:Server initialized for aiohttp.
 ERROR:asyncio:Task was destroyed but it is pending!
-task: <Task pending name='Task-9' coro=<RedisConnection._read_data() done, defined at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:180> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f4d2434e1f0>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
+task: <Task pending name='Task-9' coro=<RedisConnection._read_data() done, defined at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:180> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f02ac1ca430>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
 DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
 ERROR:asyncio:Task was destroyed but it is pending!
-task: <Task pending name='Task-3' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f4d2ddb3700>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
-/usr/lib/python3.8/copy.py:102: ResourceWarning: unclosed <socket.socket fd=10, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.19.0.6', 44574), raddr=('172.19.0.5', 27017)>
-  return _reconstruct(x, None, *rv)
-ResourceWarning: Enable tracemalloc to get the object allocation traceback
+task: <Task pending name='Task-3' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f02b400b910>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
 ERROR:asyncio:Task was destroyed but it is pending!
-task: <Task pending name='Task-6' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f4d24342580>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
+task: <Task pending name='Task-6' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f02ac1bd790>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
 .INFO:engineio.server:Server initialized for aiohttp.
 DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
-.INFO:engineio.server:Server initialized for aiohttp.
-DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
-.INFO:engineio.server:Server initialized for aiohttp.
-DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
-ERROR:asyncio:Task was destroyed but it is pending!
-task: <Task pending name='Task-18' coro=<RedisConnection._read_data() done, defined at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:180> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f4d2ddcd4f0>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
 .INFO:engineio.server:Server initialized for aiohttp.
 DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
 .INFO:engineio.server:Server initialized for aiohttp.
 ERROR:asyncio:Task was destroyed but it is pending!
-task: <Task pending name='Task-24' coro=<RedisConnection._read_data() done, defined at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:180> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f4d2ddcd610>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
+task: <Task pending name='Task-18' coro=<RedisConnection._read_data() done, defined at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:180> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f02b40585b0>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
 DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
 .INFO:engineio.server:Server initialized for aiohttp.
 DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
 .INFO:engineio.server:Server initialized for aiohttp.
-DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
-.INFO:engineio.server:Server initialized for aiohttp.
-DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
 ERROR:asyncio:Task was destroyed but it is pending!
-task: <Task pending name='Task-33' coro=<RedisConnection._read_data() done, defined at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:180> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f4d242a21f0>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
+task: <Task pending name='Task-24' coro=<RedisConnection._read_data() done, defined at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:180> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f02b4058b20>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
+DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
+.INFO:engineio.server:Server initialized for aiohttp.
+DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
+.INFO:engineio.server:Server initialized for aiohttp.
+DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
+.INFO:engineio.server:Server initialized for aiohttp.
+ERROR:asyncio:Task was destroyed but it is pending!
+task: <Task pending name='Task-33' coro=<RedisConnection._read_data() done, defined at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:180> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f02ac188700>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
+DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
 .INFO:engineio.server:Server initialized for aiohttp.
 DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
 .
 ----------------------------------------------------------------------
-Ran 13 tests in 7.279s
+Ran 13 tests in 7.155s
 
 OK
 ERROR:asyncio:Task was destroyed but it is pending!
-task: <Task pending name='Task-12' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f4d2434bf10>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
+task: <Task pending name='Task-12' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f02ac1bde80>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
 ERROR:asyncio:Task was destroyed but it is pending!
-task: <Task pending name='Task-15' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f4d242d9d60>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
+task: <Task pending name='Task-15' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f02ac1c3190>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
 ERROR:asyncio:Task was destroyed but it is pending!
-task: <Task pending name='Task-21' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f4d24342520>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
+task: <Task pending name='Task-21' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f02ac1bd460>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
 ERROR:asyncio:Task was destroyed but it is pending!
-task: <Task pending name='Task-27' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f4d242d9d00>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
+task: <Task pending name='Task-27' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f02ac15baf0>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
 ERROR:asyncio:Task was destroyed but it is pending!
-task: <Task pending name='Task-30' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f4d242a02e0>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
+task: <Task pending name='Task-30' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f02ac1829a0>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
 ERROR:asyncio:Task was destroyed but it is pending!
-task: <Task pending name='Task-36' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f4d242a04f0>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
+task: <Task pending name='Task-36' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f02ac18a070>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
 ERROR:asyncio:Task was destroyed but it is pending!
-task: <Task pending name='Task-39' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f4d242b1310>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
-.
-----------------------------------------------------------------------
-Ran 1 test in 2.021s
-
-OK
+task: <Task pending name='Task-39' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f02b4058550>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>

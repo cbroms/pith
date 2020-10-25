@@ -27,8 +27,6 @@ Unit
       :annotation: = Whether this Unit is in the chat (true) or in the document (false).
     .. autoattribute:: parent
       :annotation: = Parent Unit.
-    .. autoattribute:: position
-      :annotation: = Position in parent Unit.
     .. autoattribute:: source_unit_id
       :annotation: = Which chat Unit this Unit was copied from. 
     .. autoattribute:: original_pith

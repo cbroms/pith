@@ -81,48 +81,53 @@ class DiscussionManager:
     def _retrieve_links(self, pith):
       return constants.link_pattern.findall(pith)
 
-    def _move_units(self, discussion_id, user_id, units, parent_id, position):
-        discussion = self._get(discussion_id)
-        user = discussion.get().users.filter(id=user_id).get()
-        parent = self._get_unit(parent_id)
-        counter = position
-
-        response = []
-        for unit_id in units:
-          unit = self._get_unit(unit_id)
-          old_parent = unit.get().parent
-          old_position = unit.get().position
-
-          unit.update(
-            set__parent=parent_id,
-            set__position=counter
-          )
-          self._get_unit(old_parent).update(
-            pull__children=unit_id
-          )
-
-          counter += 1
-          self._release_position(unit_id)
-
-          response.append({
-            "unit_id": unit_id,
-            "parent": unit.get().parent,
-            "position": unit.get().position,
-            "old_parent": old_parent,
-            "old_position": old_position,
-          })
-
-        children = parent.get().children
-        parent.update(set__children=children[:position] + units + children[position:])
-
-        return response
-
     def _get_position(self, parent, unit_id):
       children = self._get_unit(parent).get().children
       if unit_id in children:
         return children.index(unit_id)
       else:
         return -1
+
+    def _move_units(self, discussion_id, user_id, units, parent_id, position):
+        discussion = self._get(discussion_id)
+        user = discussion.get().users.filter(id=user_id).get()
+        parent = self._get_unit(parent_id)
+
+        # remove from old
+        old_parents = []
+        old_positions = []
+        for unit_id in units:
+          unit = self._get_unit(unit_id)
+          old_parent = unit.get().parent
+          old_position = self._get_position(old_parent, unit_id)
+          old_parents.append(old_parent)
+          old_positions.append(old_position)
+          self._get_unit(old_parent).update(
+            pull__children=unit_id
+          )
+
+        # add to new
+        key = "push__children__{}".format(position)
+        parent.update(**{key: units})
+        for unit_id in units:
+          unit = self._get_unit(unit_id)
+          unit.update(
+            set__parent=parent_id,
+          )
+          self._release_position(unit_id)
+      
+        # build response
+        response = []
+        for i, unit_id in enumerate(units):
+          response.append({
+            "unit_id": unit_id,
+            "parent": parent_id,
+            "position": self._get_position(parent_id, unit_id), 
+            "old_parent": old_parents[i],
+            "old_position": old_positions[i],
+          })
+
+        return response
 
     """
     Verification functions. Require specific arguments in most cases.
@@ -551,15 +556,15 @@ class DiscussionManager:
           pith=chat_unit.pith,
           forward_links=forward_links,
           parent=parent_id,
-          position=position,
+          #position=position,
           source_unit_id=unit_id, # from chat
           original_pith=chat_unit.pith
         )
         unit.save()
 
         parent = self._get_unit(parent_id)
-        children = parent.get().children
-        parent.update(set__children=children[:position] + [unit.id] + children[position:])
+        key = "push__children__{}".format(position)
+        parent.update(**{key: [unit.id]})
 
         backlinks = []
         for f in forward_links:
@@ -575,8 +580,8 @@ class DiscussionManager:
           "unit_id": unit.id,
           "pith": unit.pith,
           "created_at": unit.created_at,
-          "parent": unit.parent,
-          "position": unit.position,
+          "parent": parent_id,
+          "position": self._get_position(parent_id, unit.id),
         }
         return added, backlinks 
 
@@ -647,15 +652,15 @@ class DiscussionManager:
           pith=pith,
           forward_links=self._retrieve_links(pith),
           parent=parent,
-          position=final_position,
+          #position=final_position,
           original_pith=pith
         )
         unit.save()
         unit_id = unit.id
 
         parent_ptr = self._get_unit(parent)
-        children = parent_ptr.get().children
-        parent_ptr.update(set__children=children[:final_position] + [unit_id] + children[final_position:])
+        key = "push__children__{}".format(final_position)
+        parent_ptr.update(**{key: [unit_id]})
 
         # make backlinks
         backlinks = []
@@ -672,8 +677,8 @@ class DiscussionManager:
           "unit_id": unit_id,
           "pith": unit.pith,
           "created_at": unit.created_at,
-          "parent": unit.parent,
-          "position": unit.position,
+          "parent": parent, #unit.parent,
+          "position": self._get_position(parent, unit_id)#unit.position,
         }
         return added, backlinks  
 

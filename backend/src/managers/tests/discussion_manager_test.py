@@ -482,16 +482,12 @@ class DiscussionManagerTest(unittest.TestCase):
         parent5 = self.discussion_manager._get_unit(unit_id5).get().parent
         children5 = self.discussion_manager._get_unit(unit_id5).get().children
 
-        self.assertTrue(unit_id1 in children_root)
-        self.assertTrue(unit_id2 in children_root)
-        self.assertTrue(unit_id3 in children_root)
+        self.assertEqual(children_root, [unit_id3, unit_id2, unit_id1])
         self.assertEqual(parent1, root)
         self.assertEqual(parent2, root)
         self.assertEqual(parent3, root)
 
-        self.assertEqual(len(children1), 2)
-        self.assertTrue(unit_id4 in children1)
-        self.assertTrue(unit_id5 in children1)
+        self.assertEqual(children1, [unit_id5, unit_id4])
         self.assertEqual(parent4, unit_id1)
         self.assertEqual(parent5, unit_id1)
         
@@ -523,26 +519,26 @@ class DiscussionManagerTest(unittest.TestCase):
         parent1 = self.discussion_manager._get_unit(unit_id1).get().parent
         children1 = self.discussion_manager._get_unit(unit_id1).get().children
         parent2 = self.discussion_manager._get_unit(unit_id2).get().parent
+        position2 = res[0]["position"]
         children2 = self.discussion_manager._get_unit(unit_id2).get().children
         parent3 = self.discussion_manager._get_unit(unit_id3).get().parent
+        position3 = res[1]["position"]
         children3 = self.discussion_manager._get_unit(unit_id3).get().children
         parent4 = self.discussion_manager._get_unit(unit_id4).get().parent
         children4 = self.discussion_manager._get_unit(unit_id4).get().children
         parent5 = self.discussion_manager._get_unit(unit_id5).get().parent
         children5 = self.discussion_manager._get_unit(unit_id5).get().children
 
-        self.assertTrue(unit_id1 in children_root)
+        self.assertEqual(children_root, [unit_id1])
         self.assertEqual(parent1, root)
 
-        self.assertEqual(len(children1), 2)
-        self.assertTrue(unit_id4 in children1)
-        self.assertTrue(unit_id5 in children1)
+        self.assertEqual(children1, [unit_id5, unit_id4])
         self.assertEqual(parent4, unit_id1)
         self.assertEqual(parent5, unit_id1)
 
-        self.assertEqual(len(children5), 2)
-        self.assertTrue(unit_id2 in children5)
-        self.assertTrue(unit_id3 in children5)
+        self.assertEqual(children5, [unit_id2, unit_id3])
+        self.assertTrue(children5[position2] == unit_id2)
+        self.assertTrue(children5[position3] == unit_id3)
         self.assertEqual(parent2, unit_id5)
         self.assertEqual(parent3, unit_id5)
         
@@ -578,10 +574,12 @@ class DiscussionManagerTest(unittest.TestCase):
         parent1 = self.discussion_manager._get_unit(unit_id1).get().parent
         children1 = self.discussion_manager._get_unit(unit_id1).get().children
         parent2 = self.discussion_manager._get_unit(unit_id2).get().parent
+        position2 = moved[0]["position"]
         children2 = self.discussion_manager._get_unit(unit_id2).get().children
         parent3 = self.discussion_manager._get_unit(unit_id3).get().parent
         children3 = self.discussion_manager._get_unit(unit_id3).get().children
         parent4 = self.discussion_manager._get_unit(unit_id4).get().parent
+        position4 = moved[1]["position"]
         children4 = self.discussion_manager._get_unit(unit_id4).get().children
         parent5 = self.discussion_manager._get_unit(unit_id5).get().parent
         children5 = self.discussion_manager._get_unit(unit_id5).get().children
@@ -591,21 +589,18 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertTrue(unit_id1 in children_root)
         self.assertEqual(parent1, root)
 
-        self.assertEqual(len(children1), 1)
-        self.assertTrue(unit_id5 in children1)
+        self.assertEqual(children1, [unit_id5])
         self.assertEqual(parent5, unit_id1)
 
-        self.assertEqual(len(children5), 1)
-        self.assertTrue(unit_id3 in children5)
+        self.assertEqual(children5, [unit_id3])
         self.assertEqual(parent3, unit_id5)
         
-        self.assertEqual(len(children3), 1)
-        self.assertTrue(unit_id6 in children3)
+        self.assertEqual(children3, [unit_id6])
         self.assertEqual(parent6, unit_id3)
 
-        self.assertEqual(len(children6), 2)
-        self.assertTrue(unit_id2 in children6)
-        self.assertTrue(unit_id4 in children6)
+        self.assertEqual(children6, [unit_id2, unit_id4])
+        self.assertTrue(children6[position2] == unit_id2)
+        self.assertTrue(children6[position4] == unit_id4)
         self.assertEqual(parent2, unit_id6)
         self.assertEqual(parent4, unit_id6)
 
@@ -647,12 +642,14 @@ class DiscussionManagerTest(unittest.TestCase):
         parent1 = self.discussion_manager._get_unit(unit_id1).get().parent
         children1 = self.discussion_manager._get_unit(unit_id1).get().children
         parent2 = self.discussion_manager._get_unit(unit_id2).get().parent
+        position2 = moved[0]["position"]
         children2 = self.discussion_manager._get_unit(unit_id2).get().children
         parent3 = self.discussion_manager._get_unit(unit_id3).get().parent
         children3 = self.discussion_manager._get_unit(unit_id3).get().children
         parent4 = self.discussion_manager._get_unit(unit_id4).get().parent
         children4 = self.discussion_manager._get_unit(unit_id4).get().children
         parent5 = self.discussion_manager._get_unit(unit_id5).get().parent
+        position5 = moved[1]["position"]
         children5 = self.discussion_manager._get_unit(unit_id5).get().children
         parent6 = self.discussion_manager._get_unit(unit_id6).get().parent
         children6 = self.discussion_manager._get_unit(unit_id6).get().children
@@ -662,26 +659,22 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertTrue(unit_id1 in children_root)
         self.assertEqual(parent1, root)
 
-        self.assertEqual(len(children1), 1)
-        self.assertTrue(unit_id7 in children1)
+        self.assertEqual(children1, [unit_id7])
         self.assertEqual(parent7, unit_id1)
 
-        self.assertEqual(len(children7), 2)
-        self.assertTrue(unit_id2 in children7)
-        self.assertTrue(unit_id5 in children7)
+        self.assertEqual(children7, [unit_id2, unit_id5])
+        self.assertTrue(children7[position2] == unit_id2)
+        self.assertTrue(children7[position5] == unit_id5)
         self.assertEqual(parent2, unit_id7)
         self.assertEqual(parent5, unit_id7)
 
-        self.assertEqual(len(children5), 1)
-        self.assertTrue(unit_id3 in children5)
+        self.assertEqual(children5, [unit_id3])
         self.assertEqual(parent3, unit_id5)
 
-        self.assertEqual(len(children3), 1)
-        self.assertTrue(unit_id6 in children3)
+        self.assertEqual(children3, [unit_id6])
         self.assertEqual(parent6, unit_id3)
 
-        self.assertEqual(len(children6), 1)
-        self.assertTrue(unit_id4 in children6)
+        self.assertEqual(children6, [unit_id4])
         self.assertEqual(parent4, unit_id6)
 
         self.assertEqual(len(children2), 0)
@@ -715,7 +708,7 @@ class DiscussionManagerTest(unittest.TestCase):
             unit_id2, unit_id3, unit_id4, unit_id5, unit_id6, unit_id7
           ]
         )
-        self.assertTrue(len(res), 6)
+        self.assertEqual(len(res), 6)
         # check tree structure
         """
         1 -> [2, 3, 4, 5, 6, 7]
@@ -724,34 +717,35 @@ class DiscussionManagerTest(unittest.TestCase):
         parent1 = self.discussion_manager._get_unit(unit_id1).get().parent
         children1 = self.discussion_manager._get_unit(unit_id1).get().children
         parent2 = self.discussion_manager._get_unit(unit_id2).get().parent
+        position2 = res[0]["position"]
         children2 = self.discussion_manager._get_unit(unit_id2).get().children
         parent3 = self.discussion_manager._get_unit(unit_id3).get().parent
+        position3 = res[1]["position"]
         children3 = self.discussion_manager._get_unit(unit_id3).get().children
         parent4 = self.discussion_manager._get_unit(unit_id4).get().parent
+        position4 = res[2]["position"]
         children4 = self.discussion_manager._get_unit(unit_id4).get().children
         parent5 = self.discussion_manager._get_unit(unit_id5).get().parent
+        position5 = res[3]["position"]
         children5 = self.discussion_manager._get_unit(unit_id5).get().children
         parent6 = self.discussion_manager._get_unit(unit_id6).get().parent
+        position6 = res[4]["position"]
         children6 = self.discussion_manager._get_unit(unit_id6).get().children
         parent7 = self.discussion_manager._get_unit(unit_id7).get().parent
+        position7 = res[5]["position"]
         children7 = self.discussion_manager._get_unit(unit_id7).get().children
 
         self.assertTrue(unit_id1 in children_root)
         self.assertEqual(parent1, root)
 
-        self.assertEqual(len(children1), 6)
-        self.assertTrue(unit_id2 in children1)
-        self.assertTrue(unit_id3 in children1)
-        self.assertTrue(unit_id4 in children1)
-        self.assertTrue(unit_id5 in children1)
-        self.assertTrue(unit_id6 in children1)
-        self.assertTrue(unit_id7 in children1)
-        self.assertEqual(parent2, unit_id1)
-        self.assertEqual(parent3, unit_id1)
-        self.assertEqual(parent4, unit_id1)
-        self.assertEqual(parent5, unit_id1)
-        self.assertEqual(parent6, unit_id1)
-        self.assertEqual(parent7, unit_id1)
+        self.assertEqual(children1, 
+          [unit_id2, unit_id3, unit_id4, unit_id5, unit_id6, unit_id7])
+        self.assertTrue(children1[position2] == unit_id2)
+        self.assertTrue(children1[position3] == unit_id3)
+        self.assertTrue(children1[position4] == unit_id4)
+        self.assertTrue(children1[position5] == unit_id5)
+        self.assertTrue(children1[position6] == unit_id6)
+        self.assertTrue(children1[position7] == unit_id7)
 
         self.assertEqual(len(children2), 0)
         self.assertEqual(len(children3), 0)

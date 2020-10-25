@@ -89,13 +89,6 @@ class Unit(Document):
     :default: None
     """
 
-    position = IntField()
-    """
-    :type: *int*
-    :required: False 
-    :default: None
-    """
-
     # if from chat
     source_unit_id = StringField()
     """
