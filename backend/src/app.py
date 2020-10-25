@@ -58,10 +58,14 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": error.BAD_REQUEST}
         discussion_id = request["discussion_id"]
         nickname = request["nickname"]
+        user_id = None
+        if "user_id" in request:
+          user_id = request["user_id"]
 
         result = gm.discussion_manager.create_user(
           discussion_id=discussion_id,
-          nickname=nickname
+          nickname=nickname,
+          user_id=user_id
         )
 
         if "error" in result:

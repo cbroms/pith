@@ -60,6 +60,16 @@ class DiscussionManagerTest(unittest.TestCase):
           discussion_id=discussion_id, user_id="...")
         self.assertTrue(res1 is None)
         self.assertEqual(res2["error"], error.BAD_USER_ID)
+        res = self.discussion_manager.create_user(
+          discussion_id=discussion_id, nickname=nickname)
+        self.assertEqual(res["error"], error.NICKNAME_EXISTS)
+        res = self.discussion_manager.create_user(
+          discussion_id=discussion_id, nickname="monkey", user_id=user_id)
+        self.assertEqual(res["error"], error.USER_ID_EXISTS)
+        user_id2_ = "blahblah"
+        user_id2 = self.discussion_manager.create_user(
+          discussion_id=discussion_id, nickname="monkey", user_id=user_id2_)["user_id"]
+        self.assertEqual(user_id2, user_id2_)
 
     def test_join_leave(self) -> None: 
         nickname = "whales"

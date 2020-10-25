@@ -283,8 +283,14 @@ class DiscussionManager:
     """
 
     @_check_discussion_id
-    def create_user(self, discussion_id, nickname):
+    def create_user(self, discussion_id, nickname, user_id=None):
         discussion = self._get(discussion_id)
+        if len(discussion.filter(users__name=nickname)) > 0:
+          return {"error": error.NICKNAME_EXISTS}
+        if user_id is not None:
+          if len(discussion.filter(users__id=user_id)) > 0:
+            return {"error": error.USER_ID_EXISTS}
+
         unit_id = discussion.get().document
         cursor = Cursor(unit_id=unit_id, position=-1) 
         user = User(
@@ -293,6 +299,8 @@ class DiscussionManager:
           start_time=datetime.utcnow().strftime(constants.DATE_TIME_FMT),
           cursor=cursor
         ) 
+        if user_id is not None: # use pre-chosen id
+          user.id = user_id
         discussion.update(push__users=user)
         response = {"user_id": user.id}
         return response
