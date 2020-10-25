@@ -213,7 +213,6 @@ class DiscussionManagerTest(unittest.TestCase):
         repos, added = self.discussion_manager.merge_units(
           discussion_id=discussion_id, user_id=user_id2, units=[unit_id])
         self.assertEqual(repos[0]["unit_id"], unit_id)
-        self.assertEqual(added["pith"], "")
 
         # now can request lock
         res = self.discussion_manager.select_unit(
@@ -285,7 +284,7 @@ class DiscussionManagerTest(unittest.TestCase):
         res = self.discussion_manager.load_user(discussion_id=discussion_id,
           user_id=user_id)
         self.assertFalse(res is None)
-        res = self.discussion_manager.get_unit_page(discussion_id=discussion_id,
+        res, cr = self.discussion_manager.load_unit_page(discussion_id=discussion_id,
           user_id=user_id, unit_id=unit_id)
         self.assertFalse(res is None)
         res = self.discussion_manager.get_unit_context(discussion_id=discussion_id,
@@ -376,27 +375,27 @@ class DiscussionManagerTest(unittest.TestCase):
         
         timeline = []
 
-        res = self.discussion_manager.get_unit_page(
+        res, cr = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id1
         )
         timeline.append(res["timeline_entry"])
         time.sleep(1)
-        res = self.discussion_manager.get_unit_page(
+        res, cr = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4
         )
         timeline.append(res["timeline_entry"])
         time.sleep(1)
-        res = self.discussion_manager.get_unit_page(
+        res, cr = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id3
         )
         timeline.append(res["timeline_entry"])
         time.sleep(1)
-        res = self.discussion_manager.get_unit_page(
+        res, cr = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id2
         )
         timeline.append(res["timeline_entry"])
         time.sleep(2)
-        res = self.discussion_manager.get_unit_page(
+        res, cr = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id5
         )
         timeline.append(res["timeline_entry"])
@@ -459,7 +458,7 @@ class DiscussionManagerTest(unittest.TestCase):
         )
         unit_id5 = added["unit_id"]
         
-        res = self.discussion_manager.get_unit_page(
+        res, cr = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id5
         )
         self.assertEqual(res["cursor"].unit_id, unit_id5)
@@ -607,7 +606,7 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertEqual(len(children2), 0)
         self.assertEqual(len(children4), 0)
 
-        res = self.discussion_manager.get_unit_page(
+        res = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4
         )
 
@@ -627,7 +626,7 @@ class DiscussionManagerTest(unittest.TestCase):
         )
         self.assertEqual(res["error"], error.BAD_PARENT)
         # perform the legal merge
-        res = self.discussion_manager.get_unit_page(
+        res = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id1
         )
         moved, added = self.discussion_manager.merge_units(

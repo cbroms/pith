@@ -89,7 +89,7 @@ class DiscussionManager:
         return -1
 
     def _chat_meta(self, unit_id):
-      unit = self._get_unit(unit_id)
+      unit = self._get_unit(unit_id).get()
       response = {
         "unit_id": unit_id,
         "pith": unit.pith,
@@ -99,7 +99,7 @@ class DiscussionManager:
       return response
 
     def _doc_meta(self, unit_id):
-      unit = self._get_unit(unit_id)
+      unit = self._get_unit(unit_id).get()
       response = {
         "unit_id": unit_id,
         "pith": unit.pith,
@@ -528,7 +528,7 @@ class DiscussionManager:
         forward_links = self._retrieve_links(pith)
         for f in forward_links:
             unit = self._get_unit(f)
-            if unit.in_chat:
+            if unit.get().in_chat:
               chat_meta.append(self._chat_meta(f))
             else:
               doc_meta.append(self._doc_meta(f))
@@ -631,10 +631,10 @@ class DiscussionManager:
         doc_meta.append(self._doc_meta(unit_id))
         for f in forward_links:
           unit = self._get_unit(f)
-          if f.in_chat:
-            chat_meta.append(self.chat_meta(f))
+          if unit.get().in_chat:
+            chat_meta.append(self._chat_meta(f))
           else:
-            doc_meta.append(self.doc_meta(f))
+            doc_meta.append(self._doc_meta(f))
 
         parent = self._get_unit(parent_id)
         key = "push__children__{}".format(position)
@@ -738,7 +738,7 @@ class DiscussionManager:
         doc_meta.append(self._doc_meta(unit_id))
         for f in forward_links:
           unit = self._get_unit(f)
-          if unit.in_chat:
+          if unit.get().in_chat:
             chat_meta.append(self._chat_meta(f))
           else:
             doc_meta.append(self._doc_meta(f))
@@ -886,7 +886,7 @@ class DiscussionManager:
         doc_meta.append(self._doc_meta(unit_id))
         for f in forward_links:
           unit = self._get_unit(f)
-          if unit.in_chat:
+          if unit.get().in_chat:
             chat_meta.append(self._chat_meta(f))
           else:
             doc_meta.append(self._doc_meta(f))
