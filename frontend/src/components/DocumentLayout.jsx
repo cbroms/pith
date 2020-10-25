@@ -7,7 +7,6 @@ const StyledContainer = styled.div`
     display: grid;
     height: 100%;
     max-height: 100%;
-    overflow-y: scroll;
 
     @media (max-width: 768px) {
         grid-template-columns: [ancestor] 40px [ancestor-end document] 1fr [document-end];
@@ -59,7 +58,6 @@ const StyledDocument = styled.div`
     grid-row-start: content;
     grid-row-end: content-end;
     height: 100%;
-    overflow-y: scroll;
     // background-color: SkyBlue;
 `;
 

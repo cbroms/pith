@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import styled from "styled-components";
+
 import * as dayjs from "dayjs";
 import * as calendar from "dayjs/plugin/calendar";
 import * as utc from "dayjs/plugin/utc";
@@ -10,6 +10,7 @@ import ChatLayout from "./ChatLayout";
 import PostUnitLayout from "./PostUnitLayout";
 import PostLayout from "./PostLayout";
 import Unit from "./Unit";
+import TextEditor from "./TextEditor";
 
 dayjs.extend(calendar);
 dayjs.extend(utc);
@@ -43,9 +44,7 @@ const Chat = (props) => {
 
     // calculate the post times before adding the transclusions
     for (const group of postGroups) {
-        const date = dayjs(group[0].created_at)
-            .utc()
-            .local();
+        const date = dayjs(group[0].created_at).utc().local();
 
         const formattedDate = dayjs(date).calendar(null, {
             sameDay: "[Today at] h:mm a",
@@ -126,7 +125,15 @@ const Chat = (props) => {
             </PostLayout>
         );
     });
-    return <ChatLayout>{posts}</ChatLayout>;
+
+    const editor = (
+        <TextEditor
+            openSearch={props.openSearch}
+            closeSearch={props.closeSearch}
+            setQuery={props.setQuery}
+        />
+    );
+    return <ChatLayout editor={editor}>{posts}</ChatLayout>;
 };
 
 export default Chat;

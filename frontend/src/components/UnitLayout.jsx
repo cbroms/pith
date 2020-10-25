@@ -35,7 +35,7 @@ const StyledRefNum = styled.span`
 
 const StyledContent = styled.div`
     display: inline-block;
-    width: calc(100% - 18px);
+    //width: calc(100% - 18px);
 `;
 
 const UnitLayout = (props) => {

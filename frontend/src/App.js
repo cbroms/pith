@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+// import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import "./App.css";
 
@@ -148,6 +148,7 @@ function App() {
 		<div className="App">
 			<ThemeProvider theme={theme}>
 				<Discussion
+					setDarkMode={(val) => setDarkModeActive(val)}
 					timeline={timelineDummy}
 					content={postUnits}
 					posts={postsDummy}

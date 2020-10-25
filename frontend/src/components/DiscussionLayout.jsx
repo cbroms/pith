@@ -2,10 +2,14 @@ import React, { useState } from "react";
 import styled from "styled-components";
 
 import { LargeHeading } from "./StandardUI";
-import { DiscussionIcon, DocumentIcon, MenuIcon, CloseIcon } from "./Symbols";
-import Chat from "./Chat";
+import { MenuIcon, CloseIcon } from "./Symbols";
 
 const StyledContainer = styled.div`
+    background-color: ${(props) => props.theme.shade1};
+    color: ${(props) => props.theme.shade3};
+`;
+
+const StyledContent = styled.div`
     display: grid;
     grid-template-columns: [logo] 40px [logo-end discussion] 1fr [discussion-end document] 1.25fr [document-end];
     grid-template-rows: [header] 40px [header-end content] calc(100vh - 40px) [content-end];
@@ -17,8 +21,8 @@ const StyledContainer = styled.div`
             [content-end];
     }
 
-    background-color: ${(props) => props.theme.shade1};
-    color: ${(props) => props.theme.shade3};
+    max-width: 2000px;
+    margin: 0 auto;
 `;
 
 const StyledHeaderLogo = styled.div`
@@ -95,11 +99,37 @@ const StyledMenuContainer = styled.div`
     background-color: ${(props) => props.theme.shade1};
 `;
 
+const StyledSearchContainer = styled.div`
+    box-sizing: border-box;
+    transition: max-height ${(props) => props.theme.animation};
+
+    grid-column-start: document;
+    grid-column-end: document-end;
+    grid-row-start: header;
+    grid-row-end: content-end;
+    z-index: 10;
+    max-height: ${(props) => (props.active ? "100%" : "0px")};
+
+    background-color: ${(props) => props.theme.shade1};
+`;
+
+const StyledSearchContent = styled.div`
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+
+    transition: opacity ${(props) => props.theme.animation};
+    opacity: ${(props) => (props.active ? 1 : 0)};
+
+    @media (min-width: 768px) {
+        border-right: 1px solid ${(props) => props.theme.shade2};
+    }
+`;
+
 const StyledMenuContent = styled.div`
     box-sizing: border-box;
     height: 100%;
     width: 100%;
-    padding: ${(props) => (props.active ? 20 : 0)}px;
 
     transition: opacity ${(props) => props.theme.animation};
     opacity: ${(props) => (props.active ? 1 : 0)};
@@ -172,39 +202,46 @@ const DiscussionLayout = (props) => {
 
     return (
         <StyledContainer>
-            <StyledHeaderLogo
-                active={menuActive}
-                onClick={(e) => setMenuActive(!menuActive)}
-            >
-                {menuActive ? <CloseIcon /> : <MenuIcon />}
-            </StyledHeaderLogo>
-            <StyledHeaderDiscussion
-                menuActive={menuActive}
-                active={!discussionActive}
-                onClick={(e) => setDiscussionActive(true)}
-            >
-                {/* <DiscussionIcon />*/}
-                <StyledTitle active={discussionActive}>Chat</StyledTitle>
-            </StyledHeaderDiscussion>
-            <StyledHeaderDocument
-                menuActive={menuActive}
-                active={discussionActive}
-                onClick={(e) => setDiscussionActive(false)}
-            >
-                {/* <DocumentIcon />*/}
-                <StyledTitle active={!discussionActive}>Doc</StyledTitle>
-            </StyledHeaderDocument>
-            <StyledMenuContainer active={menuActive}>
-                <StyledMenuContent active={menuActive} />
-            </StyledMenuContainer>
-            <StyledDocumentContainer>
-                {props.children[1]}
-            </StyledDocumentContainer>
-            <StyledDiscussionContainer active={discussionActive}>
-                <StyledDiscussionContent menuActive={menuActive}>
-                    {props.children[0]}
-                </StyledDiscussionContent>
-            </StyledDiscussionContainer>
+            <StyledContent>
+                <StyledHeaderLogo
+                    active={menuActive}
+                    onClick={(e) => setMenuActive(!menuActive)}
+                >
+                    {menuActive ? <CloseIcon /> : <MenuIcon />}
+                </StyledHeaderLogo>
+                <StyledHeaderDiscussion
+                    menuActive={menuActive}
+                    active={!discussionActive}
+                    onClick={(e) => setDiscussionActive(true)}
+                >
+                    <StyledTitle active={discussionActive}>Chat</StyledTitle>
+                </StyledHeaderDiscussion>
+                <StyledHeaderDocument
+                    menuActive={menuActive}
+                    active={discussionActive}
+                    onClick={(e) => setDiscussionActive(false)}
+                >
+                    <StyledTitle active={!discussionActive}>Doc</StyledTitle>
+                </StyledHeaderDocument>
+                <StyledMenuContainer active={menuActive}>
+                    <StyledMenuContent active={menuActive}>
+                        {props.menu}
+                    </StyledMenuContent>
+                </StyledMenuContainer>
+                <StyledSearchContainer active={props.searchActive}>
+                    <StyledSearchContent active={props.searchActive}>
+                        {props.search}
+                    </StyledSearchContent>
+                </StyledSearchContainer>
+                <StyledDocumentContainer>
+                    {props.document}
+                </StyledDocumentContainer>
+                <StyledDiscussionContainer active={discussionActive}>
+                    <StyledDiscussionContent menuActive={menuActive}>
+                        {props.chat}
+                    </StyledDiscussionContent>
+                </StyledDiscussionContainer>
+            </StyledContent>
         </StyledContainer>
     );
 };

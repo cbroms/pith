@@ -1,6 +1,7 @@
 import React from "react";
-import ContentEditable from "react-contenteditable";
-import sanitizeHtml from "sanitize-html";
+import DOMPurify from "dompurify";
+
+import TextEditorLayout from "./TextEditorLayout";
 
 class TextEditor extends React.Component {
   constructor(props) {
@@ -8,6 +9,7 @@ class TextEditor extends React.Component {
     this.state = {
       html: this.props.content || "",
       editable: true,
+      queryStartPos: null,
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -16,8 +18,49 @@ class TextEditor extends React.Component {
     this.toggleEditable = this.toggleEditable.bind(this);
   }
 
+  ref = React.createRef();
+
+  sanitizeConf = {
+    ALLOWED_TAGS: ["b", "i", "em", "strong", "a", "p", "u"],
+  };
+
+  sanitizeCompleteConf = {
+    ALLOWED_TAGS: [],
+  };
+
   handleChange(e) {
-    this.setState({ html: e.target.value });
+    this.setState({ html: e.target.value }, () => {
+      // console.log(this.state.html);
+      // if the state is empty, ensure the search is closed
+      if (
+        this.state.html.length === 0 ||
+        (this.state.html.length === 4 && this.state.html === "<br>")
+      ) {
+        this.props.closeSearch();
+      }
+
+      // if we're in search mode, send the query
+      if (this.state.queryStartPos !== null) {
+        // completely sanitize the string
+        const query = DOMPurify.sanitize(
+          this.state.html.substring(
+            this.state.queryStartPos,
+            this.state.html.length
+          ),
+          this.sanitizeCompleteConf
+        );
+
+        this.props.setQuery(query);
+      }
+    });
+  }
+
+  getCaretPosition() {
+    let sel = window.getSelection();
+    if (sel.rangeCount) {
+      return sel.getRangeAt(0).endOffset;
+    }
+    return null;
   }
 
   handleKeyDown(e) {
@@ -30,30 +73,42 @@ class TextEditor extends React.Component {
     // cmd/ctrl + b for bold
     if (e.keyCode === 66 && e.metaKey) {
       e.preventDefault();
-      console.log("bold");
       document.execCommand("bold", false);
     }
     // cmd/ctrl + i for italic
     if (e.keyCode === 73 && e.metaKey) {
       e.preventDefault();
-      console.log("italic");
       document.execCommand("italic", false);
     }
     // cmd/ctrl + u for underline
     if (e.keyCode === 85 && e.metaKey) {
       e.preventDefault();
-      console.log("underline");
       document.execCommand("underline", false);
+    }
+    // shift + > for start query
+    if (e.keyCode === 190 && e.shiftKey) {
+      // start the search
+      this.setState({
+        queryStartPos: this.state.html.includes("<br>")
+          ? this.state.html.length
+          : this.state.html.length + 4,
+      });
+      this.props.openSearch();
+    }
+    if (e.keyCode === 8) {
+      let caretPos = this.getCaretPosition();
+      // add 3 to the caret pos because > is represented as &gt;
+      if (caretPos + 3 === this.state.queryStartPos) {
+        this.setState({ queryStartPos: null });
+        this.props.closeSearch();
+      }
     }
   }
 
-  sanitizeConf = {
-    allowedTags: ["b", "i", "em", "strong", "a", "p", "h1", "u"],
-    allowedAttributes: { a: ["href"] },
-  };
-
   sanitize() {
-    this.setState({ html: sanitizeHtml(this.state.html, this.sanitizeConf) });
+    this.setState({
+      html: DOMPurify.sanitize(this.state.html, this.sanitizeConf),
+    });
   }
 
   toggleEditable() {
@@ -62,7 +117,8 @@ class TextEditor extends React.Component {
 
   render() {
     return (
-      <ContentEditable
+      <TextEditorLayout
+        innerRef={this.ref}
         className={this.props.className}
         html={this.state.html} // innerHTML of the editable div
         disabled={!this.state.editable} // use true to disable edition
@@ -98,18 +154,18 @@ class TextEditor extends React.Component {
   </button>
 </div>; */
 
-function EditButton(props) {
-  return (
-    <button
-      key={props.cmd}
-      onMouseDown={(evt) => {
-        evt.preventDefault(); // Avoids loosing focus from the editable area
-        document.execCommand(props.cmd, false, props.arg); // Send the command to the browser
-      }}
-    >
-      {props.name || props.cmd}
-    </button>
-  );
-}
+// function EditButton(props) {
+//   return (
+//     <button
+//       key={props.cmd}
+//       onMouseDown={(evt) => {
+//         evt.preventDefault(); // Avoids loosing focus from the editable area
+//         document.execCommand(props.cmd, false, props.arg); // Send the command to the browser
+//       }}
+//     >
+//       {props.name || props.cmd}
+//     </button>
+//   );
+// }
 
 export default TextEditor;
