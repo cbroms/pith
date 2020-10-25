@@ -11,8 +11,8 @@ with open(path + "/discussion/requests/create_user.json") as file:
 with open(path + "/discussion/requests/join.json") as file:
   join = load(file)
 
-with open(path + "/discussion/requests/get_unit_page.json") as file:
-  get_unit_page = load(file)
+with open(path + "/discussion/requests/load_unit_page.json") as file:
+  load_unit_page = load(file)
 
 with open(path + "/discussion/requests/get_ancestors.json") as file:
   get_ancestors = load(file)

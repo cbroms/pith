@@ -2,8 +2,9 @@
   "type": "object",
   "properties": {
     "unit_id": {"type": "string"},
-    "pith": {"type": "string"}
+    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"},
+    "chat_meta": {"$ref": "chat_meta.json#/chat_meta"}
   },
-  "required": ["unit_id", "pith"]
+  "required": ["unit_id", "doc_meta", "chat_meta"]
 }
 

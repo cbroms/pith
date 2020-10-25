@@ -2,14 +2,7 @@
   "type": "object",
   "properties": {
     "user_id": {"type": "string"},
-    "cursor": {
-      "type": "object",
-      "properties": {
-        "unit_id": {"type": "string"},
-        "position": {"type": "integer", "minimum": -1}
-      },
-      "required": ["unit_id", "position"]
-    }
+    "cursor": {"$ref": "cursor.json#/cursor"}
   },
   "required": ["user_id", "cursor"]
 }

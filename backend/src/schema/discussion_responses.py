@@ -33,8 +33,8 @@ with open(path + "/discussion/responses/loaded_user.json") as file:
 - **children** - List of tuples, where each tuple has a children unit ID and the list of children for that unit.
 - **backlinks** - List of tuples, where each tuple has a backlink unit ID and the list of backlinks for that unit.
 """
-with open(path + "/discussion/responses/get_unit_page.json") as file:
-  get_unit_page = load(file)
+with open(path + "/discussion/responses/loaded_unit_page.json") as file:
+  loaded_unit_page = load(file)
 
 """
 - ancestors - List of ancestor unit IDs, from most recent to oldest.

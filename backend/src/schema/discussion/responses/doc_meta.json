@@ -1,0 +1,15 @@
+"doc_meta": {
+  "$$target": "doc_meta.json#/doc_meta",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "unit_id": {"type": "string"},
+      "pith": {"type": "string"},
+      "hidden": {"type": "boolean"},
+      "created_at": {"type": "string"}
+    },
+    "required": ["unit_id", "pith", "hidden", "created_at"]
+  }
+}
+

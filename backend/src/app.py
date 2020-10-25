@@ -20,14 +20,14 @@ sio = gm.sio
 @sio.on('create')
 async def create(sid, request):
     """
-    :return: :ref:`bres_create-label`
+    :return: :ref:`bres_created-label`
     """
     result = await gm.discussion_manager.create()
 
     if "error" in result:
       return result
     serialized = dumps(result, cls=GenericEncoder)
-    if validate(instance=serialized, schema=bres.create):
+    if validate(instance=serialized, schema=bres.created):
       return {"error": error.BAD_RESPONSE}
     return serialized
 
@@ -139,22 +139,20 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": error.BAD_RESPONSE}
         return serialized
     
-    async def get_unit_page(self, sid, request):
+    async def load_unit_page(self, sid, request):
         """
-        NOTE: This changes state by moving the cursor and updating the timeline.
-
-        :event: :ref:`dreq_get_unit_page-label`
+        :event: :ref:`dreq_load_unit_page-label`
         :emit: *moved_cursor* (:ref:`dres_moved_cursor-label`)
-        :return: :ref:`dres_get_unit_page-label`
+        :return: :ref:`dres_loaded_unit_page-label`
         """
-        if validate(instance=request, schema=dreq.get_unit_page):
+        if validate(instance=request, schema=dreq.load_unit_page):
           return {"error": error.BAD_REQUEST}
         unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
         user_id = session["user_id"]
 
-        result = gm.discussion_manager.get_unit_page(
+        result = gm.discussion_manager.load_unit_page(
           discussion_id=discussion_id, 
           user_id=user_id, 
           unit_id=unit_id
@@ -171,7 +169,7 @@ class DiscussionNamespace(AsyncNamespace):
         await self.emit("moved_cursor", serialized, room=discussion_id)
 
         serialized = dumps(unit_page, cls=GenericEncoder)
-        if validate(instance=serialized, schema=dres.get_unit_page):
+        if validate(instance=serialized, schema=dres.loaded_unit_page):
           return {"error": error.BAD_RESPONSE}
         return serialized
 

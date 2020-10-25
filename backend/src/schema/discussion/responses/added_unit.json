@@ -2,11 +2,11 @@
   "type": "object",
   "properties": {
     "unit_id": {"type": "string"},
-    "pith": {"type": "string"},
-    "created_at": {"type": "string"},
     "parent": {"type": "string"},
-    "position": {"type": "integer", "minimum": 0}
+    "position": {"type": "integer", "minimum": 0},
+    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"},
+    "chat_meta": {"$ref": "chat_meta.json#/chat_meta"}
   },
-  "required": ["unit_id", "pith", "created_at", "parent", "position"]
+  "required": ["unit_id", "parent", "position", "chat_meta", "doc_meta"]
 }
 

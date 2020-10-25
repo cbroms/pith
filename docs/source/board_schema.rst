@@ -6,9 +6,9 @@ Pith Board Schema
 Board Responses
 *************************************
 
-.. _bres_create-label:
+.. _bres_created-label:
 
-create
+created
 =====================================
 
-.. jsonschema:: ../../backend/src/schema/board/responses/create.json
+.. jsonschema:: ../../backend/src/schema/board/responses/created.json

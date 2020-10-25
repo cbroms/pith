@@ -6,10 +6,9 @@
       "items": {
         "type": "object",
         "properties": {
-          "unit_id": {"type": "string"},
-          "pith": {"type": "string"}
+          "unit_id": {"type": "string"}
         },
-        "required": ["unit_id", "pith"] 
+        "required": ["unit_id"] 
       }
     },
     "doc_units": {
@@ -17,13 +16,14 @@
       "items": {
         "type": "object",
         "properties": {
-          "unit_id": {"type": "string"},
-          "pith": {"type": "string"}
+          "unit_id": {"type": "string"}
         },
-        "required": ["unit_id", "pith"] 
+        "required": ["unit_id"] 
       }
-    }
+    },
+    "chat_meta": {"$ref": "chat_meta.json#/chat_meta"},
+    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
   },
-  "required": ["chat_units", "doc_units"]
+  "required": ["chat_units", "doc_units", "chat_meta", "doc_meta"]
 }
 

@@ -1,11 +1,10 @@
 {
   "type": "object",
   "properties": {
-    "created_at": {"type": "string"},
-    "author": {"type": "string"},
     "unit_id": {"type": "string"},
-    "pith": {"type": "string"}
+    "chat_meta": {"$ref": "chat_meta.json#/chat_meta"},
+    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
   },
-  "required": ["created_at", "author", "unit_id", "pith"]
+  "required": ["unit_id", "chat_meta", "doc_meta"]
 }
 

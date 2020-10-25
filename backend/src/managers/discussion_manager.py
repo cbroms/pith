@@ -88,6 +88,27 @@ class DiscussionManager:
       else:
         return -1
 
+    def _chat_meta(self, unit_id):
+      unit = self._get_unit(unit_id)
+      response = {
+        "unit_id": unit_id,
+        "pith": unit.pith,
+        "author": unit.author,
+        "created_at": unit.created_at
+      }
+      return response
+
+    def _doc_meta(self, unit_id):
+      unit = self._get_unit(unit_id)
+      response = {
+        "unit_id": unit_id,
+        "pith": unit.pith,
+        "hidden": unit.hidden,
+        "created_at": unit.created_at
+      }
+      return response
+
+    # TODO: MULTIPLE MONGO OPERATIONS
     def _move_units(self, discussion_id, user_id, units, parent_id, position):
         discussion = self._get(discussion_id)
         user = discussion.get().users.filter(id=user_id).get()
@@ -295,6 +316,7 @@ class DiscussionManager:
         }
         return response
 
+    # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
     @_check_user_id
     def leave(self, discussion_id, user_id):
@@ -315,6 +337,9 @@ class DiscussionManager:
         discussion = self._get(discussion_id).get()
         user = discussion.users.filter(id=user_id).get()
 
+        doc_meta = []
+        chat_meta = []
+
         cursors = []
         for p in discussion.users:
           if p.active:
@@ -323,15 +348,16 @@ class DiscussionManager:
               "nickname": p.name, 
               "cursor": p.cursor
             })
+          doc_meta.append(self._doc_meta(p.cursor.unit_id))
 
         timeline = []
         for i in user.timeline: 
           timeline.append({
             "unit_id": i.unit_id,
-            "pith": self._get_unit(i.unit_id).get().pith,
             "start_time": i.start_time,
             "end_time": i.end_time,
           })
+          doc_meta.append(self._doc_meta(i.unit_id))
 
         unit_ids = []
         for u in discussion.chat:
@@ -340,28 +366,24 @@ class DiscussionManager:
           unit_ids += unit.forward_links 
         unit_ids = list(set(unit_ids))
 
-        chat_map = []
-        for u in unit_ids:
+        for u in unit_ids: # chat units and forward links
           unit = self._get_unit(u).get()
-          chat_map.append({
-            "unit_id": u,
-            "pith": unit.pith,
-            "author": unit.author, # if from document, may not be recorded
-            "created_at": unit.created_at
-          })
+          chat_meta.append(self._chat_meta(u))
 
         response = {
           "cursors": cursors,
           "current_unit": user.viewed_unit, 
           "timeline": timeline,
           "chat_history": discussion.chat, 
-          "chat_map": chat_map
+          "chat_meta": chat_meta,
+          "doc_meta": doc_meta
         }
         return response 
 
+    # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
     @_check_unit_id
-    def get_unit_page(self, discussion_id, user_id, unit_id):
+    def load_unit_page(self, discussion_id, user_id, unit_id):
         """
         This is the trigger for updating the timeline.
         """
@@ -369,41 +391,44 @@ class DiscussionManager:
         # perform unit-based operations
         unit = self._get_unit(unit_id).get()
 
+        doc_meta = []
+        doc_meta.append(self._doc_meta(unit_id))
+
         children = []
         for c in unit.children:
           c_unit = self._get_unit(c).get()
+
           grandchildren = []
           for g in c_unit.children:
             g_unit = self._get_unit(g).get()
             grandchildren.append({
               "unit_id": g,
-              "pith": g_unit.pith,
-              "hidden": g_unit.hidden,
             })
+            doc_meta.append(self._doc_meta(g))
+
           children.append({
             "unit_id": c,
-            "pith": c_unit.pith,
-            "hidden": c_unit.hidden,
             "children": grandchildren
           })
+          doc_meta.append(self._doc_meta(c))
 
         backlinks = []
         for b in unit.backward_links:
           b_unit = self._get_unit(b).get()
+
           grandbacklinks = []
           for g in b_unit.backward_links:
             g_unit = self._get_unit(g).get()
             grandbacklinks.append({
               "unit_id": g,
-              "pith": g_unit.pith,
-              "hidden": g_unit.hidden,
             })
+            doc_meta.append(self._doc_meta(g))
+
           backlinks.append({
             "unit_id": b,
-            "pith": b_unit.pith,
-            "hidden": b_unit.hidden,
             "backlinks": grandbacklinks 
           })
+          doc_meta.append(self._doc_meta(b))
 
         # update cursor
         discussion.filter(users__id=user_id).update(
@@ -417,7 +442,6 @@ class DiscussionManager:
         time_interval = user.timeline[-1] # newly made
         timeline_entry = {
           "unit_id": time_interval.unit_id,
-          "pith": self._get_unit(time_interval.unit_id).get().pith, 
           "start_time": time_interval.start_time,
           "end_time": time_interval.end_time,
         }
@@ -427,13 +451,18 @@ class DiscussionManager:
           set__users__S__viewed_unit = unit_id
         )
 
+        # ancestors
+        ancestors = self._get_ancestors(unit_id)
+        for a in ancestors:
+          doc_meta.append(self._doc_meta(a))
+
         response = {
-          "pith": unit.pith,
-          "ancestors": self._get_ancestors(unit_id),
+          "ancestors": ancestors,
           "children": children,
           "backlinks": backlinks,
           "timeline_entry": timeline_entry,
-          "cursor": cursor
+          "cursor": cursor,
+          "doc_meta": doc_meta
         }
         cursor_response = {
           "user_id": user_id,
@@ -445,7 +474,17 @@ class DiscussionManager:
     @_check_discussion_id
     @_check_unit_id
     def get_ancestors(self, discussion_id, unit_id):
-        return self._get_ancestors(unit_id)
+        ancestors = self._get_ancestors(unit_id)
+
+        doc_meta = []
+        for a in ancestors:
+          doc_meta.append(a)
+
+        response = {
+          "ancestors": ancestors,
+          "doc_meta": doc_meta
+        }
+        return response
 
     @_check_discussion_id
     @_check_unit_id
@@ -477,11 +516,23 @@ class DiscussionManager:
         }
         return response
 
+    # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
     @_check_user_id
     def post(self, discussion_id, user_id, pith):
         discussion = self._get(discussion_id)
+
+        chat_meta = []
+        doc_meta = []
+
         forward_links = self._retrieve_links(pith)
+        for f in forward_links:
+            unit = self._get_unit(f)
+            if unit.in_chat:
+              chat_meta.append(self._chat_meta(f))
+            else:
+              doc_meta.append(self._doc_meta(f))
+
         unit = Unit(
           pith=pith,
           parent="",
@@ -493,6 +544,7 @@ class DiscussionManager:
         unit_id = unit.id
         unit.save()
         discussion.update(push__chat=unit_id)
+        chat_meta.append(self._chat_meta(unit_id))
 
         # make backlinks
         backlinks = []
@@ -506,10 +558,9 @@ class DiscussionManager:
           })
 
         post = {
-          "created_at": unit.created_at,
-          "author": discussion.get().users.filter(id=user_id).get().name, 
           "unit_id": unit_id,
-          "pith": unit.pith 
+          "chat_meta": chat_meta,
+          "doc_meta": doc_meta
         }
         return post, backlinks
 
@@ -520,24 +571,34 @@ class DiscussionManager:
         """
         discussion = self._get(discussion_id)
         results = Unit.objects()._collection.find({"$text": {"$search": query}})
+
         chat = []
         doc = []
+
+        chat_meta = []
+        doc_meta = []
+
         for unit in results: # dict form
+          unit_id = unit["_id"]
           entry = {
-            "unit_id": unit["_id"],
-            "pith": unit["pith"] 
+            "unit_id": unit_id,
           }
           if unit["in_chat"]:
             chat.append(entry)
+            chat_meta.append(self._chat_meta(unit_id))
           else:
             doc.append(entry)
+            doc_meta.append(self._doc_meta(unit_id))
 
         response = {
           "chat_units": chat,
-          "doc_units": doc
+          "doc_units": doc,
+          "chat_meta": chat_meta,
+          "doc_meta": doc_meta
         }
         return response
       
+    # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
     @_check_unit_id
     def send_to_doc(self, discussion_id, user_id, unit_id):
@@ -555,7 +616,6 @@ class DiscussionManager:
           len(self._get_unit(user.cursor.unit_id).get().children)
         forward_links = chat_unit.forward_links
         parent_id = user.cursor.unit_id
-
         unit = Unit(
           pith=chat_unit.pith,
           forward_links=forward_links,
@@ -564,27 +624,38 @@ class DiscussionManager:
           original_pith=chat_unit.pith
         )
         unit.save()
+        unit_id = unit.id
+
+        doc_meta = []
+        chat_meta = []
+        doc_meta.append(self._doc_meta(unit_id))
+        for f in forward_links:
+          unit = self._get_unit(f)
+          if f.in_chat:
+            chat_meta.append(self.chat_meta(f))
+          else:
+            doc_meta.append(self.doc_meta(f))
 
         parent = self._get_unit(parent_id)
         key = "push__children__{}".format(position)
-        parent.update(**{key: [unit.id]})
+        parent.update(**{key: [unit_id]})
 
         backlinks = []
         for f in forward_links:
           self._get_unit(f).update(
-            push__backward_links = unit.id
+            push__backward_links = unit_id
           )
           backlinks.append({
             "unit_id": f,
-            "backlink": unit.id
+            "backlink": unit_id
           })
         
         added = {
-          "unit_id": unit.id,
-          "pith": unit.pith,
-          "created_at": unit.created_at,
+          "unit_id": unit_id,
           "parent": parent_id,
-          "position": self._get_position(parent_id, unit.id),
+          "position": self._get_position(parent_id, unit_id),
+          "doc_meta": doc_meta,
+          "chat_meta": chat_meta
         }
         return added, backlinks 
 
@@ -606,6 +677,7 @@ class DiscussionManager:
         }
         return response
 
+    # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
     @_check_unit_id
     @_verify_edit_privilege
@@ -631,6 +703,7 @@ class DiscussionManager:
         response = {"unit_id": unit_id}
         return response
 
+    # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
     def add_unit(self, discussion_id, pith, parent, previous, position):
         """
@@ -650,14 +723,25 @@ class DiscussionManager:
               final_position = position 
         else:
           final_position = position 
+        forward_links = self._retrieve_links(pith)
 
         unit = Unit(
           pith=pith,
-          forward_links=self._retrieve_links(pith),
+          forward_links=forward_links,
           parent=parent,
         )
         unit.save()
         unit_id = unit.id
+
+        doc_meta = []
+        chat_meta = []
+        doc_meta.append(self._doc_meta(unit_id))
+        for f in forward_links:
+          unit = self._get_unit(f)
+          if unit.in_chat:
+            chat_meta.append(self._chat_meta(f))
+          else:
+            doc_meta.append(self._doc_meta(f))
 
         parent_ptr = self._get_unit(parent)
         key = "push__children__{}".format(final_position)
@@ -665,7 +749,7 @@ class DiscussionManager:
 
         # make backlinks
         backlinks = []
-        for f in unit.forward_links:
+        for f in forward_links:
           self._get_unit(f).update(
             push__backward_links = unit_id
           )
@@ -676,10 +760,10 @@ class DiscussionManager:
 
         added = {
           "unit_id": unit_id,
-          "pith": unit.pith,
-          "created_at": unit.created_at,
           "parent": parent,
-          "position": self._get_position(parent, unit_id)
+          "position": self._get_position(parent, unit_id),
+          "doc_meta": doc_meta,
+          "chat_meta": chat_meta
         }
         return added, backlinks  
 
@@ -703,6 +787,7 @@ class DiscussionManager:
         }
         return response
 
+    # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
     @_check_user_id
     @_check_units
@@ -720,6 +805,7 @@ class DiscussionManager:
           len(self._get_unit(user.cursor.unit_id).get().children)
         return self._move_units(discussion_id, user_id, units, parent_id, position)
 
+    # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
     @_check_user_id
     @_check_units
@@ -765,6 +851,7 @@ class DiscussionManager:
         }
         return response
 
+    # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
     @_check_unit_id
     @_verify_edit_privilege
@@ -794,9 +881,20 @@ class DiscussionManager:
             push__backward_links = unit_id
           )
 
+        doc_meta = []
+        chat_meta = []
+        doc_meta.append(self._doc_meta(unit_id))
+        for f in forward_links:
+          unit = self._get_unit(f)
+          if unit.in_chat:
+            chat_meta.append(self._chat_meta(f))
+          else:
+            doc_meta.append(self._doc_meta(f))
+
         edited_unit = {
           "unit_id": unit_id,
-          "pith": pith
+          "doc_meta": doc_meta,
+          "chat_meta": chat_meta
         }
         removed_backlinks = [
           {"unit_id": r, "backlink": unit_id} for r in removed_links

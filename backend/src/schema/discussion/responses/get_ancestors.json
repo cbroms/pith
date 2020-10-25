@@ -4,8 +4,9 @@
     "ancestors": {
       "type": "array",
       "items": {"type": "string"}
-    }
+    },
+    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
   },
-  "required": ["ancestors"]
+  "required": ["ancestors", "doc_meta"]
 }
 

@@ -8,14 +8,7 @@
         "properties": {
           "user_id": {"type": "string"},
           "nickname": {"type": "string"},
-          "cursor": {
-            "type": "object",
-            "properties": {
-              "unit_id": {"type": "string"},
-              "position": {"type": "integer", "minimum": -1}
-            },
-            "required": ["unit_id", "position"]
-          }
+          "cursor": {"$ref": "cursor.json#/cursor"}
         },
         "required": ["user_id", "nickname", "cursor"]
       }
@@ -27,31 +20,19 @@
         "type": "object",
         "properties": {
           "unit_id": {"type": "string"},
-          "pith": {"type": "string"},
           "start_time": {"type": "string"},
           "end_time": {"type": "string"}
         },
-        "required": ["unit_id", "pith", "start_time", "end_time"]
+        "required": ["unit_id", "start_time", "end_time"]
       }
     }, 
     "chat_history": {
       "type": "array",
       "items": {"type": "string"}
     },
-    "chat_map": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "unit_id": {"type": "string"},
-          "pith": {"type": "string"},
-          "author": {"type": "string"},
-          "created_at": {"type": "string"}
-        },
-        "required": ["unit_id", "pith", "author", "created_at"]
-      }
-    }
+    "chat_meta": {"$ref": "chat_meta.json#/chat_meta"},
+    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
   },
-  "required": ["cursors", "current_unit", "timeline", "chat_history", "chat_map"]
+  "required": ["cursors", "current_unit", "timeline", "chat_history", "chat_meta", "doc_meta"]
 }
 

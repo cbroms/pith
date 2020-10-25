@@ -20,12 +20,12 @@ join
 
 .. jsonschema:: ../../backend/src/schema/discussion/requests/join.json
 
-.. _dreq_get_unit_page-label:
+.. _dreq_load_unit_page-label:
 
-get_unit_page
+load_unit_page
 =====================================
 
-.. jsonschema:: ../../backend/src/schema/discussion/requests/get_unit_page.json
+.. jsonschema:: ../../backend/src/schema/discussion/requests/load_unit_page.json
 
 .. _dreq_get_ancestors-label:
 
@@ -95,8 +95,6 @@ unhide_unit
 add_unit
 =====================================
 
-* **pith** - Pith of the new Unit.
-* **parent** - Parent ID of the new Unit.
 * **previous** - Previous Unit ID relative to Unit. If this Unit is meant to be first, set to parent.
 * **position** - Absolute position
 
@@ -167,34 +165,19 @@ left_user
 loaded_user
 =====================================
 
-- **cursors** - Map of active user IDs to cursor positions. 
-- **current_unit** - ID of the unit the user was last looking at.
-- **timeline** - List of the units visited via the cursor.
-- **chat_history** - List of the unit IDs.
-- **chat_map** - Array of units in the chat history as well as their forward links.
-
 .. jsonschema:: ../../backend/src/schema/discussion/responses/loaded_user.json
 
-.. _dres_get_unit_page-label:
+.. _dres_loaded_unit_page-label:
 
-get_unit_page
+loaded_unit_page
 =====================================
 
-- **pith** - Pith of the unit.
-- **ancestors** - Ancestors of the unit, including self.
-- **children** - List of tuples, where each tuple has a children unit ID and the list of children for that unit.
-- **backlinks** - List of tuples, where each tuple has a backlink unit ID and the list of backlinks for that unit.
-- **timeline_entry** - Entry for Unit just left.
-- **cursor** - Placement of cursor. 
-
-.. jsonschema:: ../../backend/src/schema/discussion/responses/get_unit_page.json
+.. jsonschema:: ../../backend/src/schema/discussion/responses/loaded_unit_page.json
 
 .. _dres_get_ancestors-label:
 
 get_ancestors
 =====================================
-
-- **ancestors** - List of ancestor unit IDs, from most recent to oldest.
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/get_ancestors.json
 
@@ -203,18 +186,12 @@ get_ancestors
 get_unit_content
 =====================================
 
-- **pith** - Pith of the unit.
-- **hidden** - Whether the unit is hidden, default false. 
-
 .. jsonschema:: ../../backend/src/schema/discussion/responses/get_unit_content.json
 
 .. _dres_get_unit_context-label:
 
 get_unit_context
 =====================================
-
-- **pith** - Pith of the unit.
-- **children** - List of children unit IDs. 
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/get_unit_context.json
 
@@ -223,19 +200,12 @@ get_unit_context
 created_post
 =====================================
 
-- **created_at** - Creation time of unit. 
-- **author** - Nickname of the author. 
-- **unit_id** - ID of the unit.
-- **pith** - Pith of the unit. 
-
 .. jsonschema:: ../../backend/src/schema/discussion/responses/created_post.json
 
 .. _dres_search-label:
 
 search
 =====================================
-
-- **units** - List of unit IDs, sorted in order of relevance.
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/search.json
 
@@ -265,21 +235,12 @@ unhid_unit
 added_unit
 =====================================
 
-- **unit_id** - Unit ID.
-- **pith** - Pith of the unit.
-- **created_at** - Creation time of unit. 
-- **parent** - Parent unit ID unit was added to.
-- **position** - Index of unit in parent.
-
 .. jsonschema:: ../../backend/src/schema/discussion/responses/added_unit.json
 
 .. _dres_locked_unit_position-label:
 
 locked_unit_position
 =====================================
-
-- **unit_id** - Unit ID.
-- **nickname** - Nickname of user with unit's position lock.
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/locked_unit_position.json
 
@@ -288,12 +249,6 @@ locked_unit_position
 repositioned_unit
 =====================================
 
-- **unit_id** - Unit ID.
-- **parent** - Parent unit ID.
-- **position** - Position of unit in parent unit.
-- **old_parent** - Old parent unit ID.
-- **old_position** - Position of unit in old parent unit.
-
 .. jsonschema:: ../../backend/src/schema/discussion/responses/repositioned_unit.json
 
 .. _dres_locked_unit_editable-label:
@@ -301,18 +256,12 @@ repositioned_unit
 locked_unit_editable
 =====================================
 
-- **unit_id** - Unit ID.
-- **nickname** - Nickname of user holding the edit lock.
-
 .. jsonschema:: ../../backend/src/schema/discussion/responses/locked_unit_editable.json
 
 .. _dres_edited_unit-label:
 
 edited_unit
 =====================================
-
-- **unit_id** - Unit ID.
-- **pith** - Pith of the unit.
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/edited_unit.json
 
@@ -330,3 +279,21 @@ added_backlinks
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/added_backlinks.json
 
+*************************************
+Sub-schemas
+*************************************
+
+cursor
+=====================================
+
+.. jsonschema:: ../../backend/src/schema/discussion/responses/cursor.json#/cursor
+
+chat_meta
+=====================================
+
+.. jsonschema:: ../../backend/src/schema/discussion/responses/chat_meta.json#/chat_meta
+
+doc_meta
+=====================================
+
+.. jsonschema:: ../../backend/src/schema/discussion/responses/doc_meta.json#/doc_meta
