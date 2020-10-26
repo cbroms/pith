@@ -4,8 +4,10 @@
     "units": {
       "type": "array",
       "items": {"type": "string"}
-    }
+    },
+    "parent": {"type": "string"},
+    "position": {"type": "integer", "minimum": 0}
   },
-  "required": ["units", "parent"]
+  "required": ["units", "parent", "position"]
 }
 

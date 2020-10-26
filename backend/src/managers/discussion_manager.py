@@ -257,9 +257,9 @@ class DiscussionManager:
         return func(self, **kwargs)
       return helper
 
-    def _verify_cursor_parent(func):
+    def _verify_parent(func):
       """
-      Check cursor unit_id as potential parent of units.
+      Check parent and position are valid.
       If any of the units are the potential parent or ancestors of the parent, the parent is invalid.
       NOTE: Requires _check_user_id _check_units on units. 
       """
@@ -267,10 +267,21 @@ class DiscussionManager:
         discussion_id = kwargs["discussion_id"]
         user_id = kwargs["user_id"]
         units = kwargs["units"]
+        parent = kwargs["parent"]
+        position = kwargs["position"]
         discussion = self._get(discussion_id)
         user = discussion.get().users.filter(id=user_id).get()
-        parent_id = user.cursor.unit_id
-        ancestors = self._get_ancestors(parent_id)
+
+        try:
+          Unit.objects.get(id=parent)
+        except DoesNotExist:
+          return {"error": error.BAD_UNIT_ID}
+
+        parent_ptr = self._get_unit(parent)
+        if position > len(parent_ptr.get().children) or position < 0: # fixed
+          return {"error": error.BAD_POSITION}
+
+        ancestors = self._get_ancestors(parent)
         inter = set(ancestors).intersection(set(units))
         if len(inter) > 0:
           return {"error": error.BAD_PARENT}
@@ -699,8 +710,9 @@ class DiscussionManager:
         
         self._release_edit(unit_id)
 
-        response = {"unit_id": unit_id}
-        return response
+        hide_response = {"unit_id": unit_id}
+        unlock_response = {"unit_id": unit_id}
+        return hide_response, unlock_response
         
     @_check_discussion_id
     @_check_unit_id
@@ -713,24 +725,13 @@ class DiscussionManager:
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
-    def add_unit(self, discussion_id, pith, parent, previous, position):
+    def add_unit(self, discussion_id, pith, parent, position):
         """
           Try to use previous to place new unit, otherwise use position.
           Releases edit lock.
         """
         discussion = self._get(discussion_id)
 
-        if previous:
-          if (previous == parent): # previous is parent pith
-            final_position = 0 # head
-          else:
-            previous_position = self._get_position(parent, previous)
-            if previous_position > -1:
-              final_position = previous_position + 1
-            else:
-              final_position = position 
-        else:
-          final_position = position 
         forward_links = self._retrieve_links(pith)
 
         unit = Unit(
@@ -752,7 +753,7 @@ class DiscussionManager:
             doc_meta.append(self._doc_meta(f))
 
         parent_ptr = self._get_unit(parent)
-        key = "push__children__{}".format(final_position)
+        key = "push__children__{}".format(position)
         parent_ptr.update(**{key: [unit_id]})
 
         # make backlinks
@@ -775,6 +776,7 @@ class DiscussionManager:
         }
         return added, backlinks  
 
+    # TODO: might support multi-select
     @_check_discussion_id
     @_check_user_id
     @_check_unit_id
@@ -789,10 +791,19 @@ class DiscussionManager:
         unit.update(position_privilege=user_id)
 
         user = discussion.get().users.filter(id=user_id).get()
-        response = {
+        response = [{
           "unit_id": unit_id,
           "nickname": user.name
-        }
+        }]
+        return response
+
+    @_check_discussion_id
+    @_check_user_id
+    @_check_unit_id
+    @_verify_positions_privilege
+    def deselect_unit(self, discussion_id, user_id, unit_id):
+        self._release_position(unit_id)
+        response = [{"unit_id": unit_id}]
         return response
 
     # TODO: MULTIPLE MONGO OPERATIONS
@@ -800,44 +811,51 @@ class DiscussionManager:
     @_check_user_id
     @_check_units
     @_verify_positions_privilege
-    @_verify_cursor_parent
-    def move_units(self, discussion_id, user_id, units):
+    @_verify_parent
+    def move_units(self, discussion_id, user_id, units, parent, position):
         """
           Releases position lock.
           Removes each of the units from old parent and puts under new parent.
         """
         discussion = self._get(discussion_id)
         user = discussion.get().users.filter(id=user_id).get()
-        parent_id = user.cursor.unit_id
-        position = user.cursor.position if user.cursor.position != -1 else \
-          len(self._get_unit(user.cursor.unit_id).get().children)
-        return self._move_units(discussion_id, user_id, units, parent_id, position)
+        repositioned_units = self._move_units(discussion_id, user_id, units, parent, position)
+
+        unlocks = []
+        for u in units:
+          unlocks.append({
+            "unit_id": u
+          })
+
+        return repositioned_units, unlocks
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
     @_check_user_id
     @_check_units
     @_verify_positions_privilege
-    @_verify_cursor_parent
-    def merge_units(self, discussion_id, user_id, units):
+    @_verify_parent
+    def merge_units(self, discussion_id, user_id, units, parent, position):
         """
           Releases position lock.
           Removes each of the units from old parent and puts under new parent.
         """
         discussion = self._get(discussion_id)
         user = discussion.get().users.filter(id=user_id).get()
-        parent_id = user.cursor.unit_id
-        position = user.cursor.position if user.cursor.position != -1 else \
-          len(self._get_unit(user.cursor.unit_id).get().children)
-
         added_unit, backlinks = self.add_unit(
           discussion_id=discussion_id, pith="", 
-          parent=parent_id, previous=None, position=position
+          parent=parent, position=position
         )  
         repositioned_units = self._move_units(discussion_id, user_id, units, 
           added_unit["unit_id"], 0) # put at head
 
-        return repositioned_units, added_unit
+        unlocks = []
+        for u in units:
+          unlocks.append({
+            "unit_id": u
+          })
+
+        return repositioned_units, added_unit, unlocks
 
     @_check_discussion_id
     @_check_user_id
@@ -857,6 +875,15 @@ class DiscussionManager:
           "unit_id": unit_id,
           "nickname": user.name
         }
+        return response
+
+    @_check_discussion_id
+    @_check_user_id
+    @_check_unit_id
+    @_verify_edit_privilege
+    def deedit_unit(self, discussion_id, user_id, unit_id):
+        self._release_edit(unit_id)
+        response = {"unit_id": unit_id}
         return response
 
     # TODO: MULTIPLE MONGO OPERATIONS
@@ -904,11 +931,11 @@ class DiscussionManager:
           "doc_meta": doc_meta,
           "chat_meta": chat_meta
         }
+        unlock_response = {"unit_id": unit_id}
         removed_backlinks = [
           {"unit_id": r, "backlink": unit_id} for r in removed_links
         ] 
         added_backlinks = [
           {"unit_id": a, "backlink": unit_id} for a in added_links
         ]
-        response = (edited_unit, removed_backlinks, added_backlinks)
-        return response
+        return edited_unit, unlock_response, removed_backlinks, added_backlinks

@@ -3,9 +3,8 @@
   "properties": {
     "pith": {"type": "string"},
     "parent": {"type": "string"},
-    "previous": {"type": "string"},
     "position": {"type": "integer", "minimum": 0}
   },
-  "required": ["pith", "parent", "previous", "position"]
+  "required": ["pith", "parent", "position"]
 }
 

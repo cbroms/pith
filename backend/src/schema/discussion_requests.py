@@ -47,6 +47,9 @@ with open(path + "/discussion/requests/add_unit.json") as file:
 with open(path + "/discussion/requests/select_unit.json") as file:
   select_unit = load(file)
 
+with open(path + "/discussion/requests/deselect_unit.json") as file:
+  deselect_unit = load(file)
+
 with open(path + "/discussion/requests/move_units.json") as file:
   move_units = load(file)
 
@@ -55,6 +58,9 @@ with open(path + "/discussion/requests/merge_units.json") as file:
 
 with open(path + "/discussion/requests/request_to_edit.json") as file:
   request_to_edit = load(file)
+
+with open(path + "/discussion/requests/deedit_unit.json") as file:
+  deedit_unit = load(file)
 
 with open(path + "/discussion/requests/edit_unit.json") as file:
   edit_unit = load(file)

@@ -107,6 +107,13 @@ select_unit
 
 .. jsonschema:: ../../backend/src/schema/discussion/requests/select_unit.json
 
+.. _dreq_deselect_unit-label:
+
+deselect_unit
+=====================================
+
+.. jsonschema:: ../../backend/src/schema/discussion/requests/deselect_unit.json
+
 .. _dreq_move_units-label:
 
 move_units
@@ -127,6 +134,13 @@ request_to_edit
 =====================================
 
 .. jsonschema:: ../../backend/src/schema/discussion/requests/request_to_edit.json
+
+.. _dreq_deedit_unit-label:
+
+deedit_unit
+=====================================
+
+.. jsonschema:: ../../backend/src/schema/discussion/requests/deedit_unit.json
 
 .. _dreq_edit_unit-label:
 
@@ -244,6 +258,13 @@ locked_unit_position
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/locked_unit_position.json
 
+.. _dres_unlocked_unit_position-label:
+
+unlocked_unit_position
+=====================================
+
+.. jsonschema:: ../../backend/src/schema/discussion/responses/unlocked_unit_position.json
+
 .. _dres_repositioned_unit-label:
 
 repositioned_unit
@@ -257,6 +278,13 @@ locked_unit_editable
 =====================================
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/locked_unit_editable.json
+
+.. _dres_unlocked_unit_editable-label:
+
+unlocked_unit_editable
+=====================================
+
+.. jsonschema:: ../../backend/src/schema/discussion/responses/unlocked_unit_editable.json
 
 .. _dres_edited_unit-label:
 

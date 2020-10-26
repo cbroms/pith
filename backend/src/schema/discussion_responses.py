@@ -96,6 +96,9 @@ with open(path + "/discussion/responses/added_unit.json") as file:
 with open(path + "/discussion/responses/locked_unit_position.json") as file:
   locked_unit_position = load(file)
 
+with open(path + "/discussion/responses/unlocked_unit_position.json") as file:
+  unlocked_unit_position = load(file)
+
 """
 - **unit_id** - Unit ID.
 - **parent** - Parent unit ID.
@@ -112,6 +115,9 @@ with open(path + "/discussion/responses/repositioned_unit.json") as file:
 """
 with open(path + "/discussion/responses/locked_unit_editable.json") as file:
   locked_unit_editable = load(file)
+
+with open(path + "/discussion/responses/unlocked_unit_editable.json") as file:
+  unlocked_unit_editable = load(file)
 
 """
 - **unit_id** - Unit ID.
