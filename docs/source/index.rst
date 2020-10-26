@@ -14,9 +14,10 @@ Interface Documentation
   :maxdepth: 1
 
   board_app
-  discussion_app
   board_schema
+  discussion_app
   discussion_schema
+  error_codes
 
 *************************************
 Backend Documentation
@@ -25,6 +26,6 @@ Backend Documentation
   :maxdepth: 1
 
   board_library
-  discussion_library
   board_documents
+  discussion_library
   discussion_documents

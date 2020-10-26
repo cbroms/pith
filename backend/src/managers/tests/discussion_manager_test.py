@@ -3,7 +3,7 @@ import logging
 import time
 import unittest
 
-import error
+from error import Errors
 from managers.global_manager import GlobalManager
 from managers.discussion_manager import DiscussionManager
 
@@ -37,7 +37,7 @@ class DiscussionManagerTest(unittest.TestCase):
         res1 = checker(self.discussion_manager, discussion_id=discussion_id)
         res2 = checker(self.discussion_manager, discussion_id="...")
         self.assertTrue(res1 is None)
-        self.assertEqual(res2["error"], error.BAD_DISCUSSION_ID)
+        self.assertEqual(res2["error"], Errors.BAD_DISCUSSION_ID)
 
     def test__check_unit_id(self) -> None:
         discussion_id = self.board_manager.create()["discussion_id"]
@@ -46,7 +46,7 @@ class DiscussionManagerTest(unittest.TestCase):
         res1 = checker(self.discussion_manager, unit_id=discussion.document)
         res2 = checker(self.discussion_manager, unit_id="...")
         self.assertTrue(res1 is None)
-        self.assertEqual(res2["error"], error.BAD_UNIT_ID)
+        self.assertEqual(res2["error"], Errors.BAD_UNIT_ID)
 
     def test_create_user(self) -> None:
         nickname = "whales"
@@ -59,13 +59,13 @@ class DiscussionManagerTest(unittest.TestCase):
         res2 = checker(self.discussion_manager, 
           discussion_id=discussion_id, user_id="...")
         self.assertTrue(res1 is None)
-        self.assertEqual(res2["error"], error.BAD_USER_ID)
+        self.assertEqual(res2["error"], Errors.BAD_USER_ID)
         res = self.discussion_manager.create_user(
           discussion_id=discussion_id, nickname=nickname)
-        self.assertEqual(res["error"], error.NICKNAME_EXISTS)
+        self.assertEqual(res["error"], Errors.NICKNAME_EXISTS)
         res = self.discussion_manager.create_user(
           discussion_id=discussion_id, nickname="monkey", user_id=user_id)
-        self.assertEqual(res["error"], error.USER_ID_EXISTS)
+        self.assertEqual(res["error"], Errors.USER_ID_EXISTS)
         user_id2_ = "blahblah"
         user_id2 = self.discussion_manager.create_user(
           discussion_id=discussion_id, nickname="monkey", user_id=user_id2_)["user_id"]
@@ -120,22 +120,22 @@ class DiscussionManagerTest(unittest.TestCase):
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
         )        
-        self.assertEqual(res["error"], error.FAILED_EDIT_ACQUIRE) # fails
+        self.assertEqual(res["error"], Errors.FAILED_EDIT_ACQUIRE) # fails
         # cannot re-request
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
         )        
-        self.assertEqual(res["error"], error.FAILED_EDIT_ACQUIRE) # fails
+        self.assertEqual(res["error"], Errors.FAILED_EDIT_ACQUIRE) # fails
 
         # hide that doesn't work
         res = self.discussion_manager.hide_unit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id)
-        self.assertEqual(res["error"], error.BAD_EDIT_TRY)
+        self.assertEqual(res["error"], Errors.BAD_EDIT_TRY)
         # lock is not released 
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
         )        
-        self.assertEqual(res["error"], error.FAILED_EDIT_ACQUIRE) # fails
+        self.assertEqual(res["error"], Errors.FAILED_EDIT_ACQUIRE) # fails
         # hide that works
         hide_res, unlock = self.discussion_manager.hide_unit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id)
@@ -152,12 +152,12 @@ class DiscussionManagerTest(unittest.TestCase):
           discussion_id=discussion_id, user_id=user_id1, 
           unit_id=unit_id, pith="blahblah"
         )
-        self.assertEqual(res["error"], error.BAD_EDIT_TRY)
+        self.assertEqual(res["error"], Errors.BAD_EDIT_TRY)
         # lock is not released 
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
         )        
-        self.assertEqual(res["error"], error.FAILED_EDIT_ACQUIRE) # fails
+        self.assertEqual(res["error"], Errors.FAILED_EDIT_ACQUIRE) # fails
         # edit that works
         edited, unlocks, ab, rb = self.discussion_manager.edit_unit(
           discussion_id=discussion_id, user_id=user_id2, 
@@ -183,23 +183,23 @@ class DiscussionManagerTest(unittest.TestCase):
         res = self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
         )        
-        self.assertEqual(res["error"], error.FAILED_POSITION_ACQUIRE) # fails
+        self.assertEqual(res["error"], Errors.FAILED_POSITION_ACQUIRE) # fails
         # cannot re-request
         res = self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
         )        
-        self.assertEqual(res["error"], error.FAILED_POSITION_ACQUIRE) # fails
+        self.assertEqual(res["error"], Errors.FAILED_POSITION_ACQUIRE) # fails
 
         # move that doesn't work
         res = self.discussion_manager.move_units(
           discussion_id=discussion_id, user_id=user_id2, units=[unit_id],
           parent=root, position=0)
-        self.assertEqual(res["error"], error.BAD_POSITION_TRY)
+        self.assertEqual(res["error"], Errors.BAD_POSITION_TRY)
         # lock not released
         res = self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
         )        
-        self.assertEqual(res["error"], error.FAILED_POSITION_ACQUIRE) # fails
+        self.assertEqual(res["error"], Errors.FAILED_POSITION_ACQUIRE) # fails
         # move that works
         res, unlocks = self.discussion_manager.move_units(
           discussion_id=discussion_id, user_id=user_id1, units=[unit_id],
@@ -216,12 +216,12 @@ class DiscussionManagerTest(unittest.TestCase):
         res = self.discussion_manager.merge_units(
           discussion_id=discussion_id, user_id=user_id1, units=[unit_id],
           parent=root, position=0)
-        self.assertEqual(res["error"], error.BAD_POSITION_TRY)
+        self.assertEqual(res["error"], Errors.BAD_POSITION_TRY)
         # lock not released
         res = self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
         )        
-        self.assertEqual(res["error"], error.FAILED_POSITION_ACQUIRE) # fails
+        self.assertEqual(res["error"], Errors.FAILED_POSITION_ACQUIRE) # fails
         # merge that works
         repos, added, unlocks = self.discussion_manager.merge_units(
           discussion_id=discussion_id, user_id=user_id2, units=[unit_id],
@@ -639,7 +639,7 @@ class DiscussionManagerTest(unittest.TestCase):
           discussion_id=discussion_id, user_id=user_id, units=[unit_id2, unit_id5],
           parent=unit_id4, position=0
         )
-        self.assertEqual(res["error"], error.BAD_PARENT)
+        self.assertEqual(res["error"], Errors.BAD_PARENT)
         # perform the legal merge
         res = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id1
