@@ -1,12 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { connect } from "react-redux";
 // import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
+import { createPost } from "./actions/discussionActions";
 import "./App.css";
 
 import Discussion from "./components/Discussion";
 
 import dark from "./themes/dark";
 import light from "./themes/light";
+
+const mapStateToProps = (state, ownProps) => {
+  return {...state};
+}
 
 const postsDummy = ["2o3iupoweuqo", "2o32o467o3y364", "2o32o46sdaf7o3y364"];
 
@@ -129,9 +135,17 @@ const timelineDummy = [
 	}, // 15 sec
 ];
 
-function App() {
+function App(props) {
 	const storedDarkMode = localStorage.getItem("darkModeActive");
 	const [darkModeActive, setDarkModeActive] = useState(storedDarkMode);
+  useEffect(() => {
+    // TEST
+    const discussionId = "9ea4d942e69848a58afe7c33462f4d39"; // dummy
+    const nickname = "whales";
+    const {dispatch} = props;
+    //dispatch(enterUser(discussionId, nickname));
+    //dispatch(createPost("Hello."));
+  });
 
 	let theme;
 
@@ -171,4 +185,4 @@ function App() {
 	);
 }
 
-export default App;
+export default connect(mapStateToProps)(App);
