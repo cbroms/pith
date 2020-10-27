@@ -14,39 +14,3 @@ body {
 html {
 	font-size: 16px;
 }
-
-/*input,
-textarea {
-	border: none;
-	font-family: freight-text-pro, serif;
-	color: #dcdcdc;
-	font-size: 1rem;
-}
-
-textarea:focus,
-input:focus {
-	background-color: #313131;
-}
-
-button {
-	font-family: freight-sans-pro, sans-serif;
-	font-size: 14px;
-	cursor: pointer;
-	margin-right: 10px;
-	border: none;
-	padding: 9px 10px;
-	color: #dcdcdc;
-	background-color: #313131;
-	border: 2px solid #313131;
-}
-
-button:hover {
-	border: 2px solid #999999 !important;
-}
-
-textarea:focus,
-input:focus,
-button:focus {
-	outline: none;
-}
-*/

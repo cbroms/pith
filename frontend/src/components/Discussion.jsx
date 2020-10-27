@@ -1,15 +1,26 @@
 import React, { useState } from "react";
+import {
+    BrowserRouter as Router,
+    Switch,
+    Route,
+    Link,
+    useRouteMatch,
+    useParams,
+} from "react-router-dom";
 
 import Chat from "./Chat";
 import Document from "./Document";
 import Menu from "./Menu";
 import Search from "./Search";
+import DiscussionJoin from "./DiscussionJoin";
 
 import DiscussionLayout from "./DiscussionLayout";
 
 const Discussion = (props) => {
     const [chatSearchOpen, setChatSearchOpen] = useState(false);
     const [query, setQuery] = useState("");
+
+    const match = useRouteMatch();
 
     const chat = (
         <Chat
@@ -31,13 +42,22 @@ const Discussion = (props) => {
 
     const menu = <Menu setDarkMode={props.setDarkMode} />;
     return (
-        <DiscussionLayout
-            chat={chat}
-            document={doc}
-            menu={menu}
-            search={search}
-            searchActive={chatSearchOpen}
-        />
+        <Router>
+            <Switch>
+                <Route path={`${match.path}/join`}>
+                    <DiscussionJoin />
+                </Route>
+                <Route path={match.path}>
+                    <DiscussionLayout
+                        chat={chat}
+                        document={doc}
+                        menu={menu}
+                        search={search}
+                        searchActive={chatSearchOpen}
+                    />
+                </Route>
+            </Switch>
+        </Router>
     );
 };
 

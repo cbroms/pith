@@ -1,18 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { connect } from "react-redux";
-// import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import { createPost } from "./actions/discussionActions";
+
 import "./App.css";
 
+import AppLayout from "./AppLayout";
+
 import Discussion from "./components/Discussion";
+import DiscussionJoin from "./components/DiscussionJoin";
+// import TemporaryBoard from "./components/TemporaryBoard";
 
 import dark from "./themes/dark";
 import light from "./themes/light";
 
 const mapStateToProps = (state, ownProps) => {
-  return {...state};
-}
+	return { ...state };
+};
 
 const postsDummy = ["2o3iupoweuqo", "2o32o467o3y364", "2o32o46sdaf7o3y364"];
 
@@ -135,54 +140,64 @@ const timelineDummy = [
 	}, // 15 sec
 ];
 
-function App(props) {
-	const storedDarkMode = localStorage.getItem("darkModeActive");
-	const [darkModeActive, setDarkModeActive] = useState(storedDarkMode);
-  useEffect(() => {
-    // TEST
-    const discussionId = "9ea4d942e69848a58afe7c33462f4d39"; // dummy
-    const nickname = "whales";
-    const {dispatch} = props;
-    //dispatch(enterUser(discussionId, nickname));
-    //dispatch(createPost("Hello."));
-  });
+class App extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			darkModeActive: localStorage.getItem("darkModeActive"),
+		};
 
-	let theme;
-
-	if (darkModeActive !== null) {
-		theme = darkModeActive ? dark : light;
-	} else {
-		if (window.matchMedia("(prefers-color-scheme: light)").matches) {
-			theme = light;
-		} else theme = dark; // default to dark mode
+		this.setDarkModeActive = this.setDarkModeActive.bind(this);
 	}
 
-	console.log(theme);
-	return (
-		<div className="App">
-			<ThemeProvider theme={theme}>
-				<Discussion
-					setDarkMode={(val) => setDarkModeActive(val)}
-					timeline={timelineDummy}
-					content={postUnits}
-					posts={postsDummy}
-					document={documentDummy}
-					users={usersDummy}
-				/>
-			</ThemeProvider>
+	componentDidMount() {
+		const discussionId = "9ea4d942e69848a58afe7c33462f4d39"; // dummy
+		const nickname = "whales";
+		const { dispatch } = this.props;
+		//dispatch(enterUser(discussionId, nickname));
+		dispatch(createPost("Hello."));
+	}
 
-			{/*<Router>
-				<Switch>
-					<Route
-						exact
-						path="/b/:boardID/d/:discussionID"
-						component={Discussion}
-					/>
-					<Route exact path="/b/:boardID" component={Board} />
-				</Switch>
-			</Router>*/}
-		</div>
-	);
+	setDarkModeActive(mode) {
+		this.setState({ darkModeActive: mode });
+	}
+
+	render() {
+		let theme;
+
+		if (this.state.darkModeActive !== null) {
+			theme = this.state.darkModeActive ? dark : light;
+		} else {
+			if (window.matchMedia("(prefers-color-scheme: light)").matches) {
+				theme = light;
+			} else theme = dark; // default to dark mode
+		}
+
+		return (
+			<div className="App">
+				<ThemeProvider theme={theme}>
+					<Router>
+						<AppLayout>
+							<Switch>
+								<Route path="/d/:discussionID">
+									<Discussion
+										setDarkMode={(val) =>
+											this.setDarkModeActive(val)
+										}
+										timeline={timelineDummy}
+										content={postUnits}
+										posts={postsDummy}
+										document={documentDummy}
+										users={usersDummy}
+									/>
+								</Route>
+							</Switch>
+						</AppLayout>
+					</Router>
+				</ThemeProvider>
+			</div>
+		);
+	}
 }
 
 export default connect(mapStateToProps)(App);

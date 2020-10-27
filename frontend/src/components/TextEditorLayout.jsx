@@ -4,7 +4,7 @@ import ContentEditable from "react-contenteditable";
 import styled from "styled-components";
 
 import { Button } from "./StandardUI";
-import { UpArrow } from "./Symbols";
+import { UpArrow, RightArrow } from "./Symbols";
 
 const StyledButton = styled(Button)`
     position: absolute;
@@ -36,7 +36,7 @@ const StyledEditor = styled(ContentEditable)`
 
     :empty::after {
         color: ${(props) => props.theme.shade2};
-        content: "type a message...";
+        content: "${(props) => `${props.placeholder}` || "type a message..."}";
     }
 
     :focus {
@@ -50,7 +50,7 @@ const TextEditorLayout = (props) => {
             <StyledEditor {...props} />
             {props.showButton ? (
                 <StyledButton>
-                    <UpArrow />
+                    {props.buttonDir === "right" ? <RightArrow /> : <UpArrow />}
                 </StyledButton>
             ) : null}
         </StyledContainer>

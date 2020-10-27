@@ -79,6 +79,9 @@ class TextEditor extends React.Component {
     if (e.keyCode === 13 && !e.shiftKey) {
       e.preventDefault();
       // TODO: submit
+      if (this.props.unitEnter) {
+        this.props.unitEnter(this.getCaretPosition(), this.state.html);
+      }
       this.setState({ html: "" });
     }
     // cmd/ctrl + b for bold
@@ -106,8 +109,15 @@ class TextEditor extends React.Component {
       });
       this.props.openSearch();
     }
+    // on delete
     if (e.keyCode === 8) {
       let caretPos = this.getCaretPosition();
+      // if we're in the first position, trigger the on unit delete
+      if (caretPos === 0 && this.props.unitDelete) {
+        this.props.unitDelete(this.state.html);
+      }
+
+      // check if the query start character has been deleted
       // add 3 to the caret pos because > is represented as &gt;
       if (caretPos + 3 === this.state.queryStartPos) {
         this.setState({ queryStartPos: null });
@@ -129,6 +139,7 @@ class TextEditor extends React.Component {
   render() {
     return (
       <TextEditorLayout
+        {...this.props}
         showButton={this.props.showButton}
         innerRef={this.ref}
         className={this.props.className}

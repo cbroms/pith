@@ -8,6 +8,18 @@ const LargeHeading = styled.h2`
     display: inline-block;
 `;
 
+const Input = styled.input`
+    font-family: ${(props) => props.theme.serif};
+    font-size: ${(props) => props.theme.mediumFont};
+    border: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    display: inline-block;
+    padding: 10px;
+  //  margin: ${(props) => (props.noBackground ? "5px 0" : "0")};
+   
+`;
+
 const Button = styled.button`
     font-family: ${(props) => props.theme.sans};
     font-size: ${(props) => props.theme.mediumFont};
@@ -28,4 +40,4 @@ const Button = styled.button`
     }
 `;
 
-export { LargeHeading, Button };
+export { LargeHeading, Button, Input };

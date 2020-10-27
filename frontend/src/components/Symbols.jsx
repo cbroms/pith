@@ -32,6 +32,10 @@ const UpArrow = styled.div`
     }
 `;
 
+const RightArrow = styled(UpArrow)`
+    transform: rotate(90deg);
+`;
+
 const DownChevron = styled.div`
     box-sizing: border-box;
     position: relative;
@@ -286,6 +290,7 @@ const CloseIcon = styled.div`
 
 export {
     UpArrow,
+    RightArrow,
     DownChevron,
     RightChevron,
     UpChevron,

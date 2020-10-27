@@ -75,6 +75,8 @@ const Unit = (props) => {
             const contentStr = ReactDOMServer.renderToString(content);
             content = (
                 <TextEditor
+                    unitEnter={props.unitEnter}
+                    unitDelete={props.unitDelete}
                     showButton={props.showButton}
                     content={contentStr}
                     onFocus={props.onFocus}

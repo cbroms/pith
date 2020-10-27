@@ -21,12 +21,29 @@ class Document extends React.Component {
         this.handleDragEnter = this.handleDragEnter.bind(this);
         this.handleDragStart = this.handleDragStart.bind(this);
 
-        // this.handleFocus = this.handleFocus.bind(this)
+        this.onUnitDelete = this.onUnitDelete.bind(this);
+        this.onUnitEnter = this.onUnitEnter.bind(this);
+
+        this.getDragInfo = this.getDragInfo.bind(this);
     }
 
-    // handleFocus(id) {
-    //     if (this.state.focus !== id) this.setState({focus: id})
-    // }
+    onUnitDelete(content, id) {
+        console.log(content, id);
+    }
+
+    onUnitEnter(position, enter, id) {
+        console.log(position, enter, id);
+    }
+
+    getDragInfo(child, grandchild) {
+        const over =
+            this.state.dragTarget?.child === child &&
+            this.state.dragTarget?.grandchild === grandchild;
+
+        const overAsChild = over && this.state.dragTarget?.asChild;
+        const overAtEnd = over && this.state.dragTarget?.atEnd;
+        return [over, overAsChild, overAtEnd];
+    }
 
     handleDragStart(e, childPosition, grandchildPosition) {
         this.setState({
@@ -141,120 +158,102 @@ class Document extends React.Component {
     }
 
     render() {
-        const sections = this.state.documentCopy.map((child, childIndex) => {
-            const grandchildren = child.children.map(
-                (grandchild, grandchildIndex) => {
-                    const pithUnit = (
-                        <Unit
-                            editable
-                            onFocus={() =>
-                                this.setState({ focused: grandchild.unit_id })
-                            }
-                            onBlur={() => this.setState({ focused: null })}
-                            pith={grandchild.pith}
-                            id={grandchild.unit_id}
-                            inline
-                        />
-                    );
-
-                    const over =
-                        this.state.dragTarget?.child === childIndex &&
-                        this.state.dragTarget?.grandchild === grandchildIndex;
-
-                    const overAsChild = over && this.state.dragTarget?.asChild;
-                    const overAtEnd = over && this.state.dragTarget?.atEnd;
-
-                    return (
-                        <DocumentSectionLayout
-                            draggable={
-                                this.state.focused !== grandchild.unit_id
-                            }
-                            onDragEnd={this.handleDragEnd}
-                            onDragStart={(e) =>
-                                this.handleDragStart(
-                                    e,
-                                    childIndex,
-                                    grandchildIndex
-                                )
-                            }
-                            onDragEnter={(e, asChild, atEnd) =>
-                                this.handleDragEnter(
-                                    e,
-                                    childIndex,
-                                    grandchildIndex,
-                                    asChild,
-                                    atEnd
-                                )
-                            }
-                            onDragOver={(e) => e.preventDefault()}
-                            over={over}
-                            overAsChild={overAsChild}
-                            overAtEnd={overAtEnd}
-                            last={grandchildIndex === child.children.length - 1}
-                            level={3}
-                            key={grandchild.unit_id}
-                            pith={pithUnit}
-                        />
-                    );
-                }
-            );
-            const pithUnit = (
+        // create a unit for a given location
+        const createUnit = (pith, id) => {
+            return (
                 <Unit
-                    onFocus={() => this.setState({ focused: child.unit_id })}
-                    onBlur={() => this.setState({ focused: null })}
-                    pith={child.pith}
-                    id={child.unit_id}
-                    inline
                     editable
+                    unitEnter={(pos, content) =>
+                        this.onUnitEnter(pos, content, id)
+                    }
+                    unitDelete={(content) => this.onUnitDelete(content, id)}
+                    onFocus={() => this.setState({ focused: id })}
+                    onBlur={() => this.setState({ focused: null })}
+                    pith={pith}
+                    id={id}
+                    inline
                 />
             );
-            const over =
-                this.state.dragTarget?.child === childIndex &&
-                this.state.dragTarget?.grandchild === null;
+        };
 
-            const overAsChild = over && this.state.dragTarget?.asChild;
-            const overAtEnd = over && this.state.dragTarget?.atEnd;
+        const createSection = (
+            content,
+            id,
+            childIndex,
+            grandchildIndex,
+            isLast,
+            pith,
+            level
+        ) => {
+            const [over, asChild, atEnd] = this.getDragInfo(
+                childIndex,
+                grandchildIndex
+            );
+
             return (
                 <DocumentSectionLayout
-                    draggable={this.state.focused !== child.unit_id}
-                    onDragOver={(e) => e.preventDefault()}
+                    draggable={this.state.focused !== id}
+                    onDragEnd={this.handleDragEnd}
                     onDragStart={(e) =>
-                        this.handleDragStart(e, childIndex, null)
+                        this.handleDragStart(e, childIndex, grandchildIndex)
                     }
                     onDragEnter={(e, asChild, atEnd) =>
                         this.handleDragEnter(
                             e,
                             childIndex,
-                            null,
+                            grandchildIndex,
                             asChild,
                             atEnd
                         )
                     }
-                    onDragEnd={this.handleDragEnd}
+                    onDragOver={(e) => e.preventDefault()}
                     over={over}
-                    overAsChild={overAsChild}
-                    overAtEnd={overAtEnd}
-                    last={childIndex === this.state.documentCopy.length - 1}
-                    key={child.unit_id}
-                    level={2}
-                    pith={pithUnit}
+                    overAsChild={asChild}
+                    overAtEnd={atEnd}
+                    last={isLast}
+                    level={level}
+                    key={id}
+                    pith={pith}
                 >
-                    {grandchildren}
+                    {content}
                 </DocumentSectionLayout>
             );
-        });
-        const pithUnit = (
-            <Unit
-                editable
-                onFocus={() =>
-                    this.setState({ focused: this.props.view.unit_id })
+        };
+
+        // create the sections in the doc with children + grandchildren
+        const sections = this.state.documentCopy.map((child, childIndex) => {
+            const grandchildren = child.children.map(
+                (grandchild, grandchildIndex) => {
+                    const pith = createUnit(
+                        grandchild.pith,
+                        grandchild.unit_id
+                    );
+                    return createSection(
+                        null,
+                        grandchild.unit_id,
+                        childIndex,
+                        grandchildIndex,
+                        grandchildIndex === child.children.length - 1,
+                        pith,
+                        3
+                    );
                 }
-                onBlur={() => this.setState({ focused: null })}
-                big={true}
-                pith={this.props.view.pith}
-                id={this.props.view.unit_id}
-                inline
-            />
+            );
+            const pith = createUnit(child.pith, child.unit_id);
+
+            return createSection(
+                grandchildren,
+                child.unit_id,
+                childIndex,
+                null,
+                childIndex === this.state.documentCopy.length - 1,
+                pith,
+                2
+            );
+        });
+        const pithUnit = createUnit(
+            this.props.view.pith,
+            this.props.view.unit_id
         );
         const doc = (
             <DocumentSectionLayout
