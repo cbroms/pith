@@ -2,7 +2,13 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 // import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
-import { createPost } from "./actions/discussionActions";
+import {
+  enterUser,
+  createUser,
+  subscribeUsers,
+  createPost,
+  subscribeChat
+} from "./actions/discussionActions";
 import "./App.css";
 
 import Discussion from "./components/Discussion";
@@ -141,10 +147,11 @@ function App(props) {
   useEffect(() => {
     // TEST
     const discussionId = "9ea4d942e69848a58afe7c33462f4d39"; // dummy
-    const nickname = "whales";
     const {dispatch} = props;
-    //dispatch(enterUser(discussionId, nickname));
-    //dispatch(createPost("Hello."));
+    dispatch(enterUser(discussionId));
+    const nickname = "whales";
+    dispatch(createUser(discussionId, nickname));
+    dispatch(createPost("Hello."));
   });
 
 	let theme;

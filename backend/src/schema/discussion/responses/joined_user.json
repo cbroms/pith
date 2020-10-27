@@ -1,9 +1,10 @@
 {
   "type": "object",
   "properties": {
+    "user_id": {"type": "string"},
     "nickname": {"type": "string"},
     "cursor": {"$ref": "cursor.json#/cursor"}
   },
-  "required": ["nickname", "cursor"]
+  "required": ["user_id", "nickname", "cursor"]
 }
 
