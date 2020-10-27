@@ -2,7 +2,14 @@ import React from "react";
 import { connect } from "react-redux";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
-import { createPost } from "./actions/discussionActions";
+
+import {
+  enterUser,
+  createUser,
+  subscribeUsers,
+  createPost,
+  subscribeChat
+} from "./actions/discussionActions";
 
 import "./App.css";
 
@@ -140,6 +147,7 @@ const timelineDummy = [
 	}, // 15 sec
 ];
 
+
 class App extends React.Component {
 	constructor(props) {
 		super(props);
@@ -160,6 +168,7 @@ class App extends React.Component {
 
 	setDarkModeActive(mode) {
 		this.setState({ darkModeActive: mode });
+
 	}
 
 	render() {

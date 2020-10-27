@@ -1,4 +1,10 @@
 import {
+  CREATE_NICKNAME,
+  CREATE_USER,
+  JOIN_USER,
+  CREATE_USER_FULFILLED,
+  JOIN_USER_FULFILLED,
+  JOINED_USER,
   CREATE_POST,
   CREATE_POST_FULFILLED,
   CREATED_POST,
@@ -9,10 +15,14 @@ const defaultState = {
   userError: {
     
   },
-  discussionId: null, 
-  userId: null, 
-  nickname: null, 
   events: {
+    createNickname: false,
+    createUser: {
+      pending: false
+    },
+    joinUser: {
+      pending: false
+    },
     post: {
       pending: false,
       content: {
@@ -20,9 +30,13 @@ const defaultState = {
       },
     },
   },
+  discussionId: null, 
+  userId: null, 
+  nickname: null, 
   chatMap: {},
   docMap: {},
   posts: [],
+  currentUnit: "",
   ancestors: [],
   documentTree: [],
   backlinkTree: [],
@@ -34,6 +48,58 @@ const defaultState = {
 
 const discussionReducer = (state = defaultState, action) => {
 	switch (action.type) {
+    case CREATE_NICKNAME: {
+			const events = {...state.events};
+      events.createNickname = true;
+			return { 
+        ...state, 
+        events: events
+      };
+    }
+    case CREATE_USER: {
+			const events = {...state.events};
+      events.createUser.pending = true;
+			return { 
+        ...state, 
+        events: events
+      };
+
+    }
+    case JOIN_USER: {
+			const events = {...state.events};
+      events.joinUser.pending = true;
+			return { 
+        ...state, 
+        events: events
+      };
+    }
+    case CREATE_USER_FULFILLED: {
+			const events = {...state.events};
+      events.createUser = {...defaultState.events.createUser};
+			return { 
+        ...state, 
+        events: events
+      };
+    }
+    case JOIN_USER_FULFILLED: {
+			const events = {...state.events};
+      events.joinUser = {...defaultState.events.joinUser};
+			return { 
+        ...state, 
+        events: events,
+        discussionId: action.payload.discussionId,
+        userId: action.payload.userId,
+        nickname: action.payload.nickname
+      };
+    }
+    case JOINED_USER: {
+      const icons = {...state.icons};
+      icons.push(action.payload.icon);
+			return { 
+        ...state, 
+        icons: icons
+      };
+    }
     case CREATE_POST: {
 			const events = {...state.events};
       events.post.pending = true;

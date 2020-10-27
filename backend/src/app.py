@@ -18,7 +18,7 @@ sio = gm.sio
 
 
 @sio.on('create')
-async def create(sid, request):
+async def on_create(sid, request):
     """
     :return: :ref:`bres_created-label`
     :errors: BAD_RESPONSE 
@@ -50,7 +50,7 @@ class DiscussionNamespace(AsyncNamespace):
             user_id=user_id
           )
 
-    async def create_user(self, sid, request):
+    async def on_create_user(self, sid, request):
         """
         :event: :ref:`dreq_create_user-label`
         :return: :ref:`dres_created_user-label` 
@@ -127,7 +127,7 @@ class DiscussionNamespace(AsyncNamespace):
         await self.emit("left_user", serialized, room=discussion_id)
         self.leave_room(sid, discussion_id)
 
-    async def load_user(self, sid, request):
+    async def on_load_user(self, sid, request):
         """
         :return: :ref:`dres_loaded_user-label`
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID
@@ -148,7 +148,7 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": Errors.BAD_RESPONSE}
         return serialized
     
-    async def load_unit_page(self, sid, request):
+    async def on_load_unit_page(self, sid, request):
         """
         :event: :ref:`dreq_load_unit_page-label`
         :emit: *moved_cursor* (:ref:`dres_moved_cursor-label`)
@@ -183,7 +183,7 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": Errors.BAD_RESPONSE}
         return serialized
 
-    async def get_ancestors(self, sid, request):
+    async def on_get_ancestors(self, sid, request):
         """
         :event: :ref:`dreq_get_ancestors-label`
         :return: :ref:`dres_get_ancestors-label`
@@ -208,7 +208,7 @@ class DiscussionNamespace(AsyncNamespace):
         await self.emit("edited_unit", serialized, room=discussion_id)
         return serialized
 
-    async def get_unit_content(self, sid, request):
+    async def on_get_unit_content(self, sid, request):
         """
         :event: :ref:`dreq_get_unit_content-label`
         :return: :ref:`dres_get_unit_content-label`
@@ -232,7 +232,7 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": Errors.BAD_RESPONSE}
         return serialized
 
-    async def get_unit_context(self, sid, request):
+    async def on_get_unit_context(self, sid, request):
         """
         :event: :ref:`dreq_get_unit_context-label`
         :return: :ref:`dres_get_unit_context-label`
@@ -256,7 +256,7 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": Errors.BAD_RESPONSE}
         return serialized
 
-    async def post(self, sid, request):
+    async def on_post(self, sid, request):
         """
         :event: :ref:`dreq_post-label`
         :emit: *created_post* (:ref:`dres_created_post-label`) AND *added_backlinks* (:ref:`dres_added_backlinks-label`)
@@ -312,7 +312,7 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": Errors.BAD_RESPONSE}
         return serialized
 
-    async def send_to_doc(self, sid, request):
+    async def on_send_to_doc(self, sid, request):
         """
         :event: :ref:`dreq_send_to_doc-label`
         :emit: *added_unit* (:ref:`dres_added_unit-label`) AND *added_backlinks* (:ref:`dres_added_backlinks-label`)
@@ -344,7 +344,7 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": Errors.BAD_RESPONSE}
         await self.emit("added_backlinks", serialized, room=discussion_id)
 
-    async def move_cursor(self, sid, request): 
+    async def on_move_cursor(self, sid, request): 
         """
         :event: :ref:`dreq_move_cursor-label`
         :emit: *moved_cursor* (:ref:`dres_moved_cursor-label`)
@@ -372,7 +372,7 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": Errors.BAD_RESPONSE}
         await self.emit("moved_cursor", serialized, room=discussion_id)
 
-    async def hide_unit(self, sid, request): 
+    async def on_hide_unit(self, sid, request): 
         """
         NOTE: Call `request_to_edit` before this.
 
@@ -407,7 +407,7 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": Errors.BAD_RESPONSE}
         await self.emit("unlocked_unit_editable", serialized, room=discussion_id)
 
-    async def unhide_unit(self, sid, request): 
+    async def on_unhide_unit(self, sid, request): 
         """
         :event: :ref:`dreq_unhide_unit-label`
         :emit: *unhid_unit* (:ref:`dres_unhid_unit-label`)
@@ -431,7 +431,7 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": Errors.BAD_RESPONSE}
         await self.emit("unhid_unit", serialized, room=discussion_id)
 
-    async def add_unit(self, sid, request): 
+    async def on_add_unit(self, sid, request): 
         """
         :event: :ref:`dreq_add_unit-label`
         :emit: *added_unit* (:ref:`dres_added_unit-label`) AND *added_backlinks* (:ref:`dres_added_backlinks-label`)
@@ -465,7 +465,7 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": Errors.BAD_RESPONSE}
         await self.emit("added_backlinks", serialized, room=discussion_id)
 
-    async def select_unit(self, sid, request): 
+    async def on_select_unit(self, sid, request): 
         """
         :event: :ref:`dreq_select_unit-label`
         :emit: *locked_unit_position* (:ref:`dres_locked_unit_position-label`) 
@@ -491,7 +491,7 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": Errors.BAD_RESPONSE}
         await self.emit("locked_unit_position", serialized, room=discussion_id)
 
-    async def deselect_unit(self, sid, request): 
+    async def on_deselect_unit(self, sid, request): 
         """
         :event: :ref:`dreq_deselect_unit-label`
         :emit: *unlocked_unit_position* (:ref:`dres_unlocked_unit_position-label`) 
@@ -517,7 +517,7 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": Errors.BAD_RESPONSE}
         await self.emit("unlocked_unit_position", serialized, room=discussion_id)
 
-    async def move_units(self, sid, request): 
+    async def on_move_units(self, sid, request): 
         """
         NOTE: Call `select_unit` before this.
 
@@ -556,7 +556,7 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": Errors.BAD_RESPONSE}
         await self.emit("unlocked_unit_position", serialized, room=discussion_id)
 
-    async def merge_units(self, sid, request): 
+    async def on_merge_units(self, sid, request): 
         """
         NOTE: Call `select_unit` before this.
 
@@ -601,7 +601,7 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": Errors.BAD_RESPONSE}
         await self.emit("unlocked_unit_position", serialized, room=discussion_id)
 
-    async def request_to_edit(self, sid, request):
+    async def on_request_to_edit(self, sid, request):
         """
         :event: :ref:`dreq_request_to_edit-label`
         :emit: *locked_unit_editable* (:ref:`dres_locked_unit_editable-label`)
@@ -627,7 +627,7 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": Errors.BAD_RESPONSE}
         await self.emit("locked_unit_editable", serialized, room=discussion_id)
 
-    async def deedit_unit(self, sid, request):
+    async def on_deedit_unit(self, sid, request):
         """
         :event: :ref:`dreq_deedit_unit-label`
         :emit: *unlocked_unit_editable* (:ref:`dres_unlocked_unit_editable-label`)
@@ -653,7 +653,7 @@ class DiscussionNamespace(AsyncNamespace):
           return {"error": Errors.BAD_RESPONSE}
         await self.emit("unlocked_unit_editable", serialized, room=discussion_id)
 
-    async def edit_unit(self, sid, request):
+    async def on_edit_unit(self, sid, request):
         """
         NOTE: Call `request_to_edit` before this.
 

@@ -330,6 +330,7 @@ class DiscussionManager:
 
         user = discussion.get().users.filter(id=user_id).get()
         response = {
+          "user_id": user_id,
           "nickname": user.name,
           "cursor": user.cursor
         }
