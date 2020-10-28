@@ -14,35 +14,39 @@ import {
   CREATED_POST,
 } from "./types";
 
+let handleJoinUser = (dispatch, discussionId, userId) => {
+    dispatch({
+      type: JOIN_USER,
+    });
+
+    const data = {
+      discussion_id: discussionId,
+      user_id: userId,
+    };
+    // backend acknowledged we sent request
+    socket.emit("join", data, (res) => {
+      dispatch({
+        type: JOIN_USER_FULFILLED,
+        payload: {
+          discussionId: discussionId,
+          userId: userId,
+        },
+      });
+    });
+}
+
 const enterUser = (discussionId) => {
   return (dispatch) => {
     // TODO check if key discussionId in local storage
     // if so, get value userId
     const userId = null;
 
-    if (userId == null) {
+    if (userId === null) {
       dispatch({
         type: CREATE_NICKNAME,
       });
     } else {
-      dispatch({
-        type: JOIN_USER,
-      });
-
-      const data = {
-        discussion_id: discussionId,
-        user_id: userId,
-      };
-      // backend acknowledged we sent request
-      socket.emit("join", data, (res) => {
-        dispatch({
-          type: JOIN_USER_FULFILLED,
-          payload: {
-            discussionId: discussionId,
-            userId: userId,
-          },
-        });
-      });
+      handleJoinUser(dispatch, discussionId, userId);
     }
   };
 };
@@ -50,7 +54,7 @@ const enterUser = (discussionId) => {
 const createUser = (discussionId, nickname) => {
   return (dispatch) => {
     dispatch({
-      type: CREATE_NICKNAME,
+      type: CREATE_USER,
     });
 
     const data = {
@@ -63,24 +67,12 @@ const createUser = (discussionId, nickname) => {
       dispatch({
         type: CREATE_USER_FULFILLED,
       });
+      const response = JSON.parse(res);
 
-      const userId = res.user_id;
+      const userId = response.user_id;
       // TODO store in local storage
 
-      const data = {
-        discussion_id: discussionId,
-        user_id: userId,
-      };
-      // backend acknowledged we sent request
-      socket.emit("join", data, (res) => {
-        dispatch({
-          type: JOIN_USER_FULFILLED,
-          payload: {
-            discussionId: discussionId,
-            userId: userId,
-          },
-        });
-      });
+      handleJoinUser(dispatch, discussionId, userId);
     });
   };
 };
@@ -88,14 +80,15 @@ const createUser = (discussionId, nickname) => {
 const subscribeUsers = () => {
   return (dispatch) => {
     socket.on("joined_user", (res) => {
+      const response = JSON.parse(res);
       // TODO case on result
       dispatch({
         type: JOINED_USER,
         payload: {
           icon: {
-            userId: res.user_id,
-            nickname: res.nickname,
-            unitId: res.cursor.unit_id,
+            userId: response.user_id,
+            nickname: response.nickname,
+            unitId: response.cursor.unit_id,
           },
         },
       });
@@ -118,7 +111,6 @@ const createPost = (pith) => {
     });
     // backend acknowledged we sent request
     socket.emit("post", data, (res) => {
-      console.log(res);
       dispatch({
         type: CREATE_POST_FULFILLED,
       });
@@ -130,12 +122,13 @@ const subscribeChat = () => {
   return (dispatch) => {
     socket.on("created_post", (res) => {
       // TODO case on result
-      const chatMeta = unpackChatMeta(res.chat_meta);
-      const docMeta = unpackDocMeta(res.doc_meta);
+      const response = JSON.parse(response);
+      const chatMeta = unpackChatMeta(response.chat_meta);
+      const docMeta = unpackDocMeta(response.doc_meta);
       dispatch({
         type: CREATED_POST,
         payload: {
-          unitId: res.unit_id,
+          unitId: response.unit_id,
           chatMapAdd: chatMeta,
           docMapAdd: docMeta,
         },

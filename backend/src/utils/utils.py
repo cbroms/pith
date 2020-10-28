@@ -14,8 +14,11 @@ from typing import (
   Dict,
   List,
 )
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 import constants
+from error import Errors
 from uuid import UUID
 
 
@@ -45,10 +48,12 @@ def sum_dicts(dL: List[Dict[Any, Any]]) -> Dict[Any, Any]:
 
 class GenericEncoder(JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, UUID):
-            return obj.hex
-        if isinstance(obj, (datetime.date, datetime.datetime)):
-            return obj.strftime(constants.DATE_TIME_FMT)
-        if isinstance(obj, (Document, EmbeddedDocument)):
-            return obj.to_mongo() # dict
+        #if isinstance(obj, UUID):
+        #    return obj.hex
+        #if isinstance(obj, (datetime.date, datetime.datetime)):
+        #    return obj.strftime(constants.DATE_TIME_FMT)
+        #if isinstance(obj, (Document, EmbeddedDocument)):
+        #    return obj.to_mongo() # dict
+        if isinstance(obj, Errors):
+            return obj.value
         return JSONEncoder.default(self, obj)
