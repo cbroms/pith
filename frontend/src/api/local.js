@@ -1,17 +1,16 @@
-function saveValue(val, data) {
-	localStorage.setItem(val, JSON.stringify(data));
-}
-
 function setValue(val, data) {
-	localStorage.setItem(val, JSON.stringify(data));
+    localStorage.setItem(val, JSON.stringify(data));
+    console.log(localStorage.getItem(val));
 }
 
 function getValue(val) {
-	const res = localStorage.getItem(val);
+    const res = localStorage.getItem(val);
 
-	if (res !== undefined && res !== null) return JSON.parse(res);
-
-	return null;
+    try {
+        return JSON.parse(res);
+    } catch {
+        return null;
+    }
 }
 
-export { saveValue, setValue, getValue };
+export { setValue, getValue };

@@ -21,21 +21,12 @@ const DiscussionJoin = (props) => {
         />
     );
     return (
-        <div>
-            {props.joined ? (
-                <Redirect
-                    to={{
-                        pathname: `/d/${props.id}/`,
-                    }}
-                />
-            ) : (
-                <DiscussionJoinLayout
-                    editor={editor}
-                    done={nickname !== null}
-                    nickname={nickname}
-                />
-            )}
-        </div>
+        <DiscussionJoinLayout
+            editor={editor}
+            done={nickname !== null}
+            nickname={nickname}
+            joiningScreen={props.joiningScreen}
+        />
     );
 };
 

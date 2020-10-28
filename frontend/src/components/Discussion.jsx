@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     BrowserRouter as Router,
     Switch,
@@ -7,6 +7,8 @@ import {
     useRouteMatch,
     useParams,
 } from "react-router-dom";
+
+import { enterUser, createUser } from "../actions/discussionActions";
 
 import Chat from "./Chat";
 import Document from "./Document";
@@ -20,17 +22,20 @@ const Discussion = (props) => {
     const [chatSearchOpen, setChatSearchOpen] = useState(false);
     const [query, setQuery] = useState("");
 
-    const [joined, setJoined] = useState(false); // TODO replace with the real state
+    // const [joined, setJoined] = useState(false); // TODO replace with the real state
+    const { joined, createNickname, joinUser } = props.events;
 
     const match = useRouteMatch();
     const { discussionId } = useParams();
 
+    useEffect(() => {
+        if (!joined && !createNickname && !joinUser.pending)
+            props.dispatch(enterUser(discussionId));
+    });
+
     const joinDiscussion = (nickname) => {
-        console.log("joining discussion with name", nickname);
-        // join discussion action goes here
-        window.setTimeout(() => {
-            setJoined(true);
-        }, 1500);
+        // join the discussion with a given nickname
+        props.dispatch(createUser(discussionId, nickname));
     };
 
     const chat = (
@@ -56,26 +61,35 @@ const Discussion = (props) => {
         <Router>
             <Switch>
                 <Route path={`${match.path}/join`}>
-                    <DiscussionJoin
-                        onComplete={(nickname) => joinDiscussion(nickname)}
-                        id={discussionId}
-                        joined={joined}
-                    />
+                    {joined ? (
+                        <Redirect
+                            to={{
+                                pathname: `/d/${discussionId}`,
+                            }}
+                        />
+                    ) : (
+                        <DiscussionJoin
+                            onComplete={(nickname) => joinDiscussion(nickname)}
+                            id={discussionId}
+                        />
+                    )}
                 </Route>
                 <Route path={match.path}>
-                    {joined ? (
+                    {!joined && createNickname ? (
+                        <Redirect
+                            to={{
+                                pathname: `/d/${discussionId}/join`,
+                            }}
+                        />
+                    ) : !joined ? (
+                        <DiscussionJoin joiningScreen={true} />
+                    ) : (
                         <DiscussionLayout
                             chat={chat}
                             document={doc}
                             menu={menu}
                             search={search}
                             searchActive={chatSearchOpen}
-                        />
-                    ) : (
-                        <Redirect
-                            to={{
-                                pathname: `/d/${discussionId}/join`,
-                            }}
                         />
                     )}
                 </Route>

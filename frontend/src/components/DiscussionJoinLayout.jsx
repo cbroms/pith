@@ -34,6 +34,7 @@ const StyledContent = styled.div`
 
     padding: 10px;
 
+    width: 100%;
     justify-self: right;
     max-width: 450px;
 `;
@@ -41,18 +42,24 @@ const StyledContent = styled.div`
 const DiscussionJoinLayout = (props) => {
     return (
         <StyledContainer>
-            <StyledContent>
-                <LargeHeading>Create a nickname</LargeHeading>
-                <Paragraph>
-                    Your nickname will be used to identify your contributions in
-                    the discussion.
-                </Paragraph>
-                {props.done ? (
-                    <Paragraph>joining as "{props.nickname}"...</Paragraph>
-                ) : (
-                    props.editor
-                )}
-            </StyledContent>
+            {props.joiningScreen ? (
+                <StyledContent>
+                    <LargeHeading>Joining discussion...</LargeHeading>
+                </StyledContent>
+            ) : (
+                <StyledContent>
+                    <LargeHeading>Create a nickname</LargeHeading>
+                    <Paragraph>
+                        Your nickname will be used to identify your
+                        contributions in the discussion.
+                    </Paragraph>
+                    {props.done ? (
+                        <Paragraph>joining as "{props.nickname}"...</Paragraph>
+                    ) : (
+                        props.editor
+                    )}
+                </StyledContent>
+            )}
         </StyledContainer>
     );
 };

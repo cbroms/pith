@@ -149,16 +149,16 @@ class TextEditor extends React.Component {
         showButton={this.props.showButton}
         innerRef={this.ref}
         className={this.props.className}
-        html={this.state.html} // innerHTML of the editable div
-        disabled={!this.state.editable} // use true to disable edition
-        onChange={this.handleChange} // handle innerHTML change
+        html={this.state.html}
+        disabled={!this.state.editable}
+        onChange={this.handleChange}
         onFocus={this.props.onFocus || null}
         onBlur={() => {
           this.sanitize();
           if (this.props.onBlur) this.props.onBlur();
         }}
         onKeyDown={this.handleKeyDown}
-        submit={() => {
+        makeSubmit={() => {
           this.props.unitEnter(this.getCaretPosition(), this.state.html);
         }}
       />
