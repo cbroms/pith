@@ -160,10 +160,11 @@ class App extends React.Component {
 
 	componentDidMount() {
 		const discussionId = "9ea4d942e69848a58afe7c33462f4d39"; // dummy
-		const nickname = "whales";
+		const nickname = "softal";
 		const { dispatch } = this.props;
-		//dispatch(enterUser(discussionId, nickname));
-		dispatch(createPost("Hello."));
+		dispatch(enterUser(discussionId));
+    dispatch(createUser(discussionId, nickname));
+		//dispatch(createPost("Hello."));
 	}
 
 	setDarkModeActive(mode) {

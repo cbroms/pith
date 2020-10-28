@@ -1,10 +1,15 @@
 {
-  "type": "object",
-  "properties": {
-    "user_id": {"type": "string"},
-    "nickname": {"type": "string"},
+  "definitions": {
     "cursor": {"$ref": "cursor.json#/cursor"}
   },
-  "required": ["user_id", "nickname", "cursor"]
+  "base": {
+    "type": "object",
+    "properties": {
+      "user_id": {"type": "string"},
+      "nickname": {"type": "string"},
+      "cursor": {"$ref": "#/definitions/cursor"}
+    },
+    "required": ["user_id", "nickname", "cursor"]
+  }
 }
 

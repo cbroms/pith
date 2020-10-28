@@ -167,7 +167,7 @@ class DiscussionManager:
           return func(self, **kwargs)
         except DoesNotExist:
           logging.info("{} DISC ERR".format(func))
-          return {"error": Errors.BAD_DISCUSSION_ID} 
+          return {"error": Errors.BAD_DISCUSSION_ID.value} 
       return helper
           
     def _check_user_id(func):
@@ -180,7 +180,7 @@ class DiscussionManager:
         user_id = kwargs["user_id"]
         discussion = self._get(discussion_id)
         if len(discussion.filter(users__id=user_id)) == 0:
-          return {"error": Errors.BAD_USER_ID}
+          return {"error": Errors.BAD_USER_ID.value}
         else:
           return func(self, **kwargs)
       return helper
@@ -195,7 +195,7 @@ class DiscussionManager:
           Unit.objects.get(id=unit_id)
           return func(self, **kwargs)
         except DoesNotExist:
-          return {"error": Errors.BAD_UNIT_ID}
+          return {"error": Errors.BAD_UNIT_ID.value}
       return helper 
 
     def _check_units(func):
@@ -209,7 +209,7 @@ class DiscussionManager:
             Unit.objects.get(id=unit_id)
           return func(self, **kwargs)
         except DoesNotExist:
-          return {"error": Errors.BAD_UNIT_ID}
+          return {"error": Errors.BAD_UNIT_ID.value}
       return helper 
 
     def _verify_position(func):
@@ -222,7 +222,7 @@ class DiscussionManager:
         position = kwargs["position"]
         unit = self._get_unit(unit_id).get()
         if position > len(unit.children) or position < -1:
-          return {"error": Errors.BAD_POSITION}
+          return {"error": Errors.BAD_POSITION.value}
         else: 
           return func(self, **kwargs)
       return helper
@@ -237,7 +237,7 @@ class DiscussionManager:
         user_id = kwargs["user_id"]
         unit = self._get_unit(unit_id).get()
         if unit.edit_privilege != user_id:
-          return {"error": Errors.BAD_EDIT_TRY}
+          return {"error": Errors.BAD_EDIT_TRY.value}
         else:
           return func(self, **kwargs)
       return helper
@@ -253,7 +253,7 @@ class DiscussionManager:
         for unit_id in units:
           unit = self._get_unit(unit_id).get()
           if unit.position_privilege != user_id:
-            return {"error": Errors.BAD_POSITION_TRY}
+            return {"error": Errors.BAD_POSITION_TRY.value}
         return func(self, **kwargs)
       return helper
 
@@ -275,16 +275,16 @@ class DiscussionManager:
         try:
           Unit.objects.get(id=parent)
         except DoesNotExist:
-          return {"error": Errors.BAD_UNIT_ID}
+          return {"error": Errors.BAD_UNIT_ID.value}
 
         parent_ptr = self._get_unit(parent)
         if position > len(parent_ptr.get().children) or position < 0: # fixed
-          return {"error": Errors.BAD_POSITION}
+          return {"error": Errors.BAD_POSITION.value}
 
         ancestors = self._get_ancestors(parent)
         inter = set(ancestors).intersection(set(units))
         if len(inter) > 0:
-          return {"error": Errors.BAD_PARENT}
+          return {"error": Errors.BAD_PARENT.value}
         else:
           return func(self, **kwargs)
       return helper
@@ -297,10 +297,10 @@ class DiscussionManager:
     def create_user(self, discussion_id, nickname, user_id=None):
         discussion = self._get(discussion_id)
         if len(discussion.filter(users__name=nickname)) > 0:
-          return {"error": Errors.NICKNAME_EXISTS}
+          return {"error": Errors.NICKNAME_EXISTS.value}
         if user_id is not None:
           if len(discussion.filter(users__id=user_id)) > 0:
-            return {"error": Errors.USER_ID_EXISTS}
+            return {"error": Errors.USER_ID_EXISTS.value}
 
         unit_id = discussion.get().document
         cursor = Cursor(unit_id=unit_id, position=-1) 
@@ -332,7 +332,10 @@ class DiscussionManager:
         response = {
           "user_id": user_id,
           "nickname": user.name,
-          "cursor": user.cursor
+          "cursor": {
+            "unit_id": user.cursor.unit_id,
+            "position": user.cursor.position
+          }
         }
         return response
 
@@ -789,7 +792,7 @@ class DiscussionManager:
         discussion = self._get(discussion_id)
         unit = self._get_unit(unit_id) 
         if unit.get().position_privilege is not None: 
-          return {"error": Errors.FAILED_POSITION_ACQUIRE}
+          return {"error": Errors.FAILED_POSITION_ACQUIRE.value}
         unit.update(position_privilege=user_id)
 
         user = discussion.get().users.filter(id=user_id).get()
@@ -869,7 +872,7 @@ class DiscussionManager:
         discussion = self._get(discussion_id)
         unit = self._get_unit(unit_id) 
         if unit.get().edit_privilege is not None: 
-          return {"error": Errors.FAILED_EDIT_ACQUIRE}
+          return {"error": Errors.FAILED_EDIT_ACQUIRE.value}
         unit.update(edit_privilege=user_id)
 
         user = discussion.get().users.filter(id=user_id).get()

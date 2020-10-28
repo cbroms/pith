@@ -1,8 +1,10 @@
 from aiohttp import web
 from json import dumps
 from jsonschema import validate
-import logging
+from jsonschema.exceptions import ValidationError
 from socketio import AsyncNamespace
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 import constants
 from error import Errors
@@ -25,11 +27,12 @@ async def on_create(sid, request):
     """
     result = await gm.discussion_manager.create()
 
-    if "error" in result:
-      return result
+    if not "error" in result:
+      try:
+        validate(instance=serialized, schema=bres.created)
+      except ValidationException:
+        result = {"error": Errors.BAD_RESPONSE}
     serialized = dumps(result, cls=GenericEncoder)
-    if validate(instance=serialized, schema=bres.created):
-      return {"error": Errors.BAD_RESPONSE}
     return serialized
 
 class DiscussionNamespace(AsyncNamespace):
@@ -41,7 +44,7 @@ class DiscussionNamespace(AsyncNamespace):
 
     async def on_disconnect(self, sid):
         session = await self.get_session(sid)
-        discussion_id = session["active_discussion_id"]
+        discussion_id = session["discussion_id"]
         user_id = session["user_id"]
         if discussion_id:
           # TODO: as stringent as on_leave
@@ -56,25 +59,30 @@ class DiscussionNamespace(AsyncNamespace):
         :return: :ref:`dres_created_user-label` 
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, NICKNAME_EXISTS, USER_ID_EXISTS 
         """
-        if validate(instance=request, schema=dreq.create_user):
-          return {"error": Errors.BAD_REQUEST}
-        discussion_id = request["discussion_id"]
-        nickname = request["nickname"]
-        user_id = None
-        if "user_id" in request:
-          user_id = request["user_id"]
+        try:
+          validate(instance=request, schema=dreq.create_user)
+          discussion_id = request["discussion_id"]
+          nickname = request["nickname"]
+          user_id = None
+          if "user_id" in request:
+            user_id = request["user_id"]
 
-        result = gm.discussion_manager.create_user(
-          discussion_id=discussion_id,
-          nickname=nickname,
-          user_id=user_id
-        )
+          result = gm.discussion_manager.create_user(
+            discussion_id=discussion_id,
+            nickname=nickname,
+            user_id=user_id
+          )
 
-        if "error" in result:
-          return result
+          if not "error" in result:
+            try:
+              validate(instance=result, schema=dres.created_user)
+            except ValidationException:
+              result = {"error": Errors.BAD_RESPONSE}
+
+        except ValidationException:
+          result = {"error": Errors.BAD_REQUEST}
+
         serialized = dumps(result, cls=GenericEncoder)
-        if validate(instance=serialized, schema=dres.created_user):
-          return {"error": Errors.BAD_RESPONSE}
         return serialized
 
     async def on_join(self, sid, request):
@@ -83,27 +91,41 @@ class DiscussionNamespace(AsyncNamespace):
         :emit: *joined_user* (:ref:`dres_joined_user-label`)
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID 
         """
-        if validate(instance=request, schema=dreq.join):
-          return {"error": Errors.BAD_REQUEST}
-        discussion_id = request["discussion_id"]
-        user_id = request["user_id"]
+        logging.info("JOIN {}".format(request))
+        try:
+          validate(instance=request, schema=dreq.join)
 
-        result = gm.discussion_manager.join(
-          discussion_id=discussion_id, 
-          user_id=user_id
-        )
+          discussion_id = request["discussion_id"]
+          user_id = request["user_id"]
 
-        if "error" in result:
-          return result
+          result = gm.discussion_manager.join(
+            discussion_id=discussion_id, 
+            user_id=user_id
+          )
+          logging.info("RESULT {}".format(result))
+
+          if not "error" in result:
+            try:
+              validate(instance=result, schema=dres.joined_user)
+            except ValidationError:
+              result = {"error": Errors.BAD_RESPONSE}
+
+        except ValidationError:
+          result = {"error": Errors.BAD_REQUEST}
+
         serialized = dumps(result, cls=GenericEncoder)
-        if validate(instance=serialized, schema=dres.joined_user):
-          return {"error": Errors.BAD_RESPONSE}
+
+        if "error" in serialized:
+          return serialized
+
         self.enter_room(sid, discussion_id)
         await self.emit("joined_user", serialized, room=discussion_id)
         await self.save_session(sid, {
           "discussion_id": discussion_id, 
           "user_id": user_id}
         )
+
+    # REFACTOR SERIALIZATION HERE
 
     async def on_leave(self, sid, request):
         """
@@ -123,7 +145,7 @@ class DiscussionNamespace(AsyncNamespace):
           return result
         serialized = dumps(result, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.left_user):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("left_user", serialized, room=discussion_id)
         self.leave_room(sid, discussion_id)
 
@@ -145,7 +167,7 @@ class DiscussionNamespace(AsyncNamespace):
           return result
         serialized = dumps(result, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.loaded_user):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         return serialized
     
     async def on_load_unit_page(self, sid, request):
@@ -156,7 +178,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID
         """
         if validate(instance=request, schema=dreq.load_unit_page):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
@@ -175,12 +197,12 @@ class DiscussionNamespace(AsyncNamespace):
         # do cursor first
         serialized = dumps(cursor, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.moved_cursor):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("moved_cursor", serialized, room=discussion_id)
 
         serialized = dumps(unit_page, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.loaded_unit_page):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         return serialized
 
     async def on_get_ancestors(self, sid, request):
@@ -190,7 +212,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_UNIT_ID
         """
         if validate(instance=request, schema=dreq.get_ancestors):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
@@ -204,7 +226,7 @@ class DiscussionNamespace(AsyncNamespace):
           return result
         serialized = dumps(result, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.get_ancestors):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("edited_unit", serialized, room=discussion_id)
         return serialized
 
@@ -215,7 +237,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_UNIT_ID
         """
         if validate(instance=request, schema=dreq.get_unit_content):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
@@ -229,7 +251,7 @@ class DiscussionNamespace(AsyncNamespace):
           return result
         serialized = dumps(result, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.get_unit_content):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         return serialized
 
     async def on_get_unit_context(self, sid, request):
@@ -239,7 +261,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_UNIT_ID
         """
         if validate(instance=request, schema=dreq.get_unit_context):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
@@ -253,7 +275,7 @@ class DiscussionNamespace(AsyncNamespace):
           return result
         serialized = dumps(result, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.get_unit_context):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         return serialized
 
     async def on_post(self, sid, request):
@@ -263,7 +285,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID
         """
         if validate(instance=request, schema=dreq.post):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         pith = request["pith"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
@@ -280,12 +302,12 @@ class DiscussionNamespace(AsyncNamespace):
         created_post, added_backlinks = result
         serialized = dumps(created_post, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.created_post):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("created_post", serialized, room=discussion_id)
 
         serialized = dumps(added_backlinks, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.added_backlinks):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("added_backlinks", serialized, room=discussion_id)
 
     async def on_search(self, sid, request):
@@ -295,7 +317,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID
         """
         if validate(instance=request, schema=dreq.search):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         query = request["query"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
@@ -309,7 +331,7 @@ class DiscussionNamespace(AsyncNamespace):
           return result
         serialized = dumps(result, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.search):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         return serialized
 
     async def on_send_to_doc(self, sid, request):
@@ -319,7 +341,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_UNIT_ID
         """
         if validate(instance=request, schema=dreq.send_to_doc):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
@@ -336,12 +358,12 @@ class DiscussionNamespace(AsyncNamespace):
         added_unit, added_backlinks = result
         serialized = dumps(added_unit, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.added_unit):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("added_unit", serialized, room=discussion_id)
 
         serialized = dumps(added_backlinks, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.added_backlinks):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("added_backlinks", serialized, room=discussion_id)
 
     async def on_move_cursor(self, sid, request): 
@@ -351,7 +373,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, BAD_POSITION
         """
         if validate(instance=request, schema=dreq.moved_cursor):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         unit_id = request["unit_id"]
         position = request["position"]
         session = await self.get_session(sid)
@@ -369,7 +391,7 @@ class DiscussionNamespace(AsyncNamespace):
           return result
         serialized = dumps(result, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.moved_cursor):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("moved_cursor", serialized, room=discussion_id)
 
     async def on_hide_unit(self, sid, request): 
@@ -381,7 +403,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_UNIT_ID, BAD_EDIT_TRY
         """
         if validate(instance=request, schema=dreq.hide_unit):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
@@ -399,12 +421,12 @@ class DiscussionNamespace(AsyncNamespace):
         # hide
         serialized = dumps(hide, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.hid_unit):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("hid_unit", serialized, room=discussion_id)
         # unlocks
         serialized = dumps(unlocks, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.unlocked_unit_editable):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("unlocked_unit_editable", serialized, room=discussion_id)
 
     async def on_unhide_unit(self, sid, request): 
@@ -414,7 +436,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_UNIT_ID
         """
         if validate(instance=request, schema=dreq.unhide_unit):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
@@ -428,7 +450,7 @@ class DiscussionNamespace(AsyncNamespace):
           return result
         serialized = dumps(result, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.unhid_unit):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("unhid_unit", serialized, room=discussion_id)
 
     async def on_add_unit(self, sid, request): 
@@ -438,7 +460,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID
         """
         if validate(instance=request, schema=dreq.add_unit):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         pith = request["pith"]
         parent = request["parent"]
         position = request["position"]
@@ -457,12 +479,12 @@ class DiscussionNamespace(AsyncNamespace):
         added_unit, added_backlinks = result
         serialized = dumps(added_unit, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.added_unit):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("added_unit", serialized, room=discussion_id)
 
         serialized = dumps(added_backlinks, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.added_backlinks):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("added_backlinks", serialized, room=discussion_id)
 
     async def on_select_unit(self, sid, request): 
@@ -472,7 +494,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, FAILED_POSITION_ACQUIRE
         """
         if validate(instance=request, schema=dreq.select_unit):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
@@ -488,7 +510,7 @@ class DiscussionNamespace(AsyncNamespace):
           return result
         serialized = dumps(result, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.locked_unit_position):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("locked_unit_position", serialized, room=discussion_id)
 
     async def on_deselect_unit(self, sid, request): 
@@ -498,7 +520,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, BAD_POSITION_TRY
         """
         if validate(instance=request, schema=dreq.deselect_unit):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
@@ -514,7 +536,7 @@ class DiscussionNamespace(AsyncNamespace):
           return result
         serialized = dumps(result, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.unlocked_unit_position):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("unlocked_unit_position", serialized, room=discussion_id)
 
     async def on_move_units(self, sid, request): 
@@ -526,7 +548,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, BAD_POSITION_TRY, BAD_PARENT
         """
         if validate(instance=request, schema=dreq.move_units):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         units = request["units"]
         parent = request["parent"]
         position = request["position"]
@@ -548,12 +570,12 @@ class DiscussionNamespace(AsyncNamespace):
         # repositions
         serialized = dumps(repositions, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.repositioned_unit):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("repositioned_unit", serialized, room=discussion_id)
         # unlocks
         serialized = dumps(unlocks, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.unlocked_unit_position):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("unlocked_unit_position", serialized, room=discussion_id)
 
     async def on_merge_units(self, sid, request): 
@@ -565,7 +587,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, BAD_POSITION_TRY, BAD_PARENT
         """
         if validate(instance=request, schema=dreq.merge_units):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         units = request["units"]
         parent = request["parent"]
         position = request["position"]
@@ -588,17 +610,17 @@ class DiscussionNamespace(AsyncNamespace):
         # give added first
         serialized = dumps(add, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.added_unit):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("added_unit", serialized, room=discussion_id)
         # repositions
         serialized = dumps(repositions, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.repositioned_unit):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("repositioned_unit", serialized, room=discussion_id)
         # unlocks
         serialized = dumps(unlocks, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.unlocked_unit_position):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("unlocked_unit_position", serialized, room=discussion_id)
 
     async def on_request_to_edit(self, sid, request):
@@ -608,7 +630,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, FAILED_EDIT_ACQUIRE
         """
         if validate(instance=request, schema=dreq.request_to_edit):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
@@ -624,7 +646,7 @@ class DiscussionNamespace(AsyncNamespace):
           return result
         serialized = dumps(result, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.locked_unit_editable):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("locked_unit_editable", serialized, room=discussion_id)
 
     async def on_deedit_unit(self, sid, request):
@@ -634,7 +656,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, FAILED_EDIT_TRY
         """
         if validate(instance=request, schema=dreq.deedit_unit):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
@@ -650,7 +672,7 @@ class DiscussionNamespace(AsyncNamespace):
           return result
         serialized = dumps(result, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.unlocked_unit_editable):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("unlocked_unit_editable", serialized, room=discussion_id)
 
     async def on_edit_unit(self, sid, request):
@@ -662,7 +684,7 @@ class DiscussionNamespace(AsyncNamespace):
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, FAILED_EDIT_TRY
         """
         if validate(instance=request, schema=dreq.edit_unit):
-          return {"error": Errors.BAD_REQUEST}
+          return {"error": Errors.BAD_REQUEST.value}
         unit_id = request["unit_id"]
         pith = request["pith"]
         session = await self.get_session(sid)
@@ -682,22 +704,22 @@ class DiscussionNamespace(AsyncNamespace):
         # edited
         serialized = dumps(edited, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.edited_unit):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("edited_unit", serialized, room=discussion_id)
         # unlocks
         serialized = dumps(unlocks, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.unlocked_unit_editable):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("unlocked_unit_editable", serialized, room=discussion_id)
         # removed backlinks
         serialized = dumps(removed_backlinks, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.removed_backlinks):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("removed_backlinks", serialized, room=discussion_id)
         # added backlinks
         serialized = dumps(added_backlinks, cls=GenericEncoder)
         if validate(instance=serialized, schema=dres.added_backlinks):
-          return {"error": Errors.BAD_RESPONSE}
+          return {"error": Errors.BAD_RESPONSE.value}
         await self.emit("added_backlinks", serialized, room=discussion_id)
 
 # TODO: later people can add backlinks directly.

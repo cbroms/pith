@@ -1,11 +1,8 @@
 {
   "type": "object",
   "properties": {
-    "piths": {
-      "type": "array",
-      "items": {"type": "string"}
-    }
+    "pith": {"type": "string"}
   },
-  "required": ["piths"]
+  "required": ["pith"]
 }
 
