@@ -11,7 +11,7 @@ const light = {
     smallFont: "0.8rem",
     mediumFont: "1rem",
     largeFont: "1.25rem",
-    extraLargeFont: "1.5rem",
+    extraLargeFont: "2rem",
     sans: "'Source Sans Pro', sans-serif",
     serif: "'Source Serif Pro', serif",
 };

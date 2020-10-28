@@ -3,7 +3,7 @@ import {
     BrowserRouter as Router,
     Switch,
     Route,
-    Link,
+    Redirect,
     useRouteMatch,
     useParams,
 } from "react-router-dom";
@@ -20,7 +20,18 @@ const Discussion = (props) => {
     const [chatSearchOpen, setChatSearchOpen] = useState(false);
     const [query, setQuery] = useState("");
 
+    const [joined, setJoined] = useState(false); // TODO replace with the real state
+
     const match = useRouteMatch();
+    const { discussionId } = useParams();
+
+    const joinDiscussion = (nickname) => {
+        console.log("joining discussion with name", nickname);
+        // join discussion action goes here
+        window.setTimeout(() => {
+            setJoined(true);
+        }, 1500);
+    };
 
     const chat = (
         <Chat
@@ -39,22 +50,34 @@ const Discussion = (props) => {
         />
     );
     const search = <Search query={query} />;
-
     const menu = <Menu setDarkMode={props.setDarkMode} />;
+
     return (
         <Router>
             <Switch>
                 <Route path={`${match.path}/join`}>
-                    <DiscussionJoin />
+                    <DiscussionJoin
+                        onComplete={(nickname) => joinDiscussion(nickname)}
+                        id={discussionId}
+                        joined={joined}
+                    />
                 </Route>
                 <Route path={match.path}>
-                    <DiscussionLayout
-                        chat={chat}
-                        document={doc}
-                        menu={menu}
-                        search={search}
-                        searchActive={chatSearchOpen}
-                    />
+                    {joined ? (
+                        <DiscussionLayout
+                            chat={chat}
+                            document={doc}
+                            menu={menu}
+                            search={search}
+                            searchActive={chatSearchOpen}
+                        />
+                    ) : (
+                        <Redirect
+                            to={{
+                                pathname: `/d/${discussionId}/join`,
+                            }}
+                        />
+                    )}
                 </Route>
             </Switch>
         </Router>

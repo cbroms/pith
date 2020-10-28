@@ -20,6 +20,12 @@ class TextEditor extends React.Component {
 
   ref = React.createRef();
 
+  componentDidMount() {
+    if (this.props.focus) {
+      this.ref.current.focus();
+    }
+  }
+
   sanitizeConf = {
     ALLOWED_TAGS: [
       "b",
@@ -152,6 +158,9 @@ class TextEditor extends React.Component {
           if (this.props.onBlur) this.props.onBlur();
         }}
         onKeyDown={this.handleKeyDown}
+        submit={() => {
+          this.props.unitEnter(this.getCaretPosition(), this.state.html);
+        }}
       />
     );
   }

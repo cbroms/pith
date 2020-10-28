@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 
-import { LargeHeading } from "./StandardUI";
+import { MediumHeading } from "./StandardUI";
 import { MenuIcon, CloseIcon } from "./Symbols";
 
 const StyledContent = styled.div`
@@ -45,13 +45,16 @@ const StyledHeaderDiscussion = styled.div`
     grid-row-start: header;
     grid-row-end: header-end;
     padding: 10px 20px;
+
+    z-index: 20;
+
     border-left: 1px solid ${(props) => props.theme.shade2};
     border-bottom: 1px solid
         ${(props) => (!props.active ? "transparent" : props.theme.shade2)};
     display: ${(props) => (props.menuActive ? "none" : "block")};
 
     @media (min-width: 768px) {
-        background-color: ${(props) => props.theme.shade1};
+        display: none;
     }
 `;
 
@@ -61,6 +64,9 @@ const StyledHeaderDocument = styled.div`
     grid-row-start: header;
     grid-row-end: header-end;
     padding: 10px 20px;
+
+    z-index: 20;
+
     border-left: 1px solid ${(props) => props.theme.shade2};
     border-bottom: 1px solid
         ${(props) => (!props.active ? "transparent" : props.theme.shade2)};
@@ -70,7 +76,7 @@ const StyledHeaderDocument = styled.div`
     }
 
     @media (min-width: 768px) {
-        background-color: ${(props) => props.theme.shade1};
+        display: none;
     }
 `;
 
@@ -182,7 +188,8 @@ const StyledDocumentContainer = styled.div`
     }
 `;
 
-const StyledTitle = styled(LargeHeading)`
+const StyledTitle = styled(MediumHeading)`
+    margin: 0;
     color: ${(props) =>
         props.active ? props.theme.shade3 : props.theme.shade2};
 

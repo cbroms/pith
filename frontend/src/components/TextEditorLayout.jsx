@@ -36,7 +36,7 @@ const StyledEditor = styled(ContentEditable)`
 
     :empty::after {
         color: ${(props) => props.theme.shade2};
-        content: "${(props) => `${props.placeholder}` || "type a message..."}";
+        content: "${(props) => props.placeholder || "type a message..."}";
     }
 
     :focus {
@@ -49,7 +49,7 @@ const TextEditorLayout = (props) => {
         <StyledContainer showButton={props.showButton}>
             <StyledEditor {...props} />
             {props.showButton ? (
-                <StyledButton>
+                <StyledButton onClick={props.submit}>
                     {props.buttonDir === "right" ? <RightArrow /> : <UpArrow />}
                 </StyledButton>
             ) : null}

@@ -1,19 +1,42 @@
-import React from "react";
+import React, { useState } from "react";
+import { Redirect } from "react-router-dom";
 
 import TextEditor from "./TextEditor";
 
 import DiscussionJoinLayout from "./DiscussionJoinLayout";
 
 const DiscussionJoin = (props) => {
-    console.log("discussion join");
+    const [nickname, setNickname] = useState(null);
+
     const editor = (
         <TextEditor
             showButton
+            focus
             buttonDir="right"
             placeholder="type a nickname..."
+            unitEnter={(caret, content) => {
+                props.onComplete(content);
+                setNickname(content);
+            }}
         />
     );
-    return <DiscussionJoinLayout editor={editor} />;
+    return (
+        <div>
+            {props.joined ? (
+                <Redirect
+                    to={{
+                        pathname: `/d/${props.id}/`,
+                    }}
+                />
+            ) : (
+                <DiscussionJoinLayout
+                    editor={editor}
+                    done={nickname !== null}
+                    nickname={nickname}
+                />
+            )}
+        </div>
+    );
 };
 
 export default DiscussionJoin;
