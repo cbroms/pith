@@ -197,19 +197,20 @@ class DiscussionNamespace(AsyncNamespace):
 
         return result
 
+    # this function has to be handled manually
     async def on_leave(self, sid, request):
         """
         :emit: *left_user* (:ref:`dres_left_user-label`)
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID
         """
-        result = None
+        result = {"success": 0} # assume success
         session = await self.get_session(sid)
 
         # joined means we are in room and need to leave
         if "joined" in session:
           discussion_id = session["discussion_id"]
           user_id = session["user_id"]
-          result = gm.discussion_manager.leave(
+          product = gm.discussion_manager.leave(
             discussion_id=discussion_id, 
             user_id=user_id
           )
@@ -222,8 +223,8 @@ class DiscussionNamespace(AsyncNamespace):
           if bad_response:
             result = {"error": Errors.BAD_RESPONSE}
           else:
-            serialized = dumps(r, cls=GenericEncoder)
-            await self.emit(e, serialized, room=discussion_id)
+            serialized = dumps(product, cls=GenericEncoder)
+            await self.emit("leave", serialized, room=discussion_id)
 
           # leave room when done with emit
           self.leave_room(sid, discussion_id)
