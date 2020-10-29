@@ -3,6 +3,7 @@ from json import dumps
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from socketio import AsyncNamespace
+from functools import wraps
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
@@ -12,7 +13,7 @@ from managers.global_manager import GlobalManager
 import schema.board_responses as bres
 import schema.discussion_requests as dreq
 import schema.discussion_responses as dres
-from utils.utils import GenericEncoder, sum_dicts
+from utils.utils import DictEncoder, GenericEncoder, sum_dicts
 
 
 gm = GlobalManager()
@@ -39,91 +40,144 @@ class DiscussionNamespace(AsyncNamespace):
     """
     Namespace functions for the discussion abstraction.
     """
+
+    def _is_error(src):
+        return "error" in src
+
+    async def _validate_request(req):
+      def outer(func):
+        @wraps(func)
+        async def helper(self, sid, request): # TODO
+          try:
+            validate(instance=request, schema=dreq.schema[req])
+            return func
+          except ValidationException:
+            return {"error": Errors.BAD_REQUEST}
+        return helper
+      return outer
+
+    async def _process_responses(ret=None, emits=None):
+      def outer(func):
+        @wraps(func)
+        async def helper(self, sid, request): # TODO
+          try:
+            session = await self.get_session(sid)
+            discussion_id = session["discussion_id"]
+          except Exception:
+            logging.error(Errors.SERVER_ERROR) # TODO
+            return # invalid
+
+          result = None
+          product = func(self, sid, request)
+
+          if self._is_error(result):
+            result = product
+          else:
+            ret_res, emits_res = product
+            emits_res = (dumps(e, cls=DictEncoder) for r in emits_res)
+
+            bad_response = False
+            if ret is not None:
+              try:
+                validate(instance=ret_res, schema=dres.schema[ret])
+                result = ret_res
+              except ValidationException:
+                bad_response = True
+
+            if emits is not None:
+              for r, e in zip(emits_res, emits):
+                try:
+                  validate(instance=r, schema=dres.schema[e])
+                except ValidationException:
+                  bad_response = True
+
+            if bad_response:
+              result = {"error": Errors.BAD_RESPONSE}
+
+            # send off emits
+            for r, e in zip(emits_res, emits):
+              serialized = dumps(r, cls=GenericEncoder)
+              await self.emit(e, serialized, room=discussion_id)
+
+          # send off return          
+          if result is not None:
+            serialized = dumps(result, cls=GenericEncoder)
+            return serialized
+
+        return helper
+      return outer
+
+    # wrapped within response so error is processed
+    async def _check_user_session(func):
+      async def helper(self, sid, request): # TODO
+        if "joined" in session:
+          try:
+            session = await self.get_session(sid)
+            discussion_id = session["discussion_id"]
+            user_id = session["user_id"]
+          except Exception:
+            logging.error(Errors.SERVER_ERROR) # TODO
+          return func(self, sid, request)
+        else:
+            return {"error": Errors.INVALID_USER_SESSION}
+        return helper
+
     async def on_connect(self, sid, environ):
-        pass
+      pass
 
     async def on_disconnect(self, sid):
-        session = await self.get_session(sid)
-        discussion_id = session["discussion_id"]
-        user_id = session["user_id"]
-        if discussion_id:
-          # TODO: as stringent as on_leave
-          gm.discussion_manager.leave(
-            discussion_id=discussion_id, 
-            user_id=user_id
-          )
+      # may return error, but we do not report back
+      self.on_leave(self, sid, {})
 
+    @_process_responses(res="created_user")
+    @_check_user_session
+    @_validate_request("create_user")
     async def on_create_user(self, sid, request):
         """
         :event: :ref:`dreq_create_user-label`
         :return: :ref:`dres_created_user-label` 
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, NICKNAME_EXISTS, USER_ID_EXISTS 
         """
-        try:
-          validate(instance=request, schema=dreq.create_user)
-          discussion_id = request["discussion_id"]
-          nickname = request["nickname"]
-          user_id = None
-          if "user_id" in request:
-            user_id = request["user_id"]
+        discussion_id = request["discussion_id"]
+        nickname = request["nickname"]
+        user_id = None
+        if "user_id" in request:
+          user_id = request["user_id"]
 
-          result = gm.discussion_manager.create_user(
-            discussion_id=discussion_id,
-            nickname=nickname,
-            user_id=user_id
-          )
+        result = gm.discussion_manager.create_user(
+          discussion_id=discussion_id,
+          nickname=nickname,
+          user_id=user_id
+        )
+        return result
 
-          if not "error" in result:
-            try:
-              validate(instance=result, schema=dres.created_user)
-            except ValidationException:
-              result = {"error": Errors.BAD_RESPONSE}
-
-        except ValidationException:
-          result = {"error": Errors.BAD_REQUEST}
-
-        serialized = dumps(result, cls=GenericEncoder)
-        return serialized
-
+    @_process_responses(emits=("joined_user"))
+    @_check_user_session
+    @_validate_request("join")
     async def on_join(self, sid, request):
         """
         :event: :ref:`dreq_join-label`
         :emit: *joined_user* (:ref:`dres_joined_user-label`)
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID 
         """
-        logging.info("JOIN {}".format(request))
-        try:
-          validate(instance=request, schema=dreq.join)
+        discussion_id = request["discussion_id"]
+        user_id = request["user_id"]
 
-          discussion_id = request["discussion_id"]
-          user_id = request["user_id"]
-
-          result = gm.discussion_manager.join(
-            discussion_id=discussion_id, 
-            user_id=user_id
-          )
-          logging.info("RESULT {}".format(result))
-
-          if not "error" in result:
-            try:
-              validate(instance=result, schema=dres.joined_user)
-            except ValidationError:
-              result = {"error": Errors.BAD_RESPONSE}
-
-        except ValidationError:
-          result = {"error": Errors.BAD_REQUEST}
-
-        serialized = dumps(result, cls=GenericEncoder)
-
-        if "error" in serialized:
-          return serialized
-
-        self.enter_room(sid, discussion_id)
-        await self.emit("joined_user", serialized, room=discussion_id)
-        await self.save_session(sid, {
-          "discussion_id": discussion_id, 
-          "user_id": user_id}
+        result = gm.discussion_manager.join(
+          discussion_id=discussion_id, 
+          user_id=user_id
         )
+
+        # Result is successful.
+        if self._is_error(result):
+          self.enter_room(sid, discussion_id)
+          await self.save_session(sid, {
+            "joined": True,
+            "discussion_id": discussion_id, 
+            "user_id": user_id}
+          )
+
+        return result
 
     # REFACTOR SERIALIZATION HERE
 

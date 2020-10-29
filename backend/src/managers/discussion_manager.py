@@ -167,7 +167,7 @@ class DiscussionManager:
           return func(self, **kwargs)
         except DoesNotExist:
           logging.info("{} DISC ERR".format(func))
-          return {"error": Errors.BAD_DISCUSSION_ID.value} 
+          return {"error": Errors.BAD_DISCUSSION_ID} 
       return helper
           
     def _check_user_id(func):
@@ -180,7 +180,7 @@ class DiscussionManager:
         user_id = kwargs["user_id"]
         discussion = self._get(discussion_id)
         if len(discussion.filter(users__id=user_id)) == 0:
-          return {"error": Errors.BAD_USER_ID.value}
+          return {"error": Errors.BAD_USER_ID}
         else:
           return func(self, **kwargs)
       return helper
@@ -195,7 +195,7 @@ class DiscussionManager:
           Unit.objects.get(id=unit_id)
           return func(self, **kwargs)
         except DoesNotExist:
-          return {"error": Errors.BAD_UNIT_ID.value}
+          return {"error": Errors.BAD_UNIT_ID}
       return helper 
 
     def _check_units(func):
@@ -209,7 +209,7 @@ class DiscussionManager:
             Unit.objects.get(id=unit_id)
           return func(self, **kwargs)
         except DoesNotExist:
-          return {"error": Errors.BAD_UNIT_ID.value}
+          return {"error": Errors.BAD_UNIT_ID}
       return helper 
 
     def _verify_position(func):
@@ -222,7 +222,7 @@ class DiscussionManager:
         position = kwargs["position"]
         unit = self._get_unit(unit_id).get()
         if position > len(unit.children) or position < -1:
-          return {"error": Errors.BAD_POSITION.value}
+          return {"error": Errors.BAD_POSITION}
         else: 
           return func(self, **kwargs)
       return helper
@@ -237,7 +237,7 @@ class DiscussionManager:
         user_id = kwargs["user_id"]
         unit = self._get_unit(unit_id).get()
         if unit.edit_privilege != user_id:
-          return {"error": Errors.BAD_EDIT_TRY.value}
+          return {"error": Errors.BAD_EDIT_TRY}
         else:
           return func(self, **kwargs)
       return helper
@@ -253,7 +253,7 @@ class DiscussionManager:
         for unit_id in units:
           unit = self._get_unit(unit_id).get()
           if unit.position_privilege != user_id:
-            return {"error": Errors.BAD_POSITION_TRY.value}
+            return {"error": Errors.BAD_POSITION_TRY}
         return func(self, **kwargs)
       return helper
 
@@ -275,16 +275,16 @@ class DiscussionManager:
         try:
           Unit.objects.get(id=parent)
         except DoesNotExist:
-          return {"error": Errors.BAD_UNIT_ID.value}
+          return {"error": Errors.BAD_UNIT_ID}
 
         parent_ptr = self._get_unit(parent)
         if position > len(parent_ptr.get().children) or position < 0: # fixed
-          return {"error": Errors.BAD_POSITION.value}
+          return {"error": Errors.BAD_POSITION}
 
         ancestors = self._get_ancestors(parent)
         inter = set(ancestors).intersection(set(units))
         if len(inter) > 0:
-          return {"error": Errors.BAD_PARENT.value}
+          return {"error": Errors.BAD_PARENT}
         else:
           return func(self, **kwargs)
       return helper
@@ -297,10 +297,10 @@ class DiscussionManager:
     def create_user(self, discussion_id, nickname, user_id=None):
         discussion = self._get(discussion_id)
         if len(discussion.filter(users__name=nickname)) > 0:
-          return {"error": Errors.NICKNAME_EXISTS.value}
+          return {"error": Errors.NICKNAME_EXISTS}
         if user_id is not None:
           if len(discussion.filter(users__id=user_id)) > 0:
-            return {"error": Errors.USER_ID_EXISTS.value}
+            return {"error": Errors.USER_ID_EXISTS}
 
         unit_id = discussion.get().document
         cursor = Cursor(unit_id=unit_id, position=-1) 
@@ -314,7 +314,7 @@ class DiscussionManager:
           user.id = user_id
         discussion.update(push__users=user)
         response = {"user_id": user.id}
-        return response
+        return response, None
 
     @_check_discussion_id
     def join(self, discussion_id, user_id):
@@ -332,12 +332,9 @@ class DiscussionManager:
         response = {
           "user_id": user_id,
           "nickname": user.name,
-          "cursor": {
-            "unit_id": user.cursor.unit_id,
-            "position": user.cursor.position
-          }
+          "cursor": user.cursor
         }
-        return response
+        return None, (response)
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -352,7 +349,7 @@ class DiscussionManager:
 
         nickname = discussion.get().users.filter(id=user_id).get().name
         response = {"nickname": nickname}
-        return response
+        return None, (response)
 
     @_check_discussion_id
     @_check_user_id
@@ -401,7 +398,7 @@ class DiscussionManager:
           "chat_meta": chat_meta,
           "doc_meta": doc_meta
         }
-        return response 
+        return (response), None
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -493,7 +490,7 @@ class DiscussionManager:
           "cursor": cursor,
         }
 
-        return response, cursor_response
+        return response, (cursor_response)
 
     @_check_discussion_id
     @_check_unit_id
@@ -508,7 +505,7 @@ class DiscussionManager:
           "ancestors": ancestors,
           "doc_meta": doc_meta
         }
-        return response
+        return response, None
 
     @_check_discussion_id
     @_check_unit_id
@@ -518,7 +515,7 @@ class DiscussionManager:
           "pith": unit.pith,
           "hidden": unit.hidden
         }
-        return response
+        return response, None
   
     @_check_discussion_id
     @_check_unit_id
@@ -538,7 +535,7 @@ class DiscussionManager:
           "pith": unit.pith,
           "children": children
         }
-        return response
+        return response, None
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -586,7 +583,7 @@ class DiscussionManager:
           "chat_meta": chat_meta,
           "doc_meta": doc_meta
         }
-        return post, backlinks
+        return None, (post, backlinks)
 
     @_check_discussion_id
     def search(self, discussion_id, query):
@@ -620,7 +617,7 @@ class DiscussionManager:
           "chat_meta": chat_meta,
           "doc_meta": doc_meta
         }
-        return response
+        return response, None
       
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -681,7 +678,7 @@ class DiscussionManager:
           "doc_meta": doc_meta,
           "chat_meta": chat_meta
         }
-        return added, backlinks 
+        return None, (added, backlinks)
 
     @_check_discussion_id
     @_check_user_id
@@ -699,7 +696,7 @@ class DiscussionManager:
             "user_id": user_id,
             "cursor": user.cursor
         }
-        return response
+        return None, (response)
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -717,7 +714,7 @@ class DiscussionManager:
 
         hide_response = {"unit_id": unit_id}
         unlock_response = {"unit_id": unit_id}
-        return hide_response, unlock_response
+        return None, (hide_response, unlock_response)
         
     @_check_discussion_id
     @_check_unit_id
@@ -726,7 +723,7 @@ class DiscussionManager:
         unit.update(hidden=False)
         
         response = {"unit_id": unit_id}
-        return response
+        return None, (response)
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -779,7 +776,7 @@ class DiscussionManager:
           "doc_meta": doc_meta,
           "chat_meta": chat_meta
         }
-        return added, backlinks  
+        return None, (added, backlinks)
 
     # TODO: might support multi-select
     @_check_discussion_id
@@ -792,7 +789,7 @@ class DiscussionManager:
         discussion = self._get(discussion_id)
         unit = self._get_unit(unit_id) 
         if unit.get().position_privilege is not None: 
-          return {"error": Errors.FAILED_POSITION_ACQUIRE.value}
+          return {"error": Errors.FAILED_POSITION_ACQUIRE}
         unit.update(position_privilege=user_id)
 
         user = discussion.get().users.filter(id=user_id).get()
@@ -800,7 +797,7 @@ class DiscussionManager:
           "unit_id": unit_id,
           "nickname": user.name
         }]
-        return response
+        return None, (response)
 
     @_check_discussion_id
     @_check_user_id
@@ -809,7 +806,7 @@ class DiscussionManager:
     def deselect_unit(self, discussion_id, user_id, unit_id):
         self._release_position(unit_id)
         response = [{"unit_id": unit_id}]
-        return response
+        return None, (response)
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -832,7 +829,7 @@ class DiscussionManager:
             "unit_id": u
           })
 
-        return repositioned_units, unlocks
+        return None, (repositioned_units, unlocks)
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -860,7 +857,7 @@ class DiscussionManager:
             "unit_id": u
           })
 
-        return repositioned_units, added_unit, unlocks
+        return None, (repositioned_units, added_unit, unlocks)
 
     @_check_discussion_id
     @_check_user_id
@@ -872,7 +869,7 @@ class DiscussionManager:
         discussion = self._get(discussion_id)
         unit = self._get_unit(unit_id) 
         if unit.get().edit_privilege is not None: 
-          return {"error": Errors.FAILED_EDIT_ACQUIRE.value}
+          return {"error": Errors.FAILED_EDIT_ACQUIRE}
         unit.update(edit_privilege=user_id)
 
         user = discussion.get().users.filter(id=user_id).get()
@@ -880,7 +877,7 @@ class DiscussionManager:
           "unit_id": unit_id,
           "nickname": user.name
         }
-        return response
+        return None, (response)
 
     @_check_discussion_id
     @_check_user_id
@@ -889,7 +886,7 @@ class DiscussionManager:
     def deedit_unit(self, discussion_id, user_id, unit_id):
         self._release_edit(unit_id)
         response = {"unit_id": unit_id}
-        return response
+        return None, (response)
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -944,4 +941,4 @@ class DiscussionManager:
         added_backlinks = [
           {"unit_id": a, "backlink": unit_id} for a in added_links
         ]
-        return edited_unit, unlock_response, removed_backlinks, added_backlinks
+        return None, (edited_unit, unlock_response, removed_backlinks, added_backlinks)
