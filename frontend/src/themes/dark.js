@@ -4,6 +4,7 @@ const dark = {
     shade1: "#0f0f0f",
     shade2: "#6d6d6d",
     shade3: "#c6c6c6",
+    errorShade: "#e85656",
     smallBorder: "1px solid #afafaf",
     smallBorderActive: "1px solid #dbdbdb",
     smallFont: "0.8rem",

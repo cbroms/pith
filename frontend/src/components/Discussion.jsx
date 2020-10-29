@@ -15,6 +15,7 @@ import Document from "./Document";
 import Menu from "./Menu";
 import Search from "./Search";
 import DiscussionJoin from "./DiscussionJoin";
+import SystemError from "./SystemError";
 
 import DiscussionLayout from "./DiscussionLayout";
 
@@ -59,6 +60,7 @@ const Discussion = (props) => {
 
     return (
         <Router>
+            <SystemError error={props.systemError} />
             <Switch>
                 <Route path={`${match.path}/join`}>
                     {joined ? (
