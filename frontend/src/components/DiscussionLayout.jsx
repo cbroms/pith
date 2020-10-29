@@ -7,17 +7,19 @@ import { MenuIcon, CloseIcon } from "./Symbols";
 const StyledContent = styled.div`
     display: grid;
     grid-template-columns: [logo] 40px [logo-end discussion] 1fr [discussion-end document] 1.25fr [document-end];
-    grid-template-rows: [header] 40px [header-end content] calc(100vh - 40px) [content-end];
+    grid-template-rows: [header] 40px [header-end content] 1fr [content-end];
 
     @media (max-width: 768px) {
         grid-template-columns: [logo] 40px [logo-end discussion] 1fr [discussion-end document] 1fr [document-end];
         grid-template-rows:
-            [header] 40px [header-end content] calc(100vh - 40px)
+            [header] 40px [header-end content] 1fr
             [content-end];
     }
 
     max-width: 2000px;
     margin: 0 auto;
+
+    z-index: 1;
 `;
 
 const StyledHeaderLogo = styled.div`
