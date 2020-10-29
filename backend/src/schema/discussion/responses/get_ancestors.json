@@ -1,12 +1,17 @@
 {
-  "type": "object",
-  "properties": {
-    "ancestors": {
-      "type": "array",
-      "items": {"type": "string"}
-    },
+  "definitions": {
     "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
   },
-  "required": ["ancestors", "doc_meta"]
+  "base": {
+    "type": "object",
+    "properties": {
+      "ancestors": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "doc_meta": {"$ref": "#/definitions/doc_meta"}
+    },
+    "required": ["ancestors", "doc_meta"]
+  }
 }
 

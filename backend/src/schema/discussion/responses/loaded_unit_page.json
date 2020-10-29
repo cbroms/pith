@@ -1,62 +1,68 @@
 {
-  "type": "object",
-  "properties": {
-    "ancestors": {
-      "type": "array",
-      "items": {"type": "string"}
-    },
-    "children": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "unit_id": {"type": "string"},
-          "children": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "unit_id": {"type": "string"}
-              },
-              "required": ["unit_id"]
-            }
-          }
-        },
-        "required": ["unit_id", "children"]
-      }
-    },
-    "backlinks": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "unit_id": {"type": "string"},
-          "backlinks": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "unit_id": {"type": "string"}
-              },
-              "required": ["unit_id"]
-            }
-          }
-        },
-        "required": ["unit_id", "backlinks"]
-      }
-    },
-    "timeline_entry": {
-        "type": "object",
-        "properties": {
-          "unit_id": {"type": "string"},
-          "start_time": {"type": "string"},
-          "end_time": {"type": "string"}
-        },
-        "required": ["unit_id", "start_time", "end_time"]
-    },
+  "definitions": {
     "cursor": {"$ref": "cursor.json#/cursor"},
     "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
   },
-  "required": ["ancestors", "children", "backlinks", "timeline_entry", "cursor", "doc_meta"]
+  "base": {
+    "type": "object",
+    "properties": {
+      "ancestors": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "children": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "unit_id": {"type": "string"},
+            "children": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "unit_id": {"type": "string"}
+                },
+                "required": ["unit_id"]
+              }
+            }
+          },
+          "required": ["unit_id", "children"]
+        }
+      },
+      "backlinks": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "unit_id": {"type": "string"},
+            "backlinks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "unit_id": {"type": "string"}
+                },
+                "required": ["unit_id"]
+              }
+            }
+          },
+          "required": ["unit_id", "backlinks"]
+        }
+      },
+      "timeline_entry": {
+          "type": "object",
+          "properties": {
+            "unit_id": {"type": "string"},
+            "start_time": {"type": "string"},
+            "end_time": {"type": "string"}
+          },
+          "required": ["unit_id", "start_time", "end_time"]
+      },
+      "cursor": {"$ref": "#/definitions/cursor"},
+      "doc_meta": {"$ref": "#/definitions/doc_meta"}
+    },
+    "required": ["ancestors", "children", "backlinks", "timeline_entry", "cursor", "doc_meta"]
+  }
 }
 
