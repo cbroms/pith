@@ -4,8 +4,6 @@ from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from socketio import AsyncNamespace
 from functools import wraps
-import sys
-import logging
 
 import constants
 from error import Errors
@@ -13,24 +11,21 @@ from managers.global_manager import GlobalManager
 import schema.board_responses as bres
 import schema.discussion_requests as dreq
 import schema.discussion_responses as dres
-from utils.utils import DictEncoder, GenericEncoder, sum_dicts
+from utils.utils import (
+  logger,
+  is_error, 
+  make_error,
+  DictEncoder, 
+  GenericEncoder, 
+  sum_dicts, 
+)
 
-
-# log uncaught exceptions to file in backend/src/{constants.LOG_FILENAME}
-logger = logging.getLogger("app_logger")
-fh = logging.FileHandler(constants.LOG_FILENAME)
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-fh.setFormatter(formatter)
-logger.addHandler(fh)
-logger.setLevel(logging.DEBUG)
-def exception_handler(type, value, tb):
-  logger.exception(str(value))
-sys.excepthook = exception_handler
 
 gm = GlobalManager()
 sio = gm.sio
 
 
+# have checkers later
 @sio.on('create')
 async def on_create(sid, request):
     """
@@ -39,11 +34,11 @@ async def on_create(sid, request):
     """
     result = await gm.discussion_manager.create()
 
-    if not "error" in result:
+    if not is_error(result):
       try:
         validate(instance=serialized, schema=bres.created)
       except ValidationError:
-        result = {"error": Errors.BAD_RESPONSE}
+        result = make_error(Errors.BAD_RESPONSE)
     serialized = dumps(result, cls=GenericEncoder)
     return serialized
 
@@ -52,34 +47,20 @@ class DiscussionNamespace(AsyncNamespace):
     Namespace functions for the discussion abstraction.
     """
 
-    def _is_error(self, src):
-        return "error" in src
-
-    def _validate_request(req):
-      def outer(func):
-        @wraps(func)
-        async def helper(self, sid, request): # TODO
-          try:
-            validate(instance=request, schema=dreq.schema[req])
-            return await func(self, sid, request)
-          except ValidationError:
-            return {"error": Errors.BAD_REQUEST}
-        return helper
-      return outer
-
     def _process_responses(ret=None, emits=None):
       def outer(func):
         @wraps(func)
         async def helper(self, sid, request): # TODO
-
+          logger.info("ENTER")
           result = None
           product = await func(self, sid, request)
+          logger.info("EXIT {}".format(product))
 
           # every function should have a discussion id
           session = await self.get_session(sid)
           discussion_id = session["discussion_id"]
 
-          if self._is_error(product):
+          if is_error(product):
             result = product
           else:
             ret_res, emits_res = product
@@ -102,7 +83,7 @@ class DiscussionNamespace(AsyncNamespace):
                   bad_response = True
 
             if bad_response: # we cannot send off emits
-              result = {"error": Errors.BAD_RESPONSE}
+              result = make_error(Errors.BAD_RESPONSE)
             else: # we can send off emits
               if emits is not None:
                 assert(emits_res is not None)
@@ -127,9 +108,21 @@ class DiscussionNamespace(AsyncNamespace):
           discussion_id = session["discussion_id"]
           user_id = session["user_id"]
         except Exception:
-            return {"error": Errors.INVALID_USER_SESSION}
+            return make_error(Errors.INVALID_USER_SESSION)
         return await func(self, sid, request)
       return helper
+
+    def _validate_request(req):
+      def outer(func):
+        @wraps(func)
+        async def helper(self, sid, request): # TODO
+          try:
+            validate(instance=request, schema=dreq.schema[req])
+            return await func(self, sid, request)
+          except ValidationError:
+            return make_error(Errors.BAD_REQUEST)
+        return helper
+      return outer
 
     async def on_connect(self, sid, environ):
       # does not do anything
@@ -138,6 +131,28 @@ class DiscussionNamespace(AsyncNamespace):
     async def on_disconnect(self, sid):
       # may return error, but we do not report back
       await self.on_leave(sid, {})
+
+    @_process_responses()
+    @_validate_request("test_connect")
+    async def on_test_connect(self, sid, request):
+        """
+        :event: :ref:`dreq_create_user-label`
+        :errors: BAD_REQUEST, BAD_DISCUSSION_ID
+        """
+        logger.info("INPUT test_connect: {}".format(request))
+        discussion_id = request["discussion_id"]
+        result = gm.discussion_manager.test_connect(
+          discussion_id=discussion_id,
+        )
+        logger.info("OUTPUT test_connect: {}".format(result))
+
+        # save, regardless of outcome
+        await self.save_session(sid, {
+          "discussion_id": discussion_id, 
+        })
+
+        # if result is None, we send back success
+        return result
 
     @_process_responses(ret="created_user")
     @_validate_request("create_user")
@@ -159,11 +174,6 @@ class DiscussionNamespace(AsyncNamespace):
           user_id=user_id
         )
 
-        # save, regardless of outcome
-        await self.save_session(sid, {
-          "discussion_id": discussion_id, 
-        })
-
         return result
 
     @_process_responses(emits=["joined_user"])
@@ -182,12 +192,8 @@ class DiscussionNamespace(AsyncNamespace):
           user_id=user_id
         )
 
-        # save, regardless of outcome
-        await self.save_session(sid, {
-          "discussion_id": discussion_id, 
-        })
         # result is successful, joined means we are in room
-        if self._is_error(result):
+        if is_error(result):
           await self.save_session(sid, {
             "joined": True,
             "user_id": user_id}
@@ -221,7 +227,7 @@ class DiscussionNamespace(AsyncNamespace):
             bad_response = True
 
           if bad_response:
-            result = {"error": Errors.BAD_RESPONSE}
+            result = make_error(Errors.BAD_RESPONSE)
           else:
             serialized = dumps(product, cls=GenericEncoder)
             await self.emit("leave", serialized, room=discussion_id)

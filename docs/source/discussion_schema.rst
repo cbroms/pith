@@ -6,6 +6,13 @@ Pith Discussion Schema
 Discussion Requests
 *************************************
 
+.. _dreq_test_connect-label:
+
+test_connect
+=====================================
+
+.. jsonschema:: ../../backend/src/schema/discussion/requests/test_connect.json
+
 .. _dreq_create_user-label:
 
 create_user

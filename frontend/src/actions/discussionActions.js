@@ -22,6 +22,7 @@ import {
 import {
   // error events
   SYSTEM_ERROR,
+  INVALID_DISCUSSION,
   TAKEN_NICKNAME,
   TAKEN_USER_ID,
   MOVE_UNABLED,
@@ -150,16 +151,39 @@ let handleJoinUser = (dispatch, discussionId, userId) => {
 
 const enterUser = (discussionId) => {
   return (dispatch) => {
-    const userId = getValue(discussionId);
-
-    if (userId === null) {
-      dispatch({
-        type: CREATE_NICKNAME,
-      });
-    } else {
-      handleJoinUser(dispatch, discussionId, userId);
-    }
-  };
+    const data = {
+      discussion_id: discussionId,
+    };
+    socket.emit("test_connect", data, (res) => {
+      console.log("test_connect", res);
+      const response = JSON.parse(res);
+      if (isError(response)) {
+        const error_stamp = response.error;
+        switch (error_stamp) {
+          case BAD_DISCUSSION_ID: {
+            dispatch({
+              type: INVALID_DISCUSSION,
+            });
+          }
+          default: {
+            dispatch({
+              type: SYSTEM_ERROR,
+            });
+          }
+        }
+      }
+      else {
+        const userId = getValue(discussionId);
+        if (userId === null) {
+          dispatch({
+            type: CREATE_NICKNAME,
+          });
+        } else {
+          handleJoinUser(dispatch, discussionId, userId);
+        }
+      }
+    });
+  }
 };
 
 const createUser = (discussionId, nickname) => {

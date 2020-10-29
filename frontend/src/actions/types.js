@@ -1,5 +1,6 @@
 // error events
 export const SYSTEM_ERROR = "SYSTEM_ERROR";
+export const INVALID_DISCUSSION = "INVALID_DISCUSSION";
 export const TAKEN_NICKNAME = "TAKEN_NICKNAME";
 export const TAKEN_USER_ID = "TAKEN_USER_ID";
 export const MOVE_UNABLED = "MOVE_UNABLED";

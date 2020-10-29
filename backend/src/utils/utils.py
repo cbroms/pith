@@ -14,12 +14,37 @@ from typing import (
   Dict,
   List,
 )
+import sys
 import logging
-logging.basicConfig(level=logging.DEBUG)
 
 import constants
 from error import Errors
 from uuid import UUID
+
+
+# log uncaught exceptions to file in backend/src/{constants.LOG_FILENAME}
+logger = logging.getLogger("app_logger")
+fh = logging.FileHandler(constants.LOG_FILENAME)
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+logger.setLevel(logging.DEBUG)
+def exception_handler(type, value, tb):
+  logger.exception(str(value))
+sys.excepthook = exception_handler
+
+def is_error(src):
+  if src is None:
+    return False
+  return "error" in src
+
+def make_error(err):
+  exp = {
+    "_id": uuid.uuid4().hex,
+    "error": err
+  }
+  logger.exception(exp)
+  return exp
 
 
 ps = PorterStemmer()
