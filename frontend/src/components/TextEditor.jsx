@@ -75,7 +75,13 @@ class TextEditor extends React.Component {
   getCaretPosition() {
     let sel = window.getSelection();
     if (sel.rangeCount) {
-      return sel.getRangeAt(0).endOffset;
+      // get the caret position (this is in the rendered text)
+      const pos = sel.getRangeAt(0).endOffset;
+
+      // TODO: adjust the caret position to reflect its position in the text
+      // with html, rather than the rendered version of the text
+      // "<em>hi</em> |there" is a diff position than "hi | there"
+      return pos;
     }
     return null;
   }
@@ -88,7 +94,7 @@ class TextEditor extends React.Component {
       if (this.props.unitEnter) {
         this.props.unitEnter(this.getCaretPosition(), this.state.html);
       }
-      this.setState({ html: "" });
+      // this.setState({ html: "" });
     }
     // cmd/ctrl + b for bold
     if (e.keyCode === 66 && e.metaKey) {

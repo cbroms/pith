@@ -8,7 +8,7 @@ const dark = {
     smallBorderActive: "1px solid #dbdbdb",
     smallFont: "0.8rem",
     mediumFont: "1rem",
-    largeFont: "1.25rem",
+    largeFont: "1.5rem",
     extraLargeFont: "2rem",
     sans: "'Source Sans Pro', sans-serif",
     serif: "'Source Serif Pro', serif",

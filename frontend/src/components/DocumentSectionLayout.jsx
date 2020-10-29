@@ -52,6 +52,9 @@ const StyledUnit = styled.div`
     grid-row-start: content;
     grid-row-end: content-end;
 
+    font-size: ${(props) =>
+        props.level === 1 ? props.theme.largeFont : "inherit"};
+
     border: ${(props) =>
         props.over
             ? "2px solid " + props.theme.shade3

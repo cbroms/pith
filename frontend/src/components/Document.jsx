@@ -1,5 +1,11 @@
 import React from "react";
 
+import {
+    handleDrag,
+    handleEnter,
+    handleDelete,
+} from "../utils/documentModifiers";
+
 import Unit from "./Unit";
 import AncestorsLayout from "./AncestorsLayout";
 import DocumentLayout from "./DocumentLayout";
@@ -27,12 +33,31 @@ class Document extends React.Component {
         this.getDragInfo = this.getDragInfo.bind(this);
     }
 
-    onUnitDelete(content, id) {
-        console.log(content, id);
+    onUnitDelete(content, position) {
+        const newDoc = handleDelete(
+            [...this.state.documentCopy],
+            content,
+            position
+        );
+        if (newDoc !== null) {
+            this.setState({
+                documentCopy: newDoc,
+            });
+        }
     }
 
-    onUnitEnter(position, enter, id) {
-        console.log(position, enter, id);
+    onUnitEnter(caretPos, content, position) {
+        const newDoc = handleEnter(
+            [...this.state.documentCopy],
+            caretPos,
+            content,
+            position
+        );
+        if (newDoc !== null) {
+            this.setState({
+                documentCopy: newDoc,
+            });
+        }
     }
 
     getDragInfo(child, grandchild) {
@@ -66,107 +91,33 @@ class Document extends React.Component {
     }
 
     handleDragEnd(e) {
-        const newDocument = [...this.state.documentCopy];
-        const dragged = this.state.dragged;
-        const dragTarget = this.state.dragTarget;
+        const newDoc = handleDrag(
+            [...this.state.documentCopy],
+            this.state.dragged,
+            this.state.dragTarget
+        );
 
-        // if we didn't drop the item on top of itself
-        if (
-            !(
-                dragged.child === dragTarget.child &&
-                dragged.grandchild === dragTarget.grandchild
-            )
-        ) {
-            // get the dragged item
-            const draggingItemContent =
-                dragged.grandchild !== null
-                    ? {
-                          ...newDocument[dragged.child].children[
-                              dragged.grandchild
-                          ],
-                      }
-                    : { ...newDocument[dragged.child] };
-
-            draggingItemContent.children = draggingItemContent.children || [];
-
-            let oldChildIndex = dragged.child;
-            let oldGrandchildIndex = dragged.grandchild;
-
-            // add the item to its new position
-            if (!dragTarget.asChild && dragTarget.grandchild !== null) {
-                // add a grandchild
-                if (dragTarget.grandchild <= oldGrandchildIndex) {
-                    oldGrandchildIndex += 1;
-                }
-                const newGrandchildPos = dragTarget.atEnd
-                    ? dragTarget.grandchild + 1
-                    : dragTarget.grandchild;
-
-                newDocument[dragTarget.child].children.splice(
-                    newGrandchildPos,
-                    0,
-                    draggingItemContent
-                );
-            } else if (!dragTarget.asChild) {
-                // add a child
-                if (dragTarget.child <= oldChildIndex) {
-                    if (!dragTarget.atEnd) oldChildIndex += 1;
-                }
-                const newChildPos = dragTarget.atEnd
-                    ? dragTarget.child + 1
-                    : dragTarget.child;
-
-                newDocument.splice(newChildPos, 0, draggingItemContent);
-            } else if (dragTarget.asChild && dragTarget.grandchild !== null) {
-                // do nothing, this is making the unit a child of a grandchild so it is
-                // outside of the render scope
-            } else {
-                // make a grandchild
-                const index = dragTarget.atEnd
-                    ? newDocument[dragTarget.child].children.length - 1
-                    : 0;
-
-                newDocument[dragTarget.child].children.splice(
-                    index,
-                    0,
-                    draggingItemContent
-                );
-            }
-
-            // remove the item from its previous position
-            if (dragged.grandchild !== null) {
-                console.log(
-                    "removing",
-                    oldGrandchildIndex,
-                    "from",
-                    oldChildIndex
-                );
-                newDocument[oldChildIndex].children.splice(
-                    oldGrandchildIndex,
-                    1
-                );
-            } else {
-                newDocument.splice(oldChildIndex, 1);
-            }
-
+        if (newDoc !== null) {
             this.setState({
                 dragged: null,
                 dragTarget: null,
-                documentCopy: newDocument,
+                documentCopy: newDoc,
             });
         }
     }
 
     render() {
         // create a unit for a given location
-        const createUnit = (pith, id) => {
+        const createUnit = (pith, id, position) => {
             return (
                 <Unit
                     editable
                     unitEnter={(pos, content) =>
-                        this.onUnitEnter(pos, content, id)
+                        this.onUnitEnter(pos, content, position)
                     }
-                    unitDelete={(content) => this.onUnitDelete(content, id)}
+                    unitDelete={(content) =>
+                        this.onUnitDelete(content, position)
+                    }
                     onFocus={() => this.setState({ focused: id })}
                     onBlur={() => this.setState({ focused: null })}
                     pith={pith}
@@ -176,18 +127,10 @@ class Document extends React.Component {
             );
         };
 
-        const createSection = (
-            content,
-            id,
-            childIndex,
-            grandchildIndex,
-            isLast,
-            pith,
-            level
-        ) => {
+        const createSection = (content, id, position, isLast, pith, level) => {
             const [over, asChild, atEnd] = this.getDragInfo(
-                childIndex,
-                grandchildIndex
+                position.child,
+                position.grandchild
             );
 
             return (
@@ -195,13 +138,17 @@ class Document extends React.Component {
                     draggable={this.state.focused !== id}
                     onDragEnd={this.handleDragEnd}
                     onDragStart={(e) =>
-                        this.handleDragStart(e, childIndex, grandchildIndex)
+                        this.handleDragStart(
+                            e,
+                            position.child,
+                            position.grandchild
+                        )
                     }
                     onDragEnter={(e, asChild, atEnd) =>
                         this.handleDragEnter(
                             e,
-                            childIndex,
-                            grandchildIndex,
+                            position.child,
+                            position.grandchild,
                             asChild,
                             atEnd
                         )
@@ -226,26 +173,28 @@ class Document extends React.Component {
                 (grandchild, grandchildIndex) => {
                     const pith = createUnit(
                         grandchild.pith,
-                        grandchild.unit_id
+                        grandchild.unit_id,
+                        { child: childIndex, grandchild: grandchildIndex }
                     );
                     return createSection(
                         null,
                         grandchild.unit_id,
-                        childIndex,
-                        grandchildIndex,
+                        { child: childIndex, grandchild: grandchildIndex },
                         grandchildIndex === child.children.length - 1,
                         pith,
                         3
                     );
                 }
             );
-            const pith = createUnit(child.pith, child.unit_id);
+            const pith = createUnit(child.pith, child.unit_id, {
+                child: childIndex,
+                grandchild: null,
+            });
 
             return createSection(
                 grandchildren,
                 child.unit_id,
-                childIndex,
-                null,
+                { child: childIndex, grandchild: null },
                 childIndex === this.state.documentCopy.length - 1,
                 pith,
                 2
@@ -253,7 +202,8 @@ class Document extends React.Component {
         });
         const pithUnit = createUnit(
             this.props.view.pith,
-            this.props.view.unit_id
+            this.props.view.unit_id,
+            { child: null, grandchild: null }
         );
         const doc = (
             <DocumentSectionLayout

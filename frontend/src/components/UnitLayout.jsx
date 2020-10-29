@@ -7,8 +7,6 @@ const StyledContainer = styled.div`
     width: ${(props) => (props.inline ? "auto" : "100%")};
     padding: 5px 0;
     margin: 0 ${(props) => (props.inline ? "10px" : "0")};
-    font-size: ${(props) =>
-        props.big ? props.theme.extraLargeFont : props.theme.mediumFont};
 
     padding-left: ${(props) => (props.transcluded ? 10 : 0)}px;
 
