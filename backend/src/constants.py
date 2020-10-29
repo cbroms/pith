@@ -30,5 +30,8 @@ DATE_TIME_FMT = "%Y-%m-%dT%H:%M:%SZ"
 MONGODB_CONN = os.getenv("MONGODB_CONN", "mongodb://localhost:27017")
 MONGODB_NAME = os.getenv("MONGODB_NAME", "pith")
 
+# file we log to
+LOG_FILENAME = "log"
+
 # compiled searcher for link pattern
 link_pattern = re.compile(r"<cite>([^<]*)<\/cite>")

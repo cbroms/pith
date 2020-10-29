@@ -4,8 +4,8 @@ from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from socketio import AsyncNamespace
 from functools import wraps
+import inspect
 import logging
-logging.basicConfig(level=logging.DEBUG)
 
 import constants
 from error import Errors
@@ -16,8 +16,21 @@ import schema.discussion_responses as dres
 from utils.utils import DictEncoder, GenericEncoder, sum_dicts
 
 
+logging.basicConfig(level=logging.DEBUG)#filename=constants.LOG_FILENAME, level=logging.DEBUG)
 gm = GlobalManager()
 sio = gm.sio
+
+def autolog(message):
+    "Automatically log the current function details."
+		# get previous frame
+    func = inspect.currentframe().f_back.f_code
+    # Dump the message + the name of this function to the log.
+    logging.debug("{}:{}:{}: {}".format(
+        func.co_filename, 
+        func.co_name, 
+        func.co_firstlineno,
+        message
+    ))
 
 
 @sio.on('create')
@@ -44,31 +57,32 @@ class DiscussionNamespace(AsyncNamespace):
     def _is_error(src):
         return "error" in src
 
-    async def _validate_request(req):
+    def _validate_request(req):
       def outer(func):
         @wraps(func)
         async def helper(self, sid, request): # TODO
           try:
             validate(instance=request, schema=dreq.schema[req])
-            return func
+            return await func
           except ValidationException:
             return {"error": Errors.BAD_REQUEST}
         return helper
       return outer
 
-    async def _process_responses(ret=None, emits=None):
+    def _process_responses(ret=None, emits=None):
       def outer(func):
         @wraps(func)
         async def helper(self, sid, request): # TODO
+					# every function should have a discussion id
           try:
             session = await self.get_session(sid)
             discussion_id = session["discussion_id"]
           except Exception:
-            logging.error(Errors.SERVER_ERROR) # TODO
+            logging.exception(Errors.SERVER_ERROR.value) # TODO
             return # invalid
 
           result = None
-          product = func(self, sid, request)
+          product = await func(self, sid, request)
 
           if self._is_error(result):
             result = product
@@ -108,7 +122,7 @@ class DiscussionNamespace(AsyncNamespace):
       return outer
 
     # wrapped within response so error is processed
-    async def _check_user_session(func):
+    def _check_user_session(func):
       async def helper(self, sid, request): # TODO
         if "joined" in session:
           try:
@@ -116,8 +130,8 @@ class DiscussionNamespace(AsyncNamespace):
             discussion_id = session["discussion_id"]
             user_id = session["user_id"]
           except Exception:
-            logging.error(Errors.SERVER_ERROR) # TODO
-          return func(self, sid, request)
+            logging.exception(Errors.SERVER_ERROR.value) # TODO
+          return await func(self, sid, request)
         else:
             return {"error": Errors.INVALID_USER_SESSION}
         return helper
@@ -129,7 +143,7 @@ class DiscussionNamespace(AsyncNamespace):
       # may return error, but we do not report back
       self.on_leave(self, sid, {})
 
-    @_process_responses(res="created_user")
+    @_process_responses(ret="created_user")
     @_check_user_session
     @_validate_request("create_user")
     async def on_create_user(self, sid, request):
@@ -149,6 +163,12 @@ class DiscussionNamespace(AsyncNamespace):
           nickname=nickname,
           user_id=user_id
         )
+
+				# save, regardless of outcome
+				await self.save_session(sid, {
+					"discussion_id": discussion_id, 
+				})
+
         return result
 
     @_process_responses(emits=("joined_user"))
@@ -168,12 +188,15 @@ class DiscussionNamespace(AsyncNamespace):
           user_id=user_id
         )
 
-        # Result is successful.
+				# save, regardless of outcome
+				await self.save_session(sid, {
+					"discussion_id": discussion_id, 
+				})
+        # result is successful
         if self._is_error(result):
           self.enter_room(sid, discussion_id)
           await self.save_session(sid, {
             "joined": True,
-            "discussion_id": discussion_id, 
             "user_id": user_id}
           )
 
@@ -782,7 +805,6 @@ sio.register_namespace(DiscussionNamespace('/discussion'))
 
 def main():
     gm.start()
-    logging.basicConfig(level=logging.DEBUG)
     aio_app = gm.aio_app
     web.run_app(aio_app, port=constants.PORT)
  

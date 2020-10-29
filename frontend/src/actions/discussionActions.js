@@ -123,7 +123,7 @@ const subscribeChat = () => {
   return (dispatch) => {
     socket.on("created_post", (res) => {
       // TODO case on result
-      const response = JSON.parse(response);
+      const response = JSON.parse(res);
       const chatMeta = unpackChatMeta(response.chat_meta);
       const docMeta = unpackDocMeta(response.doc_meta);
       dispatch({
