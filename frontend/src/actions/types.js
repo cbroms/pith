@@ -1,3 +1,4 @@
+export const SYSTEM_ERROR = "SYSTEM_ERROR";
 export const CREATE_NICKNAME = "CREATE_NICKNAME";
 export const CREATE_USER = "CREATE_USER";
 export const JOIN_USER = "JOIN_USER";

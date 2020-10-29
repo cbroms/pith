@@ -3,6 +3,7 @@ import { getValue, setValue } from "../api/local";
 import { unpackChatMeta, unpackDocMeta } from "./utils";
 
 import {
+  SYSTEM_ERROR,
   CREATE_NICKNAME,
   CREATE_USER,
   JOIN_USER,
@@ -61,18 +62,36 @@ const createUser = (discussionId, nickname) => {
     };
     // backend acknowledged we sent request
     socket.emit("create_user", data, (res) => {
-      // TODO case on result
       dispatch({
         type: CREATE_USER_FULFILLED,
       });
       const response = JSON.parse(res);
-      console.log("create_user", response);
+      // TODO fix this syntax
+      if error in response {
+        const error_stamp = response.error;
+        // make file with codes for backend errors
+        if (error_stamp === "BAD_DISCUSSION_ID") {
 
-      const userId = response.user_id;
-      // set the value in localStorage
-      setValue(discussionId, userId);
+        }
+        else if (error_stamp == "NICKNAME_EXISTS") {
+          
+        }
+        else if (error_stamp == "USER_ID_EXISTS") {
+          
+        }
+        else {
+          dispatch({
+            type: SYSTEM_ERROR,
+          });
+        }
+      }
+      else {
+        const userId = response.user_id;
+        // set the value in localStorage
+        setValue(discussionId, userId);
 
-      handleJoinUser(dispatch, discussionId, userId);
+        handleJoinUser(dispatch, discussionId, userId);
+      }
     });
   };
 };

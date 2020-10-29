@@ -1,4 +1,5 @@
 import {
+  SYSTEM_ERROR,
   CREATE_NICKNAME,
   CREATE_USER,
   JOIN_USER,
@@ -47,6 +48,12 @@ const defaultState = {
 
 const discussionReducer = (state = defaultState, action) => {
   switch (action.type) {
+    case SYSTEM_ERROR: {
+      return {
+        ...state,
+        systemError: true,
+      };
+    }
     case CREATE_NICKNAME: {
       const events = { ...state.events };
       events.createNickname = true;
