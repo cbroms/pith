@@ -93,7 +93,8 @@ class DiscussionNamespace(AsyncNamespace):
                 bad_response = True
 
             if emits is not None:
-              emits_res = (dumps(e, cls=DictEncoder) for r in emits_res)
+              assert(emits_res is not None)
+              emits_res = (dumps(r, cls=DictEncoder) for r in emits_res)
               for r, e in zip(emits_res, emits):
                 try:
                   validate(instance=r, schema=dres.schema[e])
@@ -103,11 +104,15 @@ class DiscussionNamespace(AsyncNamespace):
             if bad_response: # we cannot send off emits
               result = {"error": Errors.BAD_RESPONSE}
             else: # we can send off emits
-              for r, e in zip(emits_res, emits):
-                serialized = dumps(r, cls=GenericEncoder)
-                await self.emit(e, serialized, room=discussion_id)
+              if emits is not None:
+                assert(emits_res is not None)
+                for r, e in zip(emits_res, emits):
+                  serialized = dumps(r, cls=GenericEncoder)
+                  await self.emit(e, serialized, room=discussion_id)
 
-          # send off return, whether it is null, error, or desired result 
+          # send off return, whether it is error or desired result 
+          if result == None:
+            result = {"success": 0} # to avoid null
           serialized = dumps(result, cls=GenericEncoder)
           return serialized
 
@@ -161,7 +166,7 @@ class DiscussionNamespace(AsyncNamespace):
 
         return result
 
-    @_process_responses(emits=("joined_user"))
+    @_process_responses(emits=["joined_user"])
     @_validate_request("join")
     async def on_join(self, sid, request):
         """

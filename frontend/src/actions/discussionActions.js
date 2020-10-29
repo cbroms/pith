@@ -3,17 +3,123 @@ import { getValue, setValue } from "../api/local";
 import { unpackChatMeta, unpackDocMeta } from "./utils";
 
 import {
+  INVALID_USER_SESSION,
+  BAD_REQUEST,
+  BAD_RESPONSE,
+  BAD_DISCUSSION_ID,
+  BAD_USER_ID,
+  BAD_UNIT_ID,
+  BAD_POSITION,
+  BAD_EDIT_TRY,
+  BAD_POSITION_TRY,
+  BAD_PARENT,
+  FAILED_EDIT_ACQUIRE,
+  FAILED_POSITION_ACQUIRE,
+  NICKNAME_EXISTS,
+  USER_ID_EXISTS,
+} from "./errors";
+
+import {
+  // error events
   SYSTEM_ERROR,
+  TAKEN_NICKNAME,
+  TAKEN_USER_ID,
+  MOVE_UNABLED,
+  EDIT_UNABLED,
+  BAD_TARGET,
+  // create user events
   CREATE_NICKNAME,
   CREATE_USER,
-  JOIN_USER,
   CREATE_USER_FULFILLED,
+  // join user events
+  JOIN_USER,
   JOIN_USER_FULFILLED,
   JOINED_USER,
+  // create post events
   CREATE_POST,
   CREATE_POST_FULFILLED,
   CREATED_POST,
 } from "./types";
+
+let isError = (response) => {
+  return Object.keys(response).includes("error");
+}
+
+let handleError = (dispatch, response) => {
+  const error_stamp = response.error;
+  switch (error_stamp) {
+    case NICKNAME_EXISTS: {
+      // user error, tell them to try another
+      dispatch({
+        type: TAKEN_NICKNAME,
+      });
+      break;
+    }
+    case USER_ID_EXISTS: {
+      // user error, tell them to try another
+      dispatch({
+        type: TAKEN_USER_ID,
+      });
+      break;
+    }
+    case BAD_EDIT_TRY: {
+      // user error, probably rare concurrency issue
+      dispatch({
+        type: EDIT_UNABLED,
+      });
+      break;
+    } 
+    case FAILED_EDIT_ACQUIRE: {
+      // user error, probably rare concurrency issue
+      dispatch({
+        type: EDIT_UNABLED,
+      });
+      break;
+    }
+    case BAD_POSITION: {
+      // user error, maybe concurrency issue or system issue 
+      dispatch({
+        type: MOVE_UNABLED,
+      });
+      break;
+    }
+    case BAD_POSITION_TRY: {
+      // user error, probably rare concurrency issue
+      dispatch({
+        type: MOVE_UNABLED,
+      });
+      break;
+    }
+    case FAILED_POSITION_ACQUIRE: {
+      // user error, probably rare concurrency issue
+      dispatch({
+        type: MOVE_UNABLED,
+      });
+      break;
+    }
+    case BAD_PARENT: {
+      // user error, move is invalid
+      dispatch({
+        type: BAD_TARGET,
+      });
+      break;
+    }
+    default: {
+      /* 
+      These errors indicate there is something wrong with the system:
+      * BAD_DISCUSSION_ID,
+      * BAD_USER_ID,
+      * BAD_UNIT_ID,
+      * INVALID_USER_SESSION,
+      * BAD_REQUEST,
+      * BAD_RESPONSE,
+      */
+      dispatch({
+        type: SYSTEM_ERROR,
+      });
+    }
+  }
+}
 
 let handleJoinUser = (dispatch, discussionId, userId) => {
   dispatch({
@@ -26,13 +132,19 @@ let handleJoinUser = (dispatch, discussionId, userId) => {
   };
   // backend acknowledged we sent request
   socket.emit("join", data, (res) => {
-    dispatch({
-      type: JOIN_USER_FULFILLED,
-      payload: {
-        discussionId: discussionId,
-        userId: userId,
-      },
-    });
+    const response = JSON.parse(res);
+    if (isError(response)) {
+      handleError(dispatch, response);
+    }
+    else {
+      dispatch({
+        type: JOIN_USER_FULFILLED,
+        payload: {
+          discussionId: discussionId,
+          userId: userId,
+        },
+      });
+    }
   });
 };
 
@@ -62,32 +174,17 @@ const createUser = (discussionId, nickname) => {
     };
     // backend acknowledged we sent request
     socket.emit("create_user", data, (res) => {
-      dispatch({
-        type: CREATE_USER_FULFILLED,
-      });
       const response = JSON.parse(res);
-      // TODO fix this syntax
-      if error in response {
-        const error_stamp = response.error;
-        // make file with codes for backend errors
-        if (error_stamp === "BAD_DISCUSSION_ID") {
-
-        }
-        else if (error_stamp == "NICKNAME_EXISTS") {
-          
-        }
-        else if (error_stamp == "USER_ID_EXISTS") {
-          
-        }
-        else {
-          dispatch({
-            type: SYSTEM_ERROR,
-          });
-        }
+      if (isError(response)) {
+        handleError(dispatch, response);
       }
       else {
-        const userId = response.user_id;
+        dispatch({
+          type: CREATE_USER_FULFILLED,
+        });
+
         // set the value in localStorage
+        const userId = response.user_id;
         setValue(discussionId, userId);
 
         handleJoinUser(dispatch, discussionId, userId);
@@ -130,9 +227,15 @@ const createPost = (pith) => {
     });
     // backend acknowledged we sent request
     socket.emit("post", data, (res) => {
-      dispatch({
-        type: CREATE_POST_FULFILLED,
-      });
+      const response = JSON.parse(res);
+      if (isError(response)) {
+        handleError(dispatch, response);
+      }
+      else {
+        dispatch({
+          type: CREATE_POST_FULFILLED,
+        });
+      }
     });
   };
 };
@@ -140,7 +243,6 @@ const createPost = (pith) => {
 const subscribeChat = () => {
   return (dispatch) => {
     socket.on("created_post", (res) => {
-      // TODO case on result
       const response = JSON.parse(res);
       const chatMeta = unpackChatMeta(response.chat_meta);
       const docMeta = unpackDocMeta(response.doc_meta);

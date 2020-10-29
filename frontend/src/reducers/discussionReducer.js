@@ -13,7 +13,17 @@ import {
 
 const defaultState = {
   systemError: false,
-  userError: {},
+  userError: {
+    createUser: {
+      takenNickname: false,
+      takenUserId: false,
+    },
+    concurrency: {
+      moveUnabled: false,
+      editUnabled: false,
+      badTarget: false, 
+    },
+  },
   events: {
     createNickname: false,
     joined: false,

@@ -2,12 +2,7 @@ import enum
 
 
 class Errors(enum.Enum):
-  SERVER_ERROR = -1
-  """
-  Unexpected error due to the server.
-  """
-
-  INVALID_USER_SESSION = -2
+  INVALID_USER_SESSION = -1
   """
   User session is not properly set up.
   """
