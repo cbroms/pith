@@ -31,7 +31,7 @@ MONGODB_CONN = os.getenv("MONGODB_CONN", "mongodb://localhost:27017")
 MONGODB_NAME = os.getenv("MONGODB_NAME", "pith")
 
 # file we log to
-LOG_FILENAME = "log"
+LOG_FILENAME = "app_log"
 
 # compiled searcher for link pattern
 link_pattern = re.compile(r"<cite>([^<]*)<\/cite>")

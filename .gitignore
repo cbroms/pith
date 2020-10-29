@@ -1,6 +1,7 @@
 # other
 setup/
 *notes
+backend/src/*log
 
 .DS_Store 
 

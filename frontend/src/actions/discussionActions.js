@@ -37,8 +37,6 @@ let handleJoinUser = (dispatch, discussionId, userId) => {
 
 const enterUser = (discussionId) => {
   return (dispatch) => {
-    // TODO check if key discussionId in local storage
-    // if so, get value userId
     const userId = getValue(discussionId);
 
     if (userId === null) {
@@ -68,6 +66,7 @@ const createUser = (discussionId, nickname) => {
         type: CREATE_USER_FULFILLED,
       });
       const response = JSON.parse(res);
+      console.log("create_user", response);
 
       const userId = response.user_id;
       // set the value in localStorage
