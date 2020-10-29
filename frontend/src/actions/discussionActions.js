@@ -15,31 +15,31 @@ import {
 } from "./types";
 
 let handleJoinUser = (dispatch, discussionId, userId) => {
-    dispatch({
-      type: JOIN_USER,
-    });
+  dispatch({
+    type: JOIN_USER,
+  });
 
-    const data = {
-      discussion_id: discussionId,
-      user_id: userId,
-    };
-    // backend acknowledged we sent request
-    socket.emit("join", data, (res) => {
-      dispatch({
-        type: JOIN_USER_FULFILLED,
-        payload: {
-          discussionId: discussionId,
-          userId: userId,
-        },
-      });
+  const data = {
+    discussion_id: discussionId,
+    user_id: userId,
+  };
+  // backend acknowledged we sent request
+  socket.emit("join", data, (res) => {
+    dispatch({
+      type: JOIN_USER_FULFILLED,
+      payload: {
+        discussionId: discussionId,
+        userId: userId,
+      },
     });
-}
+  });
+};
 
 const enterUser = (discussionId) => {
   return (dispatch) => {
     // TODO check if key discussionId in local storage
     // if so, get value userId
-    const userId = null;
+    const userId = getValue(discussionId);
 
     if (userId === null) {
       dispatch({
@@ -70,7 +70,8 @@ const createUser = (discussionId, nickname) => {
       const response = JSON.parse(res);
 
       const userId = response.user_id;
-      // TODO store in local storage
+      // set the value in localStorage
+      setValue(discussionId, userId);
 
       handleJoinUser(dispatch, discussionId, userId);
     });

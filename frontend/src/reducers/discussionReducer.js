@@ -12,16 +12,15 @@ import {
 
 const defaultState = {
   systemError: false,
-  userError: {
-    
-  },
+  userError: {},
   events: {
     createNickname: false,
+    joined: false,
     createUser: {
-      pending: false
+      pending: false,
     },
     joinUser: {
-      pending: false
+      pending: false,
     },
     post: {
       pending: false,
@@ -30,9 +29,9 @@ const defaultState = {
       },
     },
   },
-  discussionId: null, 
-  userId: null, 
-  nickname: null, 
+  discussionId: null,
+  userId: null,
+  nickname: null,
   chatMap: {},
   docMap: {},
   posts: [],
@@ -42,98 +41,98 @@ const defaultState = {
   backlinkTree: [],
   icons: [],
   timeline: [],
-	searchResults: [],
+  searchResults: [],
   currentContext: null,
 };
 
 const discussionReducer = (state = defaultState, action) => {
-	switch (action.type) {
+  switch (action.type) {
     case CREATE_NICKNAME: {
-			const events = {...state.events};
+      const events = { ...state.events };
       events.createNickname = true;
-			return { 
-        ...state, 
-        events: events
+      return {
+        ...state,
+        events: events,
       };
     }
     case CREATE_USER: {
-			const events = {...state.events};
+      const events = { ...state.events };
       events.createUser.pending = true;
-			return { 
-        ...state, 
-        events: events
+      return {
+        ...state,
+        events: events,
       };
-
     }
     case JOIN_USER: {
-			const events = {...state.events};
+      const events = { ...state.events };
       events.joinUser.pending = true;
-			return { 
-        ...state, 
-        events: events
+      return {
+        ...state,
+        events: events,
       };
     }
     case CREATE_USER_FULFILLED: {
-			const events = {...state.events};
-      events.createUser = {...defaultState.events.createUser};
-			return { 
-        ...state, 
-        events: events
+      const events = { ...state.events };
+      events.createUser = { ...defaultState.events.createUser };
+      return {
+        ...state,
+        events: events,
       };
     }
     case JOIN_USER_FULFILLED: {
-			const events = {...state.events};
-      events.joinUser = {...defaultState.events.joinUser};
-			return { 
-        ...state, 
+      const events = { ...state.events };
+      events.joinUser = { ...defaultState.events.joinUser };
+      events.joined = true;
+      return {
+        ...state,
         events: events,
         discussionId: action.payload.discussionId,
         userId: action.payload.userId,
-        nickname: action.payload.nickname
+        nickname: action.payload.nickname,
       };
     }
     case JOINED_USER: {
-      const icons = {...state.icons};
+      const icons = { ...state.icons };
       icons.push(action.payload.icon);
-			return { 
-        ...state, 
-        icons: icons
+      return {
+        ...state,
+        icons: icons,
       };
     }
     case CREATE_POST: {
-			const events = {...state.events};
+      const events = { ...state.events };
       events.post.pending = true;
       events.post.content.pith = action.payload.pith;
-			return { 
-        ...state, 
-        events: events
+      return {
+        ...state,
+        events: events,
       };
     }
     case CREATE_POST_FULFILLED: {
-			const events = {...state.events};
-      events.post = {...defaultState.events.post};
-			return { 
-        ...state, 
-        events: events
+      const events = { ...state.events };
+      events.post = { ...defaultState.events.post };
+      return {
+        ...state,
+        events: events,
       };
     }
     case CREATED_POST: {
       const posts = [...state.posts];
-      posts.push(action.payload.unitId); 
-      const chatMap = {...state.chatMap};
-      
-      const docMap = {...state.docMap};
+      posts.push(action.payload.unitId);
+      const chatMap = { ...state.chatMap };
+
+      const docMap = { ...state.docMap };
       return {
         ...state,
         posts: posts,
         chatMap: Object.assign(chatMap, action.payload.chatMapAdd),
         docMap: Object.assign(docMap, action.payload.docMapAdd),
-      } 
+      };
     }
     default: {
-      return {...state}
+      return { ...state };
     }
   }
-}
+};
 
 export default discussionReducer;

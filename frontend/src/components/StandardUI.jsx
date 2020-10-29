@@ -1,11 +1,24 @@
 import styled from "styled-components";
 
 const LargeHeading = styled.h2`
+    font-family: ${(props) => props.theme.serif};
+    font-size: ${(props) => props.theme.extraLargeFont};
+    font-weight: 600;
+
+    display: inline-block;
+`;
+
+const MediumHeading = styled.h2`
     font-family: ${(props) => props.theme.sans};
     font-size: ${(props) => props.theme.largeFont};
-    font-weight: 400;
-    margin: 0;
+    font-weight: 600;
+
     display: inline-block;
+`;
+
+const Paragraph = styled.p`
+    font-family: ${(props) => props.theme.serif};
+    font-weight: 400;
 `;
 
 const Input = styled.input`
@@ -40,4 +53,4 @@ const Button = styled.button`
     }
 `;
 
-export { LargeHeading, Button, Input };
+export { LargeHeading, Paragraph, Button, MediumHeading, Input };

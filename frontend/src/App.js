@@ -4,11 +4,11 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 
 import {
-  enterUser,
-  createUser,
-  subscribeUsers,
-  createPost,
-  subscribeChat
+	enterUser,
+	createUser,
+	subscribeUsers,
+	createPost,
+	subscribeChat,
 } from "./actions/discussionActions";
 
 import "./App.css";
@@ -147,7 +147,6 @@ const timelineDummy = [
 	}, // 15 sec
 ];
 
-
 class App extends React.Component {
 	constructor(props) {
 		super(props);
@@ -159,17 +158,16 @@ class App extends React.Component {
 	}
 
 	componentDidMount() {
-		const discussionId = "9ea4d942e69848a58afe7c33462f4d39"; // dummy
-		const nickname = "softal";
-		const { dispatch } = this.props;
-		dispatch(enterUser(discussionId));
-    dispatch(createUser(discussionId, nickname));
+		// const discussionId = "9ea4d942e69848a58afe7c33462f4d39"; // dummy
+		// const nickname = "softal";
+		// const { dispatch } = this.props;
+		// dispatch(enterUser(discussionId));
+		// dispatch(createUser(discussionId, nickname));
 		//dispatch(createPost("Hello."));
 	}
 
 	setDarkModeActive(mode) {
 		this.setState({ darkModeActive: mode });
-
 	}
 
 	render() {
@@ -189,8 +187,10 @@ class App extends React.Component {
 					<Router>
 						<AppLayout>
 							<Switch>
-								<Route path="/d/:discussionID">
+								<Route path="/d/:discussionId">
 									<Discussion
+										{...this.props.discussion}
+										dispatch={this.props.dispatch}
 										setDarkMode={(val) =>
 											this.setDarkModeActive(val)
 										}

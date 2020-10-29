@@ -29,14 +29,14 @@ const StyledContainer = styled.div`
 const StyledEditor = styled(ContentEditable)`
     box-sizing: border-box;
     display: inline-block;
-    padding-right: ${(props) => (props.showButton ? 50 : 0)}px;
+    padding-right: ${(props) => (props.$showButton ? 50 : 0)}px;
     width: 100%;
     margin: 0;
     font-family: ${(props) => props.theme.serif};
 
     :empty::after {
         color: ${(props) => props.theme.shade2};
-        content: "${(props) => `${props.placeholder}` || "type a message..."}";
+        content: "${(props) => props.$placeholder || "type a message..."}";
     }
 
     :focus {
@@ -47,9 +47,20 @@ const StyledEditor = styled(ContentEditable)`
 const TextEditorLayout = (props) => {
     return (
         <StyledContainer showButton={props.showButton}>
-            <StyledEditor {...props} />
+            <StyledEditor
+                $showButton={props.showButton}
+                $placeholder={props.placeholder}
+                innerRef={props.innerRef}
+                className={props.className}
+                html={props.html}
+                disabled={props.disabled}
+                onChange={props.onChange}
+                onFocus={props.onFocus}
+                onBlur={props.onBlur}
+                onKeyDown={props.onKeyDown}
+            />
             {props.showButton ? (
-                <StyledButton>
+                <StyledButton onClick={props.makeSubmit}>
                     {props.buttonDir === "right" ? <RightArrow /> : <UpArrow />}
                 </StyledButton>
             ) : null}

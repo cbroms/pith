@@ -1,6 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 
+import { LargeHeading, Paragraph } from "./StandardUI";
+
 const StyledContainer = styled.div`
     display: grid;
     grid-template-columns: [logo] 40px [logo-end discussion] 1fr [discussion-end document] 1.25fr [document-end];
@@ -22,12 +24,42 @@ const StyledContent = styled.div`
     grid-column-end: discussion-end;
     grid-row-start: content;
     grid-row-end: content-end;
+
+    @media (max-width: 768px) {
+        grid-column-start: logo;
+        grid-column-end: document-end;
+        grid-row-start: content;
+        grid-row-end: content-end;
+    }
+
+    padding: 10px;
+
+    width: 100%;
+    justify-self: right;
+    max-width: 450px;
 `;
 
 const DiscussionJoinLayout = (props) => {
     return (
         <StyledContainer>
-            <StyledContent>{props.editor}</StyledContent>
+            {props.joiningScreen ? (
+                <StyledContent>
+                    <LargeHeading>Joining discussion...</LargeHeading>
+                </StyledContent>
+            ) : (
+                <StyledContent>
+                    <LargeHeading>Create a nickname</LargeHeading>
+                    <Paragraph>
+                        Your nickname will be used to identify your
+                        contributions in the discussion.
+                    </Paragraph>
+                    {props.done ? (
+                        <Paragraph>joining as "{props.nickname}"...</Paragraph>
+                    ) : (
+                        props.editor
+                    )}
+                </StyledContent>
+            )}
         </StyledContainer>
     );
 };
