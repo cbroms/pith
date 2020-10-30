@@ -53,7 +53,7 @@ class DiscussionManagerTest(unittest.TestCase):
         discussion_id = self.board_manager.create()["discussion_id"]
         checker = DiscussionManager._check_user_id(nothing)
         user_id = self.discussion_manager.create_user(
-          discussion_id=discussion_id, nickname=nickname)["user_id"]
+          discussion_id=discussion_id, nickname=nickname)[0]["user_id"]
         res1 = checker(self.discussion_manager, 
           discussion_id=discussion_id, user_id=user_id)
         res2 = checker(self.discussion_manager, 
@@ -68,7 +68,7 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertEqual(res["error"], Errors.USER_ID_EXISTS)
         user_id2_ = "blahblah"
         user_id2 = self.discussion_manager.create_user(
-          discussion_id=discussion_id, nickname="monkey", user_id=user_id2_)["user_id"]
+          discussion_id=discussion_id, nickname="monkey", user_id=user_id2_)[0]["user_id"]
         self.assertEqual(user_id2, user_id2_)
 
     def test_join_leave(self) -> None: 
@@ -76,13 +76,13 @@ class DiscussionManagerTest(unittest.TestCase):
         discussion_id = self.board_manager.create()["discussion_id"]
         discussion = self.discussion_manager._get(discussion_id)
         user_id = self.discussion_manager.create_user(
-          discussion_id=discussion_id, nickname=nickname)["user_id"]
+          discussion_id=discussion_id, nickname=nickname)[0]["user_id"]
         res = self.discussion_manager.join(
-          discussion_id=discussion_id, user_id=user_id)["nickname"]
+          discussion_id=discussion_id, user_id=user_id)[1][0]["nickname"]
         self.assertTrue(discussion.get().users.filter(id=user_id).get().active)
         self.assertTrue(res, nickname)
         res = self.discussion_manager.leave(
-          discussion_id=discussion_id, user_id=user_id)["nickname"]
+          discussion_id=discussion_id, user_id=user_id)[1][0]["nickname"]
         self.assertFalse(discussion.get().users.filter(id=user_id).get().active)
         self.assertTrue(res, nickname)
 
@@ -93,20 +93,20 @@ class DiscussionManagerTest(unittest.TestCase):
 
         nickname = "whales"
         user_id1 = self.discussion_manager.create_user(
-          discussion_id=discussion_id, nickname=nickname)["user_id"]
+          discussion_id=discussion_id, nickname=nickname)[0]["user_id"]
         self.discussion_manager.join(
           discussion_id=discussion_id, user_id=user_id1)
       
         nickname = "monkeys"
         user_id2 = self.discussion_manager.create_user(
-          discussion_id=discussion_id, nickname=nickname)["user_id"]
+          discussion_id=discussion_id, nickname=nickname)[0]["user_id"]
         self.discussion_manager.join(
           discussion_id=discussion_id, user_id=user_id2)
 
-        added, backlinks = self.discussion_manager.add_unit(
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="yaddi", parent=root, position=0
-        )
+        )[1][0]
         unit_id = added["unit_id"]
 
         #### edit lock ####
@@ -114,12 +114,12 @@ class DiscussionManagerTest(unittest.TestCase):
         # can request if no one has lock
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
-        )        
+        )[1][0]   
         self.assertEqual(res["unit_id"], unit_id) # works
         # cannot request if another has it
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
-        )        
+        )   
         self.assertEqual(res["error"], Errors.FAILED_EDIT_ACQUIRE) # fails
         # cannot re-request
         res = self.discussion_manager.request_to_edit(
@@ -137,14 +137,14 @@ class DiscussionManagerTest(unittest.TestCase):
         )        
         self.assertEqual(res["error"], Errors.FAILED_EDIT_ACQUIRE) # fails
         # hide that works
-        hide_res, unlock = self.discussion_manager.hide_unit(
-          discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id)
+        hide_res = self.discussion_manager.hide_unit(
+          discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id)[1][0]
         self.assertEqual(hide_res["unit_id"], unit_id)
 
         # lock is released 
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
-        )        
+        )[1][0] 
         self.assertEqual(res["unit_id"], unit_id) # works
 
         # edit that doesn't work
@@ -159,16 +159,16 @@ class DiscussionManagerTest(unittest.TestCase):
         )        
         self.assertEqual(res["error"], Errors.FAILED_EDIT_ACQUIRE) # fails
         # edit that works
-        edited, unlocks, ab, rb = self.discussion_manager.edit_unit(
+        edited = self.discussion_manager.edit_unit(
           discussion_id=discussion_id, user_id=user_id2, 
           unit_id=unit_id, pith="blahblah"
-        )
+        )[1][0]
         self.assertEqual(edited["unit_id"], unit_id)
 
         # lock is released 
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
-        )        
+        )[1][0]   
         self.assertEqual(res["unit_id"], unit_id) # works
         # edit lock is held, and this makes no difference to position lock...
         
@@ -177,8 +177,8 @@ class DiscussionManagerTest(unittest.TestCase):
         # can request if no one has lock
         res = self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
-        )        
-        self.assertEqual(res[0]["unit_id"], unit_id) # works
+        )[1][0][0] 
+        self.assertEqual(res["unit_id"], unit_id) # works
         # cannot request if another has it
         res = self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
@@ -201,16 +201,16 @@ class DiscussionManagerTest(unittest.TestCase):
         )        
         self.assertEqual(res["error"], Errors.FAILED_POSITION_ACQUIRE) # fails
         # move that works
-        res, unlocks = self.discussion_manager.move_units(
+        res = self.discussion_manager.move_units(
           discussion_id=discussion_id, user_id=user_id1, units=[unit_id],
-          parent=root, position=0)
+          parent=root, position=0)[1][0]
         self.assertEqual(res[0]["unit_id"], unit_id)
 
         # now can request lock
         res = self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
-        )        
-        self.assertEqual(res[0]["unit_id"], unit_id) # works
+        )[1][0][0]
+        self.assertEqual(res["unit_id"], unit_id) # works
 
         # merge that doesn't work
         res = self.discussion_manager.merge_units(
@@ -223,16 +223,16 @@ class DiscussionManagerTest(unittest.TestCase):
         )        
         self.assertEqual(res["error"], Errors.FAILED_POSITION_ACQUIRE) # fails
         # merge that works
-        repos, added, unlocks = self.discussion_manager.merge_units(
+        repos = self.discussion_manager.merge_units(
           discussion_id=discussion_id, user_id=user_id2, units=[unit_id],
-          parent=root, position=0)
+          parent=root, position=0)[1][0]
         self.assertEqual(repos[0]["unit_id"], unit_id)
 
         # now can request lock
         res = self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
-        )        
-        self.assertEqual(res[0]["unit_id"], unit_id) # works
+        )[1][0][0]  
+        self.assertEqual(res["unit_id"], unit_id) # works
 
         self.discussion_manager.leave(
           discussion_id=discussion_id, user_id=user_id1)
@@ -245,35 +245,35 @@ class DiscussionManagerTest(unittest.TestCase):
         root = discussion.get().document
         nickname = "monkeys"
         user_id = self.discussion_manager.create_user(
-          discussion_id=discussion_id, nickname=nickname)["user_id"]
+          discussion_id=discussion_id, nickname=nickname)[0]["user_id"]
         self.discussion_manager.join(
           discussion_id=discussion_id, user_id=user_id)
 
-        added, backlinks = self.discussion_manager.add_unit(
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="Monkeys are the best. Whales are the worst.", 
           parent=root, position=0
-        )
+        )[1][0]
         unit_id1 = added["unit_id"]
-        added, backlinks = self.discussion_manager.add_unit(
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="I really like monkeys.", parent=root, position=0
-        )
+        )[1][0]
         unit_id2 = added["unit_id"]
 
         res = self.discussion_manager.search(
           discussion_id=discussion_id, query="monkey"
-        )
+        )[0]
         self.assertEqual(len(res["chat_units"]), 0)
         self.assertEqual(len(res["doc_units"]), 2)
         res = self.discussion_manager.search(
           discussion_id=discussion_id, query="whale"
-        )
+        )[0]
         self.assertEqual(len(res["chat_units"]), 0)
         self.assertEqual(len(res["doc_units"]), 1)
         res = self.discussion_manager.search(
           discussion_id=discussion_id, query="whale monkey"
-        )
+        )[0]
         self.assertEqual(len(res["chat_units"]), 0)
         self.assertEqual(len(res["doc_units"]), 2)
 
@@ -286,29 +286,29 @@ class DiscussionManagerTest(unittest.TestCase):
         root = discussion.get().document
         nickname = "whales"
         user_id = self.discussion_manager.create_user(
-          discussion_id=discussion_id, nickname=nickname)["user_id"]
+          discussion_id=discussion_id, nickname=nickname)[0]["user_id"]
         self.discussion_manager.join(
-          discussion_id=discussion_id, user_id=user_id)["nickname"]
-        added, backlinks = self.discussion_manager.add_unit(
+          discussion_id=discussion_id, user_id=user_id)
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="yaddi", parent=root, position=0
-        )
+        )[1][0]
         unit_id = added["unit_id"]
 
         res = self.discussion_manager.load_user(discussion_id=discussion_id,
-          user_id=user_id)
+          user_id=user_id)[0]
         self.assertFalse(res is None)
-        res, cr = self.discussion_manager.load_unit_page(discussion_id=discussion_id,
-          user_id=user_id, unit_id=unit_id)
+        res = self.discussion_manager.load_unit_page(discussion_id=discussion_id,
+          user_id=user_id, unit_id=unit_id)[0]
         self.assertFalse(res is None)
         res = self.discussion_manager.get_unit_context(discussion_id=discussion_id,
-          unit_id=unit_id)
+          unit_id=unit_id)[0]
         self.assertFalse(res is None)
         res = self.discussion_manager.get_unit_content(discussion_id=discussion_id,
-          unit_id=unit_id)
+          unit_id=unit_id)[0]
         self.assertFalse(res is None)
         res = self.discussion_manager.get_ancestors(discussion_id=discussion_id,
-          unit_id=unit_id)
+          unit_id=unit_id)[0]
         self.assertFalse(res is None)
 
         self.discussion_manager.leave(
@@ -321,23 +321,23 @@ class DiscussionManagerTest(unittest.TestCase):
 
         nickname = "whales"
         user_id = self.discussion_manager.create_user(
-          discussion_id=discussion_id, nickname=nickname)["user_id"]
+          discussion_id=discussion_id, nickname=nickname)[0]["user_id"]
         self.discussion_manager.join(
-          discussion_id=discussion_id, user_id=user_id)["nickname"]
+          discussion_id=discussion_id, user_id=user_id)
 
         # adding
-        added, backlinks = self.discussion_manager.add_unit(
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="yaddi", parent=root, position=0
-        )
+        )[1][0]
         unit_id = added["unit_id"]
         # posting
-        res, back = self.discussion_manager.post(discussion_id=discussion_id, 
-          user_id=user_id, pith="blahblah")
+        res = self.discussion_manager.post(discussion_id=discussion_id, 
+          user_id=user_id, pith="blahblah")[1][0]
         unit_id = res["unit_id"]
         # send to doc
-        res, back = self.discussion_manager.send_to_doc(discussion_id=discussion_id,
-          user_id=user_id, unit_id=unit_id)        
+        res = self.discussion_manager.send_to_doc(discussion_id=discussion_id,
+          user_id=user_id, unit_id=unit_id)[1][0]   
         unit_id = res["unit_id"]
 
         self.discussion_manager.leave(
@@ -350,68 +350,68 @@ class DiscussionManagerTest(unittest.TestCase):
 
         nickname = "whales"
         user_id = self.discussion_manager.create_user(
-          discussion_id=discussion_id, nickname=nickname)["user_id"]
+          discussion_id=discussion_id, nickname=nickname)[0]["user_id"]
         self.discussion_manager.join(
           discussion_id=discussion_id, user_id=user_id)
 
         res = self.discussion_manager.load_user(
           discussion_id=discussion_id, user_id=user_id
-        )
+        )[0]
         self.assertEqual(len(res["timeline"]), 0)
 
         # make tree of units
         
-        added, backlinks = self.discussion_manager.add_unit(
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="", parent=root, position=0
-        )
+        )[1][0]
         unit_id1 = added["unit_id"]
-        added, backlinks = self.discussion_manager.add_unit(
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="", parent=root, position=0
-        )
+        )[1][0]
         unit_id2 = added["unit_id"]
-        added, backlinks = self.discussion_manager.add_unit(
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="", parent=root, position=0
-        )
+        )[1][0]
         unit_id3 = added["unit_id"]
-        added, backlinks = self.discussion_manager.add_unit(
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="", parent=unit_id1, position=0
-        )
+        )[1][0]
         unit_id4 = added["unit_id"]
-        added, backlinks = self.discussion_manager.add_unit(
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="", parent=unit_id1, position=0
-        )
+        )[1][0]
         unit_id5 = added["unit_id"]
         
         timeline = []
 
-        res, cr = self.discussion_manager.load_unit_page(
+        res = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id1
-        )
+        )[0]
         timeline.append(res["timeline_entry"])
         time.sleep(1)
-        res, cr = self.discussion_manager.load_unit_page(
+        res = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4
-        )
+        )[0]
         timeline.append(res["timeline_entry"])
         time.sleep(1)
-        res, cr = self.discussion_manager.load_unit_page(
+        res = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id3
-        )
+        )[0]
         timeline.append(res["timeline_entry"])
         time.sleep(1)
-        res, cr = self.discussion_manager.load_unit_page(
+        res = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id2
-        )
+        )[0]
         timeline.append(res["timeline_entry"])
         time.sleep(2)
-        res, cr = self.discussion_manager.load_unit_page(
+        res = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id5
-        )
+        )[0]
         timeline.append(res["timeline_entry"])
         time.sleep(1)
 
@@ -421,7 +421,7 @@ class DiscussionManagerTest(unittest.TestCase):
           discussion_id=discussion_id, user_id=user_id)
         res = self.discussion_manager.load_user(
           discussion_id=discussion_id, user_id=user_id
-        )
+        )[0]
         self.assertEqual(res["timeline"][:-1], timeline) # don't include most recently made (from leave)
         self.assertEqual(res["timeline"][-1]["unit_id"], unit_id5) # we got last one
         self.assertEqual(res["current_unit"], unit_id5)
@@ -436,7 +436,7 @@ class DiscussionManagerTest(unittest.TestCase):
 
         nickname = "whales"
         user_id = self.discussion_manager.create_user(
-          discussion_id=discussion_id, nickname=nickname)["user_id"]
+          discussion_id=discussion_id, nickname=nickname)[0]["user_id"]
         self.discussion_manager.join(
           discussion_id=discussion_id, user_id=user_id)
       
@@ -446,30 +446,30 @@ class DiscussionManagerTest(unittest.TestCase):
         2
         3
         """
-        added, backlinks = self.discussion_manager.add_unit(
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="", parent=root, position=0
-        )
+        )[1][0]
         unit_id1 = added["unit_id"]
-        added, backlinks = self.discussion_manager.add_unit(
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="", parent=root, position=0
-        )
+        )[1][0]
         unit_id2 = added["unit_id"]
-        added, backlinks = self.discussion_manager.add_unit(
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="", parent=root, position=0
-        )
+        )[1][0]
         unit_id3 = added["unit_id"]
-        added, backlinks = self.discussion_manager.add_unit(
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="", parent=unit_id1, position=0
-        )
+        )[1][0]
         unit_id4 = added["unit_id"]
-        added, backlinks = self.discussion_manager.add_unit(
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="", parent=unit_id1, position=0
-        )
+        )[1][0]
         unit_id5 = added["unit_id"]
         
         # check tree structure
@@ -504,9 +504,9 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertEqual(len(children4), 0)
         self.assertEqual(len(children5), 0)
 
-        res, cr = self.discussion_manager.load_unit_page(
+        res = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id5
-        )
+        )[0]
         self.assertEqual(res["cursor"].unit_id, unit_id5)
         self.assertEqual(res["cursor"].position, -1)
 
@@ -521,10 +521,10 @@ class DiscussionManagerTest(unittest.TestCase):
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id3
         )
         # perform the move
-        res, unlocks = self.discussion_manager.move_units(
+        res = self.discussion_manager.move_units(
           discussion_id=discussion_id, user_id=user_id, units=[unit_id2, unit_id3],
           parent = unit_id5, position = 0
-        )
+        )[1][0]
         self.assertEqual(len(res), 2)
         # check tree structure
         """
@@ -573,10 +573,12 @@ class DiscussionManagerTest(unittest.TestCase):
         )
 
         # perform the merge
-        moved, added, unlocks = self.discussion_manager.merge_units(
+        res = self.discussion_manager.merge_units(
           discussion_id=discussion_id, user_id=user_id, units=[unit_id2, unit_id4],
           parent=unit_id3, position=0
-        )
+        )[1]
+        moved = res[0]
+        added = res[1]
         unit_id6 = added["unit_id"]
         self.assertEqual(len(moved), 2)
         # check tree structure
@@ -622,7 +624,7 @@ class DiscussionManagerTest(unittest.TestCase):
 
         res = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4
-        )
+        )[0]
 
         """
         1 -> [7 -> [2, 5 -> [3 -> 6 -> [4]]]]
@@ -643,11 +645,11 @@ class DiscussionManagerTest(unittest.TestCase):
         # perform the legal merge
         res = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id1
-        )
-        moved, added, unlocks = self.discussion_manager.merge_units(
+        )[0]
+        added = self.discussion_manager.merge_units(
           discussion_id=discussion_id, user_id=user_id, units=[unit_id2, unit_id5],
           parent=unit_id1, position=0
-        )
+        )[1][1]
         unit_id7 = added["unit_id"]
         # check tree structure
         """
@@ -718,11 +720,11 @@ class DiscussionManagerTest(unittest.TestCase):
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4
         )
         # do a move flatten 
-        res, unlocks = self.discussion_manager.move_units(
+        res = self.discussion_manager.move_units(
           discussion_id=discussion_id, user_id=user_id, units=[
             unit_id2, unit_id3, unit_id4, unit_id5, unit_id6, unit_id7
           ], parent=unit_id1, position=0
-        )
+        )[1][0]
         self.assertEqual(len(res), 6)
         # check tree structure
         """
@@ -771,7 +773,7 @@ class DiscussionManagerTest(unittest.TestCase):
 
         res = self.discussion_manager.move_cursor(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id7, position=0
-        )
+        )[1][0]
 
         user = discussion.get().users.filter(id=user_id).get()
         self.assertEqual(user.cursor.unit_id, unit_id7)
@@ -783,7 +785,7 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertEqual(user.cursor.unit_id, unit_id7)
 
         res = self.discussion_manager.join(
-          discussion_id=discussion_id, user_id=user_id)
+          discussion_id=discussion_id, user_id=user_id)[1][0]
 
         # we are where we left off
         self.assertEqual(res["cursor"].unit_id, unit_id7)
@@ -806,26 +808,26 @@ class DiscussionManagerTest(unittest.TestCase):
 
         nickname = "monkeys"
         user_id = self.discussion_manager.create_user(
-          discussion_id=discussion_id, nickname=nickname)["user_id"]
+          discussion_id=discussion_id, nickname=nickname)[0]["user_id"]
         self.discussion_manager.join(
           discussion_id=discussion_id, user_id=user_id)
 
-        added, backlinks = self.discussion_manager.add_unit(
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="Monkeys are the best. Whales are the worst.", 
           parent=root, position=0
-        )
+        )[1][0]
         unit_id = added["unit_id"]
 
         self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id
         )        
         res = self.discussion_manager.hide_unit(
-          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id)
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id)[1][0]
         self.assertTrue(self.discussion_manager._get_unit(unit_id).get().hidden)
 
         res = self.discussion_manager.unhide_unit(
-          discussion_id=discussion_id, unit_id=unit_id)
+          discussion_id=discussion_id, unit_id=unit_id)[1][0]
         self.assertFalse(self.discussion_manager._get_unit(unit_id).get().hidden)
 
         self.discussion_manager.leave(
@@ -838,17 +840,17 @@ class DiscussionManagerTest(unittest.TestCase):
 
         nickname = "whales"
         user_id = self.discussion_manager.create_user(
-          discussion_id=discussion_id, nickname=nickname)["user_id"]
+          discussion_id=discussion_id, nickname=nickname)[0]["user_id"]
         self.discussion_manager.join(
           discussion_id=discussion_id, user_id=user_id)
 
         """
         1
         """
-        added, backlinks = self.discussion_manager.add_unit(
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="", parent=root, position=0
-        )
+        )[1][0]
         unit_id1 = added["unit_id"]
 
         forward1 = self.discussion_manager._get_unit(unit_id1).get().forward_links
@@ -861,8 +863,8 @@ class DiscussionManagerTest(unittest.TestCase):
         1
         2 -> 1
         """
-        res, back = self.discussion_manager.post(discussion_id=discussion_id, 
-          user_id=user_id, pith="<cite>{}</cite>".format(unit_id1))
+        res = self.discussion_manager.post(discussion_id=discussion_id, 
+          user_id=user_id, pith="<cite>{}</cite>".format(unit_id1))[1][0]
         unit_id2 = res["unit_id"]
 
         forward1 = self.discussion_manager._get_unit(unit_id1).get().forward_links
@@ -883,11 +885,11 @@ class DiscussionManagerTest(unittest.TestCase):
         2 -> 1
         3 -> 1, 2
         """
-        added, backlinks = self.discussion_manager.add_unit(
+        added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="<cite>{}</cite> <cite>{}</cite>".format(unit_id1, unit_id2), 
           parent=root, position=0
-        )
+        )[1][0]
         unit_id3 = added["unit_id"]
         
         forward1 = self.discussion_manager._get_unit(unit_id1).get().forward_links
@@ -918,8 +920,8 @@ class DiscussionManagerTest(unittest.TestCase):
         3 -> 1, 2
         4(2 -> 1)
         """
-        res, back = self.discussion_manager.send_to_doc(discussion_id=discussion_id,
-          user_id=user_id, unit_id=unit_id2)        
+        res = self.discussion_manager.send_to_doc(discussion_id=discussion_id,
+          user_id=user_id, unit_id=unit_id2)[1][0] 
         unit_id4 = res["unit_id"]
 
         forward1 = self.discussion_manager._get_unit(unit_id1).get().forward_links
@@ -963,7 +965,7 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4
         )        
-        edited, unlocks, removed, added = self.discussion_manager.edit_unit(
+        self.discussion_manager.edit_unit(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4,
           pith="<cite>{}</cite> <cite>{}</cite>".format(unit_id2, unit_id3)
         ) # now cites original post 
@@ -1011,7 +1013,7 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id3
         )        
-        edited, unlocks, removed, added = self.discussion_manager.edit_unit(
+        self.discussion_manager.edit_unit(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id3,
           pith="<cite>{}</cite> <cite>{}</cite>".format(unit_id2, unit_id4)
         )        

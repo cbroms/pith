@@ -73,7 +73,7 @@ class DiscussionNamespace(AsyncNamespace):
 
             if emits is not None:
               assert(emits_res is not None)
-              emits_res = (dumps(r, cls=DictEncoder) for r in emits_res)
+              emits_res = [dumps(r, cls=DictEncoder) for r in emits_res]
               for r, e in zip(emits_res, emits):
                 try:
                   validate(instance=r, schema=dres.schema[e])

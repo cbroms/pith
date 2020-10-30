@@ -19,7 +19,7 @@ import logging
 
 import constants
 from error import Errors
-from uuid import UUID
+from uuid import UUID, uuid4
 
 
 # log uncaught exceptions to file in backend/src/{constants.LOG_FILENAME}
@@ -40,7 +40,7 @@ def is_error(src):
 
 def make_error(err):
   exp = {
-    "_id": uuid.uuid4().hex,
+    "_id": uuid4().hex,
     "error": err
   }
   logger.exception(exp)

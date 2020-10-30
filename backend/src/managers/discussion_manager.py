@@ -194,7 +194,7 @@ class DiscussionManager:
           Unit.objects.get(id=unit_id)
           return func(self, **kwargs)
         except DoesNotExist:
-          return utils.make_error(errors.BAD_UNIT_ID)
+          return utils.make_error(Errors.BAD_UNIT_ID)
       return helper 
 
     def _check_units(func):
@@ -340,7 +340,7 @@ class DiscussionManager:
           "nickname": user.name,
           "cursor": user.cursor
         }
-        return None, (response)
+        return None, [response]
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -355,7 +355,7 @@ class DiscussionManager:
 
         nickname = discussion.get().users.filter(id=user_id).get().name
         response = {"nickname": nickname}
-        return None, (response)
+        return None, [response]
 
     @_check_discussion_id
     @_check_user_id
@@ -404,7 +404,7 @@ class DiscussionManager:
           "chat_meta": chat_meta,
           "doc_meta": doc_meta
         }
-        return (response), None
+        return response, None
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -496,7 +496,7 @@ class DiscussionManager:
           "cursor": cursor,
         }
 
-        return response, (cursor_response)
+        return response, [cursor_response]
 
     @_check_discussion_id
     @_check_unit_id
@@ -589,7 +589,7 @@ class DiscussionManager:
           "chat_meta": chat_meta,
           "doc_meta": doc_meta
         }
-        return None, (post, backlinks)
+        return None, [post, backlinks]
 
     @_check_discussion_id
     def search(self, discussion_id, query):
@@ -684,7 +684,7 @@ class DiscussionManager:
           "doc_meta": doc_meta,
           "chat_meta": chat_meta
         }
-        return None, (added, backlinks)
+        return None, [added, backlinks]
 
     @_check_discussion_id
     @_check_user_id
@@ -702,7 +702,7 @@ class DiscussionManager:
             "user_id": user_id,
             "cursor": user.cursor
         }
-        return None, (response)
+        return None, [response]
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -720,7 +720,7 @@ class DiscussionManager:
 
         hide_response = {"unit_id": unit_id}
         unlock_response = {"unit_id": unit_id}
-        return None, (hide_response, unlock_response)
+        return None, [hide_response, unlock_response]
         
     @_check_discussion_id
     @_check_unit_id
@@ -729,7 +729,7 @@ class DiscussionManager:
         unit.update(hidden=False)
         
         response = {"unit_id": unit_id}
-        return None, (response)
+        return None, [response]
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -782,7 +782,7 @@ class DiscussionManager:
           "doc_meta": doc_meta,
           "chat_meta": chat_meta
         }
-        return None, (added, backlinks)
+        return None, [added, backlinks]
 
     # TODO: might support multi-select
     @_check_discussion_id
@@ -803,7 +803,7 @@ class DiscussionManager:
           "unit_id": unit_id,
           "nickname": user.name
         }]
-        return None, (response)
+        return None, [response]
 
     @_check_discussion_id
     @_check_user_id
@@ -812,7 +812,7 @@ class DiscussionManager:
     def deselect_unit(self, discussion_id, user_id, unit_id):
         self._release_position(unit_id)
         response = [{"unit_id": unit_id}]
-        return None, (response)
+        return None, [response]
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -835,7 +835,7 @@ class DiscussionManager:
             "unit_id": u
           })
 
-        return None, (repositioned_units, unlocks)
+        return None, [repositioned_units, unlocks]
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -853,7 +853,7 @@ class DiscussionManager:
         added_unit, backlinks = self.add_unit(
           discussion_id=discussion_id, pith="", 
           parent=parent, position=position
-        )  
+        )[1] 
         repositioned_units = self._move_units(discussion_id, user_id, units, 
           added_unit["unit_id"], 0) # put at head
 
@@ -863,7 +863,7 @@ class DiscussionManager:
             "unit_id": u
           })
 
-        return None, (repositioned_units, added_unit, unlocks)
+        return None, [repositioned_units, added_unit, unlocks]
 
     @_check_discussion_id
     @_check_user_id
@@ -883,7 +883,7 @@ class DiscussionManager:
           "unit_id": unit_id,
           "nickname": user.name
         }
-        return None, (response)
+        return None, [response]
 
     @_check_discussion_id
     @_check_user_id
@@ -892,7 +892,7 @@ class DiscussionManager:
     def deedit_unit(self, discussion_id, user_id, unit_id):
         self._release_edit(unit_id)
         response = {"unit_id": unit_id}
-        return None, (response)
+        return None, [response]
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -947,4 +947,4 @@ class DiscussionManager:
         added_backlinks = [
           {"unit_id": a, "backlink": unit_id} for a in added_links
         ]
-        return None, (edited_unit, unlock_response, removed_backlinks, added_backlinks)
+        return None, [edited_unit, unlock_response, removed_backlinks, added_backlinks]
