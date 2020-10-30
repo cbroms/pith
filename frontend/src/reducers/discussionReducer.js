@@ -192,7 +192,6 @@ const discussionReducer = (state = defaultState, action) => {
       const posts = [...state.posts];
       posts.push(action.payload.unitId);
       const chatMap = { ...state.chatMap };
-
       const docMap = { ...state.docMap };
       return {
         ...state,

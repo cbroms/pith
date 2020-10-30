@@ -259,6 +259,7 @@ const createPost = (pith) => {
         dispatch({
           type: CREATE_POST_FULFILLED,
         });
+        // we should now expect to receive something through our subscription
       }
     });
   };

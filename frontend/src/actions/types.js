@@ -18,3 +18,4 @@ export const JOINED_USER = "JOINED_USER";
 export const CREATE_POST = "CREATE_POST";
 export const CREATE_POST_FULFILLED = "CREATE_POST_FULFILLED";
 export const CREATED_POST = "CREATED_POST";
+// 
