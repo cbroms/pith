@@ -16,9 +16,9 @@ const StyledContainer = styled.div`
     }
 
     max-width: 2000px;
-    margin: 0 auto;
 
-    position: relative;
+    flex: 1 1 auto;
+
     background-color: ${(props) => props.theme.shade1};
     z-index: 2;
 `;
@@ -39,8 +39,13 @@ const StyledContent = styled.div`
     padding: 10px;
 
     width: 100%;
+    height: 100%;
     justify-self: right;
     max-width: 450px;
+`;
+
+const StyledError = styled(Paragraph)`
+    color: ${(props) => props.theme.errorShade};
 `;
 
 const DiscussionJoinLayout = (props) => {
@@ -62,6 +67,11 @@ const DiscussionJoinLayout = (props) => {
                     ) : (
                         props.editor
                     )}
+                    {props.badNickname ? (
+                        <StyledError>
+                            "{props.nickname}" is already taken.
+                        </StyledError>
+                    ) : null}
                 </StyledContent>
             )}
         </StyledContainer>

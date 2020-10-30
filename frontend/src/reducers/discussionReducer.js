@@ -28,7 +28,7 @@ const defaultState = {
     concurrency: {
       moveUnabled: false,
       editUnabled: false,
-      badTarget: false, 
+      badTarget: false,
     },
   },
   events: {
@@ -77,7 +77,7 @@ const discussionReducer = (state = defaultState, action) => {
       return {
         ...state,
         userError: userError,
-      }
+      };
     }
     case TAKEN_NICKNAME: {
       const userError = { ...state.userError };
@@ -85,7 +85,7 @@ const discussionReducer = (state = defaultState, action) => {
       return {
         ...state,
         userError: userError,
-      }
+      };
     }
     case TAKEN_USER_ID: {
       const userError = { ...state.userError };
@@ -93,7 +93,7 @@ const discussionReducer = (state = defaultState, action) => {
       return {
         ...state,
         userError: userError,
-      }
+      };
     }
     case MOVE_UNABLED: {
       const userError = { ...state.userError };
@@ -101,7 +101,7 @@ const discussionReducer = (state = defaultState, action) => {
       return {
         ...state,
         userError: userError,
-      }
+      };
     }
     case EDIT_UNABLED: {
       const userError = { ...state.userError };
@@ -109,7 +109,7 @@ const discussionReducer = (state = defaultState, action) => {
       return {
         ...state,
         userError: userError,
-      }
+      };
     }
     case BAD_TARGET: {
       const userError = { ...state.userError };
@@ -117,11 +117,12 @@ const discussionReducer = (state = defaultState, action) => {
       return {
         ...state,
         userError: userError,
-      }
+      };
     }
     case CREATE_NICKNAME: {
       const events = { ...state.events };
       events.createNickname = true;
+
       return {
         ...state,
         events: events,
@@ -130,9 +131,12 @@ const discussionReducer = (state = defaultState, action) => {
     case CREATE_USER: {
       const events = { ...state.events };
       events.createUser.pending = true;
+      const userError = { ...state.userError };
+      userError.createUser.takenNickname = false;
       return {
         ...state,
         events: events,
+        userError: userError,
       };
     }
     case JOIN_USER: {

@@ -23,7 +23,8 @@ const DiscussionJoin = (props) => {
     return (
         <DiscussionJoinLayout
             editor={editor}
-            done={nickname !== null}
+            done={nickname !== null && !props.badNickname}
+            badNickname={props.badNickname}
             nickname={nickname}
             joiningScreen={props.joiningScreen}
         />

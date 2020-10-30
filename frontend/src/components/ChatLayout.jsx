@@ -36,11 +36,23 @@ const StyledChatEditor = styled.div`
     margin-top: 20px;
 `;
 
+const StyledNoContentContainer = styled.div`
+    font-style: italic;
+    color: ${(props) => props.theme.shade2};
+`;
+
 const ChatLayout = (props) => {
+    let postContent = props.children;
+
+    if (postContent.length <= 0) {
+        postContent = (
+            <StyledNoContentContainer>No posts yet</StyledNoContentContainer>
+        );
+    }
     return (
         <StyledContainer>
             <StyledChatOverflow>
-                <StyledChat>{props.children}</StyledChat>
+                <StyledChat>{postContent}</StyledChat>
             </StyledChatOverflow>
             <StyledChatEditor>{props.editor}</StyledChatEditor>
         </StyledContainer>

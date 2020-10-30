@@ -14,6 +14,7 @@ const StyledContainer = styled.div`
 	max-width: 100%;
 	background-color: ${(props) => props.theme.errorShade};
 	color: black;
+	z-index: 1;
 `;
 
 const StyledContent = styled.div`
@@ -22,21 +23,22 @@ const StyledContent = styled.div`
 	width: 100%;
 	max-width: 2000px;
 	margin: 0 auto;
-	padding: 20px;
+	padding: 20px 10px;
 	position: relative;
 
-	z-index: 1;
+	z-index: -1;
 `;
 
 const StyledHeader = styled(MediumHeading)`
 	display: inline-block;
 	font-family: monospace;
-	margin: 10px 0;
+	margin: 0;
 	margin-right: 20px;
 `;
 
 const StyledParagraph = styled(Paragraph)`
 	display: inline-block;
+	margin: 0;
 `;
 
 const StyledButton = styled(Button)`
@@ -44,6 +46,7 @@ const StyledButton = styled(Button)`
 	background-color: inherit;
 	color: inherit;
 	display: ${(props) => (props.open ? "block" : "none")};
+	padding: 0;
 
 	:hover {
 		background-color: inherit;
