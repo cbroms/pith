@@ -134,6 +134,11 @@ const Chat = (props) => {
             openSearch={props.openSearch}
             closeSearch={props.closeSearch}
             setQuery={props.setQuery}
+            unitEnter={(pos, content) => {
+                props.addPost(content);
+                // reset the text editor content to nothing
+                return true;
+            }}
         />
     );
     return <ChatLayout editor={editor}>{posts}</ChatLayout>;

@@ -191,12 +191,15 @@ class App extends React.Component {
 									<Discussion
 										{...this.props.discussion}
 										dispatch={this.props.dispatch}
+										createPost={createPost}
+										subscribeChat={subscribeChat}
+										subscribeUsers={subscribeUsers}
 										setDarkMode={(val) =>
 											this.setDarkModeActive(val)
 										}
 										timeline={timelineDummy}
-										content={postUnits}
-										posts={postsDummy}
+										content={this.props.discussion.chatMap}
+										posts={this.props.discussion.posts}
 										document={documentDummy}
 										users={usersDummy}
 									/>

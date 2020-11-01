@@ -21,6 +21,7 @@ import DiscussionLayout from "./DiscussionLayout";
 
 const Discussion = (props) => {
     const [chatSearchOpen, setChatSearchOpen] = useState(false);
+    const [subscribed, setSubscribed] = useState(false);
     const [query, setQuery] = useState("");
 
     // const [joined, setJoined] = useState(false); // TODO replace with the real state
@@ -32,6 +33,11 @@ const Discussion = (props) => {
     useEffect(() => {
         if (!joined && !createNickname && !joinUser.pending)
             props.dispatch(enterUser(discussionId));
+        else if (joined && !subscribed) {
+            props.dispatch(props.subscribeChat());
+            props.dispatch(props.subscribeUsers());
+            setSubscribed(true);
+        }
     });
 
     const joinDiscussion = (nickname) => {
@@ -46,6 +52,10 @@ const Discussion = (props) => {
             openSearch={() => setChatSearchOpen(true)}
             closeSearch={() => setChatSearchOpen(false)}
             setQuery={(query) => setQuery(query)}
+            addPost={(content) => {
+                console.log("posted:", content);
+                props.dispatch(props.createPost(content));
+            }}
         />
     );
     const doc = (
@@ -71,6 +81,9 @@ const Discussion = (props) => {
                         />
                     ) : (
                         <DiscussionJoin
+                            badNickname={
+                                props.userError.createUser.takenNickname
+                            }
                             onComplete={(nickname) => joinDiscussion(nickname)}
                             id={discussionId}
                         />

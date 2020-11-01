@@ -19,6 +19,8 @@ const StyledContent = styled.div`
     max-width: 2000px;
     margin: 0 auto;
 
+    flex: 1 1 auto;
+
     z-index: 1;
 `;
 

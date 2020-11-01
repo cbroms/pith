@@ -92,9 +92,15 @@ class TextEditor extends React.Component {
       e.preventDefault();
       // TODO: submit
       if (this.props.unitEnter) {
-        this.props.unitEnter(this.getCaretPosition(), this.state.html);
+        // we expect unitEnter to return true if we should reset the editor content
+        const res = this.props.unitEnter(
+          this.getCaretPosition(),
+          this.state.html
+        );
+        if (res) {
+          this.setState({ html: "" });
+        }
       }
-      // this.setState({ html: "" });
     }
     // cmd/ctrl + b for bold
     if (e.keyCode === 66 && e.metaKey) {
