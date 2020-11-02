@@ -37,7 +37,9 @@ const MenuLayout = (props) => {
     return (
         <StyledContainer>
             <StyledFooter>
-                <StyledFooterItem>Pith version 0.1</StyledFooterItem>
+                <StyledFooterItem>
+                    Pith <em>&alpha;lpha</em>
+                </StyledFooterItem>
                 <StyledFooterItem>&bull;</StyledFooterItem>
                 <StyledFooterItem>{props.darkToggle}</StyledFooterItem>
             </StyledFooter>

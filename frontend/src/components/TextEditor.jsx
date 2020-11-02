@@ -76,12 +76,53 @@ class TextEditor extends React.Component {
     let sel = window.getSelection();
     if (sel.rangeCount) {
       // get the caret position (this is in the rendered text)
-      const pos = sel.getRangeAt(0).endOffset;
+      const pos = sel.getRangeAt(0);
+      const start = pos.endContainer;
+      const startOffset = pos.endOffset;
 
-      // TODO: adjust the caret position to reflect its position in the text
-      // with html, rather than the rendered version of the text
-      // "<em>hi</em> |there" is a diff position than "hi | there"
-      return pos;
+      const getOffset = (curr, offset) => {
+        // add the length of the element's start tag to the offset
+        const tagNameOffset =
+          curr.nodeName === "#text" || curr.nodeName === "SPAN"
+            ? 0
+            : curr.nodeName.length + 2;
+        offset += tagNameOffset;
+
+        // return the offset when we get to the top level element
+        if (curr.parentElement.innerHTML === this.state.html) {
+          // add the length of the top level element's tag to the offset
+          return offset + curr.parentElement.innerHTML.indexOf(">") + 1;
+        }
+
+        // sum the lengths of the children before the current elt in the list
+        for (const pChild of curr.parentElement.childNodes) {
+          if (pChild === curr) {
+            break;
+          }
+
+          // add both start and end tag offset length for a child element
+          const tagNameOffset =
+            pChild.nodeName === "#text" ? 0 : 2 * pChild.nodeName.length + 5;
+
+          //  increase the length of the offset with the element's content
+          offset +=
+            tagNameOffset === 0
+              ? pChild.textContent.length
+              : pChild.innerHTML.length + tagNameOffset;
+        }
+
+        // add the offsets of the parent's children up to the current elt
+        return getOffset(curr.parentElement, offset);
+      };
+
+      // get the offset of the cursor position in DOM tree so that it's relative to
+      // the top level element
+      const offset = getOffset(start, startOffset);
+
+      // console.log("offset:", offset);
+      // console.log(this.state.html.substring(0, offset));
+
+      return offset;
     }
     return null;
   }

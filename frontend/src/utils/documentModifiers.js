@@ -89,6 +89,7 @@ const handleDrag = (doc, dragged, dragTarget) => {
 const handleEnter = (doc, caretPos, content, position) => {
     console.log("entered");
     console.log(caretPos, content, position);
+    console.log(doc);
     return null;
 };
 
