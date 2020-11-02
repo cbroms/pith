@@ -1,5 +1,6 @@
 {
   "definitions": {
+    "$$target": ["#/definitions/cursor", "#/definitions/doc_meta"],
     "cursor": {"$ref": "cursor.json#/cursor"},
     "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
   },

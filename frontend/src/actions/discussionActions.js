@@ -122,6 +122,30 @@ let handleError = (dispatch, response) => {
   }
 }
 
+let handleLoadUser = (dispatch) -> {
+  dispatch({
+    type: LOAD_USER,
+  });
+  
+  const data = {};
+  // backend acknowledged we sent request
+  socket.emit("load_user", data, (res) => {
+    const response = JSON.parse(res);
+    if (isError(response)) {
+      handleError(dispatch, response);
+    }
+    else {
+      dispatch({
+        type: LOAD_USER_FULFILLED,
+        payload: {
+          discussionId: discussionId,
+          userId: userId,
+        },
+      });
+    }
+  });
+}
+
 let handleJoinUser = (dispatch, discussionId, userId) => {
   dispatch({
     type: JOIN_USER,
@@ -145,6 +169,7 @@ let handleJoinUser = (dispatch, discussionId, userId) => {
           userId: userId,
         },
       });
+      handleLoadUser(dispatch);
     }
   });
 };

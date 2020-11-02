@@ -65,7 +65,6 @@ class DiscussionNamespace(AsyncNamespace):
 
             bad_response = False
             if ret is not None:
-              #ret_res = dumps(ret_res, cls=DictEncoder)
               try:
                 validate(instance=ret_res, schema=dres.schema[ret])
                 result = ret_res
@@ -74,12 +73,9 @@ class DiscussionNamespace(AsyncNamespace):
 
             if emits is not None:
               assert(emits_res is not None)
-              #emits_res = [dumps(r, cls=DictEncoder) for r in emits_res]
               for r, e in zip(emits_res, emits):
                 try:
-                  logger.info("VAL {} {}\n{}".format(r, type(r), dres.schema[e]))
                   validate(instance=r, schema=dres.schema[e])
-                  logger.info("VAL2 {}".format(r))
                 except ValidationError:
                   bad_response = True
 
