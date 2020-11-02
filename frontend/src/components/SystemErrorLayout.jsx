@@ -12,7 +12,9 @@ const StyledContainer = styled.div`
 	width: 100%;
 	max-height: ${(props) => (props.open ? "100%" : "0px")};
 	max-width: 100%;
-	background-color: ${(props) => props.theme.errorShade};
+
+	background-color: ${(props) =>
+		props.error ? props.theme.errorShade : props.theme.warningShade};
 	color: black;
 	z-index: 1;
 `;
@@ -54,13 +56,30 @@ const StyledButton = styled(Button)`
 `;
 
 const SystemErrorLayout = (props) => {
+	const errorContent = (
+		<span>
+			<StyledHeader>Server Error</StyledHeader>
+			<StyledParagraph>
+				Something went wrong. Please try again later.
+			</StyledParagraph>
+		</span>
+	);
+	const timeoutContent = (
+		<span>
+			<StyledHeader>Request Timeout</StyledHeader>
+			<StyledParagraph>
+				Something went wrong. Please try again later.
+			</StyledParagraph>
+		</span>
+	);
 	return (
-		<StyledContainer open={props.open}>
+		<StyledContainer
+			open={props.open}
+			error={props.error}
+			timeout={props.timeout}
+		>
 			<StyledContent>
-				<StyledHeader>500 - Server Error</StyledHeader>
-				<StyledParagraph>
-					Something went wrong. Please try again later.
-				</StyledParagraph>
+				{props.error ? errorContent : timeoutContent}
 				<StyledButton open={props.open} onClick={props.onClose}>
 					<CloseIcon />
 				</StyledButton>

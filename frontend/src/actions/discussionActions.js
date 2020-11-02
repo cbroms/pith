@@ -28,6 +28,8 @@ import {
   MOVE_UNABLED,
   EDIT_UNABLED,
   BAD_TARGET,
+  REQUEST_TIMEOUT,
+  RESET_REQUEST_TIMEOUT,
   // create user events
   CREATE_NICKNAME,
   CREATE_USER,
@@ -40,13 +42,50 @@ import {
   CREATE_POST,
   CREATE_POST_FULFILLED,
   CREATED_POST,
+  LOAD_USER,
+  LOAD_USER_FULFILLED,
 } from "./types";
 
-let isError = (response) => {
-  return Object.keys(response).includes("error");
-}
+// the handler we use to wrap all requests to the api
+const createTimeoutHandler = (dispatch, timeout = 5000) => {
+  let interval;
+  let elapsed = 0;
 
-let handleError = (dispatch, response) => {
+  const timeoutWatcher = (func) => {
+    // dispatch({
+    //   type: RESET_REQUEST_TIMEOUT,
+    // });
+
+    // make the request
+    func();
+
+    // check that the request is still active after some duration
+    interval = setInterval(() => {
+      elapsed += 1000;
+
+      if (elapsed >= timeout) {
+        console.error("request timed out");
+        dispatch({
+          type: REQUEST_TIMEOUT,
+        });
+        clearInterval(interval);
+      }
+    }, 1000);
+  };
+
+  // when the request completes, clear the interval
+  const timeoutEnd = (func) => {
+    clearInterval(interval);
+  };
+
+  return [timeoutWatcher, timeoutEnd];
+};
+
+const isError = (response) => {
+  return Object.keys(response).includes("error");
+};
+
+const handleError = (dispatch, response) => {
   const error_stamp = response.error;
   switch (error_stamp) {
     case NICKNAME_EXISTS: {
@@ -69,7 +108,7 @@ let handleError = (dispatch, response) => {
         type: EDIT_UNABLED,
       });
       break;
-    } 
+    }
     case FAILED_EDIT_ACQUIRE: {
       // user error, probably rare concurrency issue
       dispatch({
@@ -78,7 +117,7 @@ let handleError = (dispatch, response) => {
       break;
     }
     case BAD_POSITION: {
-      // user error, maybe concurrency issue or system issue 
+      // user error, maybe concurrency issue or system issue
       dispatch({
         type: MOVE_UNABLED,
       });
@@ -120,33 +159,37 @@ let handleError = (dispatch, response) => {
       });
     }
   }
-}
+};
 
-let handleLoadUser = (dispatch) -> {
+const handleLoadUser = (dispatch, discussionId, userId) => {
   dispatch({
     type: LOAD_USER,
   });
-  
-  const data = {};
-  // backend acknowledged we sent request
-  socket.emit("load_user", data, (res) => {
-    const response = JSON.parse(res);
-    if (isError(response)) {
-      handleError(dispatch, response);
-    }
-    else {
-      dispatch({
-        type: LOAD_USER_FULFILLED,
-        payload: {
-          discussionId: discussionId,
-          userId: userId,
-        },
-      });
-    }
-  });
-}
 
-let handleJoinUser = (dispatch, discussionId, userId) => {
+  const data = {};
+
+  const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+
+  startRequest(() =>
+    socket.emit("load_user", data, (res) => {
+      endRequest();
+      const response = JSON.parse(res);
+      if (isError(response)) {
+        handleError(dispatch, response);
+      } else {
+        dispatch({
+          type: LOAD_USER_FULFILLED,
+          payload: {
+            discussionId: discussionId,
+            userId: userId,
+          },
+        });
+      }
+    })
+  );
+};
+
+const handleJoinUser = (dispatch, discussionId, userId) => {
   dispatch({
     type: JOIN_USER,
   });
@@ -155,23 +198,27 @@ let handleJoinUser = (dispatch, discussionId, userId) => {
     discussion_id: discussionId,
     user_id: userId,
   };
-  // backend acknowledged we sent request
-  socket.emit("join", data, (res) => {
-    const response = JSON.parse(res);
-    if (isError(response)) {
-      handleError(dispatch, response);
-    }
-    else {
-      dispatch({
-        type: JOIN_USER_FULFILLED,
-        payload: {
-          discussionId: discussionId,
-          userId: userId,
-        },
-      });
-      handleLoadUser(dispatch);
-    }
-  });
+
+  const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+
+  startRequest(() =>
+    socket.emit("join", data, (res) => {
+      endRequest();
+      const response = JSON.parse(res);
+      if (isError(response)) {
+        handleError(dispatch, response);
+      } else {
+        dispatch({
+          type: JOIN_USER_FULFILLED,
+          payload: {
+            discussionId: discussionId,
+            userId: userId,
+          },
+        });
+        handleLoadUser(dispatch);
+      }
+    })
+  );
 };
 
 const enterUser = (discussionId) => {
@@ -179,36 +226,41 @@ const enterUser = (discussionId) => {
     const data = {
       discussion_id: discussionId,
     };
-    socket.emit("test_connect", data, (res) => {
-      console.log("test_connect", res);
-      const response = JSON.parse(res);
-      if (isError(response)) {
-        const error_stamp = response.error;
-        switch (error_stamp) {
-          case BAD_DISCUSSION_ID: {
-            dispatch({
-              type: INVALID_DISCUSSION,
-            });
+
+    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+
+    startRequest(() =>
+      socket.emit("test_connect", data, (res) => {
+        endRequest();
+        console.log("test_connect", res);
+        const response = JSON.parse(res);
+        if (isError(response)) {
+          const error_stamp = response.error;
+          switch (error_stamp) {
+            case BAD_DISCUSSION_ID: {
+              dispatch({
+                type: INVALID_DISCUSSION,
+              });
+            }
+            default: {
+              dispatch({
+                type: SYSTEM_ERROR,
+              });
+            }
           }
-          default: {
-            dispatch({
-              type: SYSTEM_ERROR,
-            });
-          }
-        }
-      }
-      else {
-        const userId = getValue(discussionId);
-        if (userId === null) {
-          dispatch({
-            type: CREATE_NICKNAME,
-          });
         } else {
-          handleJoinUser(dispatch, discussionId, userId);
+          const userId = getValue(discussionId);
+          if (userId === null) {
+            dispatch({
+              type: CREATE_NICKNAME,
+            });
+          } else {
+            handleJoinUser(dispatch, discussionId, userId);
+          }
         }
-      }
-    });
-  }
+      })
+    );
+  };
 };
 
 const createUser = (discussionId, nickname) => {
@@ -221,24 +273,27 @@ const createUser = (discussionId, nickname) => {
       discussion_id: discussionId,
       nickname: nickname,
     };
-    // backend acknowledged we sent request
-    socket.emit("create_user", data, (res) => {
-      const response = JSON.parse(res);
-      if (isError(response)) {
-        handleError(dispatch, response);
-      }
-      else {
-        dispatch({
-          type: CREATE_USER_FULFILLED,
-        });
+    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
 
-        // set the value in localStorage
-        const userId = response.user_id;
-        setValue(discussionId, userId);
+    startRequest(() =>
+      socket.emit("create_user", data, (res) => {
+        endRequest();
+        const response = JSON.parse(res);
+        if (isError(response)) {
+          handleError(dispatch, response);
+        } else {
+          dispatch({
+            type: CREATE_USER_FULFILLED,
+          });
 
-        handleJoinUser(dispatch, discussionId, userId);
-      }
-    });
+          // set the value in localStorage
+          const userId = response.user_id;
+          setValue(discussionId, userId);
+
+          handleJoinUser(dispatch, discussionId, userId);
+        }
+      })
+    );
   };
 };
 
@@ -248,8 +303,7 @@ const subscribeUsers = () => {
       const response = JSON.parse(res);
       if (isError(response)) {
         handleError(dispatch, response);
-      }
-      else {
+      } else {
         dispatch({
           type: JOINED_USER,
           payload: {
@@ -278,21 +332,24 @@ const createPost = (pith) => {
         pith: pith,
       },
     });
-    // backend acknowledged we sent request
-    socket.emit("post", data, (res) => {
-      console.log("POST", res);
-      const response = JSON.parse(res);
-      console.log("POST", response);
-      if (isError(response)) {
-        handleError(dispatch, response);
-      }
-      else {
-        dispatch({
-          type: CREATE_POST_FULFILLED,
-        });
-        // we should now expect to receive something through our subscription
-      }
-    });
+    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+
+    startRequest(() =>
+      socket.emit("post", data, (res) => {
+        endRequest();
+        console.log("POST", res);
+        const response = JSON.parse(res);
+        console.log("POST", response);
+        if (isError(response)) {
+          handleError(dispatch, response);
+        } else {
+          dispatch({
+            type: CREATE_POST_FULFILLED,
+          });
+          // we should now expect to receive something through our subscription
+        }
+      })
+    );
   };
 };
 

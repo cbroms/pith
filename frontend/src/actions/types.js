@@ -19,3 +19,9 @@ export const CREATE_POST = "CREATE_POST";
 export const CREATE_POST_FULFILLED = "CREATE_POST_FULFILLED";
 export const CREATED_POST = "CREATED_POST";
 // load user events
+export const LOAD_USER = "LOAD_USER";
+export const LOAD_USER_FULFILLED = "LOAD_USER_FULFILLED";
+
+// timeout events
+export const REQUEST_TIMEOUT = "REQUEST_TIMEOUT";
+export const RESET_REQUEST_TIMEOUT = "RESET_REQUEST_TIMEOUT";

@@ -70,7 +70,10 @@ const Discussion = (props) => {
 
     return (
         <Router>
-            <SystemError error={props.systemError} />
+            <SystemError
+                error={props.systemError}
+                timeout={props.requestTimeout}
+            />
             <Switch>
                 <Route path={`${match.path}/join`}>
                     {joined ? (

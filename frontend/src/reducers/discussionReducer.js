@@ -15,10 +15,13 @@ import {
   CREATE_POST,
   CREATE_POST_FULFILLED,
   CREATED_POST,
+  RESET_REQUEST_TIMEOUT,
+  REQUEST_TIMEOUT,
 } from "../actions/types";
 
 const defaultState = {
   systemError: false,
+  requestTimeout: false,
   userError: {
     invalidDiscussion: false,
     createUser: {
@@ -71,6 +74,12 @@ const discussionReducer = (state = defaultState, action) => {
         systemError: true,
       };
     }
+    case REQUEST_TIMEOUT: {
+      return {
+        ...state,
+        requestTimeout: true,
+      };
+    }
     case INVALID_DISCUSSION: {
       const userError = { ...state.userError };
       userError.invalidDiscussion = true;
@@ -108,6 +117,7 @@ const discussionReducer = (state = defaultState, action) => {
       userError.concurrency.editUnabled = true;
       return {
         ...state,
+        requestTimeout: false,
         userError: userError,
       };
     }
@@ -116,6 +126,7 @@ const discussionReducer = (state = defaultState, action) => {
       userError.concurrency.badTarget = true;
       return {
         ...state,
+        requestTimeout: false,
         userError: userError,
       };
     }
@@ -125,6 +136,7 @@ const discussionReducer = (state = defaultState, action) => {
 
       return {
         ...state,
+        requestTimeout: false,
         events: events,
       };
     }
@@ -136,6 +148,7 @@ const discussionReducer = (state = defaultState, action) => {
       return {
         ...state,
         events: events,
+        requestTimeout: false,
         userError: userError,
       };
     }
@@ -144,6 +157,7 @@ const discussionReducer = (state = defaultState, action) => {
       events.joinUser.pending = true;
       return {
         ...state,
+        requestTimeout: false,
         events: events,
       };
     }
@@ -152,6 +166,7 @@ const discussionReducer = (state = defaultState, action) => {
       events.createUser = { ...defaultState.events.createUser };
       return {
         ...state,
+        requestTimeout: false,
         events: events,
       };
     }
@@ -161,6 +176,7 @@ const discussionReducer = (state = defaultState, action) => {
       events.joined = true;
       return {
         ...state,
+        requestTimeout: false,
         events: events,
         discussionId: action.payload.discussionId,
         userId: action.payload.userId,
@@ -168,7 +184,7 @@ const discussionReducer = (state = defaultState, action) => {
       };
     }
     case JOINED_USER: {
-      const icons = [ ...state.icons ];
+      const icons = [...state.icons];
       icons.push(action.payload.icon);
       return {
         ...state,
@@ -181,6 +197,7 @@ const discussionReducer = (state = defaultState, action) => {
       events.post.content.pith = action.payload.pith;
       return {
         ...state,
+        requestTimeout: false,
         events: events,
       };
     }
@@ -189,11 +206,12 @@ const discussionReducer = (state = defaultState, action) => {
       events.post = { ...defaultState.events.post };
       return {
         ...state,
+        requestTimeout: false,
         events: events,
       };
     }
     case CREATED_POST: {
-      const posts = [ ...state.posts ];
+      const posts = [...state.posts];
       posts.push(action.payload.unitId);
       const chatMap = { ...state.chatMap };
       const docMap = { ...state.docMap };
