@@ -1,11 +1,11 @@
 {
+    "type": "object",
     "definitions": {
       "$$target": ["#/definitions/cursor", "#/definitions/chat_meta", "#/definitions/doc_meta"],
       "cursor": {"$ref": "cursor.json#/cursor"},
       "chat_meta": {"$ref": "chat_meta.json#/chat_meta"},
       "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
     },
-    "type": "object",
     "properties": {
       "cursors": {
         "type": "array",
