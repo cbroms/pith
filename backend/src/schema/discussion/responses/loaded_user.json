@@ -1,7 +1,6 @@
 {
-  "base": {
     "definitions": {
-      "$$target": ["#/base/definitions/cursor", "#/base/definitions/chat_meta", "#/base/definitions/doc_meta"],
+      "$$target": ["#/definitions/cursor", "#/definitions/chat_meta", "#/definitions/doc_meta"],
       "cursor": {"$ref": "cursor.json#/cursor"},
       "chat_meta": {"$ref": "chat_meta.json#/chat_meta"},
       "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
@@ -15,7 +14,7 @@
           "properties": {
             "user_id": {"type": "string"},
             "nickname": {"type": "string"},
-            "cursor": {"$ref": "#/base/definitions/cursor"}
+            "cursor": {"$ref": "#/definitions/cursor"}
           },
           "required": ["user_id", "nickname", "cursor"]
         }
@@ -37,10 +36,9 @@
         "type": "array",
         "items": {"type": "string"}
       },
-      "chat_meta": {"$ref": "#/base/definitions/chat_meta"},
-      "doc_meta": {"$ref": "#/base/definitions/doc_meta"}
+      "chat_meta": {"$ref": "#/definitions/chat_meta"},
+      "doc_meta": {"$ref": "#/definitions/doc_meta"}
     },
     "required": ["cursors", "current_unit", "timeline", "chat_history", "chat_meta", "doc_meta"]
-  }
 }
 
