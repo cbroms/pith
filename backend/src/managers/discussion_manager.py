@@ -94,7 +94,7 @@ class DiscussionManager:
         "unit_id": unit_id,
         "pith": unit.pith,
         "author": unit.author,
-        "created_at": unit.created_at
+        "created_at": unit.created_at.strftime(constants.DATE_TIME_FMT)
       }
       return response
 
@@ -104,7 +104,7 @@ class DiscussionManager:
         "unit_id": unit_id,
         "pith": unit.pith,
         "hidden": unit.hidden,
-        "created_at": unit.created_at
+        "created_at": unit.created_at.strftime(constants.DATE_TIME_FMT)
       }
       return response
 
@@ -338,7 +338,7 @@ class DiscussionManager:
         response = {
           "user_id": user_id,
           "nickname": user.name,
-          "cursor": user.cursor
+          "cursor": user.cursor.to_mongo()
         }
         return None, [response]
 
@@ -372,7 +372,7 @@ class DiscussionManager:
             cursors.append({
               "user_id": p.id,
               "nickname": p.name, 
-              "cursor": p.cursor
+              "cursor": p.cursor.to_mongo()
             })
           doc_meta.append(self._doc_meta(p.cursor.unit_id))
 
@@ -400,7 +400,7 @@ class DiscussionManager:
           "cursors": cursors,
           "current_unit": user.viewed_unit, 
           "timeline": timeline,
-          "chat_history": discussion.chat, 
+          "chat_history": discussion.chat.to_mongo(), 
           "chat_meta": chat_meta,
           "doc_meta": doc_meta
         }
@@ -488,12 +488,12 @@ class DiscussionManager:
           "children": children,
           "backlinks": backlinks,
           "timeline_entry": timeline_entry,
-          "cursor": cursor,
+          "cursor": cursor.to_mongo(),
           "doc_meta": doc_meta
         }
         cursor_response = {
           "user_id": user_id,
-          "cursor": cursor,
+          "cursor": cursor.to_mongo(),
         }
 
         return response, [cursor_response]
@@ -700,7 +700,7 @@ class DiscussionManager:
         user = discussion.get().users.filter(id=user_id).get()
         response = {
             "user_id": user_id,
-            "cursor": user.cursor
+            "cursor": user.cursor.to_mongo()
         }
         return None, [response]
 

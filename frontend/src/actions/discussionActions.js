@@ -221,17 +221,21 @@ const subscribeUsers = () => {
   return (dispatch) => {
     socket.on("joined_user", (res) => {
       const response = JSON.parse(res);
-      // TODO case on result
-      dispatch({
-        type: JOINED_USER,
-        payload: {
-          icon: {
-            userId: response.user_id,
-            nickname: response.nickname,
-            unitId: response.cursor.unit_id,
+      if (isError(response)) {
+        handleError(dispatch, response);
+      }
+      else {
+        dispatch({
+          type: JOINED_USER,
+          payload: {
+            icon: {
+              userId: response.user_id,
+              nickname: response.nickname,
+              unitId: response.cursor.unit_id,
+            },
           },
-        },
-      });
+        });
+      }
     });
   };
 };
@@ -251,7 +255,9 @@ const createPost = (pith) => {
     });
     // backend acknowledged we sent request
     socket.emit("post", data, (res) => {
+      console.log("POST", res);
       const response = JSON.parse(res);
+      console.log("POST", response);
       if (isError(response)) {
         handleError(dispatch, response);
       }
@@ -271,6 +277,7 @@ const subscribeChat = () => {
       const response = JSON.parse(res);
       const chatMeta = unpackChatMeta(response.chat_meta);
       const docMeta = unpackDocMeta(response.doc_meta);
+      console.log("POST", response);
       dispatch({
         type: CREATED_POST,
         payload: {
