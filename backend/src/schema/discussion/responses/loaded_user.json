@@ -1,11 +1,11 @@
 {
-  "definitions": {
-    "cursor": {"$ref": "cursor.json#/cursor"},
-    "chat_meta": {"$ref": "chat_meta.json#/chat_meta"},
-    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
-  },
-  "base": {
     "type": "object",
+    "definitions": {
+      "$$target": ["#/definitions/cursor", "#/definitions/chat_meta", "#/definitions/doc_meta"],
+      "cursor": {"$ref": "cursor.json#/cursor"},
+      "chat_meta": {"$ref": "chat_meta.json#/chat_meta"},
+      "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
+    },
     "properties": {
       "cursors": {
         "type": "array",
@@ -40,6 +40,5 @@
       "doc_meta": {"$ref": "#/definitions/doc_meta"}
     },
     "required": ["cursors", "current_unit", "timeline", "chat_history", "chat_meta", "doc_meta"]
-  }
 }
 

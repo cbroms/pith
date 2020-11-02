@@ -122,6 +122,30 @@ let handleError = (dispatch, response) => {
   }
 }
 
+let handleLoadUser = (dispatch) -> {
+  dispatch({
+    type: LOAD_USER,
+  });
+  
+  const data = {};
+  // backend acknowledged we sent request
+  socket.emit("load_user", data, (res) => {
+    const response = JSON.parse(res);
+    if (isError(response)) {
+      handleError(dispatch, response);
+    }
+    else {
+      dispatch({
+        type: LOAD_USER_FULFILLED,
+        payload: {
+          discussionId: discussionId,
+          userId: userId,
+        },
+      });
+    }
+  });
+}
+
 let handleJoinUser = (dispatch, discussionId, userId) => {
   dispatch({
     type: JOIN_USER,
@@ -145,6 +169,7 @@ let handleJoinUser = (dispatch, discussionId, userId) => {
           userId: userId,
         },
       });
+      handleLoadUser(dispatch);
     }
   });
 };
@@ -221,17 +246,21 @@ const subscribeUsers = () => {
   return (dispatch) => {
     socket.on("joined_user", (res) => {
       const response = JSON.parse(res);
-      // TODO case on result
-      dispatch({
-        type: JOINED_USER,
-        payload: {
-          icon: {
-            userId: response.user_id,
-            nickname: response.nickname,
-            unitId: response.cursor.unit_id,
+      if (isError(response)) {
+        handleError(dispatch, response);
+      }
+      else {
+        dispatch({
+          type: JOINED_USER,
+          payload: {
+            icon: {
+              userId: response.user_id,
+              nickname: response.nickname,
+              unitId: response.cursor.unit_id,
+            },
           },
-        },
-      });
+        });
+      }
     });
   };
 };
@@ -251,7 +280,9 @@ const createPost = (pith) => {
     });
     // backend acknowledged we sent request
     socket.emit("post", data, (res) => {
+      console.log("POST", res);
       const response = JSON.parse(res);
+      console.log("POST", response);
       if (isError(response)) {
         handleError(dispatch, response);
       }
@@ -259,6 +290,7 @@ const createPost = (pith) => {
         dispatch({
           type: CREATE_POST_FULFILLED,
         });
+        // we should now expect to receive something through our subscription
       }
     });
   };
@@ -270,6 +302,7 @@ const subscribeChat = () => {
       const response = JSON.parse(res);
       const chatMeta = unpackChatMeta(response.chat_meta);
       const docMeta = unpackDocMeta(response.doc_meta);
+      console.log("POST", response);
       dispatch({
         type: CREATED_POST,
         payload: {

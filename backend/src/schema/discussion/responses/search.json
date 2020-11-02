@@ -1,5 +1,6 @@
 {
   "definitions": {
+    "$$target": ["#/definitions/chat_meta", "#/definitions/doc_meta"],
     "chat_meta": {"$ref": "chat_meta.json#/chat_meta"},
     "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
   },

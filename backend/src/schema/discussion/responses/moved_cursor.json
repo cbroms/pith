@@ -1,5 +1,6 @@
 {
   "definitions": {
+    "$$target": ["#/definitions/cursor"],
     "cursor": {"$ref": "cursor.json#/cursor"}
   },
   "base": {

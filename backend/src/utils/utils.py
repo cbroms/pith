@@ -1,7 +1,7 @@
 from collections import Counter, defaultdict
 import datetime
 from functools import reduce
-from json import JSONEncoder
+from json import JSONEncoder, dumps
 from mongoengine import (
   Document,
   EmbeddedDocument,
@@ -21,6 +21,23 @@ import constants
 from error import Errors
 from uuid import UUID, uuid4
 
+
+class DictEncoder(JSONEncoder):
+    def default(self, obj):
+        #if isinstance(obj, UUID):
+        #    return obj.hex
+        #if isinstance(obj, (datetime.date, datetime.datetime)):
+        #    return obj.strftime(constants.DATE_TIME_FMT)
+        #if isinstance(obj, (Document, EmbeddedDocument)):
+        #    return obj.to_mongo() # dict
+        return JSONEncoder.default(self, obj)
+
+class ErrorEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Errors):
+            return obj.value
+        res = JSONEncoder.default(self, obj)
+        return res
 
 # log uncaught exceptions to file in backend/src/{constants.LOG_FILENAME}
 logger = logging.getLogger("app_logger")
@@ -44,7 +61,7 @@ def make_error(err):
     "error": err
   }
   logger.exception(exp)
-  return exp
+  return dumps(exp, cls=ErrorEncoder)
 
 
 ps = PorterStemmer()
@@ -69,19 +86,3 @@ def make_freq_dict(text: str) -> Dict[str, int]:
 def sum_dicts(dL: List[Dict[Any, Any]]) -> Dict[Any, Any]:
   keys = reduce(or_, [set(d) for d in dL])
   return defaultdict(lambda:0, {k:sum([d.get(k,0) for d in dL]) for k in keys})
-
-class DictEncoder(JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, UUID):
-            return obj.hex
-        if isinstance(obj, (datetime.date, datetime.datetime)):
-            return obj.strftime(constants.DATE_TIME_FMT)
-        if isinstance(obj, (Document, EmbeddedDocument)):
-            return obj.to_mongo() # dict
-        return obj
-
-class GenericEncoder(JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Errors):
-            return obj.value
-        return JSONEncoder.default(self, obj)

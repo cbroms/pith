@@ -1,5 +1,5 @@
 from aiohttp import web
-from json import dumps
+from json import dumps, loads
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from socketio import AsyncNamespace
@@ -16,7 +16,7 @@ from utils.utils import (
   is_error, 
   make_error,
   DictEncoder, 
-  GenericEncoder, 
+  ErrorEncoder,
   sum_dicts, 
 )
 
@@ -36,10 +36,10 @@ async def on_create(sid, request):
 
     if not is_error(result):
       try:
-        validate(instance=serialized, schema=bres.created)
+        validate(instance=result, schema=bres.created)
+        serialized = dumps(result, cls=DictEncoder)
       except ValidationError:
-        result = make_error(Errors.BAD_RESPONSE)
-    serialized = dumps(result, cls=GenericEncoder)
+        serialized = make_error(Errors.BAD_RESPONSE)
     return serialized
 
 class DiscussionNamespace(AsyncNamespace):
@@ -73,7 +73,6 @@ class DiscussionNamespace(AsyncNamespace):
 
             if emits is not None:
               assert(emits_res is not None)
-              emits_res = [dumps(r, cls=DictEncoder) for r in emits_res]
               for r, e in zip(emits_res, emits):
                 try:
                   validate(instance=r, schema=dres.schema[e])
@@ -86,14 +85,14 @@ class DiscussionNamespace(AsyncNamespace):
               if emits is not None:
                 assert(emits_res is not None)
                 for r, e in zip(emits_res, emits):
-                  serialized = dumps(r, cls=GenericEncoder)
+                  serialized = dumps(r, cls=DictEncoder)
                   await self.emit(e, serialized, room=discussion_id)
 
           # send off return, whether it is error or desired result 
           if result == None:
             result = {"success": 0} # to avoid null
-          serialized = dumps(result, cls=GenericEncoder)
-          return serialized
+          result = dumps(result, cls=DictEncoder)
+          return result
 
         return helper
       return outer
@@ -179,8 +178,10 @@ class DiscussionNamespace(AsyncNamespace):
         :emit: *joined_user* (:ref:`dres_joined_user-label`)
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID 
         """
-        discussion_id = request["discussion_id"]
         user_id = request["user_id"]
+
+        session = await self.get_session(sid)
+        discussion_id = session["discussion_id"]
 
         result = gm.discussion_manager.join(
           discussion_id=discussion_id, 
@@ -188,11 +189,13 @@ class DiscussionNamespace(AsyncNamespace):
         )
 
         # result is successful, joined means we are in room
-        if is_error(result):
+        if not is_error(result):
+          # resave discussion ID, as this replaces user session
           await self.save_session(sid, {
             "joined": True,
-            "user_id": user_id}
-          )
+            "user_id": user_id,
+            "discussion_id": discussion_id
+          })
           self.enter_room(sid, discussion_id)
           # need to enter before can emit
 
@@ -216,19 +219,17 @@ class DiscussionNamespace(AsyncNamespace):
             user_id=user_id
           )
 
+          ret, emits = product
+
           try:
-            validate(instance=r, schema=dres.schema["leave"])
+            validate(instance=emits[0], schema=dres.schema["left_user"])
+            serialized = dumps(emits[0], cls=DictEncoder)
+            await self.emit("left_user", serialized, room=discussion_id)
+            # leave room when done with emit
+            self.leave_room(sid, discussion_id)
           except ValidationError:
             bad_response = True
-
-          if bad_response:
             result = make_error(Errors.BAD_RESPONSE)
-          else:
-            serialized = dumps(product, cls=GenericEncoder)
-            await self.emit("leave", serialized, room=discussion_id)
-
-          # leave room when done with emit
-          self.leave_room(sid, discussion_id)
 
         return result
 

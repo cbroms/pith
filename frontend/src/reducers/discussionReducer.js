@@ -168,7 +168,7 @@ const discussionReducer = (state = defaultState, action) => {
       };
     }
     case JOINED_USER: {
-      const icons = { ...state.icons };
+      const icons = [ ...state.icons ];
       icons.push(action.payload.icon);
       return {
         ...state,
@@ -193,10 +193,9 @@ const discussionReducer = (state = defaultState, action) => {
       };
     }
     case CREATED_POST: {
-      const posts = [...state.posts];
+      const posts = [ ...state.posts ];
       posts.push(action.payload.unitId);
       const chatMap = { ...state.chatMap };
-
       const docMap = { ...state.docMap };
       return {
         ...state,

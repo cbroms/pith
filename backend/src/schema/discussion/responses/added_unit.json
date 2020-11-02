@@ -1,5 +1,6 @@
 {
   "definitions": {
+    "$$target": ["#/definitions/chat_meta", "#/definitions/doc_meta"],
     "chat_meta": {"$ref": "chat_meta.json#/chat_meta"},
     "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
   },
@@ -12,7 +13,7 @@
       "doc_meta": {"$ref": "#/definitions/doc_meta"},
       "chat_meta": {"$ref": "#/definitions/chat_meta"}
     },
-    "required": ["unit_id", "parent", "position", "chat_meta", "doc_meta"]
+    "required": ["unit_id", "parent", "position", "doc_meta", "chat_meta"]
   }
 }
 
