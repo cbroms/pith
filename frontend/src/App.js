@@ -17,7 +17,7 @@ import AppLayout from "./AppLayout";
 
 import Discussion from "./components/Discussion";
 import DiscussionJoin from "./components/DiscussionJoin";
-// import TemporaryBoard from "./components/TemporaryBoard";
+import AlphaBoard from "./components/AlphaBoard";
 
 import dark from "./themes/dark";
 import light from "./themes/light";
@@ -203,6 +203,9 @@ class App extends React.Component {
 										document={documentDummy}
 										users={usersDummy}
 									/>
+								</Route>
+								<Route path="/">
+									<AlphaBoard />
 								</Route>
 							</Switch>
 						</AppLayout>

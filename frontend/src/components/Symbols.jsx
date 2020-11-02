@@ -3,9 +3,9 @@ import styled from "styled-components";
 const UpArrow = styled.div`
     box-sizing: border-box;
     position: relative;
-    display: block;
-    width: 22px;
-    height: 22px;
+    display: inline-block;
+    width: 15px;
+    height: 15px;
     color: inherit;
 
     ::after,
