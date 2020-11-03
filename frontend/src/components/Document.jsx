@@ -47,7 +47,7 @@ class Document extends React.Component {
     }
 
     onUnitEnter(caretPos, content, position) {
-        const newDoc = handleEnter(
+        const [newContent, focused, newDoc] = handleEnter(
             [...this.state.documentCopy],
             caretPos,
             content,
@@ -55,9 +55,11 @@ class Document extends React.Component {
         );
         if (newDoc !== null) {
             this.setState({
+                focused: focused,
                 documentCopy: newDoc,
             });
         }
+        return newContent;
     }
 
     getDragInfo(child, grandchild) {
@@ -120,6 +122,7 @@ class Document extends React.Component {
                     }
                     onFocus={() => this.setState({ focused: id })}
                     onBlur={() => this.setState({ focused: null })}
+                    focused={this.state.focused === id}
                     pith={pith}
                     id={id}
                     inline

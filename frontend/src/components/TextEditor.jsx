@@ -16,13 +16,36 @@ class TextEditor extends React.Component {
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.sanitize = this.sanitize.bind(this);
     this.toggleEditable = this.toggleEditable.bind(this);
+
+    this.checkFocus = this.checkFocus.bind(this);
   }
 
   ref = React.createRef();
 
   componentDidMount() {
-    if (this.props.focus) {
-      this.ref.current.focus();
+    this.checkFocus();
+  }
+
+  // componentDidUpdate() {
+  //   this.checkFocus();
+  // }
+
+  checkFocus() {
+    if (this.props.focused && document.activeElement !== this.ref.current) {
+      // remove the prior focus and move the cursor to the first position in this
+      // element
+      window.setTimeout(() => {
+        this.ref.current.focus();
+        var setpos = document.createRange();
+        var set = window.getSelection();
+        // Set start position of range
+        setpos.setStart(this.ref.current.childNodes[0], 0);
+        setpos.collapse(true);
+
+        set.removeAllRanges();
+        set.addRange(setpos);
+        this.ref.current.focus();
+      }, 50);
     }
   }
 
@@ -139,6 +162,8 @@ class TextEditor extends React.Component {
           this.state.html
         );
         if (res) {
+          this.setState({ html: res });
+        } else {
           this.setState({ html: "" });
         }
       }

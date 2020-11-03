@@ -16,6 +16,7 @@ const StyledContent = styled.div`
             [content-end];
     }
 
+    max-height: 100%;
     max-width: 2000px;
     margin: 0 auto;
 

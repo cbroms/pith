@@ -39,7 +39,6 @@ const StyledContent = styled.div`
     padding: 10px;
 
     width: 100%;
-    height: 100%;
     justify-self: right;
     max-width: 450px;
 `;

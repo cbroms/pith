@@ -81,6 +81,7 @@ const Unit = (props) => {
                     content={contentStr}
                     onFocus={props.onFocus}
                     onBlur={props.onBlur}
+                    focused={props.focused}
                 />
             );
         }

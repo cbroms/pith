@@ -32,6 +32,7 @@ const StyledContent = styled.div`
 `;
 
 const StyledHeader = styled(MediumHeading)`
+	font-size: 1.25rem;
 	display: inline-block;
 	font-family: monospace;
 	margin: 0;
@@ -68,7 +69,8 @@ const SystemErrorLayout = (props) => {
 		<span>
 			<StyledHeader>Request Timeout</StyledHeader>
 			<StyledParagraph>
-				Something went wrong. Please try again later.
+				It's taking a while for the server to respond. Please wait or
+				reload the page.
 			</StyledParagraph>
 		</span>
 	);

@@ -87,10 +87,33 @@ const handleDrag = (doc, dragged, dragTarget) => {
 };
 
 const handleEnter = (doc, caretPos, content, position) => {
-    console.log("entered");
-    console.log(caretPos, content, position);
-    console.log(doc);
-    return null;
+    const newUnitPith = content.substring(caretPos, content.length);
+    let focused = null;
+
+    if (position.child === null && position.grandchild === null) {
+        // this is the top level element, so add a child at pos 0
+        console.log(doc);
+        doc.splice(0, 0, { unit_id: "temp1", pith: newUnitPith, children: [] });
+        focused = "temp1";
+    } else if (position.grandchild === null) {
+        // add a sibling child
+        doc.splice(position.child + 1, 0, {
+            unit_id: "temp1",
+            pith: newUnitPith,
+            children: [],
+        });
+        focused = "temp1";
+    } else {
+        // add a sibling grandchild
+        doc[position.child].children.splice(position.grandchild + 1, 0, {
+            unit_id: "temp1",
+            pith: newUnitPith,
+            children: [],
+        });
+        focused = "temp1";
+    }
+
+    return [content.substring(0, caretPos), focused, doc];
 };
 
 const handleDelete = (doc, content, position) => {
