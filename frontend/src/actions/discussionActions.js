@@ -1,6 +1,15 @@
 import { socket } from "./socket";
 import { getValue, setValue } from "../api/local";
-import { unpackChatMeta, unpackDocMeta } from "./utils";
+import { 
+  unpackCursors,
+  unpackChildren,
+  unpackBacklinks,
+  unpackTimelineEntry,
+  unpackTimeline, 
+  unpackContext,
+  unpackChatMeta, 
+  unpackDocMeta, 
+} from "./utils";
 
 import {
   INVALID_USER_SESSION,
@@ -20,7 +29,6 @@ import {
 } from "./errors";
 
 import {
-  // error events
   SYSTEM_ERROR,
   INVALID_DISCUSSION,
   TAKEN_NICKNAME,
@@ -30,20 +38,54 @@ import {
   BAD_TARGET,
   REQUEST_TIMEOUT,
   RESET_REQUEST_TIMEOUT,
-  // create user events
   CREATE_NICKNAME,
   CREATE_USER,
   CREATE_USER_FULFILLED,
-  // join user events
   JOIN_USER,
   JOIN_USER_FULFILLED,
-  JOINED_USER,
-  // create post events
-  CREATE_POST,
-  CREATE_POST_FULFILLED,
-  CREATED_POST,
   LOAD_USER,
   LOAD_USER_FULFILLED,
+  LOAD_UNIT_PAGE,
+  LOAD_UNIT_PAGE_FULFILLED,
+  CREATE_POST,
+  CREATE_POST_FULFILLED,
+  GET_CONTEXT,
+  GET_CONTEXT_FULFILLED,
+  SEARCH,
+  SEARCH_FULFILLED,
+  SEND_TO_DOC,
+  SEND_TO_DOC_FULFILLED,
+  ADD_UNIT,
+  ADD_UNIT_FULFILLED,
+  HIDE_UNIT,
+  HIDE_UNIT_FULFILLED,
+  UNHIDE_UNIT,
+  UNHIDE_UNIT_FULFILLED,
+  SELECT_UNIT,
+  SELECT_UNIT_FULFILLED,
+  DESELECT_UNIT,
+  DESELECT_UNIT_FULFILLED,
+  MOVE_UNIT,
+  MOVE_UNIT_FULFILLED,
+  REQUEST_EDIT_UNIT,
+  REQUEST_EDIT_UNIT_FULFILLED,
+  DEEDIT_UNIT,
+  DEEDIT_UNIT_FULFILLED,
+  EDIT_UNIT,
+  EDIT_UNIT_FULFILLED,
+  JOINED_USER,
+  CREATED_POST,
+  ADDED_UNIT,
+  EDITED_UNIT,
+  ADDED_BACKLINKS,
+  REMOVED_BACKLINKS,
+  HID_UNIT,
+  UNHID_UNIT,
+  REPOSITIONED_UNIT,
+  LOCKED_EDIT,
+  UNLOCKED_EDIT,
+  LOCKED_POSITION,
+  UNLOCKED_POSITION,
 } from "./types";
 
 // the handler we use to wrap all requests to the api
@@ -177,11 +219,19 @@ const handleLoadUser = (dispatch, discussionId, userId) => {
       if (isError(response)) {
         handleError(dispatch, response);
       } else {
+        const chatMeta = unpackChatMeta(response.chat_meta);
+        const docMeta = unpackDocMeta(response.doc_meta);
+        const timeline = unpackTimeline(response.timeline);
+        const cursors = unpackCursors(response.cursors);
         dispatch({
           type: LOAD_USER_FULFILLED,
           payload: {
-            discussionId: discussionId,
-            userId: userId,
+            icons: cursors,
+            currentUnit: response.current_unit,
+            timeline: timeline,
+            chatHistory: response.chat_history,
+            chatMapAdd: chatMeta,
+            docMapAdd: docMeta,
           },
         });
       }
@@ -319,6 +369,44 @@ const subscribeUsers = () => {
   };
 };
 
+const getPage = (unitId) => {
+  return (dispatch) => {
+    const data = {
+      unit_id: unitId,
+    };
+
+    dispatch({
+      type: LOAD_UNIT_PAGE,
+    });
+
+    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+
+    startRequest(() =>
+      socket.emit("load_unit_page", data, (res) => {
+        endRequest();
+        const response = JSON.parse(res);
+        if (isError(response)) {
+          handleError(dispatch, response);
+        } else {
+          const children = unpackChildren(response.children);
+          const backlinks = unpackBacklinks(response.backlinks);
+          const timelineEntry = unpackTimelineEntry(response.timeline_entry);
+          const docMeta = unpackDocMeta(response.doc_meta);
+          dispatch({
+            type: LOAD_UNIT_PAGE_FULFILLED,
+            ancestors: response.ancestors,
+            currentUnit: response.cursor.unit_id,
+            timelineEntry: timelineEntry,
+            children: children,
+            backlinks: backlinks,
+            docMeta: docMeta,
+          });
+        }
+      })
+    );
+  }
+}
+
 const createPost = (pith) => {
   return (dispatch) => {
     const data = {
@@ -337,9 +425,7 @@ const createPost = (pith) => {
     startRequest(() =>
       socket.emit("post", data, (res) => {
         endRequest();
-        console.log("POST", res);
         const response = JSON.parse(res);
-        console.log("POST", response);
         if (isError(response)) {
           handleError(dispatch, response);
         } else {
@@ -359,7 +445,6 @@ const subscribeChat = () => {
       const response = JSON.parse(res);
       const chatMeta = unpackChatMeta(response.chat_meta);
       const docMeta = unpackDocMeta(response.doc_meta);
-      console.log("POST", response);
       dispatch({
         type: CREATED_POST,
         payload: {
@@ -372,4 +457,102 @@ const subscribeChat = () => {
   };
 };
 
-export { enterUser, createUser, subscribeUsers, createPost, subscribeChat };
+const getContext = (unitId) => {
+  return (dispatch) => {
+    const data = {
+      unit_id: unitId,
+    };
+
+    dispatch({
+      type: GET_CONTEXT,
+    });
+
+    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+
+    startRequest(() =>
+      socket.emit("get_unit_context", data, (res) => {
+        endRequest();
+        const response = JSON.parse(res);
+        if (isError(response)) {
+          handleError(dispatch, response);
+        } else {
+          const context = unpackContext(response);
+          dispatch({
+            type: GET_CONTEXT_FULFILLED,
+            context: context,
+          });
+        }
+      })
+    );
+  }
+}
+
+const search = (query) => {
+  return (dispatch) => {
+    const data = {
+      query: query,
+    };
+
+    dispatch({
+      type: SEARCH,
+    });
+
+    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+
+    startRequest(() =>
+      socket.emit("search", data, (res) => {
+        endRequest();
+        const response = JSON.parse(res);
+        if (isError(response)) {
+          handleError(dispatch, response);
+        } else {
+          const chatMeta = unpackChatMeta(response.chat_meta);
+          const docMeta = unpackDocMeta(response.doc_meta);
+          dispatch({
+            type: SEARCH_FULFILLED,
+            chatResults: response.chat_units,
+            docResults: response.doc_units,
+            chatMapAdd: chatMeta,
+            docMapAdd: docMeta,
+          });
+        }
+      })
+    );
+  }
+}
+
+export { 
+  enterUser, 
+  createUser, 
+  getPage,
+  createPost, 
+  getContext,
+  search,
+/*
+  sendToDoc,
+  addUnit,
+  hideUnit,
+  unhideUnit,
+  selectUnit,
+  deselectUnit,
+  moveUnits,
+  requestEdit,
+  deeditUnit,
+  editUnit,
+*/
+  subscribeUsers, 
+  subscribeChat,
+/*
+  subscribeAddedUnit,
+  subscribeEditedUnit,
+  subscribeAddedBacklinks,
+  subscribeRemovedBacklinks,
+  subscribeHidUnit,
+  subscribeUnhidUnit,
+  subscribeRepositionedUnit,
+  subscribeLockedEdit,
+  subscribeUnlockedEdit,
+  subscribeLockedPosition,
+  subscribeUnlockedPosition,
+*/
+};

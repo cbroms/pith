@@ -60,7 +60,7 @@ class DiscussionManager:
         """
         discussion = self._get(discussion_id)
         user = discussion.get().users.filter(id=user_id).get()
-        now = datetime.utcnow().strftime(constants.DATE_TIME_FMT)
+        now = datetime.utcnow() #.strftime(constants.DATE_TIME_FMT)
         time_interval = TimeInterval(
           unit_id=user.viewed_unit,
           start_time=user.start_time,
@@ -88,17 +88,18 @@ class DiscussionManager:
       else:
         return -1
 
-    def _chat_meta(self, unit_id):
+    def _chat_meta(self, discussion_id, unit_id):
       unit = self._get_unit(unit_id).get()
+      user = self._get(discussion_id).get().users.filter(id=unit.author).get()
       response = {
         "unit_id": unit_id,
         "pith": unit.pith,
-        "author": unit.author,
+        "author": user.name,
         "created_at": unit.created_at.strftime(constants.DATE_TIME_FMT)
       }
       return response
 
-    def _doc_meta(self, unit_id):
+    def _doc_meta(self, discussion, unit_id):
       unit = self._get_unit(unit_id).get()
       response = {
         "unit_id": unit_id,
@@ -313,7 +314,7 @@ class DiscussionManager:
         user = User(
           name=nickname,
           viewed_unit=unit_id,
-          start_time=datetime.utcnow().strftime(constants.DATE_TIME_FMT),
+          start_time=datetime.utcnow(), #.strftime(constants.DATE_TIME_FMT),
           cursor=cursor
         ) 
         if user_id is not None: # use pre-chosen id
@@ -331,7 +332,7 @@ class DiscussionManager:
         discussion.filter(users__id=user_id).update(
           set__users__S__active=True,
           set__users__S__start_time=
-            datetime.utcnow().strftime(constants.DATE_TIME_FMT)
+            datetime.utcnow() #.strftime(constants.DATE_TIME_FMT)
         ) 
 
         user = discussion.get().users.filter(id=user_id).get()
@@ -374,16 +375,16 @@ class DiscussionManager:
               "nickname": p.name, 
               "cursor": p.cursor.to_mongo().to_dict()
             })
-          doc_meta.append(self._doc_meta(p.cursor.unit_id))
+          doc_meta.append(self._doc_meta(discussion_id, p.cursor.unit_id))
 
         timeline = []
         for i in user.timeline: 
           timeline.append({
             "unit_id": i.unit_id,
-            "start_time": i.start_time,
-            "end_time": i.end_time,
+            "start_time": i.start_time.strftime(constants.DATE_TIME_FMT),
+            "end_time": i.end_time.strftime(constants.DATE_TIME_FMT),
           })
-          doc_meta.append(self._doc_meta(i.unit_id))
+          doc_meta.append(self._doc_meta(discussion_id, i.unit_id))
 
         unit_ids = []
         for u in discussion.chat:
@@ -394,7 +395,7 @@ class DiscussionManager:
 
         for u in unit_ids: # chat units and forward links
           unit = self._get_unit(u).get()
-          chat_meta.append(self._chat_meta(u))
+          chat_meta.append(self._chat_meta(discussion_id, u))
 
         response = {
           "cursors": cursors,
@@ -419,7 +420,7 @@ class DiscussionManager:
         unit = self._get_unit(unit_id).get()
 
         doc_meta = []
-        doc_meta.append(self._doc_meta(unit_id))
+        doc_meta.append(self._doc_meta(discussion_id, unit_id))
 
         children = []
         for c in unit.children:
@@ -431,13 +432,13 @@ class DiscussionManager:
             grandchildren.append({
               "unit_id": g,
             })
-            doc_meta.append(self._doc_meta(g))
+            doc_meta.append(self._doc_meta(discussion_id, g))
 
           children.append({
             "unit_id": c,
             "children": grandchildren
           })
-          doc_meta.append(self._doc_meta(c))
+          doc_meta.append(self._doc_meta(discussion_id, c))
 
         backlinks = []
         for b in unit.backward_links:
@@ -449,13 +450,13 @@ class DiscussionManager:
             grandbacklinks.append({
               "unit_id": g,
             })
-            doc_meta.append(self._doc_meta(g))
+            doc_meta.append(self._doc_meta(discussion_id, g))
 
           backlinks.append({
             "unit_id": b,
             "backlinks": grandbacklinks 
           })
-          doc_meta.append(self._doc_meta(b))
+          doc_meta.append(self._doc_meta(discussion_id, b))
 
         # update cursor
         discussion.filter(users__id=user_id).update(
@@ -469,8 +470,8 @@ class DiscussionManager:
         time_interval = user.timeline[-1] # newly made
         timeline_entry = {
           "unit_id": time_interval.unit_id,
-          "start_time": time_interval.start_time,
-          "end_time": time_interval.end_time,
+          "start_time": time_interval.start_time.strftime(constants.DATE_TIME_FMT),
+          "end_time": time_interval.end_time.strftime(constants.DATE_TIME_FMT),
         }
 
         # update viewed unit to current
@@ -481,7 +482,7 @@ class DiscussionManager:
         # ancestors
         ancestors = self._get_ancestors(unit_id)
         for a in ancestors:
-          doc_meta.append(self._doc_meta(a))
+          doc_meta.append(self._doc_meta(discussion_id, a))
 
         response = {
           "ancestors": ancestors,
@@ -556,9 +557,9 @@ class DiscussionManager:
         for f in forward_links:
             unit = self._get_unit(f)
             if unit.get().in_chat:
-              chat_meta.append(self._chat_meta(f))
+              chat_meta.append(self._chat_meta(discussion_id, f))
             else:
-              doc_meta.append(self._doc_meta(f))
+              doc_meta.append(self._doc_meta(discussion_id, f))
 
         unit = Unit(
           pith=pith,
@@ -571,7 +572,7 @@ class DiscussionManager:
         unit_id = unit.id
         unit.save()
         discussion.update(push__chat=unit_id)
-        chat_meta.append(self._chat_meta(unit_id))
+        chat_meta.append(self._chat_meta(discussion_id, unit_id))
 
         # make backlinks
         backlinks = []
@@ -612,10 +613,10 @@ class DiscussionManager:
           }
           if unit["in_chat"]:
             chat.append(entry)
-            chat_meta.append(self._chat_meta(unit_id))
+            chat_meta.append(self._chat_meta(discussion_id, unit_id))
           else:
             doc.append(entry)
-            doc_meta.append(self._doc_meta(unit_id))
+            doc_meta.append(self._doc_meta(discussion_id, unit_id))
 
         response = {
           "chat_units": chat,
@@ -655,13 +656,13 @@ class DiscussionManager:
 
         doc_meta = []
         chat_meta = []
-        doc_meta.append(self._doc_meta(unit_id))
+        doc_meta.append(self._doc_meta(discussion_id, unit_id))
         for f in forward_links:
           unit = self._get_unit(f)
           if unit.get().in_chat:
-            chat_meta.append(self._chat_meta(f))
+            chat_meta.append(self._chat_meta(discussion_id, f))
           else:
-            doc_meta.append(self._doc_meta(f))
+            doc_meta.append(self._doc_meta(discussion_id, f))
 
         parent = self._get_unit(parent_id)
         key = "push__children__{}".format(position)
@@ -752,13 +753,13 @@ class DiscussionManager:
 
         doc_meta = []
         chat_meta = []
-        doc_meta.append(self._doc_meta(unit_id))
+        doc_meta.append(self._doc_meta(discussion_id, unit_id))
         for f in forward_links:
           unit = self._get_unit(f)
           if unit.get().in_chat:
-            chat_meta.append(self._chat_meta(f))
+            chat_meta.append(self._chat_meta(discussion_id, f))
           else:
-            doc_meta.append(self._doc_meta(f))
+            doc_meta.append(self._doc_meta(discussion_id, f))
 
         parent_ptr = self._get_unit(parent)
         key = "push__children__{}".format(position)
@@ -927,13 +928,13 @@ class DiscussionManager:
 
         doc_meta = []
         chat_meta = []
-        doc_meta.append(self._doc_meta(unit_id))
+        doc_meta.append(self._doc_meta(discussion_id, unit_id))
         for f in forward_links:
           unit = self._get_unit(f)
           if unit.get().in_chat:
-            chat_meta.append(self._chat_meta(f))
+            chat_meta.append(self._chat_meta(discussion_id, f))
           else:
-            doc_meta.append(self._doc_meta(f))
+            doc_meta.append(self._doc_meta(discussion_id, f))
 
         edited_unit = {
           "unit_id": unit_id,

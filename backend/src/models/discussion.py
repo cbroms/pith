@@ -198,7 +198,7 @@ class User(EmbeddedDocument):
     :default: None
     """
 
-    start_time = StringField(required=True)
+    start_time = DateTimeField(required=True) #StringField(required=True)
     """
     :type: *datetime*
     :required: True
