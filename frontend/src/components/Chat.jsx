@@ -48,6 +48,8 @@ const Chat = (props) => {
             .utc()
             .local();
 
+        console.log(group[0].created_at);
+
         const formattedDate = dayjs(date).calendar(null, {
             sameDay: "[Today at] h:mm a",
             lastDay: "[Yesterday at] h:mm a",
@@ -136,12 +138,14 @@ const Chat = (props) => {
             setQuery={props.setQuery}
             unitEnter={(pos, content) => {
                 props.addPost(content);
-                // reset the text editor content to nothing
-                return true;
             }}
         />
     );
-    return <ChatLayout editor={editor}>{posts}</ChatLayout>;
+    return (
+        <ChatLayout loading={props.loading} editor={editor}>
+            {posts}
+        </ChatLayout>
+    );
 };
 
 export default Chat;

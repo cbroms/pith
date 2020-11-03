@@ -61,14 +61,29 @@ const StyledDocument = styled.div`
     // background-color: SkyBlue;
 `;
 
+const StyledLoadingContainer = styled(StyledDocument)`
+    font-style: italic;
+    color: ${(props) => props.theme.shade2};
+`;
+
 const DocumentLayout = (props) => {
     return (
-        <StyledContainer>
-            <StyledTimeline>{props.timeline}</StyledTimeline>
-            <StyledParticipantList>{props.users}</StyledParticipantList>
-            <StyledDocument>{props.document}</StyledDocument>
-            <StyledAncestorList>{props.ancestors}</StyledAncestorList>
-        </StyledContainer>
+        <span>
+            {props.loading ? (
+                <StyledContainer>
+                    <StyledLoadingContainer>
+                        Loading document...
+                    </StyledLoadingContainer>
+                </StyledContainer>
+            ) : (
+                <StyledContainer>
+                    <StyledTimeline>{props.timeline}</StyledTimeline>
+                    <StyledParticipantList>{props.users}</StyledParticipantList>
+                    <StyledDocument>{props.document}</StyledDocument>
+                    <StyledAncestorList>{props.ancestors}</StyledAncestorList>
+                </StyledContainer>
+            )}
+        </span>
     );
 };
 

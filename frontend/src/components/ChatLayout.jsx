@@ -41,12 +41,21 @@ const StyledNoContentContainer = styled.div`
     color: ${(props) => props.theme.shade2};
 `;
 
+const StyledLoadingContainer = styled.div`
+    font-style: italic;
+    color: ${(props) => props.theme.shade2};
+`;
+
 const ChatLayout = (props) => {
     let postContent = props.children;
 
-    if (postContent.length <= 0) {
+    if (postContent.length <= 0 && !props.loading) {
         postContent = (
             <StyledNoContentContainer>No posts yet</StyledNoContentContainer>
+        );
+    } else if (props.loading) {
+        postContent = (
+            <StyledLoadingContainer>Loading chat...</StyledLoadingContainer>
         );
     }
     return (

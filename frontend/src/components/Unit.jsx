@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactDOMServer from "react-dom/server";
 
 import { splitAtLinks, parseLinks } from "../utils/parseLinks";
@@ -10,8 +10,13 @@ import TooltipLayout from "./TooltipLayout";
 import UnitLayout from "./UnitLayout";
 
 const Unit = (props) => {
-    const links = parseLinks(props.pith);
-    const splitPith = splitAtLinks(props.pith);
+    const [tempContent, setTempContent] = useState(null);
+
+    let pith = props.pith;
+    if (tempContent !== null && tempContent !== pith) pith = tempContent;
+
+    const links = parseLinks(pith);
+    const splitPith = splitAtLinks(pith);
 
     let content = [];
 
@@ -78,10 +83,18 @@ const Unit = (props) => {
                     unitEnter={props.unitEnter}
                     unitDelete={props.unitDelete}
                     showButton={props.showButton}
-                    content={contentStr}
+                    renderedContent={contentStr}
+                    content={props.pith}
                     onFocus={props.onFocus}
-                    onBlur={props.onBlur}
+                    // TODO: reset the temp when we get a prop refresh. We only want
+                    // this to happen when there's an update from the server, though,
+                    // so there probably needs to be some fancy logic somewhere for that.
+                    onBlur={(temp) => {
+                        setTempContent(temp);
+                        props.onBlur();
+                    }}
                     focused={props.focused}
+                    placeholder={props.placeholder}
                 />
             );
         }

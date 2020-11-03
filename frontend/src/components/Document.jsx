@@ -17,7 +17,8 @@ class Document extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            documentCopy: props.view.children,
+            documentCopy: this.props.view.children,
+            pithCopy: this.props.view.pith,
             dragged: null,
             dragTarget: null,
             focused: null,
@@ -33,14 +34,19 @@ class Document extends React.Component {
         this.getDragInfo = this.getDragInfo.bind(this);
     }
 
-    onUnitDelete(content, position) {
-        const newDoc = handleDelete(
+    onUnitDelete(isEmpty, content, position) {
+        const [newPith, newDoc] = handleDelete(
+            this.state.pithCopy,
             [...this.state.documentCopy],
+            isEmpty,
             content,
             position
         );
+
         if (newDoc !== null) {
             this.setState({
+                focused: null,
+                pithCopy: newPith,
                 documentCopy: newDoc,
             });
         }
@@ -117,12 +123,13 @@ class Document extends React.Component {
                     unitEnter={(pos, content) =>
                         this.onUnitEnter(pos, content, position)
                     }
-                    unitDelete={(content) =>
-                        this.onUnitDelete(content, position)
+                    unitDelete={(isEmpty, content) =>
+                        this.onUnitDelete(isEmpty, content, position)
                     }
                     onFocus={() => this.setState({ focused: id })}
                     onBlur={() => this.setState({ focused: null })}
                     focused={this.state.focused === id}
+                    placeholder={"type a pith..."}
                     pith={pith}
                     id={id}
                     inline
@@ -204,10 +211,11 @@ class Document extends React.Component {
             );
         });
         const pithUnit = createUnit(
-            this.props.view.pith,
+            this.state.pithCopy,
             this.props.view.unit_id,
             { child: null, grandchild: null }
         );
+
         const doc = (
             <DocumentSectionLayout
                 focused={this.state.focused === this.props.view.unit_id}
@@ -227,6 +235,7 @@ class Document extends React.Component {
 
         return (
             <DocumentLayout
+                loading={this.props.loading}
                 document={doc}
                 ancestors={ancestors}
                 users={users}

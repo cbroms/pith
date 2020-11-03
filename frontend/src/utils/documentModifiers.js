@@ -88,13 +88,12 @@ const handleDrag = (doc, dragged, dragTarget) => {
 
 const handleEnter = (doc, caretPos, content, position) => {
     const newUnitPith = content.substring(caretPos, content.length);
-    let focused = null;
+    let focused = "temp1";
 
     if (position.child === null && position.grandchild === null) {
         // this is the top level element, so add a child at pos 0
         console.log(doc);
         doc.splice(0, 0, { unit_id: "temp1", pith: newUnitPith, children: [] });
-        focused = "temp1";
     } else if (position.grandchild === null) {
         // add a sibling child
         doc.splice(position.child + 1, 0, {
@@ -102,7 +101,6 @@ const handleEnter = (doc, caretPos, content, position) => {
             pith: newUnitPith,
             children: [],
         });
-        focused = "temp1";
     } else {
         // add a sibling grandchild
         doc[position.child].children.splice(position.grandchild + 1, 0, {
@@ -110,15 +108,48 @@ const handleEnter = (doc, caretPos, content, position) => {
             pith: newUnitPith,
             children: [],
         });
-        focused = "temp1";
     }
+
+    console.log(caretPos);
+
+    console.log("new:", content.substring(0, caretPos));
 
     return [content.substring(0, caretPos), focused, doc];
 };
 
-const handleDelete = (doc, content, position) => {
+const handleDelete = (pith, doc, isEmpty, content, position) => {
     console.log("deleted");
-    return null;
+    let pithCopy = pith;
+    // attach the content to the unit above (sibling) or parent
+    // (if the deleted unit is first child of unit)
+    if (position.child !== null) {
+        // remove the element from the doc
+        if (position.grandchild !== null) {
+            doc[position.child].children.splice(position.grandchild, 1);
+        } else {
+            doc.splice(position.child, 1);
+        }
+    }
+
+    // add the content to the previous sibling/parent
+    if (!isEmpty) {
+        if (position.child === 0 && position.grandchild === null) {
+            // add content to the end of the parent pith
+            pithCopy += " " + content;
+        } else if (position.grandchild === 0) {
+            // add the grandchild content to the child above
+            doc[position.child].pith += " " + content;
+        } else if (position.grandchild === null) {
+            // add content to the sibling child above
+            doc[position.child - 1].pith += " " + content;
+        } else {
+            // add content to the sibling grandchild above
+            doc[position.child].children[position.grandchild - 1].pith +=
+                " " + content;
+        }
+    }
+    console.log(doc);
+    return [pithCopy, doc];
 };
 
 export { handleDrag, handleEnter, handleDelete };

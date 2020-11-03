@@ -19,6 +19,7 @@ const StyledContent = styled.div`
     max-height: 100%;
     max-width: 2000px;
     margin: 0 auto;
+    width: 100%;
 
     flex: 1 1 auto;
 

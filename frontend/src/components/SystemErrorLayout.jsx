@@ -67,10 +67,9 @@ const SystemErrorLayout = (props) => {
 	);
 	const timeoutContent = (
 		<span>
-			<StyledHeader>Request Timeout</StyledHeader>
 			<StyledParagraph>
-				It's taking a while for the server to respond. Please wait or
-				reload the page.
+				It's taking a while for the server to respond. Please wait a bit
+				longer or try reloading the page.
 			</StyledParagraph>
 		</span>
 	);

@@ -8,9 +8,14 @@ class TextEditor extends React.Component {
     super(props);
     this.state = {
       html: this.props.content || "",
+      renderDisplay: true,
+      editedSinceChange: false,
       editable: true,
       queryStartPos: null,
     };
+
+    this.onBlur = this.onBlur.bind(this);
+    this.onFocus = this.onFocus.bind(this);
 
     this.handleChange = this.handleChange.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
@@ -26,9 +31,15 @@ class TextEditor extends React.Component {
     this.checkFocus();
   }
 
-  // componentDidUpdate() {
-  //   this.checkFocus();
-  // }
+  componentDidUpdate() {
+    if (
+      this.props.content !== undefined &&
+      (this.props.content !== this.state.html && !this.state.editedSinceChange)
+    ) {
+      this.setState({ html: this.props.content });
+    }
+    //TODO check for renderedContent update too
+  }
 
   checkFocus() {
     if (this.props.focused && document.activeElement !== this.ref.current) {
@@ -36,12 +47,10 @@ class TextEditor extends React.Component {
       // element
       window.setTimeout(() => {
         this.ref.current.focus();
-        var setpos = document.createRange();
-        var set = window.getSelection();
-        // Set start position of range
+        const setpos = document.createRange();
+        const set = window.getSelection();
         setpos.setStart(this.ref.current.childNodes[0], 0);
         setpos.collapse(true);
-
         set.removeAllRanges();
         set.addRange(setpos);
         this.ref.current.focus();
@@ -68,15 +77,33 @@ class TextEditor extends React.Component {
     ALLOWED_TAGS: [],
   };
 
+  onBlur() {
+    this.sanitize();
+    this.setState({ renderDisplay: true });
+    if (this.props.onBlur) this.props.onBlur(this.state.html);
+  }
+
+  onFocus() {
+    if (this.props.onFocus) this.props.onFocus();
+    this.setState({ renderDisplay: false });
+  }
+
   handleChange(e) {
-    this.setState({ html: e.target.value }, () => {
-      // console.log(this.state.html);
+    this.setState({ html: e.target.value, editedSinceChange: true }, () => {
+      // TODO: time the duration that we've been editing, and periodically
+      // emit updates to the server. This should change props.content, so we
+      // want to keep a copy of all teh content created after the emit, then
+      // add it to the end of the new content, and adjust the cursor position.
+
+      // TODO: add a color difference around text that is not yet updated on
+      // the server (make it grey) like https://stackoverflow.com/a/38037538
+
       // if the state is empty, ensure the search is closed
       if (
         this.state.html.length === 0 ||
         (this.state.html.length === 4 && this.state.html === "<br>")
       ) {
-        this.props.closeSearch();
+        if (this.props.closeSearch) this.props.closeSearch();
       }
 
       // if we're in search mode, send the query
@@ -103,6 +130,20 @@ class TextEditor extends React.Component {
       const start = pos.endContainer;
       const startOffset = pos.endOffset;
 
+      // is the comparison element in one of the element's children in pos 0?
+      const isFirstChild = (comp, elt) => {
+        if (elt === comp) return true;
+        else if (elt.childNodes.length > 0) {
+          return isFirstChild(comp, elt.childNodes[0]);
+        } else {
+          return false;
+        }
+      };
+
+      // is the cursor in the first position?
+      const isAtStart =
+        pos.endOffset === 0 && isFirstChild(start, this.ref.current);
+
       const getOffset = (curr, offset) => {
         // add the length of the element's start tag to the offset
         const tagNameOffset =
@@ -112,26 +153,30 @@ class TextEditor extends React.Component {
         offset += tagNameOffset;
 
         // return the offset when we get to the top level element
-        if (curr.parentElement.innerHTML === this.state.html) {
+        if (curr.parentElement?.innerHTML === this.state.html) {
           // add the length of the top level element's tag to the offset
           return offset + curr.parentElement.innerHTML.indexOf(">") + 1;
         }
 
         // sum the lengths of the children before the current elt in the list
-        for (const pChild of curr.parentElement.childNodes) {
-          if (pChild === curr) {
-            break;
+        if (curr.parentElement !== null) {
+          for (const pChild of curr.parentElement.childNodes) {
+            if (pChild === curr) {
+              break;
+            }
+
+            // add both start and end tag offset length for a child element
+            const tagNameOffset =
+              pChild.nodeName === "#text" ? 0 : 2 * pChild.nodeName.length + 5;
+
+            //  increase the length of the offset with the element's content
+            offset +=
+              tagNameOffset === 0
+                ? pChild.textContent.length
+                : pChild.innerHTML.length + tagNameOffset;
           }
-
-          // add both start and end tag offset length for a child element
-          const tagNameOffset =
-            pChild.nodeName === "#text" ? 0 : 2 * pChild.nodeName.length + 5;
-
-          //  increase the length of the offset with the element's content
-          offset +=
-            tagNameOffset === 0
-              ? pChild.textContent.length
-              : pChild.innerHTML.length + tagNameOffset;
+        } else {
+          return 0;
         }
 
         // add the offsets of the parent's children up to the current elt
@@ -140,12 +185,12 @@ class TextEditor extends React.Component {
 
       // get the offset of the cursor position in DOM tree so that it's relative to
       // the top level element
-      const offset = getOffset(start, startOffset);
+      const offset = isAtStart ? 0 : getOffset(start, startOffset);
 
       // console.log("offset:", offset);
       // console.log(this.state.html.substring(0, offset));
 
-      return offset;
+      return [isAtStart, offset];
     }
     return null;
   }
@@ -158,13 +203,13 @@ class TextEditor extends React.Component {
       if (this.props.unitEnter) {
         // we expect unitEnter to return true if we should reset the editor content
         const res = this.props.unitEnter(
-          this.getCaretPosition(),
+          this.getCaretPosition()[1],
           this.state.html
         );
         if (res) {
-          this.setState({ html: res });
+          this.setState({ html: res, editedSinceChange: true });
         } else {
-          this.setState({ html: "" });
+          this.setState({ html: "", editedSinceChange: true });
         }
       }
     }
@@ -185,20 +230,28 @@ class TextEditor extends React.Component {
     }
     // shift + > for start query
     if (e.keyCode === 190 && e.shiftKey) {
-      // start the search
-      this.setState({
-        queryStartPos: this.state.html.includes("<br>")
-          ? this.state.html.length
-          : this.state.html.length + 4,
-      });
-      this.props.openSearch();
+      if (this.props.openSearch) {
+        // start the search
+        this.setState({
+          queryStartPos: this.state.html.includes("<br>")
+            ? this.state.html.length
+            : this.state.html.length + 4,
+        });
+        this.props.openSearch();
+      }
     }
     // on delete
     if (e.keyCode === 8) {
-      let caretPos = this.getCaretPosition();
+      let [caretAtStart, caretPos] = this.getCaretPosition();
       // if we're in the first position, trigger the on unit delete
-      if (caretPos === 0 && this.props.unitDelete) {
-        this.props.unitDelete(this.state.html);
+      if (caretAtStart && this.props.unitDelete) {
+        // completely sanitize the string and check its length
+        const isEmpty =
+          DOMPurify.sanitize(this.state.html, this.sanitizeCompleteConf)
+            .length === 0;
+        if (this.props.unitDelete)
+          this.props.unitDelete(isEmpty, this.state.html);
+        e.preventDefault();
       }
 
       // check if the query start character has been deleted
@@ -227,17 +280,19 @@ class TextEditor extends React.Component {
         showButton={this.props.showButton}
         innerRef={this.ref}
         className={this.props.className}
-        html={this.state.html}
+        focused={this.props.focused}
+        html={
+          this.state.renderDisplay && this.props.renderedContent !== undefined
+            ? this.props.renderedContent
+            : this.state.html
+        }
         disabled={!this.state.editable}
         onChange={this.handleChange}
-        onFocus={this.props.onFocus || null}
-        onBlur={() => {
-          this.sanitize();
-          if (this.props.onBlur) this.props.onBlur();
-        }}
+        onFocus={this.onFocus}
+        onBlur={this.onBlur}
         onKeyDown={this.handleKeyDown}
         makeSubmit={() => {
-          this.props.unitEnter(this.getCaretPosition(), this.state.html);
+          this.props.unitEnter(this.getCaretPosition()[1], this.state.html);
         }}
       />
     );

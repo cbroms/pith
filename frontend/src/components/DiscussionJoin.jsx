@@ -25,8 +25,10 @@ const DiscussionJoin = (props) => {
             editor={editor}
             done={nickname !== null && !props.badNickname}
             badNickname={props.badNickname}
+            badDiscussion={props.badDiscussion}
             nickname={nickname}
             joiningScreen={props.joiningScreen}
+            loadingScreen={props.loadingScreen}
         />
     );
 };

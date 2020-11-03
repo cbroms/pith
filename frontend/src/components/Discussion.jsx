@@ -26,6 +26,8 @@ const Discussion = (props) => {
 
     // const [joined, setJoined] = useState(false); // TODO replace with the real state
     const { joined, createNickname, joinUser } = props.events;
+    const loading = props.events.loadUser.pending;
+    const badDiscussion = props.userError.invalidDiscussion;
 
     const match = useRouteMatch();
     const { discussionId } = useParams();
@@ -47,6 +49,7 @@ const Discussion = (props) => {
 
     const chat = (
         <Chat
+            loading={props.events.loadUser.pending}
             content={props.content}
             posts={props.posts}
             openSearch={() => setChatSearchOpen(true)}
@@ -60,6 +63,7 @@ const Discussion = (props) => {
     );
     const doc = (
         <Document
+            loading={props.events.loadUser.pending}
             view={props.document}
             users={props.users}
             timeline={props.timeline}
@@ -87,20 +91,26 @@ const Discussion = (props) => {
                             badNickname={
                                 props.userError.createUser.takenNickname
                             }
+                            badDiscussion={badDiscussion}
                             onComplete={(nickname) => joinDiscussion(nickname)}
                             id={discussionId}
+                            loadingScreen={props.events.loadUser.pending}
                         />
                     )}
                 </Route>
                 <Route path={match.path}>
-                    {!joined && createNickname ? (
+                    {!joined && createNickname && !badDiscussion ? (
                         <Redirect
                             to={{
                                 pathname: `/d/${discussionId}/join`,
                             }}
                         />
-                    ) : !joined ? (
-                        <DiscussionJoin joiningScreen={true} />
+                    ) : !joined || loading || badDiscussion ? (
+                        <DiscussionJoin
+                            badDiscussion={badDiscussion}
+                            joiningScreen={!joined}
+                            loadingScreen={loading}
+                        />
                     ) : (
                         <DiscussionLayout
                             chat={chat}

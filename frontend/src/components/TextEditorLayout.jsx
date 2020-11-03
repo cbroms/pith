@@ -58,6 +58,7 @@ const TextEditorLayout = (props) => {
                 onFocus={props.onFocus}
                 onBlur={props.onBlur}
                 onKeyDown={props.onKeyDown}
+                spellCheck={props.focused}
             />
             {props.showButton ? (
                 <StyledButton onClick={props.makeSubmit}>

@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-import { LargeHeading, Paragraph } from "./StandardUI";
+import { LargeHeading, MediumHeading, Paragraph } from "./StandardUI";
 
 const StyledContainer = styled.div`
     display: grid;
@@ -43,38 +43,65 @@ const StyledContent = styled.div`
     max-width: 450px;
 `;
 
+const StyledErrorHeader = styled(MediumHeading)`
+    font-size: 1.25rem;
+    display: inline-block;
+    font-family: monospace;
+    margin: 0;
+    margin-right: 20px;
+`;
+
+const StyledErrorParagraph = styled(Paragraph)`
+    display: inline-block;
+    margin: 0;
+`;
+
 const StyledError = styled(Paragraph)`
     color: ${(props) => props.theme.errorShade};
 `;
 
 const DiscussionJoinLayout = (props) => {
-    return (
-        <StyledContainer>
-            {props.joiningScreen ? (
-                <StyledContent>
-                    <LargeHeading>Joining discussion...</LargeHeading>
-                </StyledContent>
+    let view = (
+        <StyledContent>
+            <LargeHeading>Create a nickname</LargeHeading>
+            <Paragraph>
+                Your nickname will be used to identify your contributions in the
+                discussion.
+            </Paragraph>
+            {props.done ? (
+                <Paragraph>joining as "{props.nickname}"...</Paragraph>
             ) : (
-                <StyledContent>
-                    <LargeHeading>Create a nickname</LargeHeading>
-                    <Paragraph>
-                        Your nickname will be used to identify your
-                        contributions in the discussion.
-                    </Paragraph>
-                    {props.done ? (
-                        <Paragraph>joining as "{props.nickname}"...</Paragraph>
-                    ) : (
-                        props.editor
-                    )}
-                    {props.badNickname ? (
-                        <StyledError>
-                            "{props.nickname}" is already taken.
-                        </StyledError>
-                    ) : null}
-                </StyledContent>
+                props.editor
             )}
-        </StyledContainer>
+            {props.badNickname ? (
+                <StyledError>"{props.nickname}" is already taken.</StyledError>
+            ) : null}
+        </StyledContent>
     );
+
+    if (props.badDiscussion) {
+        view = (
+            <StyledContent>
+                <StyledErrorHeader>404</StyledErrorHeader>
+                <StyledErrorParagraph>
+                    That discussion doesn't exist.
+                </StyledErrorParagraph>
+            </StyledContent>
+        );
+    } else if (props.joiningScreen && !props.loadingScreen) {
+        view = (
+            <StyledContent>
+                <LargeHeading>Joining discussion...</LargeHeading>
+            </StyledContent>
+        );
+    } else if (props.loadingScreen) {
+        view = (
+            <StyledContent>
+                <LargeHeading>Loading discussion...</LargeHeading>
+            </StyledContent>
+        );
+    }
+    return <StyledContainer>{view}</StyledContainer>;
 };
 
 export default DiscussionJoinLayout;

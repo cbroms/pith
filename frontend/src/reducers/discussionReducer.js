@@ -249,11 +249,11 @@ const discussionReducer = (state = defaultState, action) => {
         ...state,
         requestTimeout: false,
         events: events,
-      } 
+      };
     }
     case LOAD_USER_FULFILLED: {
       const events = { ...state.events };
-      events.loadUser = { ...defaultState.events.loadUser };
+      events.loadUser.pending = false;
       const chatMap = { ...state.chatMap };
       const docMap = { ...state.docMap };
       return {
@@ -275,12 +275,12 @@ const discussionReducer = (state = defaultState, action) => {
         ...state,
         requestTimeout: false,
         events: events,
-      } 
+      };
     }
     case LOAD_UNIT_PAGE_FULFILLED: {
       const events = { ...state.events };
       events.loadUnitPage = { ...defaultState.events.loadUnitPage };
-      const timeline = [ ...state.timeline ];
+      const timeline = [...state.timeline];
       timeline.push(action.payload.timelineEntry);
       const docMap = { ...state.docMap };
       return {
@@ -371,39 +371,72 @@ const discussionReducer = (state = defaultState, action) => {
         docMap: Object.assign(docMap, action.payload.docMapAdd),
       };
     }
-    case SEND_TO_DOC: {}
-    case SEND_TO_DOC_FULFILLED: {}
-    case ADD_UNIT: {}
-    case ADD_UNIT_FULFILLED: {}
-    case HIDE_UNIT: {}
-    case HIDE_UNIT_FULFILLED: {}
-    case UNHIDE_UNIT: {}
-    case UNHIDE_UNIT_FULFILLED: {}
-    case SELECT_UNIT: {}
-    case SELECT_UNIT_FULFILLED: {}
-    case DESELECT_UNIT: {}
-    case DESELECT_UNIT_FULFILLED: {}
-    case MOVE_UNIT: {}
-    case MOVE_UNIT_FULFILLED: {}
-    case REQUEST_EDIT_UNIT: {}
-    case REQUEST_EDIT_UNIT_FULFILLED: {}
-    case DEEDIT_UNIT: {}
-    case DEEDIT_UNIT_FULFILLED: {}
-    case EDIT_UNIT: {}
-    case EDIT_UNIT_FULFILLED: {}
-    case JOINED_USER: {}
-    case CREATED_POST: {}
-    case ADDED_UNIT: {}
-    case EDITED_UNIT: {}
-    case ADDED_BACKLINKS: {}
-    case REMOVED_BACKLINKS: {}
-    case HID_UNIT: {}
-    case UNHID_UNIT: {}
-    case REPOSITIONED_UNIT: {}
-    case LOCKED_EDIT: {}
-    case UNLOCKED_EDIT: {}
-    case LOCKED_POSITION: {}
-    case UNLOCKED_POSITION: {}
+    case SEND_TO_DOC: {
+    }
+    case SEND_TO_DOC_FULFILLED: {
+    }
+    case ADD_UNIT: {
+    }
+    case ADD_UNIT_FULFILLED: {
+    }
+    case HIDE_UNIT: {
+    }
+    case HIDE_UNIT_FULFILLED: {
+    }
+    case UNHIDE_UNIT: {
+    }
+    case UNHIDE_UNIT_FULFILLED: {
+    }
+    case SELECT_UNIT: {
+    }
+    case SELECT_UNIT_FULFILLED: {
+    }
+    case DESELECT_UNIT: {
+    }
+    case DESELECT_UNIT_FULFILLED: {
+    }
+    case MOVE_UNIT: {
+    }
+    case MOVE_UNIT_FULFILLED: {
+    }
+    case REQUEST_EDIT_UNIT: {
+    }
+    case REQUEST_EDIT_UNIT_FULFILLED: {
+    }
+    case DEEDIT_UNIT: {
+    }
+    case DEEDIT_UNIT_FULFILLED: {
+    }
+    case EDIT_UNIT: {
+    }
+    case EDIT_UNIT_FULFILLED: {
+    }
+    case JOINED_USER: {
+    }
+    case CREATED_POST: {
+    }
+    case ADDED_UNIT: {
+    }
+    case EDITED_UNIT: {
+    }
+    case ADDED_BACKLINKS: {
+    }
+    case REMOVED_BACKLINKS: {
+    }
+    case HID_UNIT: {
+    }
+    case UNHID_UNIT: {
+    }
+    case REPOSITIONED_UNIT: {
+    }
+    case LOCKED_EDIT: {
+    }
+    case UNLOCKED_EDIT: {
+    }
+    case LOCKED_POSITION: {
+    }
+    case UNLOCKED_POSITION: {
+    }
     default: {
       return { ...state };
     }

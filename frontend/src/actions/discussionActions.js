@@ -1,14 +1,14 @@
 import { socket } from "./socket";
 import { getValue, setValue } from "../api/local";
-import { 
+import {
   unpackCursors,
   unpackChildren,
   unpackBacklinks,
   unpackTimelineEntry,
-  unpackTimeline, 
+  unpackTimeline,
   unpackContext,
-  unpackChatMeta, 
-  unpackDocMeta, 
+  unpackChatMeta,
+  unpackDocMeta,
 } from "./utils";
 
 import {
@@ -229,7 +229,7 @@ const handleLoadUser = (dispatch, discussionId, userId) => {
             icons: cursors,
             currentUnit: response.current_unit,
             timeline: timeline,
-            chatHistory: response.chat_history,
+            chatHistory: response.chat_history || [],
             chatMapAdd: chatMeta,
             docMapAdd: docMeta,
           },
@@ -282,8 +282,9 @@ const enterUser = (discussionId) => {
     startRequest(() =>
       socket.emit("test_connect", data, (res) => {
         endRequest();
-        console.log("test_connect", res);
+
         const response = JSON.parse(res);
+        console.log("test_connect", response);
         if (isError(response)) {
           const error_stamp = response.error;
           switch (error_stamp) {
@@ -404,8 +405,8 @@ const getPage = (unitId) => {
         }
       })
     );
-  }
-}
+  };
+};
 
 const createPost = (pith) => {
   return (dispatch) => {
@@ -484,8 +485,8 @@ const getContext = (unitId) => {
         }
       })
     );
-  }
-}
+  };
+};
 
 const search = (query) => {
   return (dispatch) => {
@@ -518,17 +519,17 @@ const search = (query) => {
         }
       })
     );
-  }
-}
+  };
+};
 
-export { 
-  enterUser, 
-  createUser, 
+export {
+  enterUser,
+  createUser,
   getPage,
-  createPost, 
+  createPost,
   getContext,
   search,
-/*
+  /*
   sendToDoc,
   addUnit,
   hideUnit,
@@ -540,9 +541,9 @@ export {
   deeditUnit,
   editUnit,
 */
-  subscribeUsers, 
+  subscribeUsers,
   subscribeChat,
-/*
+  /*
   subscribeAddedUnit,
   subscribeEditedUnit,
   subscribeAddedBacklinks,

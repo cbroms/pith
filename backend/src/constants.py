@@ -26,7 +26,7 @@ MAX_QUEUED_JOB_RETRIES = 5
 MAX_JOBS = 10
 
 # using ISO so this can be easily parsed in js with Date()
-DATE_TIME_FMT = "%Y-%m-%dT%H:%M:%SZ"
+DATE_TIME_FMT = "%Y-%m-%dT%H:%M:%S.000Z"
 MONGODB_CONN = os.getenv("MONGODB_CONN", "mongodb://localhost:27017")
 MONGODB_NAME = os.getenv("MONGODB_NAME", "pith")
 
