@@ -1,44 +1,45 @@
 {
-    "type": "object",
     "definitions": {
-      "$$target": ["#/definitions/cursor", "#/definitions/chat_meta", "#/definitions/doc_meta"],
       "cursor": {"$ref": "cursor.json#/cursor"},
       "chat_meta": {"$ref": "chat_meta.json#/chat_meta"},
       "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
     },
-    "properties": {
-      "cursors": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "user_id": {"type": "string"},
-            "nickname": {"type": "string"},
-            "cursor": {"$ref": "#/definitions/cursor"}
-          },
-          "required": ["user_id", "nickname", "cursor"]
-        }
+    "base": {
+      "type": "object",
+      "properties": {
+        "cursors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "user_id": {"type": "string"},
+              "nickname": {"type": "string"},
+              "cursor": {"$ref": "#/definitions/cursor"}
+            },
+            "required": ["user_id", "nickname", "cursor"]
+          }
+        },
+        "current_unit": {"type": "string"},
+        "timeline": {
+          "type" : "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "unit_id": {"type": "string"},
+              "start_time": {"type": "string"},
+              "end_time": {"type": "string"}
+            },
+            "required": ["unit_id", "start_time", "end_time"]
+          }
+        }, 
+        "chat_history": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "chat_meta": {"$ref": "#/definitions/chat_meta"},
+        "doc_meta": {"$ref": "#/definitions/doc_meta"}
       },
-      "current_unit": {"type": "string"},
-      "timeline": {
-        "type" : "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "unit_id": {"type": "string"},
-            "start_time": {"type": "string"},
-            "end_time": {"type": "string"}
-          },
-          "required": ["unit_id", "start_time", "end_time"]
-        }
-      }, 
-      "chat_history": {
-        "type": "array",
-        "items": {"type": "string"}
-      },
-      "chat_meta": {"$ref": "#/definitions/chat_meta"},
-      "doc_meta": {"$ref": "#/definitions/doc_meta"}
-    },
-    "required": ["cursors", "current_unit", "timeline", "chat_history", "chat_meta", "doc_meta"]
+      "required": ["cursors", "current_unit", "timeline", "chat_history", "chat_meta", "doc_meta"]
+  }
 }
 

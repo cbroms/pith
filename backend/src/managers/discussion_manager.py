@@ -338,7 +338,7 @@ class DiscussionManager:
         response = {
           "user_id": user_id,
           "nickname": user.name,
-          "cursor": user.cursor.to_mongo()
+          "cursor": user.cursor.to_mongo().to_dict()
         }
         return None, [response]
 
@@ -372,7 +372,7 @@ class DiscussionManager:
             cursors.append({
               "user_id": p.id,
               "nickname": p.name, 
-              "cursor": p.cursor.to_mongo()
+              "cursor": p.cursor.to_mongo().to_dict()
             })
           doc_meta.append(self._doc_meta(p.cursor.unit_id))
 
@@ -400,7 +400,7 @@ class DiscussionManager:
           "cursors": cursors,
           "current_unit": user.viewed_unit, 
           "timeline": timeline,
-          "chat_history": discussion.chat.to_mongo(), 
+          "chat_history": list(discussion.chat), 
           "chat_meta": chat_meta,
           "doc_meta": doc_meta
         }
@@ -488,12 +488,12 @@ class DiscussionManager:
           "children": children,
           "backlinks": backlinks,
           "timeline_entry": timeline_entry,
-          "cursor": cursor.to_mongo(),
+          "cursor": cursor.to_mongo().to_dict(),
           "doc_meta": doc_meta
         }
         cursor_response = {
           "user_id": user_id,
-          "cursor": cursor.to_mongo(),
+          "cursor": cursor.to_mongo().to_dict(),
         }
 
         return response, [cursor_response]
@@ -700,7 +700,7 @@ class DiscussionManager:
         user = discussion.get().users.filter(id=user_id).get()
         response = {
             "user_id": user_id,
-            "cursor": user.cursor.to_mongo()
+            "cursor": user.cursor.to_mongo().to_dict()
         }
         return None, [response]
 

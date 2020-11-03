@@ -75,6 +75,8 @@ class DiscussionNamespace(AsyncNamespace):
               assert(emits_res is not None)
               for r, e in zip(emits_res, emits):
                 try:
+                  logger.info("VAL {}\n{}".format(r, dres.schema[e]))
+              
                   validate(instance=r, schema=dres.schema[e])
                 except ValidationError:
                   bad_response = True

@@ -64,7 +64,7 @@ const createTimeoutHandler = (dispatch, timeout = 5000) => {
       elapsed += 1000;
 
       if (elapsed >= timeout) {
-        console.error("request timed out");
+        console.error("request timed out", func);
         dispatch({
           type: REQUEST_TIMEOUT,
         });
