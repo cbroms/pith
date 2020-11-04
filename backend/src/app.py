@@ -64,6 +64,7 @@ class DiscussionNamespace(AsyncNamespace):
             ret_res, emits_res = product
 
             bad_response = False
+
             if ret is not None:
               try:
                 validate(instance=ret_res, schema=dres.schema[ret])
@@ -82,18 +83,18 @@ class DiscussionNamespace(AsyncNamespace):
             if bad_response: # we cannot send off emits
               result = make_error(Errors.BAD_RESPONSE)
             else: # we can send off emits
+
+              if result is None:
+                result = {"success": 0} # to avoid null
+              result = dumps(result, cls=DictEncoder)
+
               if emits is not None:
                 assert(emits_res is not None)
                 for r, e in zip(emits_res, emits):
                   serialized = dumps(r, cls=DictEncoder)
                   await self.emit(e, serialized, room=discussion_id)
 
-          # send off return, whether it is error or desired result 
-          if result == None:
-            result = {"success": 0} # to avoid null
-          result = dumps(result, cls=DictEncoder)
           return result
-
         return helper
       return outer
 

@@ -44,11 +44,9 @@ const Chat = (props) => {
 
     // calculate the post times before adding the transclusions
     for (const group of postGroups) {
-        const date = dayjs(group[0].created_at)
+        const date = dayjs(group[0].createdAt)
             .utc()
             .local();
-
-        console.log(group[0].created_at);
 
         const formattedDate = dayjs(date).calendar(null, {
             sameDay: "[Today at] h:mm a",

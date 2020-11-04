@@ -33,7 +33,7 @@ const Discussion = (props) => {
     const { discussionId } = useParams();
 
     useEffect(() => {
-        if (!joined && !createNickname && !joinUser.pending)
+        if (!joined && !createNickname && !joinUser.pending && !badDiscussion)
             props.dispatch(enterUser(discussionId));
         else if (joined && !subscribed) {
             props.dispatch(props.subscribeChat());

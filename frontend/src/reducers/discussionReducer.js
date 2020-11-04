@@ -124,12 +124,14 @@ const discussionReducer = (state = defaultState, action) => {
         ...state,
         systemError: true,
       };
+      break;
     }
     case REQUEST_TIMEOUT: {
       return {
         ...state,
         requestTimeout: true,
       };
+      break;
     }
     case INVALID_DISCUSSION: {
       const userError = { ...state.userError };
@@ -138,6 +140,7 @@ const discussionReducer = (state = defaultState, action) => {
         ...state,
         userError: userError,
       };
+      break;
     }
     case TAKEN_NICKNAME: {
       const userError = { ...state.userError };
@@ -146,6 +149,7 @@ const discussionReducer = (state = defaultState, action) => {
         ...state,
         userError: userError,
       };
+      break;
     }
     case TAKEN_USER_ID: {
       const userError = { ...state.userError };
@@ -154,6 +158,7 @@ const discussionReducer = (state = defaultState, action) => {
         ...state,
         userError: userError,
       };
+      break;
     }
     case MOVE_UNABLED: {
       const userError = { ...state.userError };
@@ -162,6 +167,7 @@ const discussionReducer = (state = defaultState, action) => {
         ...state,
         userError: userError,
       };
+      break;
     }
     case EDIT_UNABLED: {
       const userError = { ...state.userError };
@@ -171,6 +177,7 @@ const discussionReducer = (state = defaultState, action) => {
         requestTimeout: false,
         userError: userError,
       };
+      break;
     }
     case BAD_TARGET: {
       const userError = { ...state.userError };
@@ -180,16 +187,17 @@ const discussionReducer = (state = defaultState, action) => {
         requestTimeout: false,
         userError: userError,
       };
+      break;
     }
     case CREATE_NICKNAME: {
       const events = { ...state.events };
       events.createNickname = true;
-
       return {
         ...state,
         requestTimeout: false,
         events: events,
       };
+      break;
     }
     case CREATE_USER: {
       const events = { ...state.events };
@@ -202,6 +210,7 @@ const discussionReducer = (state = defaultState, action) => {
         requestTimeout: false,
         userError: userError,
       };
+      break;
     }
     case JOIN_USER: {
       const events = { ...state.events };
@@ -211,6 +220,7 @@ const discussionReducer = (state = defaultState, action) => {
         requestTimeout: false,
         events: events,
       };
+      break;
     }
     case CREATE_USER_FULFILLED: {
       const events = { ...state.events };
@@ -220,6 +230,7 @@ const discussionReducer = (state = defaultState, action) => {
         requestTimeout: false,
         events: events,
       };
+      break;
     }
     case JOIN_USER_FULFILLED: {
       const events = { ...state.events };
@@ -233,6 +244,7 @@ const discussionReducer = (state = defaultState, action) => {
         userId: action.payload.userId,
         nickname: action.payload.nickname,
       };
+      break;
     }
     case JOINED_USER: {
       const icons = [...state.icons];
@@ -241,6 +253,7 @@ const discussionReducer = (state = defaultState, action) => {
         ...state,
         icons: icons,
       };
+      break;
     }
     case LOAD_USER: {
       const events = { ...state.events };
@@ -250,6 +263,7 @@ const discussionReducer = (state = defaultState, action) => {
         requestTimeout: false,
         events: events,
       };
+      break;
     }
     case LOAD_USER_FULFILLED: {
       const events = { ...state.events };
@@ -267,6 +281,7 @@ const discussionReducer = (state = defaultState, action) => {
         chatMap: Object.assign(chatMap, action.payload.chatMapAdd),
         docMap: Object.assign(docMap, action.payload.docMapAdd),
       };
+      break;
     }
     case LOAD_UNIT_PAGE: {
       const events = { ...state.events };
@@ -276,6 +291,7 @@ const discussionReducer = (state = defaultState, action) => {
         requestTimeout: false,
         events: events,
       };
+      break;
     }
     case LOAD_UNIT_PAGE_FULFILLED: {
       const events = { ...state.events };
@@ -294,6 +310,7 @@ const discussionReducer = (state = defaultState, action) => {
         backlinkTree: action.payload.backlinks,
         docMap: Object.assign(docMap, action.payload.docMapAdd),
       };
+      break;
     }
     case CREATE_POST: {
       const events = { ...state.events };
@@ -304,6 +321,7 @@ const discussionReducer = (state = defaultState, action) => {
         requestTimeout: false,
         events: events,
       };
+      break;
     }
     case CREATE_POST_FULFILLED: {
       const events = { ...state.events };
@@ -313,6 +331,7 @@ const discussionReducer = (state = defaultState, action) => {
         requestTimeout: false,
         events: events,
       };
+      break;
     }
     case CREATED_POST: {
       const posts = [...state.posts];
@@ -325,6 +344,7 @@ const discussionReducer = (state = defaultState, action) => {
         chatMap: Object.assign(chatMap, action.payload.chatMapAdd),
         docMap: Object.assign(docMap, action.payload.docMapAdd),
       };
+      break;
     }
     case GET_CONTEXT: {
       const events = { ...state.events };
@@ -334,6 +354,7 @@ const discussionReducer = (state = defaultState, action) => {
         requestTimeout: false,
         events: events,
       };
+      break;
     }
     case GET_CONTEXT_FULFILLED: {
       const events = { ...state.events };
@@ -344,6 +365,7 @@ const discussionReducer = (state = defaultState, action) => {
         events: events,
         currentContext: action.payload.context,
       };
+      break;
     }
     case SEARCH: {
       const events = { ...state.events };
@@ -353,6 +375,7 @@ const discussionReducer = (state = defaultState, action) => {
         requestTimeout: false,
         events: events,
       };
+      break;
     }
     case SEARCH_FULFILLED: {
       const events = { ...state.events };
@@ -370,6 +393,7 @@ const discussionReducer = (state = defaultState, action) => {
         chatMap: Object.assign(chatMap, action.payload.chatMapAdd),
         docMap: Object.assign(docMap, action.payload.docMapAdd),
       };
+      break;
     }
     case SEND_TO_DOC: {
     }

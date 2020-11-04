@@ -292,6 +292,7 @@ const enterUser = (discussionId) => {
               dispatch({
                 type: INVALID_DISCUSSION,
               });
+              break;
             }
             default: {
               dispatch({
@@ -522,6 +523,35 @@ const search = (query) => {
   };
 };
 
+const sendToDoc = (query) => {
+  return (dispatch) => {
+    const data = {
+      query: query,
+    };
+
+    dispatch({
+      type: SEND_TO_DOC,
+    });
+
+    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+
+    startRequest(() =>
+      socket.emit("send_to_doc", data, (res) => {
+        endRequest();
+        const response = JSON.parse(res);
+        if (isError(response)) {
+          handleError(dispatch, response);
+        } else {
+          console.log("DONE send_to_doc");
+          dispatch({
+            type: SEND_TO_DOC_FULFILLED,
+          });
+        }
+      })
+    );
+  };
+};
+
 export {
   enterUser,
   createUser,
@@ -529,8 +559,8 @@ export {
   createPost,
   getContext,
   search,
-  /*
   sendToDoc,
+  /*
   addUnit,
   hideUnit,
   unhideUnit,
