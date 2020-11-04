@@ -1,6 +1,5 @@
 {
   "definitions": {
-    "$$target": ["#/definitions/doc_meta"],
     "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
   },
   "base": {

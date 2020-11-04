@@ -65,8 +65,8 @@ import {
   SELECT_UNIT_FULFILLED,
   DESELECT_UNIT,
   DESELECT_UNIT_FULFILLED,
-  MOVE_UNIT,
-  MOVE_UNIT_FULFILLED,
+  MOVE_UNITS,
+  MOVE_UNITS_FULFILLED,
   REQUEST_EDIT_UNIT,
   REQUEST_EDIT_UNIT_FULFILLED,
   DEEDIT_UNIT,
@@ -349,28 +349,6 @@ const createUser = (discussionId, nickname) => {
   };
 };
 
-const subscribeUsers = () => {
-  return (dispatch) => {
-    socket.on("joined_user", (res) => {
-      const response = JSON.parse(res);
-      if (isError(response)) {
-        handleError(dispatch, response);
-      } else {
-        dispatch({
-          type: JOINED_USER,
-          payload: {
-            icon: {
-              userId: response.user_id,
-              nickname: response.nickname,
-              unitId: response.cursor.unit_id,
-            },
-          },
-        });
-      }
-    });
-  };
-};
-
 const getPage = (unitId) => {
   return (dispatch) => {
     const data = {
@@ -441,24 +419,6 @@ const createPost = (pith) => {
   };
 };
 
-const subscribeChat = () => {
-  return (dispatch) => {
-    socket.on("created_post", (res) => {
-      const response = JSON.parse(res);
-      const chatMeta = unpackChatMeta(response.chat_meta);
-      const docMeta = unpackDocMeta(response.doc_meta);
-      dispatch({
-        type: CREATED_POST,
-        payload: {
-          unitId: response.unit_id,
-          chatMapAdd: chatMeta,
-          docMapAdd: docMeta,
-        },
-      });
-    });
-  };
-};
-
 const getContext = (unitId) => {
   return (dispatch) => {
     const data = {
@@ -523,10 +483,10 @@ const search = (query) => {
   };
 };
 
-const sendToDoc = (query) => {
+const sendToDoc = (unitId) => {
   return (dispatch) => {
     const data = {
-      query: query,
+      unit_id: unitId,
     };
 
     dispatch({
@@ -542,13 +502,326 @@ const sendToDoc = (query) => {
         if (isError(response)) {
           handleError(dispatch, response);
         } else {
-          console.log("DONE send_to_doc");
           dispatch({
             type: SEND_TO_DOC_FULFILLED,
           });
         }
       })
     );
+  };
+};
+
+const addUnit = (pith, parentUnit, position) => {
+  return (dispatch) => {
+    const data = {
+      pith: pith,
+      parent: parentUnit,
+      position: position
+    };
+
+    dispatch({
+      type: ADD_UNIT,
+    });
+
+    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+
+    startRequest(() =>
+      socket.emit("add_unit", data, (res) => {
+        endRequest();
+        const response = JSON.parse(res);
+        if (isError(response)) {
+          handleError(dispatch, response);
+        } else {
+          dispatch({
+            type: ADD_UNIT_FULFILLED,
+          });
+        }
+      })
+    );
+  };
+};
+
+const hideUnit = (unitId) => {
+  return (dispatch) => {
+    const data = {
+      unit_id: unitId,
+    };
+
+    dispatch({
+      type: HIDE_UNIT,
+    });
+
+    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+
+    startRequest(() =>
+      socket.emit("hide_unit", data, (res) => {
+        endRequest();
+        const response = JSON.parse(res);
+        if (isError(response)) {
+          handleError(dispatch, response);
+        } else {
+          dispatch({
+            type: HIDE_UNIT_FULFILLED,
+          });
+        }
+      })
+    );
+  };
+};
+
+const unhideUnit = (unitId) => {
+  return (dispatch) => {
+    const data = {
+      unit_id: unitId,
+    };
+
+    dispatch({
+      type: UNHIDE_UNIT,
+    });
+
+    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+
+    startRequest(() =>
+      socket.emit("unhide_unit", data, (res) => {
+        endRequest();
+        const response = JSON.parse(res);
+        if (isError(response)) {
+          handleError(dispatch, response);
+        } else {
+          dispatch({
+            type: UNHIDE_UNIT_FULFILLED,
+          });
+        }
+      })
+    );
+  };
+};
+
+const selectUnit = (unitId) => {
+  return (dispatch) => {
+    const data = {
+      unit_id: unitId,
+    };
+
+    dispatch({
+      type: SELECT_UNIT,
+    });
+
+    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+
+    startRequest(() =>
+      socket.emit("select_unit", data, (res) => {
+        endRequest();
+        const response = JSON.parse(res);
+        if (isError(response)) {
+          handleError(dispatch, response);
+        } else {
+          dispatch({
+            type: SELECT_UNIT_FULFILLED,
+          });
+        }
+      })
+    );
+  };
+};
+
+const deselectUnit = (unitId) => {
+  return (dispatch) => {
+    const data = {
+      unit_id: unitId,
+    };
+
+    dispatch({
+      type: DESELECT_UNIT,
+    });
+
+    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+
+    startRequest(() =>
+      socket.emit("deselect_unit", data, (res) => {
+        endRequest();
+        const response = JSON.parse(res);
+        if (isError(response)) {
+          handleError(dispatch, response);
+        } else {
+          dispatch({
+            type: DESELECT_UNIT_FULFILLED,
+          });
+        }
+      })
+    );
+  };
+};
+
+const moveUnits = (units, parentUnit, position) => {
+  return (dispatch) => {
+    const data = {
+      units: units,
+      parent: parentUnit,
+      position: position,
+    };
+
+    dispatch({
+      type: MOVE_UNITS,
+    });
+
+    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+
+    startRequest(() =>
+      socket.emit("move_units", data, (res) => {
+        endRequest();
+        const response = JSON.parse(res);
+        if (isError(response)) {
+          handleError(dispatch, response);
+        } else {
+          dispatch({
+            type: MOVE_UNITS_FULFILLED,
+          });
+        }
+      })
+    );
+  };
+};
+
+const requestEdit = (unitId) => {
+  return (dispatch) => {
+    const data = {
+      unit_id: unitId,
+    };
+
+    dispatch({
+      type: REQUEST_EDIT,
+    });
+
+    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+
+    startRequest(() =>
+      socket.emit("request_to_edit", data, (res) => {
+        endRequest();
+        const response = JSON.parse(res);
+        if (isError(response)) {
+          handleError(dispatch, response);
+        } else {
+          dispatch({
+            type: REQUEST_EDIT_FULFILLED,
+          });
+        }
+      })
+    );
+  };
+};
+
+const deeditUnit = (unitId) => {
+  return (dispatch) => {
+    const data = {
+      unit_id: unitId,
+    };
+
+    dispatch({
+      type: DEEDIT_UNIT,
+    });
+
+    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+
+    startRequest(() =>
+      socket.emit("deedit_unit", data, (res) => {
+        endRequest();
+        const response = JSON.parse(res);
+        if (isError(response)) {
+          handleError(dispatch, response);
+        } else {
+          dispatch({
+            type: DEEDIT_UNIT_FULFILLED,
+          });
+        }
+      })
+    );
+  };
+};
+
+const editUnit = (unitId) => {
+  return (dispatch) => {
+    const data = {
+      unit_id: unitId,
+    };
+
+    dispatch({
+      type: EDIT_UNIT,
+    });
+
+    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+
+    startRequest(() =>
+      socket.emit("edit_unit", data, (res) => {
+        endRequest();
+        const response = JSON.parse(res);
+        if (isError(response)) {
+          handleError(dispatch, response);
+        } else {
+          dispatch({
+            type: EDIT_UNIT_FULFILLED,
+          });
+        }
+      })
+    );
+  };
+};
+
+const subscribeUsers = () => {
+  return (dispatch) => {
+    socket.on("joined_user", (res) => {
+      const response = JSON.parse(res);
+      if (isError(response)) {
+        handleError(dispatch, response);
+      } else {
+        dispatch({
+          type: JOINED_USER,
+          payload: {
+            icon: {
+              userId: response.user_id,
+              nickname: response.nickname,
+              unitId: response.cursor.unit_id,
+            },
+          },
+        });
+      }
+    });
+  };
+};
+
+const subscribeChat = () => {
+  return (dispatch) => {
+    socket.on("created_post", (res) => {
+      const response = JSON.parse(res);
+      const chatMeta = unpackChatMeta(response.chat_meta);
+      const docMeta = unpackDocMeta(response.doc_meta);
+      dispatch({
+        type: CREATED_POST,
+        payload: {
+          unitId: response.unit_id,
+          chatMapAdd: chatMeta,
+          docMapAdd: docMeta,
+        },
+      });
+    });
+  };
+};
+
+const subscribeAddedUnit = () => {
+  return (dispatch) => {
+    socket.on("created_post", (res) => {
+      const response = JSON.parse(res);
+      const chatMeta = unpackChatMeta(response.chat_meta);
+      const docMeta = unpackDocMeta(response.doc_meta);
+      dispatch({
+        type: CREATED_POST,
+        payload: {
+          unitId: response.unit_id,
+          chatMapAdd: chatMeta,
+          docMapAdd: docMeta,
+        },
+      });
+    });
   };
 };
 
@@ -560,7 +833,6 @@ export {
   getContext,
   search,
   sendToDoc,
-  /*
   addUnit,
   hideUnit,
   unhideUnit,
@@ -570,7 +842,6 @@ export {
   requestEdit,
   deeditUnit,
   editUnit,
-*/
   subscribeUsers,
   subscribeChat,
   /*

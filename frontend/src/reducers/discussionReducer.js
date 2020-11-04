@@ -33,8 +33,8 @@ import {
   SELECT_UNIT_FULFILLED,
   DESELECT_UNIT,
   DESELECT_UNIT_FULFILLED,
-  MOVE_UNIT,
-  MOVE_UNIT_FULFILLED,
+  MOVE_UNITS,
+  MOVE_UNITS_FULFILLED,
   REQUEST_EDIT_UNIT,
   REQUEST_EDIT_UNIT_FULFILLED,
   DEEDIT_UNIT,
@@ -95,6 +95,39 @@ const defaultState = {
       },
     },
     getContext: {
+      pending: false,
+    },
+    search: {
+      pending: false,
+    },
+    sendToDoc: {
+      pending: false,
+    },
+    addUnit: {
+      pending: false,
+    },
+    hideUnit: {
+      pending: false,
+    },
+    unhideUnit: {
+      pending: false,
+    },
+    selectUnit: {
+      pending: false,
+    },
+    deselectUnit: {
+      pending: false,
+    },
+    moveUnits: {
+      pending: false,
+    },
+    requestEdit: {
+      pending: false,
+    },
+    deeditUnit: {
+      pending: false,
+    },
+    editUnit: {
       pending: false,
     },
   },
@@ -246,15 +279,6 @@ const discussionReducer = (state = defaultState, action) => {
       };
       break;
     }
-    case JOINED_USER: {
-      const icons = [...state.icons];
-      icons.push(action.payload.icon);
-      return {
-        ...state,
-        icons: icons,
-      };
-      break;
-    }
     case LOAD_USER: {
       const events = { ...state.events };
       events.loadUser.pending = true;
@@ -333,19 +357,6 @@ const discussionReducer = (state = defaultState, action) => {
       };
       break;
     }
-    case CREATED_POST: {
-      const posts = [...state.posts];
-      posts.push(action.payload.unitId);
-      const chatMap = { ...state.chatMap };
-      const docMap = { ...state.docMap };
-      return {
-        ...state,
-        posts: posts,
-        chatMap: Object.assign(chatMap, action.payload.chatMapAdd),
-        docMap: Object.assign(docMap, action.payload.docMapAdd),
-      };
-      break;
-    }
     case GET_CONTEXT: {
       const events = { ...state.events };
       events.getContext.pending = true;
@@ -396,48 +407,226 @@ const discussionReducer = (state = defaultState, action) => {
       break;
     }
     case SEND_TO_DOC: {
+      const events = { ...state.events };
+      events.sendToDoc.pending = true;
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case SEND_TO_DOC_FULFILLED: {
+      const events = { ...state.events };
+      events.sendToDoc = { ...defaultState.events.sendToDoc };
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case ADD_UNIT: {
+      const events = { ...state.events };
+      events.addUnit.pending = true;
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case ADD_UNIT_FULFILLED: {
+      const events = { ...state.events };
+      events.addUnit = { ...defaultState.events.addUnit };
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case HIDE_UNIT: {
+      const events = { ...state.events };
+      events.hideUnit.pending = true;
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case HIDE_UNIT_FULFILLED: {
+      const events = { ...state.events };
+      events.hideUnit = { ...defaultState.events.hideUnit };
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case UNHIDE_UNIT: {
+      const events = { ...state.events };
+      events.unhideUnit.pending = true;
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case UNHIDE_UNIT_FULFILLED: {
+      const events = { ...state.events };
+      events.unhideUnit = { ...defaultState.events.unhideUnit };
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case SELECT_UNIT: {
+      const events = { ...state.events };
+      events.selectUnit.pending = true;
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case SELECT_UNIT_FULFILLED: {
+      const events = { ...state.events };
+      events.selectUnit = { ...defaultState.events.selectUnit };
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case DESELECT_UNIT: {
+      const events = { ...state.events };
+      events.deselectUnit.pending = true;
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case DESELECT_UNIT_FULFILLED: {
+      const events = { ...state.events };
+      events.deselectUnit = { ...defaultState.events.deselectUnit };
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
-    case MOVE_UNIT: {
+    case MOVE_UNITS: {
+      const events = { ...state.events };
+      events.moveUnits.pending = true;
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
-    case MOVE_UNIT_FULFILLED: {
+    case MOVE_UNITS_FULFILLED: {
+      const events = { ...state.events };
+      events.moveUnits = { ...defaultState.events.moveUnits };
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case REQUEST_EDIT_UNIT: {
+      const events = { ...state.events };
+      events.requestEdit.pending = true;
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case REQUEST_EDIT_UNIT_FULFILLED: {
+      const events = { ...state.events };
+      events.requestEdit = { ...defaultState.events.requestEdit };
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case DEEDIT_UNIT: {
+      const events = { ...state.events };
+      events.deeditUnit.pending = true;
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case DEEDIT_UNIT_FULFILLED: {
+      const events = { ...state.events };
+      events.deeditUnit = { ...defaultState.events.deeditUnit };
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case EDIT_UNIT: {
+      const events = { ...state.events };
+      events.editUnit.pending = true;
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case EDIT_UNIT_FULFILLED: {
+      const events = { ...state.events };
+      events.editUnit = { ...defaultState.events.editUnit };
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
     }
     case JOINED_USER: {
+      const icons = [...state.icons];
+      icons.push(action.payload.icon);
+      return {
+        ...state,
+        icons: icons,
+      };
+      break;
     }
     case CREATED_POST: {
+      const posts = [...state.posts];
+      posts.push(action.payload.unitId);
+      const chatMap = { ...state.chatMap };
+      const docMap = { ...state.docMap };
+      return {
+        ...state,
+        posts: posts,
+        chatMap: Object.assign(chatMap, action.payload.chatMapAdd),
+        docMap: Object.assign(docMap, action.payload.docMapAdd),
+      };
+      break;
     }
     case ADDED_UNIT: {
     }
