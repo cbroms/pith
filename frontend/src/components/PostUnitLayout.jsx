@@ -45,7 +45,7 @@ const PostUnitLayout = (props) => {
         >
             <StyledUnit>{props.unit}</StyledUnit>
             <StyledMoveButton className="move">
-                <Button onClick={() => console.log("open")} noBackground>
+                <Button onClick={props.onMove} noBackground>
                     <MoveRightChevron />
                 </Button>
             </StyledMoveButton>

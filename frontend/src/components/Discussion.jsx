@@ -8,7 +8,7 @@ import {
     useParams,
 } from "react-router-dom";
 
-import { enterUser, createUser } from "../actions/discussionActions";
+import { enterUser, createUser, sendToDoc } from "../actions/discussionActions";
 
 import Chat from "./Chat";
 import Document from "./Document";
@@ -58,6 +58,10 @@ const Discussion = (props) => {
             addPost={(content) => {
                 console.log("posted:", content);
                 props.dispatch(props.createPost(content));
+            }}
+            sendPostToDoc={(id) => {
+                console.log("moved:", id);
+                props.dispatch(sendToDoc(id));
             }}
         />
     );

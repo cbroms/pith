@@ -109,6 +109,7 @@ const Chat = (props) => {
                         post?.totalTranscluded === post?.transcludeNum
                     }
                     transcluded={post.transcluded}
+                    onMove={() => props.sendPostToDoc(post.id)}
                     unit={unit}
                     key={`${post.id}-${
                         post.transcluded ? group[group.length - 1].id : "og"
