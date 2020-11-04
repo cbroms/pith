@@ -38,6 +38,8 @@ import {
   BAD_TARGET,
   REQUEST_TIMEOUT,
   RESET_REQUEST_TIMEOUT,
+  CHAT_MAP,
+  DOC_MAP,
   CREATE_NICKNAME,
   CREATE_USER,
   CREATE_USER_FULFILLED,
@@ -76,12 +78,11 @@ import {
   JOINED_USER,
   CREATED_POST,
   ADDED_UNIT,
-  EDITED_UNIT,
-  ADDED_BACKLINKS,
-  REMOVED_BACKLINKS,
+  REMOVED_UNIT,
+  ADDED_BACKLINK,
+  REMOVED_BACKLINK,
   HID_UNIT,
   UNHID_UNIT,
-  REPOSITIONED_UNIT,
   LOCKED_EDIT,
   UNLOCKED_EDIT,
   LOCKED_POSITION,
@@ -224,14 +225,24 @@ const handleLoadUser = (dispatch, discussionId, userId) => {
         const timeline = unpackTimeline(response.timeline);
         const cursors = unpackCursors(response.cursors);
         dispatch({
+          type: CHAT_MAP,
+          payload: {
+            chatMapAdd: chatMeta,
+          }
+        });
+        dispatch({
+          type: DOC_MAP,
+          payload: {
+            docMapAdd: docMeta,
+          }
+        });
+        dispatch({
           type: LOAD_USER_FULFILLED,
           payload: {
             icons: cursors,
             currentUnit: response.current_unit,
             timeline: timeline,
             chatHistory: response.chat_history || [],
-            chatMapAdd: chatMeta,
-            docMapAdd: docMeta,
           },
         });
       }
@@ -373,13 +384,18 @@ const getPage = (unitId) => {
           const timelineEntry = unpackTimelineEntry(response.timeline_entry);
           const docMeta = unpackDocMeta(response.doc_meta);
           dispatch({
+            type: DOC_MAP,
+            payload: {
+              docMapAdd: docMeta,
+            }
+          });
+          dispatch({
             type: LOAD_UNIT_PAGE_FULFILLED,
             ancestors: response.ancestors,
             currentUnit: response.cursor.unit_id,
             timelineEntry: timelineEntry,
             children: children,
             backlinks: backlinks,
-            docMeta: docMeta,
           });
         }
       })
@@ -471,11 +487,21 @@ const search = (query) => {
           const chatMeta = unpackChatMeta(response.chat_meta);
           const docMeta = unpackDocMeta(response.doc_meta);
           dispatch({
+            type: CHAT_MAP,
+            payload: {
+              chatMapAdd: chatMeta,
+            }
+          });
+          dispatch({
+            type: DOC_MAP,
+            payload: {
+              docMapAdd: docMeta,
+            }
+          });
+          dispatch({
             type: SEARCH_FULFILLED,
             chatResults: response.chat_units,
             docResults: response.doc_units,
-            chatMapAdd: chatMeta,
-            docMapAdd: docMeta,
           });
         }
       })
@@ -690,7 +716,7 @@ const requestEdit = (unitId) => {
     };
 
     dispatch({
-      type: REQUEST_EDIT,
+      type: REQUEST_EDIT_UNIT,
     });
 
     const [startRequest, endRequest] = createTimeoutHandler(dispatch);
@@ -703,7 +729,7 @@ const requestEdit = (unitId) => {
           handleError(dispatch, response);
         } else {
           dispatch({
-            type: REQUEST_EDIT_FULFILLED,
+            type: REQUEST_EDIT_UNIT_FULFILLED,
           });
         }
       })
@@ -796,11 +822,21 @@ const subscribeChat = () => {
       const chatMeta = unpackChatMeta(response.chat_meta);
       const docMeta = unpackDocMeta(response.doc_meta);
       dispatch({
+        type: CHAT_MAP,
+        payload: {
+          chatMapAdd: chatMeta,
+        }
+      });
+      dispatch({
+        type: DOC_MAP,
+        payload: {
+          docMapAdd: docMeta,
+        }
+      });
+      dispatch({
         type: CREATED_POST,
         payload: {
           unitId: response.unit_id,
-          chatMapAdd: chatMeta,
-          docMapAdd: docMeta,
         },
       });
     });
@@ -809,18 +845,218 @@ const subscribeChat = () => {
 
 const subscribeAddedUnit = () => {
   return (dispatch) => {
-    socket.on("created_post", (res) => {
+    socket.on("added_unit", (res) => {
       const response = JSON.parse(res);
       const chatMeta = unpackChatMeta(response.chat_meta);
       const docMeta = unpackDocMeta(response.doc_meta);
       dispatch({
-        type: CREATED_POST,
+        type: CHAT_MAP,
+        payload: {
+          chatMapAdd: chatMeta,
+        }
+      });
+      dispatch({
+        type: DOC_MAP,
+        payload: {
+          docMapAdd: docMeta,
+        }
+      });
+      dispatch({
+        type: ADDED_UNIT,
         payload: {
           unitId: response.unit_id,
-          chatMapAdd: chatMeta,
-          docMapAdd: docMeta,
+          parent: response.parent,
+          position: response.position,
         },
       });
+    });
+  };
+};
+
+const subscribeEditedUnit = () => {
+  return (dispatch) => {
+    socket.on("edited_unit", (res) => {
+      const response = JSON.parse(res);
+      const chatMeta = unpackChatMeta(response.chat_meta);
+      const docMeta = unpackDocMeta(response.doc_meta);
+      dispatch({
+        type: CHAT_MAP,
+        payload: {
+          chatMapAdd: chatMeta,
+        }
+      });
+      dispatch({
+        type: DOC_MAP,
+        payload: {
+          docMapAdd: docMeta,
+        }
+      });
+    });
+  };
+};
+
+const subscribeAddedBacklinks = () => {
+  return (dispatch) => {
+    socket.on("added_backlinks", (res) => {
+      const response = JSON.parse(res);
+      for (const entry in response) {
+        dispatch({
+          type: ADDED_BACKLINK,
+          payload: {
+            unitId: entry.unit_id,
+            backlink: entry.backlink,
+          },
+        });
+      }
+    });
+  };
+};
+
+const subscribeRemovedBacklinks = () => {
+  return (dispatch) => {
+    socket.on("removed_backlinks", (res) => {
+      const response = JSON.parse(res);
+      for (const entry in response) {
+        dispatch({
+          type: REMOVED_BACKLINK,
+          payload: {
+            unitId: entry.unit_id,
+            backlink: entry.backlink,
+          },
+        });
+      }
+    });
+  };
+};
+
+const subscribeHidUnit = () => {
+  return (dispatch, getState) => {
+    socket.on("hid_unit", (res) => {
+      const response = JSON.parse(res);
+      // change state if we have cached this
+      const state = getState();
+      if (Object.keys(state.discussion.docMap).includes(response.unit_id)) {
+        dispatch({
+          type: HID_UNIT,
+          payload: {
+            unitId: response.unit_id,
+          },
+        });
+      }
+    });
+  };
+};
+
+const subscribeUnhidUnit = () => {
+  return (dispatch, getState) => {
+    socket.on("unhid_unit", (res) => {
+      const response = JSON.parse(res);
+      // change state if we have cached this
+      const state = getState();
+      if (Object.keys(state.discussion.docMap).includes(response.unit_id)) {
+        dispatch({
+          type: HID_UNIT,
+          payload: {
+            unitId: response.unit_id,
+          },
+        });
+      }
+    });
+  };
+};
+
+const subscribeRepositionedUnit = () => {
+  return (dispatch) => {
+    socket.on("repositioned_unit", (res) => {
+      const response = JSON.parse(res);
+      for (const entry in response) {
+        dispatch({
+          type: ADDED_UNIT,
+          payload: {
+            unitId: entry.unit_id,
+            parent: entry.parent,
+            position: entry.position,
+          },
+        });
+        dispatch({
+          type: REMOVED_UNIT,
+          payload: {
+            unitId: entry.unit_id,
+            parent: entry.old_parent,
+            position: entry.old_position,
+          },
+        });
+      }
+    });
+  };
+};
+
+const subscribeLockedEdit = () => {
+  return (dispatch, getState) => {
+    socket.on("locked_unit_editable", (res) => {
+      const response = JSON.parse(res);
+      const state = getState();
+      if (Object.keys(state.discussion.docMap).includes(response.unit_id)) {
+        dispatch({
+          type: LOCKED_EDIT,
+          payload: {
+            unitId: response.unit_id,
+            nickname: response.nickname,
+          },
+        });
+      }
+    });
+  };
+};
+
+const subscribeUnlockedEdit = () => {
+  return (dispatch, getState) => {
+    socket.on("unlocked_unit_editable", (res) => {
+      const response = JSON.parse(res);
+      const state = getState();
+      if (Object.keys(state.discussion.docMap).includes(response.unit_id)) {
+        dispatch({
+          type: UNLOCKED_EDIT,
+          payload: {
+            unitId: response.unit_id,
+          },
+        });
+      }
+    });
+  };
+};
+
+const subscribeLockedPosition = () => {
+  return (dispatch, getState) => {
+    socket.on("locked_unit_position", (res) => {
+      const response = JSON.parse(res);
+      const state = getState();
+      if (Object.keys(state.discussion.docMap).includes(response.unit_id)) {
+        dispatch({
+          type: LOCKED_POSITION,
+          payload: {
+            unitId: response.unit_id,
+            nickname: response.nickname,
+          },
+        });
+      }
+    });
+  };
+};
+
+const subscribeUnlockedPosition = () => {
+  return (dispatch, getState) => {
+    socket.on("unlocked_unit_position", (res) => {
+      const response = JSON.parse(res);
+      const state = getState();
+      if (Object.keys(state.discussion.docMap).includes(response.unit_id)) {
+        dispatch({
+          type: UNLOCKED_POSITION,
+          payload: {
+            unitId: response.unit_id,
+          },
+        });
+      }
     });
   };
 };
@@ -844,7 +1080,6 @@ export {
   editUnit,
   subscribeUsers,
   subscribeChat,
-  /*
   subscribeAddedUnit,
   subscribeEditedUnit,
   subscribeAddedBacklinks,
@@ -856,5 +1091,4 @@ export {
   subscribeUnlockedEdit,
   subscribeLockedPosition,
   subscribeUnlockedPosition,
-*/
 };

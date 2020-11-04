@@ -6,6 +6,9 @@ export const TAKEN_USER_ID = "TAKEN_USER_ID";
 export const MOVE_UNABLED = "MOVE_UNABLED";
 export const EDIT_UNABLED = "EDIT_UNABLED";
 export const BAD_TARGET = "BAD_TARGET";
+// cache events
+export const CHAT_MAP = "CHAT_MAP";
+export const DOC_MAP = "DOC_MAP";
 // create user events
 export const CREATE_NICKNAME = "CREATE_NICKNAME";
 export const CREATE_USER = "CREATE_USER";
@@ -62,12 +65,11 @@ export const EDIT_UNIT_FULFILLED = "EDIT_UNIT_FULFILLED";
 export const JOINED_USER = "JOINED_USER";
 export const CREATED_POST = "CREATED_POST";
 export const ADDED_UNIT = "ADDED_UNIT";
-export const EDITED_UNIT = "EDITED_UNIT";
-export const ADDED_BACKLINKS = "ADDED_BACKLINKS";
-export const REMOVED_BACKLINKS = "REMOVED_BACKLINKS";
+export const REMOVED_UNIT = "REMOVED_UNIT";
+export const ADDED_BACKLINK = "ADDED_BACKLINK";
+export const REMOVED_BACKLINK = "REMOVED_BACKLINK";
 export const HID_UNIT = "HID_UNIT";
 export const UNHID_UNIT = "UNHID_UNIT";
-export const REPOSITIONED_UNIT = "REPOSITIONED_UNIT";
 export const LOCKED_EDIT = "LOCKED_EDIT";
 export const UNLOCKED_EDIT = "UNLOCKED_EDIT";
 export const LOCKED_POSITION = "LOCKED_POSITION";

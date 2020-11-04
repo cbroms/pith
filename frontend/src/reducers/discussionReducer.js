@@ -6,6 +6,8 @@ import {
   MOVE_UNABLED,
   EDIT_UNABLED,
   BAD_TARGET,
+  CHAT_MAP,
+  DOC_MAP,
   CREATE_NICKNAME,
   CREATE_USER,
   JOIN_USER,
@@ -44,12 +46,11 @@ import {
   JOINED_USER,
   CREATED_POST,
   ADDED_UNIT,
-  EDITED_UNIT,
-  ADDED_BACKLINKS,
-  REMOVED_BACKLINKS,
+  REMOVED_UNIT,
+  ADDED_BACKLINK,
+  REMOVED_BACKLINK,
   HID_UNIT,
   UNHID_UNIT,
-  REPOSITIONED_UNIT,
   LOCKED_EDIT,
   UNLOCKED_EDIT,
   LOCKED_POSITION,
@@ -222,6 +223,22 @@ const discussionReducer = (state = defaultState, action) => {
       };
       break;
     }
+    case CHAT_MAP: {
+      const chatMap = { ...state.chatMap };
+      return {
+        ...state,
+        chatMap: Object.assign(chatMap, action.payload.chatMapAdd),
+      };
+      break;
+    }
+    case DOC_MAP: {
+      const docMap = { ...state.docMap };
+      return {
+        ...state,
+        docMap: Object.assign(docMap, action.payload.docMapAdd),
+      };
+      break;
+    }
     case CREATE_NICKNAME: {
       const events = { ...state.events };
       events.createNickname = true;
@@ -292,8 +309,6 @@ const discussionReducer = (state = defaultState, action) => {
     case LOAD_USER_FULFILLED: {
       const events = { ...state.events };
       events.loadUser.pending = false;
-      const chatMap = { ...state.chatMap };
-      const docMap = { ...state.docMap };
       return {
         ...state,
         requestTimeout: false,
@@ -302,8 +317,6 @@ const discussionReducer = (state = defaultState, action) => {
         currentUnit: action.payload.currentUnit,
         timeline: action.payload.timeline,
         posts: action.payload.chatHistory,
-        chatMap: Object.assign(chatMap, action.payload.chatMapAdd),
-        docMap: Object.assign(docMap, action.payload.docMapAdd),
       };
       break;
     }
@@ -322,7 +335,6 @@ const discussionReducer = (state = defaultState, action) => {
       events.loadUnitPage = { ...defaultState.events.loadUnitPage };
       const timeline = [...state.timeline];
       timeline.push(action.payload.timelineEntry);
-      const docMap = { ...state.docMap };
       return {
         ...state,
         requestTimeout: false,
@@ -332,7 +344,6 @@ const discussionReducer = (state = defaultState, action) => {
         timeline: timeline,
         documentTree: action.payload.children,
         backlinkTree: action.payload.backlinks,
-        docMap: Object.assign(docMap, action.payload.docMapAdd),
       };
       break;
     }
@@ -391,8 +402,6 @@ const discussionReducer = (state = defaultState, action) => {
     case SEARCH_FULFILLED: {
       const events = { ...state.events };
       const searchResults = { ...state.searchResults };
-      const chatMap = { ...state.chatMap };
-      const docMap = { ...state.docMap };
       events.search = { ...defaultState.events.search };
       searchResults.chat = action.payload.chatResults;
       searchResults.doc = action.payload.docResults;
@@ -401,8 +410,6 @@ const discussionReducer = (state = defaultState, action) => {
         requestTimeout: false,
         events: events,
         searchResults: searchResults,
-        chatMap: Object.assign(chatMap, action.payload.chatMapAdd),
-        docMap: Object.assign(docMap, action.payload.docMapAdd),
       };
       break;
     }
@@ -618,37 +625,77 @@ const discussionReducer = (state = defaultState, action) => {
     case CREATED_POST: {
       const posts = [...state.posts];
       posts.push(action.payload.unitId);
-      const chatMap = { ...state.chatMap };
-      const docMap = { ...state.docMap };
       return {
         ...state,
         posts: posts,
-        chatMap: Object.assign(chatMap, action.payload.chatMapAdd),
-        docMap: Object.assign(docMap, action.payload.docMapAdd),
       };
       break;
     }
     case ADDED_UNIT: {
+      // change documentTree
     }
-    case EDITED_UNIT: {
+    case REMOVED_UNIT: {
+      // change documentTree
     }
-    case ADDED_BACKLINKS: {
+    case ADDED_BACKLINK: {
+      // change backlinkTree
     }
-    case REMOVED_BACKLINKS: {
+    case REMOVED_BACKLINK: {
+      // change backlinkTree
     }
     case HID_UNIT: {
+      const docMap = { ...state.docMap };
+      docMap[action.payload.unitId].hidden = true;
+      return {
+        ...state,
+        docMap: docMap,
+      };
+      break;
     }
     case UNHID_UNIT: {
-    }
-    case REPOSITIONED_UNIT: {
+      const docMap = { ...state.docMap };
+      docMap[action.payload.unitId].hidden = false;
+      return {
+        ...state,
+        docMap: docMap,
+      };
+      break;
     }
     case LOCKED_EDIT: {
+      const docMap = { ...state.docMap };
+      docMap[action.payload.unitId].editLock = action.payload.nickname;
+      return {
+        ...state,
+        docMap: docMap,
+      };
+      break;
     }
     case UNLOCKED_EDIT: {
+      const docMap = { ...state.docMap };
+      docMap[action.payload.unitId].editLock = null;
+      return {
+        ...state,
+        docMap: docMap,
+      };
+      break;
     }
     case LOCKED_POSITION: {
+      const docMap = { ...state.docMap };
+      docMap[action.payload.unitId].positionLock = action.payload.nickname;
+      return {
+        ...state,
+        docMap: docMap,
+      };
+      break;
     }
     case UNLOCKED_POSITION: {
+      const docMap = { ...state.docMap };
+      docMap[action.payload.unitId].positionLock = null;
+      return {
+        ...state,
+        docMap: docMap,
+      };
+      break;
     }
     default: {
       return { ...state };
