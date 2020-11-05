@@ -132,6 +132,7 @@ const Chat = (props) => {
     const editor = (
         <TextEditor
             showButton
+            showRenderDisplay={false}
             openSearch={props.openSearch}
             closeSearch={props.closeSearch}
             setQuery={props.setQuery}

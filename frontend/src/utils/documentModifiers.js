@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from "uuid";
+
 // insert a child into a position in the document
 const insertChild = (doc, position, content) => {
     if (position.grandchild !== undefined) {
@@ -86,70 +88,99 @@ const handleDrag = (doc, dragged, dragTarget) => {
     return null;
 };
 
-const handleEnter = (doc, caretPos, content, position) => {
+// When a user pesses the return key, add a new unit after the current one.
+// We want any content right of their cursor position in the current unit
+// to be copied into the new unit.
+const handleEnter = (store, caretPos, content, position) => {
     const newUnitPith = content.substring(caretPos, content.length);
-    let focused = "temp1";
+
+    // generate a new random id.
+    // TODO: record this id and reconcile it with the new id received through
+    // props for each new unit
+    let newUnitId = uuidv4();
+    const newUnit = {
+        unit_id: newUnitId,
+        pith: newUnitPith,
+        children: [],
+    };
 
     if (position.child === null && position.grandchild === null) {
         // this is the top level element, so add a child at pos 0
-        console.log(doc);
-        doc.splice(0, 0, { unit_id: "temp1", pith: newUnitPith, children: [] });
+        store[position.id].children = store[position.id].children || [];
+        store[position.id].children.splice(0, 0, newUnitId);
     } else if (position.grandchild === null) {
         // add a sibling child
-        doc.splice(position.child + 1, 0, {
-            unit_id: "temp1",
-            pith: newUnitPith,
-            children: [],
-        });
+        store[position.parentId].children =
+            store[position.parentId].children || [];
+        store[position.parentId].children.splice(
+            position.child + 1,
+            0,
+            newUnitId
+        );
     } else {
         // add a sibling grandchild
-        doc[position.child].children.splice(position.grandchild + 1, 0, {
-            unit_id: "temp1",
-            pith: newUnitPith,
-            children: [],
-        });
+        store[position.parentId].children =
+            store[position.parentId].children || [];
+        store[position.parentId].children.splice(
+            position.grandchild + 1,
+            0,
+            newUnitId
+        );
     }
 
-    console.log(caretPos);
+    // add the new unit to the store
+    store[newUnitId] = newUnit;
 
+    console.log(caretPos);
     console.log("new:", content.substring(0, caretPos));
 
-    return [content.substring(0, caretPos), focused, doc];
+    return [content.substring(0, caretPos), newUnitId, store];
 };
 
-const handleDelete = (pith, doc, isEmpty, content, position) => {
-    console.log("deleted");
-    let pithCopy = pith;
+const handleDelete = (store, isEmpty, content, position) => {
+    //let pithCopy = pith;
     // attach the content to the unit above (sibling) or parent
-    // (if the deleted unit is first child of unit)
+    // if the deleted unit is first child of unit
     if (position.child !== null) {
         // remove the element from the doc
         if (position.grandchild !== null) {
-            doc[position.child].children.splice(position.grandchild, 1);
+            store[position.parentId].children.splice(position.grandchild, 1);
         } else {
-            doc.splice(position.child, 1);
+            store[position.parentId].children.splice(position.child, 1);
         }
+    }
+
+    // remove the old item from the store
+    // this isn't strictly necessary but should help with debugging
+    delete store[position.id];
+
+    let sibling = null;
+    // get the sibling above the deleted element
+    if (position.child !== null && position.grandchild === null) {
+        sibling = store[position.parentId].children[position.child - 1];
+    } else if (position.child !== null) {
+        sibling = store[position.parentId].children[position.grandchild - 1];
     }
 
     // add the content to the previous sibling/parent
     if (!isEmpty) {
-        if (position.child === 0 && position.grandchild === null) {
+        if (position.child === 0 || position.grandchild === 0) {
             // add content to the end of the parent pith
-            pithCopy += " " + content;
-        } else if (position.grandchild === 0) {
-            // add the grandchild content to the child above
-            doc[position.child].pith += " " + content;
-        } else if (position.grandchild === null) {
-            // add content to the sibling child above
-            doc[position.child - 1].pith += " " + content;
+            // this works for the first child and first grandchildren
+            store[position.parentId].pith += " " + content;
+            sibling = position.parentId;
         } else {
-            // add content to the sibling grandchild above
-            doc[position.child].children[position.grandchild - 1].pith +=
-                " " + content;
+            // add content to the sibling above
+            store[sibling].pith += " " + content;
         }
     }
-    console.log(doc);
-    return [pithCopy, doc];
+    return [sibling, store];
 };
 
-export { handleDrag, handleEnter, handleDelete };
+// edit the pith of a unit
+const handleEdit = (store, content, position) => {
+    store[position.id].pith = content;
+    return store;
+};
+
+export { handleDrag, handleEnter, handleDelete, handleEdit };

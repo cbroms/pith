@@ -3,14 +3,6 @@ import { connect } from "react-redux";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 
-import {
-	enterUser,
-	createUser,
-	subscribeUsers,
-	createPost,
-	subscribeChat,
-} from "./actions/discussionActions";
-
 import "./App.css";
 
 import AppLayout from "./AppLayout";
@@ -191,15 +183,10 @@ class App extends React.Component {
 									<Discussion
 										{...this.props.discussion}
 										dispatch={this.props.dispatch}
-										createPost={createPost}
-										subscribeChat={subscribeChat}
-										subscribeUsers={subscribeUsers}
 										setDarkMode={(val) =>
 											this.setDarkModeActive(val)
 										}
 										timeline={timelineDummy}
-										content={this.props.discussion.chatMap}
-										posts={this.props.discussion.posts}
 										document={documentDummy}
 										users={usersDummy}
 									/>

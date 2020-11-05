@@ -5,10 +5,9 @@ const StyledContainer = styled.div`
     box-sizing: border-box;
     display: ${(props) => (props.inline ? "inline-block" : "block")};
     width: ${(props) => (props.inline ? "auto" : "100%")};
-    padding: 5px 0;
-    margin: 0 ${(props) => (props.inline ? "10px" : "0")};
-
-    padding-left: ${(props) => (props.transcluded ? 10 : 0)}px;
+    padding: 5px 10px;
+    width: 100%;
+    padding-left: ${(props) => (props.transcluded || props.inline ? 10 : 0)}px;
 
     border-left: ${(props) =>
         props.transcluded ? "2px solid " + props.theme.shade2 : "none"};
@@ -33,7 +32,7 @@ const StyledRefNum = styled.span`
 
 const StyledContent = styled.div`
     display: inline-block;
-    //width: calc(100% - 18px);
+    width: 100%;
 `;
 
 const UnitLayout = (props) => {
