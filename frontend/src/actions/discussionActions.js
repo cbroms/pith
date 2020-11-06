@@ -679,6 +679,8 @@ const deselectUnit = (unitId) => {
   };
 };
 
+// TODO moveUnit for drag-and-drop or keyboard
+
 const moveUnits = (units, parentUnit, position) => {
   return (dispatch) => {
     const data = {

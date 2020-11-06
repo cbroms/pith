@@ -140,8 +140,8 @@ const defaultState = {
   posts: [],
   currentUnit: "",
   ancestors: [],
-  documentTree: [],
-  backlinkTree: [],
+  documentTree: [], // consider adding children to cache so don't need this => rerender whenever some is updated?
+  backlinkTree: [], // consider adding children to cache so don't need this => rerender whenever some is updated?
   icons: [],
   timeline: [],
   searchResults: {
