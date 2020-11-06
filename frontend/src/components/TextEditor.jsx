@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import DOMPurify from "dompurify";
 
 import TextEditorLayout from "./TextEditorLayout";
@@ -8,7 +9,7 @@ class TextEditor extends React.Component {
     super(props);
     this.state = {
       html: this.props.content || "",
-      renderDisplay: true,
+      renderDisplay: false,
       editedSinceChange: false,
       editable: true,
       queryStartPos: null,
@@ -38,22 +39,30 @@ class TextEditor extends React.Component {
     ) {
       this.setState({ html: this.props.content });
     }
+    this.checkFocus();
+
     //TODO check for renderedContent update too
   }
 
   checkFocus() {
     if (this.props.focused && document.activeElement !== this.ref.current) {
+      console.log("checking focus ");
+
       // remove the prior focus and move the cursor to the first position in this
       // element
       window.setTimeout(() => {
-        this.ref.current.focus();
-        const setpos = document.createRange();
-        const set = window.getSelection();
-        setpos.setStart(this.ref.current.childNodes[0], 0);
-        setpos.collapse(true);
-        set.removeAllRanges();
-        set.addRange(setpos);
-        this.ref.current.focus();
+        try {
+          this.ref.current.focus();
+          const setpos = document.createRange();
+          const set = window.getSelection();
+          setpos.setStart(this.ref.current.childNodes[0], 0);
+          setpos.collapse(true);
+          set.removeAllRanges();
+          set.addRange(setpos);
+          this.ref.current.focus();
+        } catch {
+          console.log("couldn't set focus");
+        }
       }, 50);
     }
   }
@@ -79,7 +88,7 @@ class TextEditor extends React.Component {
 
   onBlur() {
     this.sanitize();
-    this.setState({ renderDisplay: true });
+    this.setState({ renderDisplay: true, editedSinceChange: false });
     if (this.props.onBlur) this.props.onBlur(this.state.html);
   }
 
@@ -154,8 +163,7 @@ class TextEditor extends React.Component {
 
         // return the offset when we get to the top level element
         if (curr.parentElement?.innerHTML === this.state.html) {
-          // add the length of the top level element's tag to the offset
-          return offset + curr.parentElement.innerHTML.indexOf(">") + 1;
+          return offset;
         }
 
         // sum the lengths of the children before the current elt in the list
@@ -189,7 +197,7 @@ class TextEditor extends React.Component {
 
       // console.log("offset:", offset);
       // console.log(this.state.html.substring(0, offset));
-
+      console.log([isAtStart, offset]);
       return [isAtStart, offset];
     }
     return null;
@@ -281,11 +289,9 @@ class TextEditor extends React.Component {
         innerRef={this.ref}
         className={this.props.className}
         focused={this.props.focused}
-        html={
-          this.state.renderDisplay && this.props.renderedContent !== undefined
-            ? this.props.renderedContent
-            : this.state.html
-        }
+        html={this.state.html}
+        renderedContent={this.props.renderedContent}
+        showRendered={this.state.renderDisplay && this.props.showRenderDisplay}
         disabled={!this.state.editable}
         onChange={this.handleChange}
         onFocus={this.onFocus}

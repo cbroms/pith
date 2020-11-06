@@ -1,7 +1,7 @@
 import React from "react";
-import ContentEditable from "react-contenteditable";
-
 import styled from "styled-components";
+
+import ContentEditable from "./ContentEditable";
 
 import { Button } from "./StandardUI";
 import { UpArrow, RightArrow } from "./Symbols";
@@ -47,19 +47,27 @@ const StyledEditor = styled(ContentEditable)`
 const TextEditorLayout = (props) => {
     return (
         <StyledContainer showButton={props.showButton}>
-            <StyledEditor
-                $showButton={props.showButton}
-                $placeholder={props.placeholder}
-                innerRef={props.innerRef}
-                className={props.className}
-                html={props.html}
-                disabled={props.disabled}
-                onChange={props.onChange}
-                onFocus={props.onFocus}
-                onBlur={props.onBlur}
-                onKeyDown={props.onKeyDown}
-                spellCheck={props.focused}
-            />
+            {props.showRendered && props.renderedContent !== null ? (
+                // when the editor is not focused, show the
+                // rendered version of it
+                <div onClick={props.onFocus}>{props.renderedContent}</div>
+            ) : (
+                // in the case the editor is focused, add the text editable container
+                <StyledEditor
+                    $showButton={props.showButton}
+                    $placeholder={props.placeholder}
+                    innerRef={props.innerRef}
+                    className={props.className}
+                    html={props.html}
+                    disabled={props.disabled}
+                    onChange={props.onChange}
+                    onFocus={props.onFocus}
+                    onBlur={props.onBlur}
+                    onKeyDown={props.onKeyDown}
+                    spellCheck={props.focused}
+                />
+            )}
+
             {props.showButton ? (
                 <StyledButton onClick={props.makeSubmit}>
                     {props.buttonDir === "right" ? <RightArrow /> : <UpArrow />}

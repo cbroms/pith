@@ -228,13 +228,13 @@ const handleLoadUser = (dispatch, discussionId, userId) => {
           type: CHAT_MAP,
           payload: {
             chatMapAdd: chatMeta,
-          }
+          },
         });
         dispatch({
           type: DOC_MAP,
           payload: {
             docMapAdd: docMeta,
-          }
+          },
         });
         dispatch({
           type: LOAD_USER_FULFILLED,
@@ -387,7 +387,7 @@ const getPage = (unitId) => {
             type: DOC_MAP,
             payload: {
               docMapAdd: docMeta,
-            }
+            },
           });
           dispatch({
             type: LOAD_UNIT_PAGE_FULFILLED,
@@ -490,13 +490,13 @@ const search = (query) => {
             type: CHAT_MAP,
             payload: {
               chatMapAdd: chatMeta,
-            }
+            },
           });
           dispatch({
             type: DOC_MAP,
             payload: {
               docMapAdd: docMeta,
-            }
+            },
           });
           dispatch({
             type: SEARCH_FULFILLED,
@@ -542,7 +542,7 @@ const addUnit = (pith, parentUnit, position) => {
     const data = {
       pith: pith,
       parent: parentUnit,
-      position: position
+      position: position,
     };
 
     dispatch({
@@ -827,13 +827,13 @@ const subscribeChat = () => {
         type: CHAT_MAP,
         payload: {
           chatMapAdd: chatMeta,
-        }
+        },
       });
       dispatch({
         type: DOC_MAP,
         payload: {
           docMapAdd: docMeta,
-        }
+        },
       });
       dispatch({
         type: CREATED_POST,
@@ -845,8 +845,8 @@ const subscribeChat = () => {
   };
 };
 
-const subscribeAddedUnit = () => {
-  return (dispatch) => {
+const subscribeDocument = () => {
+  return (dispatch, getState) => {
     socket.on("added_unit", (res) => {
       const response = JSON.parse(res);
       const chatMeta = unpackChatMeta(response.chat_meta);
@@ -855,13 +855,13 @@ const subscribeAddedUnit = () => {
         type: CHAT_MAP,
         payload: {
           chatMapAdd: chatMeta,
-        }
+        },
       });
       dispatch({
         type: DOC_MAP,
         payload: {
           docMapAdd: docMeta,
-        }
+        },
       });
       dispatch({
         type: ADDED_UNIT,
@@ -872,11 +872,7 @@ const subscribeAddedUnit = () => {
         },
       });
     });
-  };
-};
 
-const subscribeEditedUnit = () => {
-  return (dispatch) => {
     socket.on("edited_unit", (res) => {
       const response = JSON.parse(res);
       const chatMeta = unpackChatMeta(response.chat_meta);
@@ -885,20 +881,16 @@ const subscribeEditedUnit = () => {
         type: CHAT_MAP,
         payload: {
           chatMapAdd: chatMeta,
-        }
+        },
       });
       dispatch({
         type: DOC_MAP,
         payload: {
           docMapAdd: docMeta,
-        }
+        },
       });
     });
-  };
-};
 
-const subscribeAddedBacklinks = () => {
-  return (dispatch) => {
     socket.on("added_backlinks", (res) => {
       const response = JSON.parse(res);
       for (const entry in response) {
@@ -911,11 +903,7 @@ const subscribeAddedBacklinks = () => {
         });
       }
     });
-  };
-};
 
-const subscribeRemovedBacklinks = () => {
-  return (dispatch) => {
     socket.on("removed_backlinks", (res) => {
       const response = JSON.parse(res);
       for (const entry in response) {
@@ -928,11 +916,7 @@ const subscribeRemovedBacklinks = () => {
         });
       }
     });
-  };
-};
 
-const subscribeHidUnit = () => {
-  return (dispatch, getState) => {
     socket.on("hid_unit", (res) => {
       const response = JSON.parse(res);
       // change state if we have cached this
@@ -946,11 +930,7 @@ const subscribeHidUnit = () => {
         });
       }
     });
-  };
-};
 
-const subscribeUnhidUnit = () => {
-  return (dispatch, getState) => {
     socket.on("unhid_unit", (res) => {
       const response = JSON.parse(res);
       // change state if we have cached this
@@ -964,11 +944,7 @@ const subscribeUnhidUnit = () => {
         });
       }
     });
-  };
-};
 
-const subscribeRepositionedUnit = () => {
-  return (dispatch) => {
     socket.on("repositioned_unit", (res) => {
       const response = JSON.parse(res);
       for (const entry in response) {
@@ -990,11 +966,7 @@ const subscribeRepositionedUnit = () => {
         });
       }
     });
-  };
-};
 
-const subscribeLockedEdit = () => {
-  return (dispatch, getState) => {
     socket.on("locked_unit_editable", (res) => {
       const response = JSON.parse(res);
       const state = getState();
@@ -1008,11 +980,7 @@ const subscribeLockedEdit = () => {
         });
       }
     });
-  };
-};
 
-const subscribeUnlockedEdit = () => {
-  return (dispatch, getState) => {
     socket.on("unlocked_unit_editable", (res) => {
       const response = JSON.parse(res);
       const state = getState();
@@ -1025,11 +993,7 @@ const subscribeUnlockedEdit = () => {
         });
       }
     });
-  };
-};
 
-const subscribeLockedPosition = () => {
-  return (dispatch, getState) => {
     socket.on("locked_unit_position", (res) => {
       const response = JSON.parse(res);
       const state = getState();
@@ -1043,11 +1007,7 @@ const subscribeLockedPosition = () => {
         });
       }
     });
-  };
-};
 
-const subscribeUnlockedPosition = () => {
-  return (dispatch, getState) => {
     socket.on("unlocked_unit_position", (res) => {
       const response = JSON.parse(res);
       const state = getState();
@@ -1082,15 +1042,5 @@ export {
   editUnit,
   subscribeUsers,
   subscribeChat,
-  subscribeAddedUnit,
-  subscribeEditedUnit,
-  subscribeAddedBacklinks,
-  subscribeRemovedBacklinks,
-  subscribeHidUnit,
-  subscribeUnhidUnit,
-  subscribeRepositionedUnit,
-  subscribeLockedEdit,
-  subscribeUnlockedEdit,
-  subscribeLockedPosition,
-  subscribeUnlockedPosition,
+  subscribeDocument,
 };

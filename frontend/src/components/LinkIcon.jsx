@@ -8,7 +8,6 @@ const StyledIcon = styled.div`
     height: 18px;
     font-size: ${(props) => props.theme.smallFont};
     font-family: ${(props) => props.theme.sans};
-    line-height: 20px;
     margin: 0px 2px;
     margin-top: 3px;
     

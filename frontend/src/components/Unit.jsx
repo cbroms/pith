@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import ReactDOMServer from "react-dom/server";
 
 import { splitAtLinks, parseLinks } from "../utils/parseLinks";
 
@@ -10,10 +9,7 @@ import TooltipLayout from "./TooltipLayout";
 import UnitLayout from "./UnitLayout";
 
 const Unit = (props) => {
-    const [tempContent, setTempContent] = useState(null);
-
     let pith = props.pith;
-    if (tempContent !== null && tempContent !== pith) pith = tempContent;
 
     const links = parseLinks(pith);
     const splitPith = splitAtLinks(pith);
@@ -66,7 +62,11 @@ const Unit = (props) => {
                         />
                         {!props.chat ? (
                             <TooltipLayout id={`ref-${props.id}-${i}`}>
-                                <span> Hi </span>
+                                <span>
+                                    {" "}
+                                    A Memex is a machine introduced in Vannevar
+                                    Bush's essay <em>As We May Think</em>.{" "}
+                                </span>
                             </TooltipLayout>
                         ) : null}
                     </span>
@@ -74,23 +74,18 @@ const Unit = (props) => {
             }
         }
         if (props.editable) {
-            // if the unit is editable, we need to feed the content to the TextEditor
-            // component. it requires that we first render the component to a string of
-            // html, then pass that to the TextEditor component
-            const contentStr = ReactDOMServer.renderToString(content);
             content = (
                 <TextEditor
+                    showRenderDisplay={pith.length > 0}
                     unitEnter={props.unitEnter}
                     unitDelete={props.unitDelete}
                     showButton={props.showButton}
-                    renderedContent={contentStr}
-                    content={props.pith}
+                    renderedContent={content} // pass the rendered version of the unit (with link icons)
+                    content={pith}
+                    isEmpty={pith.length === 0}
                     onFocus={props.onFocus}
-                    // TODO: reset the temp when we get a prop refresh. We only want
-                    // this to happen when there's an update from the server, though,
-                    // so there probably needs to be some fancy logic somewhere for that.
                     onBlur={(temp) => {
-                        setTempContent(temp);
+                        props.unitEdit(temp);
                         props.onBlur();
                     }}
                     focused={props.focused}

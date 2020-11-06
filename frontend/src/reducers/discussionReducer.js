@@ -136,9 +136,9 @@ const defaultState = {
   userId: null,
   nickname: null,
   chatMap: {},
-  docMap: {},
+  docMap: { _: { pith: "", children: [] } },
   posts: [],
-  currentUnit: "",
+  currentUnit: "_",
   ancestors: [],
   documentTree: [], // consider adding children to cache so don't need this => rerender whenever some is updated?
   backlinkTree: [], // consider adding children to cache so don't need this => rerender whenever some is updated?

@@ -4,6 +4,7 @@ import {
     handleDrag,
     handleEnter,
     handleDelete,
+    handleEdit,
 } from "../utils/documentModifiers";
 
 import Unit from "./Unit";
@@ -17,12 +18,14 @@ class Document extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            documentCopy: this.props.view.children,
-            pithCopy: this.props.view.pith,
+            tempUnitCopy: {}, // a temporary copy of the unit store while we're editing
             dragged: null,
             dragTarget: null,
             focused: null,
         };
+
+        this.getStore = this.getStore.bind(this);
+        this.getStoreCopy = this.getStoreCopy.bind(this);
 
         this.handleDragEnd = this.handleDragEnd.bind(this);
         this.handleDragEnter = this.handleDragEnter.bind(this);
@@ -30,42 +33,91 @@ class Document extends React.Component {
 
         this.onUnitDelete = this.onUnitDelete.bind(this);
         this.onUnitEnter = this.onUnitEnter.bind(this);
+        this.onUnitEdit = this.onUnitEdit.bind(this);
 
         this.getDragInfo = this.getDragInfo.bind(this);
     }
 
+    componentDidUpdate(prevProps, prevState) {
+        // wipe any local updates
+        // if (this.state.documentCopy.length > 0) {
+        //     this.setState({ documentCopy: [] });
+        // }
+    }
+
+    // return whichever store we're using (locally modified or global from props)
+    getStore() {
+        if (Object.keys(this.state.tempUnitCopy).length === 0)
+            return this.props.units;
+        return this.state.tempUnitCopy;
+    }
+
+    // get a copy of whichever store we're using,
+    getStoreCopy() {
+        const store = this.getStore();
+        return { ...store };
+    }
+
     onUnitDelete(isEmpty, content, position) {
-        const [newPith, newDoc] = handleDelete(
-            this.state.pithCopy,
-            [...this.state.documentCopy],
+        const store = this.getStoreCopy();
+        const [focused, newStore] = handleDelete(
+            store,
             isEmpty,
             content,
             position
         );
-
-        if (newDoc !== null) {
+        if (newStore !== null) {
             this.setState({
-                focused: null,
-                pithCopy: newPith,
-                documentCopy: newDoc,
+                focused: focused,
+                tempUnitCopy: newStore,
             });
         }
     }
 
     onUnitEnter(caretPos, content, position) {
-        const [newContent, focused, newDoc] = handleEnter(
-            [...this.state.documentCopy],
+        const store = this.getStoreCopy();
+        const [newContent, focused, newStore] = handleEnter(
+            store,
             caretPos,
             content,
             position
         );
-        if (newDoc !== null) {
+        if (newStore !== null) {
             this.setState({
                 focused: focused,
-                documentCopy: newDoc,
+                tempUnitCopy: newStore,
             });
         }
         return newContent;
+    }
+
+    onUnitEdit(content, position) {
+        const store = this.getStoreCopy();
+        const newStore = handleEdit(store, content, position);
+        if (newStore !== null) {
+            this.setState({
+                tempUnitCopy: newStore,
+            });
+        }
+    }
+
+    handleDragEnd(e) {
+        // TODO: change this
+        const store = { ...this.props.units };
+
+        const newDoc = handleDrag(
+            store,
+            this.state.dragged,
+            this.state.dragTarget
+        );
+
+        // if (newDoc !== null) {
+        //     this.setState({
+        //         dragged: null,
+        //         dragTarget: null,
+        //         documentCopy: newDoc,
+        //     });
+        // }
     }
 
     getDragInfo(child, grandchild) {
@@ -98,23 +150,8 @@ class Document extends React.Component {
         });
     }
 
-    handleDragEnd(e) {
-        const newDoc = handleDrag(
-            [...this.state.documentCopy],
-            this.state.dragged,
-            this.state.dragTarget
-        );
-
-        if (newDoc !== null) {
-            this.setState({
-                dragged: null,
-                dragTarget: null,
-                documentCopy: newDoc,
-            });
-        }
-    }
-
     render() {
+        console.log(this.state.focused);
         // create a unit for a given location
         const createUnit = (pith, id, position) => {
             return (
@@ -126,6 +163,9 @@ class Document extends React.Component {
                     unitDelete={(isEmpty, content) =>
                         this.onUnitDelete(isEmpty, content, position)
                     }
+                    unitEdit={(content) => {
+                        this.onUnitEdit(content, position);
+                    }}
                     onFocus={() => this.setState({ focused: id })}
                     onBlur={() => this.setState({ focused: null })}
                     focused={this.state.focused === id}
@@ -177,48 +217,66 @@ class Document extends React.Component {
             );
         };
 
-        // create the sections in the doc with children + grandchildren
-        const sections = this.state.documentCopy.map((child, childIndex) => {
-            const grandchildren = child.children.map(
-                (grandchild, grandchildIndex) => {
-                    const pith = createUnit(
-                        grandchild.pith,
-                        grandchild.unit_id,
-                        { child: childIndex, grandchild: grandchildIndex }
-                    );
-                    return createSection(
-                        null,
-                        grandchild.unit_id,
-                        { child: childIndex, grandchild: grandchildIndex },
-                        grandchildIndex === child.children.length - 1,
-                        pith,
-                        3
-                    );
-                }
-            );
-            const pith = createUnit(child.pith, child.unit_id, {
-                child: childIndex,
-                grandchild: null,
-            });
+        const store = this.getStore();
 
-            return createSection(
-                grandchildren,
-                child.unit_id,
-                { child: childIndex, grandchild: null },
-                childIndex === this.state.documentCopy.length - 1,
-                pith,
-                2
-            );
-        });
+        // create the sections in the doc with children + grandchildren
+        const sections = store[this.props.currentUnit]?.children?.map(
+            (childId, childIndex) => {
+                const child = store[childId];
+
+                // create the grandchild sections for each child
+                const grandchildren = store[childId]?.children?.map(
+                    (grandchildId, grandchildIndex) => {
+                        const grandchild = store[grandchildId];
+                        const position = {
+                            child: childIndex,
+                            grandchild: grandchildIndex,
+                            parentId: childId,
+                            id: grandchildId,
+                        };
+                        return createSection(
+                            null,
+                            grandchildId,
+                            position,
+                            grandchildIndex === child.children.length - 1,
+                            createUnit(grandchild.pith, grandchildId, position),
+                            3
+                        );
+                    }
+                );
+
+                // create the child section
+                const position = {
+                    child: childIndex,
+                    grandchild: null,
+                    parentId: this.props.currentUnit,
+                    id: childId,
+                };
+                return createSection(
+                    grandchildren,
+                    childId,
+                    position,
+                    childIndex ===
+                        store[this.props.currentUnit].children.length - 1,
+                    createUnit(child.pith, childId, position),
+                    2
+                );
+            }
+        );
         const pithUnit = createUnit(
-            this.state.pithCopy,
-            this.props.view.unit_id,
-            { child: null, grandchild: null }
+            store[this.props.currentUnit].pith,
+            this.props.currentUnit,
+            {
+                child: null,
+                grandchild: null,
+                id: this.props.currentUnit,
+                parentId: null,
+            }
         );
 
         const doc = (
             <DocumentSectionLayout
-                focused={this.state.focused === this.props.view.unit_id}
+                focused={this.state.focused === this.props.currentUnit}
                 level={1}
                 pith={pithUnit}
                 onDragEnter={() => null}
@@ -228,10 +286,13 @@ class Document extends React.Component {
         );
 
         const timeline = <TimelineLayout pages={this.props.timeline} />;
-        const ancestors = (
-            <AncestorsLayout ancestors={this.props.view.ancestors} />
+        const ancestors = <AncestorsLayout ancestors={this.props.ancestors} />;
+        const users = (
+            <UsersLayout
+                users={this.props.users}
+                currentUnit={this.props.currentUnit}
+            />
         );
-        const users = <UsersLayout users={this.props.users} />;
 
         return (
             <DocumentLayout
