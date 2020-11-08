@@ -8,6 +8,8 @@ import {
   BAD_TARGET,
   CHAT_MAP,
   DOC_MAP,
+  TEST_CONNECT,
+  TEST_CONNECT_FULFILLED,
   CREATE_NICKNAME,
   CREATE_USER,
   JOIN_USER,
@@ -15,6 +17,7 @@ import {
   JOIN_USER_FULFILLED,
   LOAD_USER,
   LOAD_USER_FULFILLED,
+  LOADED_USER,
   LOAD_UNIT_PAGE,
   LOAD_UNIT_PAGE_FULFILLED,
   CREATE_POST,
@@ -75,6 +78,9 @@ const defaultState = {
     },
   },
   events: {
+    testConnect: {
+      pending: false,
+    },
     createNickname: false,
     joined: false,
     createUser: {
@@ -239,6 +245,26 @@ const discussionReducer = (state = defaultState, action) => {
       };
       break;
     }
+    case TEST_CONNECT: {
+      const events = { ...state.events };
+      events.testConnect.pending = true;
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
+    }
+    case TEST_CONNECT_FULFILLED: {
+      const events = { ...state.events };
+      events.testConnect = { ...defaultState.events.testConnect };
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
+      break;
+    }
     case CREATE_NICKNAME: {
       const events = { ...state.events };
       events.createNickname = true;
@@ -307,18 +333,23 @@ const discussionReducer = (state = defaultState, action) => {
       break;
     }
     case LOAD_USER_FULFILLED: {
-      const events = { ...state.events };
-      events.loadUser.pending = false;
       return {
         ...state,
-        requestTimeout: false,
-        events: events,
         icons: action.payload.icons,
         currentUnit: action.payload.currentUnit,
         timeline: action.payload.timeline,
         posts: action.payload.chatHistory,
       };
       break;
+    }
+    case LOADED_USER: {
+      const events = { ...state.events };
+      events.loadUser.pending = false;
+      return {
+        ...state,
+        requestTimeout: false,
+        events: events,
+      };
     }
     case LOAD_UNIT_PAGE: {
       const events = { ...state.events };

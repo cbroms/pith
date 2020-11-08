@@ -8,6 +8,7 @@ import {
     useParams,
 } from "react-router-dom";
 
+import { v4 as uuidv4 } from "uuid";
 import {
     enterUser,
     createUser,
@@ -42,6 +43,10 @@ const Discussion = (props) => {
     useEffect(() => {
         if (!joined && !createNickname && !joinUser.pending && !badDiscussion)
             props.dispatch(enterUser(discussionId));
+        // => invalidDiscussion is not true
+        // join
+        // => check state i joined
+        //  loadUser
         else if (joined && !subscribed) {
             props.dispatch(subscribeChat());
             props.dispatch(subscribeUsers());
@@ -53,6 +58,7 @@ const Discussion = (props) => {
     const joinDiscussion = (nickname) => {
         // join the discussion with a given nickname
         props.dispatch(createUser(discussionId, nickname));
+        // call join manually
     };
 
     const chat = (
@@ -65,7 +71,7 @@ const Discussion = (props) => {
             setQuery={(query) => setQuery(query)}
             addPost={(content) => {
                 console.log("posted:", content);
-                props.dispatch(props.createPost(content));
+                props.dispatch(createPost(content, uuidv4()));
             }}
             sendPostToDoc={(id) => {
                 console.log("moved:", id);

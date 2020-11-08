@@ -14,3 +14,5 @@ Discussion.objects().delete()
 Unit.objects().delete()
 
 discussion_id = gm.board_manager.create()["discussion_id"]
+
+print("made id {}".format(discussion_id))

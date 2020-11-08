@@ -1,5 +1,6 @@
 import { socket } from "./socket";
 import { getValue, setValue } from "../api/local";
+import { cleanUpRequest, createRequestWrapper } from "./queue";
 import {
   unpackCursors,
   unpackChildren,
@@ -37,16 +38,18 @@ import {
   EDIT_UNABLED,
   BAD_TARGET,
   REQUEST_TIMEOUT,
-  RESET_REQUEST_TIMEOUT,
   CHAT_MAP,
   DOC_MAP,
   CREATE_NICKNAME,
+  TEST_CONNECT,
+  TEST_CONNECT_FULFILLED,
   CREATE_USER,
   CREATE_USER_FULFILLED,
   JOIN_USER,
   JOIN_USER_FULFILLED,
   LOAD_USER,
   LOAD_USER_FULFILLED,
+  LOADED_USER,
   LOAD_UNIT_PAGE,
   LOAD_UNIT_PAGE_FULFILLED,
   CREATE_POST,
@@ -88,41 +91,6 @@ import {
   LOCKED_POSITION,
   UNLOCKED_POSITION,
 } from "./types";
-
-// the handler we use to wrap all requests to the api
-const createTimeoutHandler = (dispatch, timeout = 5000) => {
-  let interval;
-  let elapsed = 0;
-
-  const timeoutWatcher = (func) => {
-    // dispatch({
-    //   type: RESET_REQUEST_TIMEOUT,
-    // });
-
-    // make the request
-    func();
-
-    // check that the request is still active after some duration
-    interval = setInterval(() => {
-      elapsed += 1000;
-
-      if (elapsed >= timeout) {
-        console.error("request timed out", func);
-        dispatch({
-          type: REQUEST_TIMEOUT,
-        });
-        clearInterval(interval);
-      }
-    }, 1000);
-  };
-
-  // when the request completes, clear the interval
-  const timeoutEnd = (func) => {
-    clearInterval(interval);
-  };
-
-  return [timeoutWatcher, timeoutEnd];
-};
 
 const isError = (response) => {
   return Object.keys(response).includes("error");
@@ -204,16 +172,18 @@ const handleError = (dispatch, response) => {
   }
 };
 
-const handleLoadUser = (dispatch, discussionId, userId) => {
-  dispatch({
-    type: LOAD_USER,
-  });
+const loadUser = (dispatch, discussionId, userId, requestId) => {
+  const start = performance.now();
 
   const data = {};
 
-  const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+  const [startRequest, endRequest] = createRequestWrapper(dispatch);
 
-  startRequest(() =>
+  startRequest(() => {
+    dispatch({
+      type: LOAD_USER,
+    });
+
     socket.emit("load_user", data, (res) => {
       endRequest();
       const response = JSON.parse(res);
@@ -224,6 +194,8 @@ const handleLoadUser = (dispatch, discussionId, userId) => {
         const docMeta = unpackDocMeta(response.doc_meta);
         const timeline = unpackTimeline(response.timeline);
         const cursors = unpackCursors(response.cursors);
+        const end = performance.now();
+        console.log("returned ", end - start);
         dispatch({
           type: CHAT_MAP,
           payload: {
@@ -237,7 +209,7 @@ const handleLoadUser = (dispatch, discussionId, userId) => {
           },
         });
         dispatch({
-          type: LOAD_USER_FULFILLED,
+          type: LOADED_USER,
           payload: {
             icons: cursors,
             currentUnit: response.current_unit,
@@ -246,56 +218,70 @@ const handleLoadUser = (dispatch, discussionId, userId) => {
           },
         });
       }
-    })
-  );
+
+      cleanUpRequest(requestId, () =>
+        dispatch({
+          type: LOAD_USER_FULFILLED,
+        })
+      );
+    });
+  });
 };
 
-const handleJoinUser = (dispatch, discussionId, userId) => {
-  dispatch({
-    type: JOIN_USER,
-  });
-
+const joinUser = (dispatch, discussionId, userId, requestId) => {
   const data = {
     discussion_id: discussionId,
     user_id: userId,
   };
 
-  const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+  const [startRequest, endRequest] = createRequestWrapper(dispatch);
 
-  startRequest(() =>
+  startRequest(() => {
+    dispatch({
+      type: JOIN_USER,
+    });
+
     socket.emit("join", data, (res) => {
       endRequest();
       const response = JSON.parse(res);
       if (isError(response)) {
         handleError(dispatch, response);
-      } else {
-        dispatch({
-          type: JOIN_USER_FULFILLED,
-          payload: {
-            discussionId: discussionId,
-            userId: userId,
-          },
-        });
-        handleLoadUser(dispatch);
       }
-    })
-  );
+    });
+
+    cleanUpRequest(requestId, () => {
+      dispatch({
+        type: JOIN_USER_FULFILLED,
+        payload: {
+          discussionId: discussionId,
+          userId: userId,
+        },
+      });
+    });
+  });
 };
 
-const enterUser = (discussionId) => {
+const enterUser = (discussionId, requestId) => {
   return (dispatch) => {
     const data = {
       discussion_id: discussionId,
     };
 
-    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+    const [startRequest, endRequest] = createRequestWrapper(
+      dispatch,
+      requestId
+    );
 
-    startRequest(() =>
+    startRequest(() => {
+      dispatch({
+        type: TEST_CONNECT,
+      });
+
       socket.emit("test_connect", data, (res) => {
         endRequest();
 
         const response = JSON.parse(res);
-        console.log("test_connect", response);
+
         if (isError(response)) {
           const error_stamp = response.error;
           switch (error_stamp) {
@@ -317,46 +303,51 @@ const enterUser = (discussionId) => {
             dispatch({
               type: CREATE_NICKNAME,
             });
-          } else {
-            handleJoinUser(dispatch, discussionId, userId);
           }
         }
-      })
-    );
+
+        cleanUpRequest(requestId, () =>
+          dispatch({
+            type: TEST_CONNECT_FULFILLED,
+          })
+        );
+      });
+    });
   };
 };
 
-const createUser = (discussionId, nickname) => {
+const createUser = (discussionId, nickname, requestId) => {
   return (dispatch) => {
-    dispatch({
-      type: CREATE_USER,
-    });
-
     const data = {
       discussion_id: discussionId,
       nickname: nickname,
     };
-    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+    const [startRequest, endRequest] = createRequestWrapper(dispatch);
 
-    startRequest(() =>
+    startRequest(() => {
+      dispatch({
+        type: CREATE_USER,
+      });
+
       socket.emit("create_user", data, (res) => {
         endRequest();
         const response = JSON.parse(res);
         if (isError(response)) {
           handleError(dispatch, response);
         } else {
-          dispatch({
-            type: CREATE_USER_FULFILLED,
-          });
-
           // set the value in localStorage
           const userId = response.user_id;
           setValue(discussionId, userId);
 
-          handleJoinUser(dispatch, discussionId, userId);
+          //handleJoinUser(dispatch, discussionId, userId);
         }
-      })
-    );
+        cleanUpRequest(requestId, () => {
+          dispatch({
+            type: CREATE_USER_FULFILLED,
+          });
+        });
+      });
+    });
   };
 };
 
@@ -370,7 +361,7 @@ const getPage = (unitId) => {
       type: LOAD_UNIT_PAGE,
     });
 
-    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+    const [startRequest, endRequest] = createRequestWrapper(dispatch);
 
     startRequest(() =>
       socket.emit("load_unit_page", data, (res) => {
@@ -403,35 +394,39 @@ const getPage = (unitId) => {
   };
 };
 
-const createPost = (pith) => {
+const createPost = (pith, requestId) => {
   return (dispatch) => {
     const data = {
       pith: pith,
     };
 
-    // report to UI the attempt
-    dispatch({
-      type: CREATE_POST,
-      payload: {
-        pith: pith,
-      },
-    });
-    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+    const [startRequest, endRequest] = createRequestWrapper(
+      dispatch,
+      requestId
+    );
 
-    startRequest(() =>
+    startRequest(() => {
+      // report to UI the attempt
+      dispatch({
+        type: CREATE_POST,
+        payload: {
+          pith: pith,
+        },
+      });
       socket.emit("post", data, (res) => {
         endRequest();
         const response = JSON.parse(res);
         if (isError(response)) {
-          handleError(dispatch, response);
-        } else {
-          dispatch({
-            type: CREATE_POST_FULFILLED,
+          cleanUpRequest(requestId, () => {
+            dispatch({
+              type: CREATE_POST_FULFILLED,
+            });
           });
-          // we should now expect to receive something through our subscription
+          handleError(dispatch, response);
         }
-      })
-    );
+        // the pending complete is handled when we get the response from an emit
+      });
+    });
   };
 };
 
@@ -445,7 +440,7 @@ const getContext = (unitId) => {
       type: GET_CONTEXT,
     });
 
-    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+    const [startRequest, endRequest] = createRequestWrapper(dispatch);
 
     startRequest(() =>
       socket.emit("get_unit_context", data, (res) => {
@@ -475,7 +470,7 @@ const search = (query) => {
       type: SEARCH,
     });
 
-    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+    const [startRequest, endRequest] = createRequestWrapper(dispatch);
 
     startRequest(() =>
       socket.emit("search", data, (res) => {
@@ -519,7 +514,7 @@ const sendToDoc = (unitId) => {
       type: SEND_TO_DOC,
     });
 
-    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+    const [startRequest, endRequest] = createRequestWrapper(dispatch);
 
     startRequest(() =>
       socket.emit("send_to_doc", data, (res) => {
@@ -549,7 +544,7 @@ const addUnit = (pith, parentUnit, position) => {
       type: ADD_UNIT,
     });
 
-    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+    const [startRequest, endRequest] = createRequestWrapper(dispatch);
 
     startRequest(() =>
       socket.emit("add_unit", data, (res) => {
@@ -577,7 +572,7 @@ const hideUnit = (unitId) => {
       type: HIDE_UNIT,
     });
 
-    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+    const [startRequest, endRequest] = createRequestWrapper(dispatch);
 
     startRequest(() =>
       socket.emit("hide_unit", data, (res) => {
@@ -605,7 +600,7 @@ const unhideUnit = (unitId) => {
       type: UNHIDE_UNIT,
     });
 
-    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+    const [startRequest, endRequest] = createRequestWrapper(dispatch);
 
     startRequest(() =>
       socket.emit("unhide_unit", data, (res) => {
@@ -633,7 +628,7 @@ const selectUnit = (unitId) => {
       type: SELECT_UNIT,
     });
 
-    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+    const [startRequest, endRequest] = createRequestWrapper(dispatch);
 
     startRequest(() =>
       socket.emit("select_unit", data, (res) => {
@@ -661,7 +656,7 @@ const deselectUnit = (unitId) => {
       type: DESELECT_UNIT,
     });
 
-    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+    const [startRequest, endRequest] = createRequestWrapper(dispatch);
 
     startRequest(() =>
       socket.emit("deselect_unit", data, (res) => {
@@ -691,7 +686,7 @@ const moveUnits = (units, parentUnit, position) => {
       type: MOVE_UNITS,
     });
 
-    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+    const [startRequest, endRequest] = createRequestWrapper(dispatch);
 
     startRequest(() =>
       socket.emit("move_units", data, (res) => {
@@ -719,7 +714,7 @@ const requestEdit = (unitId) => {
       type: REQUEST_EDIT_UNIT,
     });
 
-    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+    const [startRequest, endRequest] = createRequestWrapper(dispatch);
 
     startRequest(() =>
       socket.emit("request_to_edit", data, (res) => {
@@ -747,7 +742,7 @@ const deeditUnit = (unitId) => {
       type: DEEDIT_UNIT,
     });
 
-    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+    const [startRequest, endRequest] = createRequestWrapper(dispatch);
 
     startRequest(() =>
       socket.emit("deedit_unit", data, (res) => {
@@ -775,7 +770,7 @@ const editUnit = (unitId) => {
       type: EDIT_UNIT,
     });
 
-    const [startRequest, endRequest] = createTimeoutHandler(dispatch);
+    const [startRequest, endRequest] = createRequestWrapper(dispatch);
 
     startRequest(() =>
       socket.emit("edit_unit", data, (res) => {
@@ -838,6 +833,15 @@ const subscribeChat = () => {
         payload: {
           unitId: response.unit_id,
         },
+      });
+
+      // signify that the create post funciton is complete and we can move on the
+      // queue to the next request
+      cleanUpRequest(response.id, () => {
+        // this is executed if the id is in our requests map
+        dispatch({
+          type: CREATE_POST_FULFILLED,
+        });
       });
     });
   };

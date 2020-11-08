@@ -9,6 +9,9 @@ export const BAD_TARGET = "BAD_TARGET";
 // cache events
 export const CHAT_MAP = "CHAT_MAP";
 export const DOC_MAP = "DOC_MAP";
+// test connect
+export const TEST_CONNECT = "TEST_CONNECT";
+export const TEST_CONNECT_FULFILLED = "TEST_CONNECT_FULFILLED";
 // create user events
 export const CREATE_NICKNAME = "CREATE_NICKNAME";
 export const CREATE_USER = "CREATE_USER";
@@ -22,6 +25,7 @@ export const CREATE_POST_FULFILLED = "CREATE_POST_FULFILLED";
 // load user events
 export const LOAD_USER = "LOAD_USER";
 export const LOAD_USER_FULFILLED = "LOAD_USER_FULFILLED";
+export const LOADED_USER = "LOADED_USER";
 // load unit page events
 export const LOAD_UNIT_PAGE = "LOAD_UNIT_PAGE";
 export const LOAD_UNIT_PAGE_FULFILLED = "LOAD_UNIT_PAGE_FULFILLED";
