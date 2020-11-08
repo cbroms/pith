@@ -1,4 +1,5 @@
 import {
+  COMPLETE_REQUEST,
   SYSTEM_ERROR,
   INVALID_DISCUSSION,
   TAKEN_NICKNAME,
@@ -65,79 +66,8 @@ import {
 const defaultState = {
   systemError: false,
   requestTimeout: false,
-  userError: {
-    invalidDiscussion: false,
-    createUser: {
-      takenNickname: false,
-      takenUserId: false,
-    },
-    concurrency: {
-      moveUnabled: false,
-      editUnabled: false,
-      badTarget: false,
-    },
-  },
-  events: {
-    testConnect: {
-      pending: false,
-    },
-    createNickname: false,
-    joined: false,
-    createUser: {
-      pending: false,
-    },
-    joinUser: {
-      pending: false,
-    },
-    loadUser: {
-      pending: false,
-    },
-    loadUnitPage: {
-      pending: false,
-    },
-    post: {
-      pending: false,
-      content: {
-        pith: "",
-      },
-    },
-    getContext: {
-      pending: false,
-    },
-    search: {
-      pending: false,
-    },
-    sendToDoc: {
-      pending: false,
-    },
-    addUnit: {
-      pending: false,
-    },
-    hideUnit: {
-      pending: false,
-    },
-    unhideUnit: {
-      pending: false,
-    },
-    selectUnit: {
-      pending: false,
-    },
-    deselectUnit: {
-      pending: false,
-    },
-    moveUnits: {
-      pending: false,
-    },
-    requestEdit: {
-      pending: false,
-    },
-    deeditUnit: {
-      pending: false,
-    },
-    editUnit: {
-      pending: false,
-    },
-  },
+  completedRequests: {},
+  // valid state
   discussionId: null,
   userId: null,
   nickname: null,
@@ -159,6 +89,15 @@ const defaultState = {
 
 const discussionReducer = (state = defaultState, action) => {
   switch (action.type) {
+    case COMPLETE_REQUEST {
+      const completedRequests = {...state.completedRequests};
+      completedRequests[action.payload.id] = action.payload.value;
+      return {
+        ...state,
+        completedRequests: completedRequests
+      };
+      break;
+    }
     case SYSTEM_ERROR: {
       return {
         ...state,

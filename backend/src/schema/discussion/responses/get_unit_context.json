@@ -1,20 +1,13 @@
 {
-  "type": "object",
-  "properties": {
-    "pith": {"type": "string"},
-    "children": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "unit_id": {"type": "string"},
-          "pith": {"type": "string"},
-          "hidden": {"type": "boolean"}
-        },
-        "required": ["unit_id", "pith", "hidden"]
-      }
-    }
+  "base": {
+    "type": "object",
+    "properties": {
+      "doc_meta": {"$ref": "#/definitions/doc_meta"}
+    },
+    "required": ["doc_meta"]
   },
-  "required": ["pith", "children"]
+  "definitions": {
+    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
+  }
 }
 

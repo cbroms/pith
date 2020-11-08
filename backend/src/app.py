@@ -47,7 +47,7 @@ class DiscussionNamespace(AsyncNamespace):
     Namespace functions for the discussion abstraction.
     """
 
-    def _process_responses(ret=None, emits=None):
+    def _process_responses(ret=None, emits=None): # res is used to package emits
       def outer(func):
         @wraps(func)
         async def helper(self, sid, request):
@@ -84,15 +84,22 @@ class DiscussionNamespace(AsyncNamespace):
               result = make_error(Errors.BAD_RESPONSE)
             else: # we can send off emits
 
-              if result is None:
-                result = {"success": 0} # to avoid null
-              result = dumps(result, cls=DictEncoder)
-
+              shared = {}
               if emits is not None:
                 assert(emits_res is not None)
                 for r, e in zip(emits_res, emits):
                   serialized = dumps(r, cls=DictEncoder)
-                  await self.emit(e, serialized, room=discussion_id)
+                  shared[e] = serialized
+
+              if result is None:
+                result = {}
+              result = dumps(result, cls=DictEncoder) # default returns
+
+              # set emitted data to return
+              result["shared"] = shared
+              # send to everyone else
+              emit_name = func.__name__
+              await self.emit(emit_name, shared, room=discussion_id, skip_sid=sid)
 
           return result
         return helper
@@ -171,12 +178,13 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["joined_user"])
+    @_process_responses(ret="joined_user", emits=["set_cursor"])
     @_validate_request("join")
     async def on_join(self, sid, request):
         """
         :event: :ref:`dreq_join-label`
-        :emit: *joined_user* (:ref:`dres_joined_user-label`)
+        :return: *joined_user* (:ref:`dres_joined_user-label`)
+        :emit: *set_cursor* (:ref:`dres_set_cursor-label`)
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID 
         """
         user_id = request["user_id"]
@@ -203,6 +211,7 @@ class DiscussionNamespace(AsyncNamespace):
         return result
 
     # this function has to be handled manually
+    @_process_responses(ret="left_user")
     async def on_leave(self, sid, request):
         """
         :emit: *left_user* (:ref:`dres_left_user-label`)
@@ -220,44 +229,17 @@ class DiscussionNamespace(AsyncNamespace):
             user_id=user_id
           )
 
-          ret, emits = product
+          self.leave_room(sid, discussion_id)
 
-          try:
-            validate(instance=emits[0], schema=dres.schema["left_user"])
-            serialized = dumps(emits[0], cls=DictEncoder)
-            await self.emit("left_user", serialized, room=discussion_id)
-            # leave room when done with emit
-            self.leave_room(sid, discussion_id)
-          except ValidationError:
-            bad_response = True
-            result = make_error(Errors.BAD_RESPONSE)
-
-        return result
-
-    @_process_responses(ret="loaded_user")
-    @_check_user_session
-    async def on_load_user(self, sid, request):
-        """
-        :return: :ref:`dres_loaded_user-label`
-        :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID
-        """
-        session = await self.get_session(sid)
-        discussion_id = session["discussion_id"]
-        user_id = session["user_id"]
-
-        result = gm.discussion_manager.load_user(
-          discussion_id=discussion_id, 
-          user_id=user_id
-        )
         return result
     
-    @_process_responses(ret="loaded_unit_page", emits=["moved_cursor"])
+    @_process_responses(ret="loaded_unit_page", emits=["set_cursor"])
     @_validate_request("load_unit_page")
     @_check_user_session
     async def on_load_unit_page(self, sid, request):
         """
         :event: :ref:`dreq_load_unit_page-label`
-        :emit: *moved_cursor* (:ref:`dres_moved_cursor-label`)
+        :emit: *set_cursor* (:ref:`dres_set_cursor-label`)
         :return: :ref:`dres_loaded_unit_page-label`
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID
         """
@@ -391,13 +373,13 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["moved_cursor"])
+    @_process_responses(emits=["set_cursor"])
     @_validate_request("move_cursor")
     @_check_user_session
     async def on_move_cursor(self, sid, request): 
         """
         :event: :ref:`dreq_move_cursor-label`
-        :emit: *moved_cursor* (:ref:`dres_moved_cursor-label`)
+        :emit: *set_cursor* (:ref:`dres_set_cursor-label`)
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, BAD_POSITION
         """
         unit_id = request["unit_id"]

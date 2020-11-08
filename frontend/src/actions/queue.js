@@ -14,27 +14,8 @@ const execNext = () => {
   }
 };
 
-const cleanUpRequest = (id, callback = null) => {
-  if (Object.keys(requests).includes(id)) {
-    console.log("removing request", id);
-    // remove the request from the queue
-    queue.shift();
-    // remove from the requests map
-    delete requests[id];
-
-    // if there's a callback containing a dispatch to end a pending
-    // request in state, execute it here
-    if (callback !== null) {
-      callback();
-    }
-
-    // move on the next
-    execNext();
-  }
-};
-
 // the handler we use to wrap all requests to the api
-const createRequestWrapper = (dispatch, id, timeout = 5000) => {
+const createRequestWrapper = (actionType, dispatch, id, timeout = 5000) => {
   let interval;
   let elapsed = 0;
 
@@ -66,8 +47,28 @@ const createRequestWrapper = (dispatch, id, timeout = 5000) => {
   };
 
   // when the request completes, clear the interval
-  const endRequest = (func) => {
+  const endRequest = (statusCode) => { 
     clearInterval(interval);
+
+    console.log("removing request", id);
+
+    // remove the request from the queue
+    queue.shift();
+    // remove from the requests map
+    delete requests[id];
+    // move on the next in queue
+    execNext();
+
+    dispatch({
+      type: COMPLETE_REQUEST,
+      payload: {
+        id: requestId,
+        value: {
+          action: actionType,
+          status: statusCode,
+        }
+      }
+    });
   };
 
   return [startRequest, endRequest];

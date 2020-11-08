@@ -99,13 +99,15 @@ class DiscussionManager:
       }
       return response
 
-    def _doc_meta(self, discussion, unit_id):
+    def _doc_meta(self, discussion_id, unit_id):
       unit = self._get_unit(unit_id).get()
       response = {
         "unit_id": unit_id,
         "pith": unit.pith,
         "hidden": unit.hidden,
         "created_at": unit.created_at.strftime(constants.DATE_TIME_FMT)
+        "children": list(unit.children),
+        "backlinks": list(unit.backlinks),
       }
       return response
 
@@ -324,41 +326,6 @@ class DiscussionManager:
         return response, None
 
     @_check_discussion_id
-    def join(self, discussion_id, user_id):
-        """
-        Update start time of current unit.
-        """
-        discussion = self._get(discussion_id)
-        discussion.filter(users__id=user_id).update(
-          set__users__S__active=True,
-          set__users__S__start_time=
-            datetime.utcnow() #.strftime(constants.DATE_TIME_FMT)
-        ) 
-
-        user = discussion.get().users.filter(id=user_id).get()
-        response = {
-          "user_id": user_id,
-          "nickname": user.name,
-          "cursor": user.cursor.to_mongo().to_dict()
-        }
-        return None, [response]
-
-    # TODO: MULTIPLE MONGO OPERATIONS
-    @_check_discussion_id
-    @_check_user_id
-    def leave(self, discussion_id, user_id):
-        """
-        Create new time interval for last visited unit.
-        """
-        discussion = self._get(discussion_id)
-        discussion.filter(users__id=user_id).update(set__users__S__active=False) 
-        self._time_entry(discussion_id, user_id)
-
-        nickname = discussion.get().users.filter(id=user_id).get().name
-        response = {"nickname": nickname}
-        return None, [response]
-
-    @_check_discussion_id
     @_check_user_id
     def load_user(self, discussion_id, user_id):
         discussion = self._get(discussion_id).get()
@@ -405,7 +372,44 @@ class DiscussionManager:
           "chat_meta": chat_meta,
           "doc_meta": doc_meta
         }
-        return response, None
+        return response
+
+    @_check_discussion_id
+    def join(self, discussion_id, user_id):
+        """
+        Update start time of current unit.
+        """
+        discussion = self._get(discussion_id)
+        discussion.filter(users__id=user_id).update(
+          set__users__S__active=True,
+          set__users__S__start_time=
+            datetime.utcnow() #.strftime(constants.DATE_TIME_FMT)
+        ) 
+
+        user = discussion.get().users.filter(id=user_id).get()
+
+        response = load_user(discussion_id, user_id)
+        cursor_response = {
+          "user_id": user_id,
+          "nickname": user.name,
+          "cursor": user.cursor.to_mongo().to_dict()
+        }
+        return response, [cursor_response]
+
+    # TODO: MULTIPLE MONGO OPERATIONS
+    @_check_discussion_id
+    @_check_user_id
+    def leave(self, discussion_id, user_id):
+        """
+        Create new time interval for last visited unit.
+        """
+        discussion = self._get(discussion_id)
+        discussion.filter(users__id=user_id).update(set__users__S__active=False) 
+        self._time_entry(discussion_id, user_id)
+
+        nickname = discussion.get().users.filter(id=user_id).get().name
+        response = {"nickname": nickname}
+        return None, [response]
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -421,41 +425,15 @@ class DiscussionManager:
 
         doc_meta = []
         doc_meta.append(self._doc_meta(discussion_id, unit_id))
-
-        children = []
         for c in unit.children:
           c_unit = self._get_unit(c).get()
-
-          grandchildren = []
           for g in c_unit.children:
-            g_unit = self._get_unit(g).get()
-            grandchildren.append({
-              "unit_id": g,
-            })
             doc_meta.append(self._doc_meta(discussion_id, g))
-
-          children.append({
-            "unit_id": c,
-            "children": grandchildren
-          })
           doc_meta.append(self._doc_meta(discussion_id, c))
-
-        backlinks = []
         for b in unit.backward_links:
           b_unit = self._get_unit(b).get()
-
-          grandbacklinks = []
           for g in b_unit.backward_links:
-            g_unit = self._get_unit(g).get()
-            grandbacklinks.append({
-              "unit_id": g,
-            })
             doc_meta.append(self._doc_meta(discussion_id, g))
-
-          backlinks.append({
-            "unit_id": b,
-            "backlinks": grandbacklinks 
-          })
           doc_meta.append(self._doc_meta(discussion_id, b))
 
         # update cursor
@@ -466,6 +444,7 @@ class DiscussionManager:
         # uses old viewed unit
         self._time_entry(discussion_id, user_id)
         user = discussion.get().users.filter(id=user_id).get()
+        nickname = user.name
         cursor = user.cursor
         time_interval = user.timeline[-1] # newly made
         timeline_entry = {
@@ -486,14 +465,12 @@ class DiscussionManager:
 
         response = {
           "ancestors": ancestors,
-          "children": children,
-          "backlinks": backlinks,
           "timeline_entry": timeline_entry,
-          "cursor": cursor.to_mongo().to_dict(),
           "doc_meta": doc_meta
         }
         cursor_response = {
           "user_id": user_id,
+          "nickname": nickname,
           "cursor": cursor.to_mongo().to_dict(),
         }
 
@@ -527,21 +504,7 @@ class DiscussionManager:
     @_check_discussion_id
     @_check_unit_id
     def get_unit_context(self, discussion_id, unit_id):
-        discussion = self._get(discussion_id)
-        unit = self._get_unit(unit_id).get()
-        children = []
-        for c in unit.children:
-          c_unit = self._get_unit(c).get()
-          children.append({
-            "unit_id": c,
-            "pith": c_unit.pith,
-            "hidden": c_unit.hidden
-          })
-         
-        response = {
-          "pith": unit.pith,
-          "children": children
-        }
+        response = self._doc_meta(discussion_id, unit_id)
         return response, None
 
     # TODO: MULTIPLE MONGO OPERATIONS
@@ -701,6 +664,7 @@ class DiscussionManager:
         user = discussion.get().users.filter(id=user_id).get()
         response = {
             "user_id": user_id,
+            "nickname": user.name,
             "cursor": user.cursor.to_mongo().to_dict()
         }
         return None, [response]

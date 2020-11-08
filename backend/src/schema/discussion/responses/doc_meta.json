@@ -7,9 +7,17 @@
       "unit_id": {"type": "string"},
       "pith": {"type": "string"},
       "hidden": {"type": "boolean"},
-      "created_at": {"type": "string"}
+      "created_at": {"type": "string"},
+      "children": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "backlinks": {
+        "type": "array",
+        "items": {"type": "string"}
+      }
     },
-    "required": ["unit_id", "pith", "hidden", "created_at"]
+    "required": ["unit_id", "pith", "hidden", "created_at", "children", "backlinks"]
   }
 }
 

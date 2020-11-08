@@ -11,7 +11,15 @@ import {
   unpackChatMeta,
   unpackDocMeta,
 } from "./utils";
-
+import {
+  GENERIC_ERROR,
+  INVALID_DISCUSSION,
+  TAKEN_NICKNAME,
+  TAKEN_USER_ID,
+  MOVE_UNABLED,
+  EDIT_UNABLED,
+  BAD_TARGET,
+} from "../utils/errors";
 import {
   INVALID_USER_SESSION,
   BAD_REQUEST,
@@ -28,6 +36,26 @@ import {
   NICKNAME_EXISTS,
   USER_ID_EXISTS,
 } from "./errors";
+import {
+  TEST_CONNECT, 
+  CREATE_USER, 
+  JOIN_USER, 
+  CREATE_POST, 
+  LOAD_USER, 
+  LOAD_UNIT_PAGE, 
+  GET_CONTEXT, 
+  SEARCH, 
+  SEND_TO_DOC, 
+  ADD_UNIT, 
+  HIDE_UNIT, 
+  UNHIDE_UNIT, 
+  SELECT_UNIT, 
+  DESELECT_UNIT, 
+  MOVE_UNITS, 
+  REQUEST_EDIT_UNIT, 
+  DEEDIT_UNIT, 
+  EDIT_UNIT, 
+} from "./types";
 
 import {
   SYSTEM_ERROR,
@@ -90,87 +118,31 @@ import {
   UNLOCKED_EDIT,
   LOCKED_POSITION,
   UNLOCKED_POSITION,
-} from "./types";
+} from "../reducers/types";
 
 const isError = (response) => {
   return Object.keys(response).includes("error");
 };
 
-const handleError = (dispatch, response) => {
-  const error_stamp = response.error;
-  switch (error_stamp) {
-    case NICKNAME_EXISTS: {
-      // user error, tell them to try another
-      dispatch({
-        type: TAKEN_NICKNAME,
-      });
-      break;
+const getStatus(response, dispatch, errorMap) {
+    let statusCode = null;
+    if (isError(response)) {
+      const errorStamp = response.error;
+      for (const key in errorMap) {
+        if (errorStamp === key) {
+          statusCode = errorMap[key];
+          break;
+        }
+      }
+      if (statusCode === null) {
+          statusCode = GENERIC_ERROR;
+          dispatch({
+            type: SYSTEM_ERROR,
+          });
+      }
     }
-    case USER_ID_EXISTS: {
-      // user error, tell them to try another
-      dispatch({
-        type: TAKEN_USER_ID,
-      });
-      break;
-    }
-    case BAD_EDIT_TRY: {
-      // user error, probably rare concurrency issue
-      dispatch({
-        type: EDIT_UNABLED,
-      });
-      break;
-    }
-    case FAILED_EDIT_ACQUIRE: {
-      // user error, probably rare concurrency issue
-      dispatch({
-        type: EDIT_UNABLED,
-      });
-      break;
-    }
-    case BAD_POSITION: {
-      // user error, maybe concurrency issue or system issue
-      dispatch({
-        type: MOVE_UNABLED,
-      });
-      break;
-    }
-    case BAD_POSITION_TRY: {
-      // user error, probably rare concurrency issue
-      dispatch({
-        type: MOVE_UNABLED,
-      });
-      break;
-    }
-    case FAILED_POSITION_ACQUIRE: {
-      // user error, probably rare concurrency issue
-      dispatch({
-        type: MOVE_UNABLED,
-      });
-      break;
-    }
-    case BAD_PARENT: {
-      // user error, move is invalid
-      dispatch({
-        type: BAD_TARGET,
-      });
-      break;
-    }
-    default: {
-      /* 
-      These errors indicate there is something wrong with the system:
-      * BAD_DISCUSSION_ID,
-      * BAD_USER_ID,
-      * BAD_UNIT_ID,
-      * INVALID_USER_SESSION,
-      * BAD_REQUEST,
-      * BAD_RESPONSE,
-      */
-      dispatch({
-        type: SYSTEM_ERROR,
-      });
-    }
-  }
-};
+    return statusCode;
+}
 
 const loadUser = (dispatch, discussionId, userId, requestId) => {
   const start = performance.now();
@@ -228,7 +200,7 @@ const loadUser = (dispatch, discussionId, userId, requestId) => {
   });
 };
 
-const joinUser = (dispatch, discussionId, userId, requestId) => {
+const joinUser = (discussionId, userId, requestId) => {
   const data = {
     discussion_id: discussionId,
     user_id: userId,
@@ -261,56 +233,34 @@ const joinUser = (dispatch, discussionId, userId, requestId) => {
   });
 };
 
-const enterUser = (discussionId, requestId) => {
+// TODO model
+const enterDiscussion = (discussionId, requestId) => {
   return (dispatch) => {
     const data = {
       discussion_id: discussionId,
     };
 
     const [startRequest, endRequest] = createRequestWrapper(
+      TEST_CONNECT,
       dispatch,
       requestId
     );
 
     startRequest(() => {
-      dispatch({
-        type: TEST_CONNECT,
-      });
-
       socket.emit("test_connect", data, (res) => {
-        endRequest();
-
         const response = JSON.parse(res);
+        const statusCode = getStatus(response, dispatch, {
+          BAD_DISCUSSION_ID: INVALID_DISCUSSION
+        });
 
-        if (isError(response)) {
-          const error_stamp = response.error;
-          switch (error_stamp) {
-            case BAD_DISCUSSION_ID: {
-              dispatch({
-                type: INVALID_DISCUSSION,
-              });
-              break;
-            }
-            default: {
-              dispatch({
-                type: SYSTEM_ERROR,
-              });
-            }
-          }
-        } else {
+        if (statusCode === null) { // success 
           const userId = getValue(discussionId);
           if (userId === null) {
-            dispatch({
-              type: CREATE_NICKNAME,
-            });
+            statusCode = NO_USER_ID, // need to call createUser
           }
         }
 
-        cleanUpRequest(requestId, () =>
-          dispatch({
-            type: TEST_CONNECT_FULFILLED,
-          })
-        );
+        endRequest(statusCode);
       });
     });
   };
@@ -1028,7 +978,7 @@ const subscribeDocument = () => {
 };
 
 export {
-  enterUser,
+  enterDiscussion,
   createUser,
   getPage,
   createPost,

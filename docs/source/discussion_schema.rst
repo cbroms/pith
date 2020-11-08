@@ -181,13 +181,6 @@ left_user
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/left_user.json
 
-.. _dres_loaded_user-label:
-
-loaded_user
-=====================================
-
-.. jsonschema:: ../../backend/src/schema/discussion/responses/loaded_user.json
-
 .. _dres_loaded_unit_page-label:
 
 loaded_unit_page
@@ -230,12 +223,12 @@ search
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/search.json
 
-.. _dres_moved_cursor-label:
+.. _dres_set_cursor-label:
 
-moved_cursor
+set_cursor
 =====================================
 
-.. jsonschema:: ../../backend/src/schema/discussion/responses/moved_cursor.json
+.. jsonschema:: ../../backend/src/schema/discussion/responses/set_cursor.json
 
 .. _dres_hid_unit-label:
 
