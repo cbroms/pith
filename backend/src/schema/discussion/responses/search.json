@@ -1,8 +1,4 @@
 {
-  "definitions": {
-    "chat_meta": {"$ref": "chat_meta.json#/chat_meta"},
-    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
-  },
   "base": {
     "type": "object",
     "properties": {
@@ -30,6 +26,10 @@
       "doc_meta": {"$ref": "#/definitions/doc_meta"}
     },
     "required": ["chat_units", "doc_units", "chat_meta", "doc_meta"]
+  },
+  "definitions": {
+    "chat_meta": {"$ref": "chat_meta.json#/chat_meta"},
+    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
   }
 }
 

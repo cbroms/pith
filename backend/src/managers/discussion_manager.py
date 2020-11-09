@@ -105,7 +105,7 @@ class DiscussionManager:
         "unit_id": unit_id,
         "pith": unit.pith,
         "hidden": unit.hidden,
-        "created_at": unit.created_at.strftime(constants.DATE_TIME_FMT)
+        "created_at": unit.created_at.strftime(constants.DATE_TIME_FMT),
         "edit_privilege": unit.edit_privilege,
         "position_privilege": unit.position_privilege,
         "children": list(unit.children),

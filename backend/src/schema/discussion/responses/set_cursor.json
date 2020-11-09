@@ -1,7 +1,4 @@
 {
-  "definitions": {
-    "cursor": {"$ref": "cursor.json#/cursor"}
-  },
   "base": {
     "type": "object",
     "properties": {
@@ -10,6 +7,10 @@
       "cursor": {"$ref": "#/definitions/cursor"}
     },
     "required": ["user_id", "nickname", "cursor"]
+  },
+  "definitions": {
+    "$$target": ["#/definitions/cursor"],
+    "cursor": {"$ref": "cursor.json#/cursor"}
   }
 }
 

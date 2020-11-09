@@ -1,8 +1,4 @@
 {
-  "definitions": {
-    "cursor": {"$ref": "cursor.json#/cursor"},
-    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
-  },
   "base": {
     "type": "object",
     "properties": {
@@ -22,6 +18,10 @@
       "doc_meta": {"$ref": "#/definitions/doc_meta"}
     },
     "required": ["ancestors", "timeline_entry", "doc_meta"]
+  },
+  "definitions": {
+    "cursor": {"$ref": "cursor.json#/cursor"},
+    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
   }
 }
 

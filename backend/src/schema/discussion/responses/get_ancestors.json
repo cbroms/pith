@@ -1,7 +1,4 @@
 {
-  "definitions": {
-    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
-  },
   "base": {
     "type": "object",
     "properties": {
@@ -12,6 +9,9 @@
       "doc_meta": {"$ref": "#/definitions/doc_meta"}
     },
     "required": ["ancestors", "doc_meta"]
+  },
+  "definitions": {
+    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
   }
 }
 
