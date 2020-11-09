@@ -8,33 +8,7 @@ import {
   unpackTimelineEntry,
   unpackTimeline,
   unpackContext,
-  unpackChatMeta,
-  unpackDocMeta,
 } from "./utils";
-import {
-  GENERIC_ERROR,
-  INVALID_DISCUSSION,
-  TAKEN_NICKNAME,
-  TAKEN_USER_ID,
-  MOVE_UNABLED,
-  EDIT_UNABLED,
-  BAD_TARGET,
-} from "../utils/errors";
-import {
-  handleJoin,
-  handleLeave,
-  handleLoadUnitPage,
-  handlePost,
-  handleSendToDoc,
-  handleHideUnit,
-  handleUnhideUnit,
-  handleAddUnit,
-  handleSelectUnit,
-  handleDeselectUnit,
-  handleRequestToEdit,
-  handleDeeditUnit,
-  handleEditUnit,
-} from "./handlers";
 import {
   INVALID_USER_SESSION,
   BAD_REQUEST,
@@ -51,6 +25,32 @@ import {
   NICKNAME_EXISTS,
   USER_ID_EXISTS,
 } from "./errors";
+import {
+  GENERIC_ERROR,
+  INVALID_DISCUSSION,
+  TAKEN_NICKNAME,
+  TAKEN_USER_ID,
+  MOVE_UNABLED,
+  EDIT_UNABLED,
+  BAD_TARGET,
+} from "../utils/errors";
+import {
+  handleDocMeta,
+  handleChatMeta,
+  handleJoin,
+  handleLeave,
+  handleLoadUnitPage,
+  handlePost,
+  handleSendToDoc,
+  handleHideUnit,
+  handleUnhideUnit,
+  handleAddUnit,
+  handleSelectUnit,
+  handleDeselectUnit,
+  handleRequestToEdit,
+  handleDeeditUnit,
+  handleEditUnit,
+} from "./handlers";
 import {
   TEST_CONNECT, 
   CREATE_USER, 
@@ -73,44 +73,14 @@ import {
 } from "./types";
 import {
   SYSTEM_ERROR,
-  INVALID_DISCUSSION,
-  TAKEN_NICKNAME,
-  TAKEN_USER_ID,
-  MOVE_UNABLED,
-  EDIT_UNABLED,
-  BAD_TARGET,
-  REQUEST_TIMEOUT,
-  CHAT_MAP,
-  DOC_MAP,
-  CREATE_NICKNAME,
-  TEST_CONNECT_FULFILLED,
-  CREATE_USER_FULFILLED,
   JOIN_USER_FULFILLED,
-  LOAD_USER_FULFILLED,
-  LOADED_USER,
   LOAD_UNIT_PAGE_FULFILLED,
-  CREATE_POST_FULFILLED,
-  GET_CONTEXT_FULFILLED,
   SEARCH_FULFILLED,
-  SEND_TO_DOC_FULFILLED,
-  ADD_UNIT_FULFILLED,
-  HIDE_UNIT_FULFILLED,
-  UNHIDE_UNIT_FULFILLED,
-  SELECT_UNIT_FULFILLED,
-  DESELECT_UNIT_FULFILLED,
-  MOVE_UNITS_FULFILLED,
-  REQUEST_EDIT_UNIT_FULFILLED,
-  DEEDIT_UNIT_FULFILLED,
-  EDIT_UNIT_FULFILLED,
 } from "../reducers/types";
-
-const isError = (response) => {
-  return Object.keys(response).includes("error");
-};
 
 const getStatus(response, dispatch, errorMap) {
     let statusCode = null;
-    if (isError(response)) {
+    if (Object.keys(response).includes("error")) {
       const errorStamp = response.error;
       for (const key in errorMap) {
         if (errorStamp === key) {
@@ -147,24 +117,13 @@ const joinUser = (discussionId, userId, requestId) => {
 
       if (statusCode === null) { // success 
         handleJoin(response.shared, dispatch);
-        const chatMeta = unpackChatMeta(response.chat_meta);
-        const docMeta = unpackDocMeta(response.doc_meta);
+        handleDocMeta(response.doc_meta, dispatch)
+        handleChatMeta(response.chat_meta, dispatch);
+
         const timeline = unpackTimeline(response.timeline);
         const cursors = unpackCursors(response.cursors);
         dispatch({
-          type: CHAT_MAP,
-          payload: {
-            chatMapAdd: chatMeta,
-          },
-        });
-        dispatch({
-          type: DOC_MAP,
-          payload: {
-            docMapAdd: docMeta,
-          },
-        });
-        dispatch({
-          type: JOINED_USER,
+          type: JOIN_USER_FULFILLED,
           payload: {
             discussionId: discussionId,
             userId: userId,
@@ -228,7 +187,10 @@ const createUser = (discussionId, nickname, requestId) => {
     startRequest(() => {
       socket.emit("create_user", data, (res) => {
         const response = JSON.parse(res);
-        const statusCode = getStatus(response, dispatch, {});
+        const statusCode = getStatus(response, dispatch, {
+          NICKNAME_EXISTS: TAKEN_NICKNAME,
+          USER_ID_EXISTS: TAKEN_USER_ID, 
+        });
         if (statusCode === null) {
           // set the value in localStorage
           const userId = response.user_id;
@@ -262,13 +224,7 @@ const getPage = (unitId, requestId) => {
           const children = unpackChildren(response.children);
           const backlinks = unpackBacklinks(response.backlinks);
           const timelineEntry = unpackTimelineEntry(response.timeline_entry);
-          const docMeta = unpackDocMeta(response.doc_meta);
-          dispatch({
-            type: DOC_MAP,
-            payload: {
-              docMapAdd: docMeta,
-            },
-          });
+          handleDocMeta(response.doc_meta, dispatch);
           dispatch({
             type: LOAD_UNIT_PAGE_FULFILLED,
             ancestors: response.ancestors,
@@ -326,20 +282,7 @@ const getContext = (unitId, requestId) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {});
         if (statusCode === null) {
-					const docMeta = unpackDocMeta(response.doc_meta);
-					dispatch({
-						type: DOC_MAP,
-						payload: {
-							docMapAdd: docMeta,
-						},
-					});
-					/*
-          const context = unpackContext(response);
-          dispatch({
-            type: GET_CONTEXT_FULFILLED,
-            context: context,
-          });
-					*/
+          handleDocMeta(response.doc_meta, dispatch);
         }
         endRequest(statusCode);
       })
@@ -364,20 +307,8 @@ const search = (query, requestId) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {});
         if (statusCode === null) {
-          const chatMeta = unpackChatMeta(response.chat_meta);
-          const docMeta = unpackDocMeta(response.doc_meta);
-          dispatch({
-            type: CHAT_MAP,
-            payload: {
-              chatMapAdd: chatMeta,
-            },
-          });
-          dispatch({
-            type: DOC_MAP,
-            payload: {
-              docMapAdd: docMeta,
-            },
-          });
+          handleDocMeta(response.doc_meta, dispatch);
+          handleChatMeta(response.chat_meta, dispatch);
           dispatch({
             type: SEARCH_FULFILLED,
             chatResults: response.chat_units,
@@ -457,7 +388,9 @@ const hideUnit = (unitId, requestId) => {
     startRequest(() =>
       socket.emit("hide_unit", data, (res) => {
         const response = JSON.parse(res);
-        const statusCode = getStatus(response, dispatch, {});
+        const statusCode = getStatus(response, dispatch, {
+          BAD_EDIT_TRY: EDIT_UNABLED, 
+        });
         if (statusCode === null) {
           handleHideUnit(response.shared, dispatch);
         }
@@ -507,7 +440,9 @@ const selectUnit = (unitId, requestId) => {
     startRequest(() =>
       socket.emit("select_unit", data, (res) => {
         const response = JSON.parse(res);
-        const statusCode = getStatus(response, dispatch, {});
+        const statusCode = getStatus(response, dispatch, {
+          FAILED_POSITION_ACQUIRE: POSITION_UNABLED
+        });
         if (statusCode === null) {
           handleSelectUnit(response.shared, dispatch);
         }
@@ -532,7 +467,9 @@ const deselectUnit = (unitId, requestId) => {
     startRequest(() =>
       socket.emit("deselect_unit", data, (res) => {
         const response = JSON.parse(res);
-        const statusCode = getStatus(response, dispatch, {});
+        const statusCode = getStatus(response, dispatch, {
+          BAD_POSITION_TRY: POSITION_UNABLED, 
+        });
         if (statusCode === null) {
           handleDeselectUnit(response.shared, dispatch);
         }
@@ -561,7 +498,10 @@ const moveUnits = (units, parentUnit, position, requestId) => {
     startRequest(() =>
       socket.emit("move_units", data, (res) => {
         const response = JSON.parse(res);
-        const statusCode = getStatus(response, dispatch, {});
+        const statusCode = getStatus(response, dispatch, {
+          BAD_POSITION_TRY: POSITION_UNABLED, 
+          BAD_PARENT: BAD_TARGET,
+        });
         if (statusCode === null) {
           handleMoveUnits(response.shared, dispatch);
         }
@@ -586,7 +526,9 @@ const requestEdit = (unitId, requestId) => {
     startRequest(() =>
       socket.emit("request_to_edit", data, (res) => {
         const response = JSON.parse(res);
-        const statusCode = getStatus(response, dispatch, {});
+        const statusCode = getStatus(response, dispatch, {
+          FAILED_EDIT_ACQUIRE: EDIT_UNABLED
+        });
         if (statusCode === null) {
           handleRequestToEdit(response.shared, dispatch);
         }
@@ -611,7 +553,9 @@ const deeditUnit = (unitId, requestId) => {
     startRequest(() =>
       socket.emit("deedit_unit", data, (res) => {
         const response = JSON.parse(res);
-        const statusCode = getStatus(response, dispatch, {});
+        const statusCode = getStatus(response, dispatch, {
+          BAD_EDIT_TRY: EDIT_UNABLED, 
+        });
         if (statusCode === null) {
           handleDeeditUnit(response.shared, dispatch);
         }
@@ -636,7 +580,9 @@ const editUnit = (unitId, requestId) => {
     startRequest(() =>
       socket.emit("edit_unit", data, (res) => {
         const response = JSON.parse(res);
-        const statusCode = getStatus(response, dispatch, {});
+        const statusCode = getStatus(response, dispatch, {
+          BAD_EDIT_TRY: EDIT_UNABLED, 
+        });
         if (statusCode === null) {
           handleEditUnit(response.shared, dispatch);
         }

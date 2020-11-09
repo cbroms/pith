@@ -75,8 +75,10 @@ const unpackDocMeta = (docMetaArr = []) => {
       pith: unit.pith,
       hidden: unit.hidden,
       createdAt: unit.created_at,
-      editLock: null, // nickname
-      positionLock: null, // nickname
+      editLock: unit.edit_privilege,
+      positionLock: unit.position_privilege,
+      children: unit.children,
+      backlinks: unit.backlinks
     };
   }
   return docMeta;

@@ -1,8 +1,9 @@
 {
   "type": "object",
   "properties": {
+    "user_id": {"type": "string"},
     "nickname": {"type": "string"}
   },
-  "required": ["nickname"]
+  "required": ["user_id", "nickname"]
 }
 

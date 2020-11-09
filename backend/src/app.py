@@ -585,7 +585,7 @@ class DiscussionNamespace(AsyncNamespace):
         """
         :event: :ref:`dreq_deedit_unit-label`
         :emit: *doc_meta* (:ref:`dres_doc_meta-label`) 
-        :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, FAILED_EDIT_TRY
+        :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, BAD_EDIT_TRY
         """
         unit_id = request["unit_id"]
         session = await self.get_session(sid)
@@ -608,7 +608,7 @@ class DiscussionNamespace(AsyncNamespace):
 
         :event: :ref:`dreq_edit_unit-label`
         :emit: *doc_meta* (:ref:`dres_doc_meta-label`) AND *chat_meta* (:ref:`dres_chat_meta-label`) 
-        :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, FAILED_EDIT_TRY
+        :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, BAD_EDIT_TRY
         """
         unit_id = request["unit_id"]
         pith = request["pith"]

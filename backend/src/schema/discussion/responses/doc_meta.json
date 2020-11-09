@@ -8,6 +8,8 @@
       "pith": {"type": "string"},
       "hidden": {"type": "boolean"},
       "created_at": {"type": "string"},
+      "edit_privilege": {"type": "string"},
+      "position_privilege": {"type": "string"},
       "children": {
         "type": "array",
         "items": {"type": "string"}
@@ -17,7 +19,7 @@
         "items": {"type": "string"}
       }
     },
-    "required": ["unit_id", "pith", "hidden", "created_at", "children", "backlinks"]
+    "required": ["unit_id", "pith", "hidden", "created_at", "edit_privilege", "position_privilege", "children", "backlinks"]
   }
 }
 

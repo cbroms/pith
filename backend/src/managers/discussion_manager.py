@@ -106,6 +106,8 @@ class DiscussionManager:
         "pith": unit.pith,
         "hidden": unit.hidden,
         "created_at": unit.created_at.strftime(constants.DATE_TIME_FMT)
+        "edit_privilege": unit.edit_privilege,
+        "position_privilege": unit.position_privilege,
         "children": list(unit.children),
         "backlinks": list(unit.backlinks),
       }
@@ -117,18 +119,17 @@ class DiscussionManager:
         user = discussion.get().users.filter(id=user_id).get()
         parent = self._get_unit(parent_id)
 
+        doc_meta = []
+
         # remove from old
-        old_parents = []
-        old_positions = []
         for unit_id in units:
           unit = self._get_unit(unit_id)
           old_parent = unit.get().parent
-          old_position = self._get_position(old_parent, unit_id)
-          old_parents.append(old_parent)
-          old_positions.append(old_position)
           self._get_unit(old_parent).update(
             pull__children=unit_id
           )
+          # TODO don't need to add unit to doc_meta
+          doc_meta.append(old_parent)
 
         # add to new
         key = "push__children__{}".format(position)
@@ -139,19 +140,9 @@ class DiscussionManager:
             set__parent=parent_id,
           )
           self._release_position(unit_id)
+        doc_meta.append(parent)
       
-        # build response
-        response = []
-        for i, unit_id in enumerate(units):
-          response.append({
-            "unit_id": unit_id,
-            "parent": parent_id,
-            "position": self._get_position(parent_id, unit_id), 
-            "old_parent": old_parents[i],
-            "old_position": old_positions[i],
-          })
-
-        return response
+        return doc_meta
 
     """
     Verification functions. Require specific arguments in most cases.
@@ -409,7 +400,10 @@ class DiscussionManager:
         self._time_entry(discussion_id, user_id)
 
         nickname = discussion.get().users.filter(id=user_id).get().name
-        response = {"nickname": nickname}
+        response = {
+          "user_id": user_id,
+          "nickname": nickname
+        }
         return None, [response]
 
     # TODO: MULTIPLE MONGO OPERATIONS
@@ -539,22 +533,20 @@ class DiscussionManager:
         chat_meta.append(self._chat_meta(discussion_id, unit_id))
 
         # make backlinks
-        backlinks = []
         for f in forward_links:
           self._get_unit(f).update(
             push__backward_links = unit_id
           )
-          backlinks.append({
-            "unit_id": f,
-            "backlink": unit_id
-          })
+          unit = self._get_unit(f)
+          if unit.get().in_chat:
+            chat_meta.append(self._chat_meta(discussion_id, f))
+          else:
+            doc_meta.append(self._doc_meta(discussion_id, f))
 
         post = {
           "unit_id": unit_id,
-          "chat_meta": chat_meta,
-          "doc_meta": doc_meta
         }
-        return None, [post, backlinks]
+        return None, [post, doc_meta, chat_meta]
 
     @_check_discussion_id
     def search(self, discussion_id, query):
@@ -618,9 +610,15 @@ class DiscussionManager:
         unit.save()
         unit_id = unit.id
 
+        parent = self._get_unit(parent_id)
+        key = "push__children__{}".format(position)
+        parent.update(**{key: [unit_id]})
+
         doc_meta = []
         chat_meta = []
         doc_meta.append(self._doc_meta(discussion_id, unit_id))
+        doc_meta.append(self._doc_meta(discussion_id, parent))
+
         for f in forward_links:
           unit = self._get_unit(f)
           if unit.get().in_chat:
@@ -628,28 +626,13 @@ class DiscussionManager:
           else:
             doc_meta.append(self._doc_meta(discussion_id, f))
 
-        parent = self._get_unit(parent_id)
-        key = "push__children__{}".format(position)
-        parent.update(**{key: [unit_id]})
-
-        backlinks = []
         for f in forward_links:
           self._get_unit(f).update(
             push__backward_links = unit_id
           )
-          backlinks.append({
-            "unit_id": f,
-            "backlink": unit_id
-          })
+          doc_meta.append(self._doc_meta(discussion_id, f))
         
-        added = {
-          "unit_id": unit_id,
-          "parent": parent_id,
-          "position": self._get_position(parent_id, unit_id),
-          "doc_meta": doc_meta,
-          "chat_meta": chat_meta
-        }
-        return None, [added, backlinks]
+        return None, [doc_meta, chat_meta]
 
     @_check_discussion_id
     @_check_user_id
@@ -684,9 +667,8 @@ class DiscussionManager:
         
         self._release_edit(unit_id)
 
-        hide_response = self._doc_meta(unit_id) #{"unit_id": unit_id}
-        unlock_response = self._doc_meta(unit_id) #unlock_response = {"unit_id": unit_id}
-        return None, [hide_response, unlock_response]
+        doc_meta = [self._doc_meta(discussion_id, unit_id)]
+        return None, [doc_meta]
         
     @_check_discussion_id
     @_check_unit_id
@@ -694,8 +676,8 @@ class DiscussionManager:
         unit = self._get_unit(unit_id)
         unit.update(hidden=False)
         
-        response = self._doc_meta(unit_id) #{"unit_id": unit_id}
-        return None, [response]
+        doc_meta = [self._doc_meta(discussion_id, unit_id)]
+        return None, [doc_meta]
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -716,9 +698,15 @@ class DiscussionManager:
         unit.save()
         unit_id = unit.id
 
+        parent_ptr = self._get_unit(parent)
+        key = "push__children__{}".format(position)
+        parent_ptr.update(**{key: [unit_id]})
+
         doc_meta = []
         chat_meta = []
         doc_meta.append(self._doc_meta(discussion_id, unit_id))
+        doc_meta.append(self._doc_meta(discussion_id, parent))
+
         for f in forward_links:
           unit = self._get_unit(f)
           if unit.get().in_chat:
@@ -726,29 +714,18 @@ class DiscussionManager:
           else:
             doc_meta.append(self._doc_meta(discussion_id, f))
 
-        parent_ptr = self._get_unit(parent)
-        key = "push__children__{}".format(position)
-        parent_ptr.update(**{key: [unit_id]})
-
         # make backlinks
-        backlinks = []
         for f in forward_links:
           self._get_unit(f).update(
             push__backward_links = unit_id
           )
-          backlinks.append({
-            "unit_id": f,
-            "backlink": unit_id
-          })
+          unit = self._get_unit(f)
+          if unit.get().in_chat:
+            chat_meta.append(self._chat_meta(discussion_id, f))
+          else:
+            doc_meta.append(self._doc_meta(discussion_id, f))
 
-        added = {
-          "unit_id": unit_id,
-          "parent": parent,
-          "position": self._get_position(parent, unit_id),
-          "doc_meta": doc_meta,
-          "chat_meta": chat_meta
-        }
-        return None, [added, backlinks]
+        return None, [doc_meta, chat_meta]
 
     # TODO: might support multi-select
     @_check_discussion_id
@@ -764,12 +741,8 @@ class DiscussionManager:
           return utils.make_error(Errors.FAILED_POSITION_ACQUIRE)
         unit.update(position_privilege=user_id)
 
-        user = discussion.get().users.filter(id=user_id).get()
-        response = [{
-          "unit_id": unit_id,
-          "nickname": user.name
-        }]
-        return None, [response]
+        doc_meta = [self._doc_meta(discussion_id, unit_id)]
+        return None, [doc_meta]
 
     @_check_discussion_id
     @_check_user_id
@@ -777,8 +750,8 @@ class DiscussionManager:
     @_verify_positions_privilege
     def deselect_unit(self, discussion_id, user_id, unit_id):
         self._release_position(unit_id)
-        response = [{"unit_id": unit_id}]
-        return None, [response]
+        doc_meta = [self._doc_meta(discussion_id, unit_id)]
+        return None, [doc_meta]
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -793,15 +766,9 @@ class DiscussionManager:
         """
         discussion = self._get(discussion_id)
         user = discussion.get().users.filter(id=user_id).get()
-        repositioned_units = self._move_units(discussion_id, user_id, units, parent, position)
+        doc_meta = self._move_units(discussion_id, user_id, units, parent, position)
 
-        unlocks = []
-        for u in units:
-          unlocks.append({
-            "unit_id": u
-          })
-
-        return None, [repositioned_units, unlocks]
+        return None, [doc_meta]
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -816,20 +783,16 @@ class DiscussionManager:
         """
         discussion = self._get(discussion_id)
         user = discussion.get().users.filter(id=user_id).get()
-        added_unit, backlinks = self.add_unit(
+        doc_meta = self.add_unit(
           discussion_id=discussion_id, pith="", 
           parent=parent, position=position
-        )[1] 
-        repositioned_units = self._move_units(discussion_id, user_id, units, 
+        )[1][0] 
+        doc_meta2 = self._move_units(discussion_id, user_id, units, 
           added_unit["unit_id"], 0) # put at head
 
-        unlocks = []
-        for u in units:
-          unlocks.append({
-            "unit_id": u
-          })
+        doc_meta += doc_meta2
 
-        return None, [repositioned_units, added_unit, unlocks]
+        return None, [doc_meta]
 
     @_check_discussion_id
     @_check_user_id
@@ -844,12 +807,8 @@ class DiscussionManager:
           return utils.make_error(Errors.FAILED_EDIT_ACQUIRE)
         unit.update(edit_privilege=user_id)
 
-        user = discussion.get().users.filter(id=user_id).get()
-        response = {
-          "unit_id": unit_id,
-          "nickname": user.name
-        }
-        return None, [response]
+        doc_meta = [self._doc_meta(discussion, unit_id)]
+        return None, [doc_meta]
 
     @_check_discussion_id
     @_check_user_id
@@ -857,8 +816,8 @@ class DiscussionManager:
     @_verify_edit_privilege
     def deedit_unit(self, discussion_id, user_id, unit_id):
         self._release_edit(unit_id)
-        response = {"unit_id": unit_id}
-        return None, [response]
+        doc_meta = [self._doc_meta(discussion, unit_id)]
+        return None, [doc_meta]
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
@@ -894,23 +853,13 @@ class DiscussionManager:
         doc_meta = []
         chat_meta = []
         doc_meta.append(self._doc_meta(discussion_id, unit_id))
-        for f in forward_links:
-          unit = self._get_unit(f)
-          if unit.get().in_chat:
-            chat_meta.append(self._chat_meta(discussion_id, f))
-          else:
-            doc_meta.append(self._doc_meta(discussion_id, f))
 
-        edited_unit = {
-          "unit_id": unit_id,
-          "doc_meta": doc_meta,
-          "chat_meta": chat_meta
-        }
-        unlock_response = {"unit_id": unit_id}
-        removed_backlinks = [
-          {"unit_id": r, "backlink": unit_id} for r in removed_links
-        ] 
-        added_backlinks = [
-          {"unit_id": a, "backlink": unit_id} for a in added_links
-        ]
-        return None, [edited_unit, unlock_response, removed_backlinks, added_backlinks]
+        # backward links added/removed
+        for b in removed_links + added_links:
+          unit = self._get_unit(b)
+          if unit.get().in_chat:
+            chat_meta.append(self._chat_meta(discussion_id, b))
+          else:
+            doc_meta.append(self._doc_meta(discussion_id, b))
+
+        return None, [doc_meta, chat_meta]

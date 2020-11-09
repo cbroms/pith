@@ -1,4 +1,8 @@
-import { REQUEST_TIMEOUT } from "./types";
+import { 
+  COMPLETE_REQUEST,
+  REQUEST_TIMEOUT, 
+  RESET_REQUEST_TIMEOUT,
+} from "./types";
 
 // ids in order that we want to execute
 const queue = [];
@@ -59,6 +63,9 @@ const createRequestWrapper = (actionType, dispatch, id, timeout = 5000) => {
     // move on the next in queue
     execNext();
 
+    dispatch({
+      type: RESET_REQUEST_TIMEOUT,
+    });
     dispatch({
       type: COMPLETE_REQUEST,
       payload: {
