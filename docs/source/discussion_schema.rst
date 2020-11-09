@@ -212,7 +212,7 @@ get_unit_context
 .. _dres_created_post-label:
 
 created_post
-=====================================
+====================================
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/created_post.json
 
@@ -230,92 +230,6 @@ set_cursor
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/set_cursor.json
 
-.. _dres_hid_unit-label:
-
-hid_unit
-=====================================
-
-.. jsonschema:: ../../backend/src/schema/discussion/responses/hid_unit.json
-
-.. _dres_unhid_unit-label:
-
-unhid_unit
-=====================================
-
-.. jsonschema:: ../../backend/src/schema/discussion/responses/unhid_unit.json
-
-.. _dres_added_unit-label:
-
-added_unit
-=====================================
-
-.. jsonschema:: ../../backend/src/schema/discussion/responses/added_unit.json
-
-.. _dres_locked_unit_position-label:
-
-locked_unit_position
-=====================================
-
-.. jsonschema:: ../../backend/src/schema/discussion/responses/locked_unit_position.json
-
-.. _dres_unlocked_unit_position-label:
-
-unlocked_unit_position
-=====================================
-
-.. jsonschema:: ../../backend/src/schema/discussion/responses/unlocked_unit_position.json
-
-.. _dres_repositioned_unit-label:
-
-repositioned_unit
-=====================================
-
-.. jsonschema:: ../../backend/src/schema/discussion/responses/repositioned_unit.json
-
-.. _dres_locked_unit_editable-label:
-
-locked_unit_editable
-=====================================
-
-.. jsonschema:: ../../backend/src/schema/discussion/responses/locked_unit_editable.json
-
-.. _dres_unlocked_unit_editable-label:
-
-unlocked_unit_editable
-=====================================
-
-.. jsonschema:: ../../backend/src/schema/discussion/responses/unlocked_unit_editable.json
-
-.. _dres_edited_unit-label:
-
-edited_unit
-=====================================
-
-.. jsonschema:: ../../backend/src/schema/discussion/responses/edited_unit.json
-
-.. _dres_removed_backlinks-label:
-
-removed_backlinks
-=====================================
-
-.. jsonschema:: ../../backend/src/schema/discussion/responses/removed_backlinks.json
-
-.. _dres_added_backlinks-label:
-
-added_backlinks
-=====================================
-
-.. jsonschema:: ../../backend/src/schema/discussion/responses/added_backlinks.json
-
-*************************************
-Sub-schemas
-*************************************
-
-cursor
-=====================================
-
-.. jsonschema:: ../../backend/src/schema/discussion/responses/cursor.json#/cursor
-
 chat_meta
 =====================================
 
@@ -325,3 +239,8 @@ doc_meta
 =====================================
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/doc_meta.json#/doc_meta
+
+cursor
+=====================================
+
+.. jsonschema:: ../../backend/src/schema/discussion/responses/cursor.json#/cursor

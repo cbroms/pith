@@ -312,13 +312,13 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["created_post", "added_backlinks"])
+    @_process_responses(emits=["created_post", "doc_meta", "chat_meta"])
     @_validate_request("post")
     @_check_user_session
     async def on_post(self, sid, request):
         """
         :event: :ref:`dreq_post-label`
-        :emit: *created_post* (:ref:`dres_created_post-label`) AND *added_backlinks* (:ref:`dres_added_backlinks-label`)
+        :emit: *created_post* (:ref:`dres_created_post-label`) AND *doc_meta* (:ref:`dres_doc_meta-label`) AND *chat_meta* (:ref:`dres_chat_meta-label`) 
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID
         """
         pith = request["pith"]
@@ -352,13 +352,13 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["added_unit", "added_backlinks"])
+    @_process_responses(emits=["doc_meta", "chat_meta"])
     @_validate_request("send_to_doc")
     @_check_user_session
     async def on_send_to_doc(self, sid, request):
         """
         :event: :ref:`dreq_send_to_doc-label`
-        :emit: *added_unit* (:ref:`dres_added_unit-label`) AND *added_backlinks* (:ref:`dres_added_backlinks-label`)
+        :emit: *doc_meta* (:ref:`dres_doc_meta-label`) AND *chat_meta* (:ref:`dres_chat_meta-label`)
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_UNIT_ID
         """
         unit_id = request["unit_id"]
@@ -396,7 +396,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["hid_unit", "unlocked_unit_editable"])
+    @_process_responses(emits=["doc_meta"])
     @_validate_request("hide_unit")
     @_check_user_session
     async def on_hide_unit(self, sid, request): 
@@ -404,7 +404,7 @@ class DiscussionNamespace(AsyncNamespace):
         NOTE: Call `request_to_edit` before this.
 
         :event: :ref:`dreq_hide_unit-label`
-        :emit: *hid_unit* (:ref:`dres_hid_unit-label`) AND *unlocked_unit_editable* (:ref:`dres_unlocked_unit_editable-label`)
+        :emit: *doc_meta* (:ref:`dres_doc_meta-label`)
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_UNIT_ID, BAD_EDIT_TRY
         """
         unit_id = request["unit_id"]
@@ -419,13 +419,13 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["unhid_unit"])
+    @_process_responses(emits=["doc_meta"])
     @_validate_request("unhide_unit")
     @_check_user_session
     async def on_unhide_unit(self, sid, request): 
         """
         :event: :ref:`dreq_unhide_unit-label`
-        :emit: *unhid_unit* (:ref:`dres_unhid_unit-label`)
+        :emit: *doc_meta* (:ref:`dres_doc_meta-label`)
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_UNIT_ID
         """
         unit_id = request["unit_id"]
@@ -438,13 +438,13 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["added_unit", "added_backlinks"])
+    @_process_responses(emits=["doc_meta", "chat_meta"])
     @_validate_request("add_unit")
     @_check_user_session
     async def on_add_unit(self, sid, request): 
         """
         :event: :ref:`dreq_add_unit-label`
-        :emit: *added_unit* (:ref:`dres_added_unit-label`) AND *added_backlinks* (:ref:`dres_added_backlinks-label`)
+        :emit: *doc_meta* (:ref:`dres_doc_meta-label`) AND *chat_meta* (:ref:`dres_chat_meta-label`)
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID
         """
         pith = request["pith"]
@@ -461,13 +461,13 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["locked_unit_position"])
+    @_process_responses(emits=["doc_meta"])
     @_validate_request("select_unit")
     @_check_user_session
     async def on_select_unit(self, sid, request): 
         """
         :event: :ref:`dreq_select_unit-label`
-        :emit: *locked_unit_position* (:ref:`dres_locked_unit_position-label`) 
+        :emit: *doc_meta* (:ref:`dres_doc_meta-label`) 
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, FAILED_POSITION_ACQUIRE
         """
         unit_id = request["unit_id"]
@@ -482,13 +482,13 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["unlocked_unit_position"])
+    @_process_responses(emits=["doc_meta"])
     @_validate_request("deselect_unit")
     @_check_user_session
     async def on_deselect_unit(self, sid, request): 
         """
         :event: :ref:`dreq_deselect_unit-label`
-        :emit: *unlocked_unit_position* (:ref:`dres_unlocked_unit_position-label`) 
+        :emit: *doc_meta* (:ref:`dres_doc_meta-label`) 
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, BAD_POSITION_TRY
         """
         unit_id = request["unit_id"]
@@ -503,7 +503,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["repositioned_unit", "unlocked_unit_position"])
+    @_process_responses(emits=["doc_meta"])
     @_validate_request("move_units")
     @_check_user_session
     async def on_move_units(self, sid, request): 
@@ -511,7 +511,7 @@ class DiscussionNamespace(AsyncNamespace):
         NOTE: Call `select_unit` before this.
 
         :event: :ref:`dreq_move_units-label`
-        :emit: *repositioned_unit* (:ref:`dres_repositioned_unit-label`) AND *unlocked_unit_position* (:ref:`dres_unlocked_unit_position-label`)
+        :emit: *doc_meta* (:ref:`dres_doc_meta-label`) 
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, BAD_POSITION_TRY, BAD_PARENT
         """
         units = request["units"]
@@ -530,7 +530,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["repositioned_unit", "added_unit", "unlocked_unit_position"])
+    @_process_responses(emits=["doc_meta"])
     @_validate_request("merge_units")
     @_check_user_session
     async def on_merge_units(self, sid, request): 
@@ -538,7 +538,7 @@ class DiscussionNamespace(AsyncNamespace):
         NOTE: Call `select_unit` before this.
 
         :event: :ref:`dreq_merge_units-label`
-        :emit: *repositioned_unit* (:ref:`dres_repositioned_unit-label`), *added_unit* (for parent unit, :ref:`dres_added_unit-label`) AND *unlocked_unit_position* (:ref:`dres_unlocked_unit_position-label`)
+        :emit: *doc_meta* (:ref:`dres_doc_meta-label`) 
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, BAD_POSITION_TRY, BAD_PARENT
         """
         units = request["units"]
@@ -557,13 +557,13 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["locked_unit_editable"])
+    @_process_responses(emits=["doc_meta"])
     @_validate_request("request_to_edit")
     @_check_user_session
     async def on_request_to_edit(self, sid, request):
         """
         :event: :ref:`dreq_request_to_edit-label`
-        :emit: *locked_unit_editable* (:ref:`dres_locked_unit_editable-label`)
+        :emit: *doc_meta* (:ref:`dres_doc_meta-label`) 
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, FAILED_EDIT_ACQUIRE
         """
         unit_id = request["unit_id"]
@@ -578,13 +578,13 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["unlocked_unit_editable"])
+    @_process_responses(emits=["doc_meta"])
     @_validate_request("deedit_unit")
     @_check_user_session
     async def on_deedit_unit(self, sid, request):
         """
         :event: :ref:`dreq_deedit_unit-label`
-        :emit: *unlocked_unit_editable* (:ref:`dres_unlocked_unit_editable-label`)
+        :emit: *doc_meta* (:ref:`dres_doc_meta-label`) 
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, FAILED_EDIT_TRY
         """
         unit_id = request["unit_id"]
@@ -599,7 +599,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["edited_unit", "unlocked_unit_editable", "removed_backlinks", "added_backlinks"])
+    @_process_responses(emits=["doc_meta", "chat_meta"])
     @_validate_request("edit_unit")
     @_check_user_session
     async def on_edit_unit(self, sid, request):
@@ -607,7 +607,7 @@ class DiscussionNamespace(AsyncNamespace):
         NOTE: Call `request_to_edit` before this.
 
         :event: :ref:`dreq_edit_unit-label`
-        :emit: *edited_unit* (:ref:`dres_edited_unit-label`) AND *unlocked_unit_editable* (:ref:`dres_unlocked_unit_editable-label`) AND *removed_backlinks* (:ref:`dres_removed_backlinks-label`) AND *added_backlinks* (:ref:`dres_added_backlinks-label`) 
+        :emit: *doc_meta* (:ref:`dres_doc_meta-label`) AND *chat_meta* (:ref:`dres_chat_meta-label`) 
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID, BAD_UNIT_ID, FAILED_EDIT_TRY
         """
         unit_id = request["unit_id"]

@@ -16,17 +16,8 @@ schema_names = [
   "created_post",
   "search",
   "set_cursor",
-  "hid_unit",
-  "unhid_unit",
-  "added_unit",
-  "locked_unit_position",
-  "unlocked_unit_position",
-  "repositioned_unit",
-  "locked_unit_editable",
-  "unlocked_unit_editable",
-  "edited_unit",
-  "removed_backlinks",
-  "added_backlinks",
+  "doc_meta",
+  "chat_meta"
 ]
 
 for schema_name in schema_names:
