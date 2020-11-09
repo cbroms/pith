@@ -14,10 +14,6 @@ export const JOIN_USER_FULFILLED = "JOIN_USER_FULFILLED";
 // create post events
 export const CREATE_POST = "CREATE_POST";
 export const CREATE_POST_FULFILLED = "CREATE_POST_FULFILLED";
-// load user events
-export const LOAD_USER = "LOAD_USER";
-export const LOAD_USER_FULFILLED = "LOAD_USER_FULFILLED";
-export const LOADED_USER = "LOADED_USER";
 // load unit page events
 export const LOAD_UNIT_PAGE = "LOAD_UNIT_PAGE";
 export const LOAD_UNIT_PAGE_FULFILLED = "LOAD_UNIT_PAGE_FULFILLED";
@@ -58,9 +54,11 @@ export const DEEDIT_UNIT_FULFILLED = "DEEDIT_UNIT_FULFILLED";
 export const EDIT_UNIT = "EDIT_UNIT";
 export const EDIT_UNIT_FULFILLED = "EDIT_UNIT_FULFILLED";
 // subscription events
-export const JOINED_USER = "JOINED_USER";
+export const SET_CURSOR = "SET_CURSOR";
+export const LEFT_USER = "LEFT_USER";
 export const CREATED_POST = "CREATED_POST";
 export const ADDED_UNIT = "ADDED_UNIT";
+export const EDITED_UNIT = "EDITED_UNIT";
 export const REMOVED_UNIT = "REMOVED_UNIT";
 export const ADDED_BACKLINK = "ADDED_BACKLINK";
 export const REMOVED_BACKLINK = "REMOVED_BACKLINK";

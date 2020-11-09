@@ -1,14 +1,13 @@
 {
-  "type": "array",
-  "items": {
+  "definitions": {
+    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
+  },
+  "base": {
     "type": "object",
     "properties": {
-      "unit_id": {"type": "string"},
-      "parent": {"type": "string"},
-      "position": {"type": "integer", "minimum": 0},
-      "old_parent": {"type": "string"},
-      "old_position": {"type": "integer", "minimum": 0}
+      "doc_meta": {"$ref": "#/definitions/doc_meta"}
     },
-    "required": ["unit_id", "parent", "position", "old_parent", "old_position"]
+    "required": ["doc_meta"]
   }
 }
+

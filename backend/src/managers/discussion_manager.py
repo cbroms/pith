@@ -365,6 +365,7 @@ class DiscussionManager:
           chat_meta.append(self._chat_meta(discussion_id, u))
 
         response = {
+          "nickname": user.name,
           "cursors": cursors,
           "current_unit": user.viewed_unit, 
           "timeline": timeline,
@@ -683,8 +684,8 @@ class DiscussionManager:
         
         self._release_edit(unit_id)
 
-        hide_response = {"unit_id": unit_id}
-        unlock_response = {"unit_id": unit_id}
+        hide_response = self._doc_meta(unit_id) #{"unit_id": unit_id}
+        unlock_response = self._doc_meta(unit_id) #unlock_response = {"unit_id": unit_id}
         return None, [hide_response, unlock_response]
         
     @_check_discussion_id
@@ -693,7 +694,7 @@ class DiscussionManager:
         unit = self._get_unit(unit_id)
         unit.update(hidden=False)
         
-        response = {"unit_id": unit_id}
+        response = self._doc_meta(unit_id) #{"unit_id": unit_id}
         return None, [response]
 
     # TODO: MULTIPLE MONGO OPERATIONS

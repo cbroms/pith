@@ -1,8 +1,13 @@
 {
-  "type": "object",
-  "properties": {
-    "unit_id": {"type": "string"}
+  "definitions": {
+    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
   },
-  "required": ["unit_id"]
+  "base": {
+    "type": "object",
+    "properties": {
+      "doc_meta": {"$ref": "#/definitions/doc_meta"}
+    },
+    "required": ["doc_meta"]
+  }
 }
 

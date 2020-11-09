@@ -7,6 +7,7 @@
     "base": {
       "type": "object",
       "properties": {
+        "nickname": {"type": "string"},
         "cursors": {
           "type": "array",
           "items": {
@@ -39,7 +40,7 @@
         "chat_meta": {"$ref": "#/definitions/chat_meta"},
         "doc_meta": {"$ref": "#/definitions/doc_meta"}
       },
-      "required": ["cursors", "current_unit", "timeline", "chat_history", "chat_meta", "doc_meta"]
+      "required": ["nickname", "cursors", "current_unit", "timeline", "chat_history", "chat_meta", "doc_meta"]
   }
 }
 

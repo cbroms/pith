@@ -16,9 +16,6 @@ import {
   JOIN_USER,
   CREATE_USER_FULFILLED,
   JOIN_USER_FULFILLED,
-  LOAD_USER,
-  LOAD_USER_FULFILLED,
-  LOADED_USER,
   LOAD_UNIT_PAGE,
   LOAD_UNIT_PAGE_FULFILLED,
   CREATE_POST,
@@ -47,7 +44,8 @@ import {
   DEEDIT_UNIT_FULFILLED,
   EDIT_UNIT,
   EDIT_UNIT_FULFILLED,
-  JOINED_USER,
+	LEFT_USER,
+	SET_CURSOR,
   CREATED_POST,
   ADDED_UNIT,
   REMOVED_UNIT,
@@ -248,47 +246,17 @@ const discussionReducer = (state = defaultState, action) => {
       break;
     }
     case JOIN_USER_FULFILLED: {
-      const events = { ...state.events };
-      events.joinUser = { ...defaultState.events.joinUser };
-      events.joined = true;
       return {
         ...state,
-        requestTimeout: false,
-        events: events,
         discussionId: action.payload.discussionId,
         userId: action.payload.userId,
         nickname: action.payload.nickname,
-      };
-      break;
-    }
-    case LOAD_USER: {
-      const events = { ...state.events };
-      events.loadUser.pending = true;
-      return {
-        ...state,
-        requestTimeout: false,
-        events: events,
-      };
-      break;
-    }
-    case LOAD_USER_FULFILLED: {
-      return {
-        ...state,
         icons: action.payload.icons,
         currentUnit: action.payload.currentUnit,
         timeline: action.payload.timeline,
         posts: action.payload.chatHistory,
       };
       break;
-    }
-    case LOADED_USER: {
-      const events = { ...state.events };
-      events.loadUser.pending = false;
-      return {
-        ...state,
-        requestTimeout: false,
-        events: events,
-      };
     }
     case LOAD_UNIT_PAGE: {
       const events = { ...state.events };
@@ -583,9 +551,18 @@ const discussionReducer = (state = defaultState, action) => {
       };
       break;
     }
-    case JOINED_USER: {
-      const icons = [...state.icons];
-      icons.push(action.payload.icon);
+    case SET_CURSOR: {
+      const icons = {...state.icons};
+			icons[action.payload.userId] = action.payload.icon;
+      return {
+        ...state,
+        icons: icons,
+      };
+      break;
+    }
+    case LEFT_USER: {
+      const icons = {...state.icons};
+			del icons[action.payload.userId];
       return {
         ...state,
         icons: icons,
@@ -602,6 +579,9 @@ const discussionReducer = (state = defaultState, action) => {
       break;
     }
     case ADDED_UNIT: {
+      // change documentTree
+    }
+    case EDITED_UNIT: {
       // change documentTree
     }
     case REMOVED_UNIT: {
