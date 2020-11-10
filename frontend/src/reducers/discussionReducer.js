@@ -4,14 +4,14 @@ import {
   SEARCH_FULFILLED,
   CHAT_MAP,
   DOC_MAP,
-	SET_CURSOR,
+  SET_CURSOR,
   CREATED_POST,
-	LEFT_USER,
+  LEFT_USER,
   SYSTEM_ERROR,
   COMPLETE_REQUEST,
   REQUEST_TIMEOUT,
   RESET_REQUEST_TIMEOUT,
-} from "../actions/types";
+} from "./types";
 
 const defaultState = {
   systemError: false,
@@ -91,8 +91,8 @@ const discussionReducer = (state = defaultState, action) => {
       break;
     }
     case SET_CURSOR: {
-      const icons = {...state.icons};
-			icons[action.payload.userId] = action.payload.icon;
+      const icons = { ...state.icons };
+      icons[action.payload.userId] = action.payload.icon;
       return {
         ...state,
         icons: icons,
@@ -100,8 +100,8 @@ const discussionReducer = (state = defaultState, action) => {
       break;
     }
     case LEFT_USER: {
-      const icons = {...state.icons};
-			delete icons[action.payload.userId];
+      const icons = { ...state.icons };
+      delete icons[action.payload.userId];
       return {
         ...state,
         icons: icons,
@@ -124,12 +124,12 @@ const discussionReducer = (state = defaultState, action) => {
       };
       break;
     }
-    case COMPLETE_REQUEST {
-      const completedRequests = {...state.completedRequests};
+    case COMPLETE_REQUEST: {
+      const completedRequests = { ...state.completedRequests };
       completedRequests[action.payload.id] = action.payload.value;
       return {
         ...state,
-        completedRequests: completedRequests
+        completedRequests: completedRequests,
       };
       break;
     }

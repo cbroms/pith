@@ -8,16 +8,26 @@ import {
     useParams,
 } from "react-router-dom";
 
+import {
+    GENERIC_ERROR,
+    INVALID_DISCUSSION,
+    NO_USER_ID,
+    TAKEN_NICKNAME,
+    TAKEN_USER_ID,
+} from "../utils/errors";
+
 import { v4 as uuidv4 } from "uuid";
 import {
-    enterUser,
+    enterDiscussion,
     createUser,
+    joinUser,
     createPost,
     sendToDoc,
-    subscribeUsers,
     subscribeChat,
     subscribeDocument,
 } from "../actions/discussionActions";
+
+import usePending from "../hooks/usePending";
 
 import Chat from "./Chat";
 import Document from "./Document";
@@ -33,37 +43,67 @@ const Discussion = (props) => {
     const [subscribed, setSubscribed] = useState(false);
     const [query, setQuery] = useState("");
 
-    const { joined, createNickname, joinUser } = props.events;
-    const loading = props.events.loadUser.pending;
-    const badDiscussion = props.userError.invalidDiscussion;
+    const [enterDiscussionStatus, makeEnterDiscussion] = usePending(
+        props.completedRequests
+    );
+    const [createUserStatus, makeCreateUser] = usePending(
+        props.completedRequests
+    );
+    const [joinUserStatus, makeJoinUser] = usePending(props.completedRequests);
+
+    const joined = joinUserStatus.made && !joinUserStatus.pending;
+    const loading = joinUserStatus.pending;
+
+    const badDiscussion = enterDiscussionStatus.status === INVALID_DISCUSSION;
+    const createNickname = enterDiscussionStatus.status === NO_USER_ID;
+    const badNickname = createUserStatus.status === TAKEN_NICKNAME;
 
     const match = useRouteMatch();
     const { discussionId } = useParams();
 
     useEffect(() => {
-        if (!joined && !createNickname && !joinUser.pending && !badDiscussion)
-            props.dispatch(enterUser(discussionId));
+        if (!enterDiscussionStatus.made) {
+            console.log("entering discussion");
+            // we have yet to enter the discussion, so do that now
+            makeEnterDiscussion((requestId) =>
+                props.dispatch(enterDiscussion(discussionId, requestId))
+            );
+        } else if (!enterDiscussionStatus.pending && !badDiscussion) {
+            console.log("entered discussion sucessfully");
+            // we're done entering the discussion and it's a valid id and we have not yet
+            // tried to join with the user
+            if (enterDiscussionStatus.status === 0) {
+                // if we entered the discussion and it indicated we have a userId already,
+                // go ahead and join
+                console.log("joining user");
+                makeJoinUser((requestId) =>
+                    props.dispatch(joinDiscussion(discussionId))
+                );
+            }
+        }
         // => invalidDiscussion is not true
         // join
         // => check state i joined
         //  loadUser
-        else if (joined && !subscribed) {
-            props.dispatch(subscribeChat());
-            props.dispatch(subscribeUsers());
-            props.dispatch(subscribeDocument());
-            setSubscribed(true);
-        }
+        // else if (enterDiscussion && !subscribed) {
+        //     props.dispatch(subscribeChat());
+        //     props.dispatch(subscribeDocument());
+        //     setSubscribed(true);
+        // }
     });
 
     const joinDiscussion = (nickname) => {
         // join the discussion with a given nickname
-        props.dispatch(createUser(discussionId, nickname));
+        console.log("creating user");
+        makeCreateUser((requestId) =>
+            props.dispatch(createUser(discussionId, nickname, requestId))
+        );
         // call join manually
     };
 
     const chat = (
         <Chat
-            loading={props.events.loadUser.pending}
+            loading={loading}
             content={props.chatMap}
             posts={props.posts}
             openSearch={() => setChatSearchOpen(true)}
@@ -82,7 +122,7 @@ const Discussion = (props) => {
 
     const doc = (
         <Document
-            loading={props.events.loadUser.pending}
+            loading={loading}
             units={props.docMap}
             ancestors={props.ancestors}
             currentUnit={props.currentUnit}
@@ -109,13 +149,11 @@ const Discussion = (props) => {
                         />
                     ) : (
                         <DiscussionJoin
-                            badNickname={
-                                props.userError.createUser.takenNickname
-                            }
+                            badNickname={badNickname}
                             badDiscussion={badDiscussion}
                             onComplete={(nickname) => joinDiscussion(nickname)}
                             id={discussionId}
-                            loadingScreen={props.events.loadUser.pending}
+                            loadingScreen={loading}
                         />
                     )}
                 </Route>

@@ -1,8 +1,8 @@
-import { 
+import {
   COMPLETE_REQUEST,
-  REQUEST_TIMEOUT, 
+  REQUEST_TIMEOUT,
   RESET_REQUEST_TIMEOUT,
-} from "./types";
+} from "../reducers/types";
 
 // ids in order that we want to execute
 const queue = [];
@@ -51,7 +51,7 @@ const createRequestWrapper = (actionType, dispatch, id, timeout = 5000) => {
   };
 
   // when the request completes, clear the interval
-  const endRequest = (statusCode) => { 
+  const endRequest = (statusCode) => {
     clearInterval(interval);
 
     console.log("removing request", id);
@@ -69,16 +69,16 @@ const createRequestWrapper = (actionType, dispatch, id, timeout = 5000) => {
     dispatch({
       type: COMPLETE_REQUEST,
       payload: {
-        id: requestId,
+        id: id,
         value: {
           action: actionType,
           status: statusCode,
-        }
-      }
+        },
+      },
     });
   };
 
   return [startRequest, endRequest];
 };
 
-export { cleanUpRequest, createRequestWrapper };
+export { createRequestWrapper };

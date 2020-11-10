@@ -1,6 +1,7 @@
 import { socket } from "./socket";
 import { getValue, setValue } from "../api/local";
 import { cleanUpRequest, createRequestWrapper } from "./queue";
+
 import {
   unpackCursors,
   unpackChildren,
@@ -9,6 +10,7 @@ import {
   unpackTimeline,
   unpackContext,
 } from "./utils";
+
 import {
   INVALID_USER_SESSION,
   BAD_REQUEST,
@@ -25,15 +27,18 @@ import {
   NICKNAME_EXISTS,
   USER_ID_EXISTS,
 } from "./errors";
+
 import {
   GENERIC_ERROR,
   INVALID_DISCUSSION,
+  NO_USER_ID,
   TAKEN_NICKNAME,
   TAKEN_USER_ID,
-  MOVE_UNABLED,
-  EDIT_UNABLED,
+  MOVE_DISABLED,
+  EDIT_DISABLED,
   BAD_TARGET,
 } from "../utils/errors";
+
 import {
   handleDocMeta,
   handleChatMeta,
@@ -47,30 +52,33 @@ import {
   handleAddUnit,
   handleSelectUnit,
   handleDeselectUnit,
+  handleMoveUnits,
   handleRequestToEdit,
   handleDeeditUnit,
   handleEditUnit,
 } from "./handlers";
+
 import {
-  TEST_CONNECT, 
-  CREATE_USER, 
-  JOIN_USER, 
-  CREATE_POST, 
-  LOAD_USER, 
-  LOAD_UNIT_PAGE, 
-  GET_CONTEXT, 
-  SEARCH, 
-  SEND_TO_DOC, 
-  ADD_UNIT, 
-  HIDE_UNIT, 
-  UNHIDE_UNIT, 
-  SELECT_UNIT, 
-  DESELECT_UNIT, 
-  MOVE_UNITS, 
-  REQUEST_EDIT_UNIT, 
-  DEEDIT_UNIT, 
-  EDIT_UNIT, 
+  TEST_CONNECT,
+  CREATE_USER,
+  JOIN_USER,
+  CREATE_POST,
+  LOAD_USER,
+  LOAD_UNIT_PAGE,
+  GET_CONTEXT,
+  SEARCH,
+  SEND_TO_DOC,
+  ADD_UNIT,
+  HIDE_UNIT,
+  UNHIDE_UNIT,
+  SELECT_UNIT,
+  DESELECT_UNIT,
+  MOVE_UNITS,
+  REQUEST_EDIT_UNIT,
+  DEEDIT_UNIT,
+  EDIT_UNIT,
 } from "./types";
+
 import {
   SYSTEM_ERROR,
   JOIN_USER_FULFILLED,
@@ -78,65 +86,72 @@ import {
   SEARCH_FULFILLED,
 } from "../reducers/types";
 
-const getStatus(response, dispatch, errorMap) {
-    let statusCode = null;
-    if (Object.keys(response).includes("error")) {
-      const errorStamp = response.error;
-      for (const key in errorMap) {
-        if (errorStamp === key) {
-          statusCode = errorMap[key];
-          break;
-        }
-      }
-      if (statusCode === null) {
-          statusCode = GENERIC_ERROR;
-          dispatch({
-            type: SYSTEM_ERROR,
-          });
+const getStatus = (response, dispatch, errorMap) => {
+  let statusCode = null;
+  if (Object.keys(response).includes("error")) {
+    const errorStamp = response.error;
+    for (const key in errorMap) {
+      if (errorStamp === key) {
+        statusCode = errorMap[key];
+        break;
       }
     }
-    return statusCode;
-}
+    if (statusCode === null) {
+      statusCode = GENERIC_ERROR;
+      dispatch({
+        type: SYSTEM_ERROR,
+      });
+    }
+  }
+  return statusCode;
+};
 
-const joinUser = (discussionId, userId, requestId) => {
-  const data = {
-    discussion_id: discussionId,
-    user_id: userId,
+const joinUser = (discussionId, requestId) => {
+  return (dispatch) => {
+    // we assume join user to be called only when the userId is populated
+    const userId = getValue(discussionId);
+
+    const data = {
+      discussion_id: discussionId,
+      user_id: userId,
+    };
+
+    const [startRequest, endRequest] = createRequestWrapper(
+      JOIN_USER,
+      dispatch,
+      requestId
+    );
+
+    startRequest(() => {
+      socket.emit("join", data, (res) => {
+        const response = JSON.parse(res);
+        const statusCode = getStatus(response, dispatch, {});
+
+        if (statusCode === null) {
+          // success
+          handleJoin(response.shared, dispatch);
+          handleDocMeta(response.doc_meta, dispatch);
+          handleChatMeta(response.chat_meta, dispatch);
+
+          const timeline = unpackTimeline(response.timeline);
+          const cursors = unpackCursors(response.cursors);
+          dispatch({
+            type: JOIN_USER_FULFILLED,
+            payload: {
+              discussionId: discussionId,
+              userId: userId,
+              nickname: response.nickname,
+              icons: cursors,
+              currentUnit: response.current_unit,
+              timeline: timeline,
+              chatHistory: response.chat_history || [],
+            },
+          });
+        }
+        endRequest(statusCode);
+      });
+    });
   };
-
-  const [startRequest, endRequest] = createRequestWrapper(
-    JOIN_USER,
-    dispatch,
-    requestId
-  );
-
-	startRequest(() => {
-    socket.emit("join", data, (res) => {
-      const response = JSON.parse(res);
-      const statusCode = getStatus(response, dispatch, {});
-
-      if (statusCode === null) { // success 
-        handleJoin(response.shared, dispatch);
-        handleDocMeta(response.doc_meta, dispatch)
-        handleChatMeta(response.chat_meta, dispatch);
-
-        const timeline = unpackTimeline(response.timeline);
-        const cursors = unpackCursors(response.cursors);
-        dispatch({
-          type: JOIN_USER_FULFILLED,
-          payload: {
-            discussionId: discussionId,
-            userId: userId,
-            nickname: response.nickname, 
-            icons: cursors,
-            currentUnit: response.current_unit,
-            timeline: timeline,
-            chatHistory: response.chat_history || [],
-          },
-        });
-      }
-      endRequest(statusCode);
-  });
 };
 
 const enterDiscussion = (discussionId, requestId) => {
@@ -155,13 +170,14 @@ const enterDiscussion = (discussionId, requestId) => {
       socket.emit("test_connect", data, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
-          BAD_DISCUSSION_ID: INVALID_DISCUSSION
+          BAD_DISCUSSION_ID: INVALID_DISCUSSION,
         });
 
-        if (statusCode === null) { // success 
+        if (statusCode === null) {
+          // success
           const userId = getValue(discussionId);
           if (userId === null) {
-            statusCode = NO_USER_ID, // need to call createUser
+            statusCode = NO_USER_ID; // need to call createUser
           }
         }
 
@@ -189,7 +205,7 @@ const createUser = (discussionId, nickname, requestId) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
           NICKNAME_EXISTS: TAKEN_NICKNAME,
-          USER_ID_EXISTS: TAKEN_USER_ID, 
+          USER_ID_EXISTS: TAKEN_USER_ID,
         });
         if (statusCode === null) {
           // set the value in localStorage
@@ -220,7 +236,7 @@ const getPage = (unitId, requestId) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {});
         if (statusCode === null) {
-          handleGetPage(response.shared, dispatch);
+          handleLoadUnitPage(response.shared, dispatch);
           const children = unpackChildren(response.children);
           const backlinks = unpackBacklinks(response.backlinks);
           const timelineEntry = unpackTimelineEntry(response.timeline_entry);
@@ -257,7 +273,7 @@ const createPost = (pith, requestId) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {});
         if (statusCode === null) {
-          handleCreatePost(response.shared, dispatch);
+          handlePost(response.shared, dispatch);
         }
         endRequest(statusCode);
       });
@@ -272,7 +288,7 @@ const getContext = (unitId, requestId) => {
     };
 
     const [startRequest, endRequest] = createRequestWrapper(
-      GET_CONTEXT, 
+      GET_CONTEXT,
       dispatch,
       requestId
     );
@@ -355,7 +371,7 @@ const addUnit = (pith, parentUnit, position, requestId) => {
     };
 
     const [startRequest, endRequest] = createRequestWrapper(
-      ADD_UNIT, 
+      ADD_UNIT,
       dispatch,
       requestId
     );
@@ -389,7 +405,7 @@ const hideUnit = (unitId, requestId) => {
       socket.emit("hide_unit", data, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
-          BAD_EDIT_TRY: EDIT_UNABLED, 
+          BAD_EDIT_TRY: EDIT_DISABLED,
         });
         if (statusCode === null) {
           handleHideUnit(response.shared, dispatch);
@@ -441,7 +457,7 @@ const selectUnit = (unitId, requestId) => {
       socket.emit("select_unit", data, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
-          FAILED_POSITION_ACQUIRE: POSITION_UNABLED
+          FAILED_POSITION_ACQUIRE: MOVE_DISABLED,
         });
         if (statusCode === null) {
           handleSelectUnit(response.shared, dispatch);
@@ -468,7 +484,7 @@ const deselectUnit = (unitId, requestId) => {
       socket.emit("deselect_unit", data, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
-          BAD_POSITION_TRY: POSITION_UNABLED, 
+          BAD_POSITION_TRY: MOVE_DISABLED,
         });
         if (statusCode === null) {
           handleDeselectUnit(response.shared, dispatch);
@@ -499,7 +515,7 @@ const moveUnits = (units, parentUnit, position, requestId) => {
       socket.emit("move_units", data, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
-          BAD_POSITION_TRY: POSITION_UNABLED, 
+          BAD_POSITION_TRY: MOVE_DISABLED,
           BAD_PARENT: BAD_TARGET,
         });
         if (statusCode === null) {
@@ -527,7 +543,7 @@ const requestEdit = (unitId, requestId) => {
       socket.emit("request_to_edit", data, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
-          FAILED_EDIT_ACQUIRE: EDIT_UNABLED
+          FAILED_EDIT_ACQUIRE: EDIT_DISABLED,
         });
         if (statusCode === null) {
           handleRequestToEdit(response.shared, dispatch);
@@ -554,7 +570,7 @@ const deeditUnit = (unitId, requestId) => {
       socket.emit("deedit_unit", data, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
-          BAD_EDIT_TRY: EDIT_UNABLED, 
+          BAD_EDIT_TRY: EDIT_DISABLED,
         });
         if (statusCode === null) {
           handleDeeditUnit(response.shared, dispatch);
@@ -581,7 +597,7 @@ const editUnit = (unitId, requestId) => {
       socket.emit("edit_unit", data, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
-          BAD_EDIT_TRY: EDIT_UNABLED, 
+          BAD_EDIT_TRY: EDIT_DISABLED,
         });
         if (statusCode === null) {
           handleEditUnit(response.shared, dispatch);
@@ -592,131 +608,83 @@ const editUnit = (unitId, requestId) => {
   };
 };
 
-const subscribeJoin = () => {
-  return (dispatch) => {
-    socket.on("join", (res) => {
-      const response = JSON.parse(res);
-      handleJoin(response, dispatch);
-    }
-  }
-}
-
-const subscribeLeave = () => {
-  return (dispatch) => {
-    socket.on("leave", (res) => {
-      const response = JSON.parse(res);
-      handleLeave(response, dispatch);
-    }
-  }
-}
-
-const subscribeLoadUnitPage = () => {
-  return (dispatch) => {
-    socket.on("load_unit_page", (res) => {
-      const response = JSON.parse(res);
-      handleLoadUnitPage(response, dispatch);
-    }
-  }
-}
-
-const subscribePost = () => {
+const subscribeChat = () => {
   return (dispatch) => {
     socket.on("post", (res) => {
       const response = JSON.parse(res);
       handlePost(response, dispatch);
-    }
-  }
-}
+    });
+  };
+};
 
-const subscribeSendToDoc = () => {
+const subscribeDocument = () => {
   return (dispatch) => {
+    socket.on("join", (res) => {
+      const response = JSON.parse(res);
+      handleJoin(response, dispatch);
+    });
+
+    socket.on("leave", (res) => {
+      const response = JSON.parse(res);
+      handleLeave(response, dispatch);
+    });
+
+    socket.on("load_unit_page", (res) => {
+      const response = JSON.parse(res);
+      handleLoadUnitPage(response, dispatch);
+    });
+
     socket.on("post", (res) => {
       const response = JSON.parse(res);
       handleSendToDoc(response, dispatch);
-    }
-  }
-}
+    });
 
-const subscribeHideUnit = () => {
-  return (dispatch) => {
     socket.on("hide_unit", (res) => {
       const response = JSON.parse(res);
       handleHideUnit(response, dispatch);
-    }
-  }
-}
+    });
 
-const subscribeUnhideUnit = () => {
-  return (dispatch) => {
     socket.on("unhide_unit", (res) => {
       const response = JSON.parse(res);
       handleUnhideUnit(response, dispatch);
-    }
-  }
-}
+    });
 
-const subscribeAddUnit = () => {
-  return (dispatch) => {
     socket.on("add_unit", (res) => {
       const response = JSON.parse(res);
       handleAddUnit(response, dispatch);
-    }
-  }
-}
+    });
 
-const subscribeSelectUnit = () => {
-  return (dispatch) => {
     socket.on("select_unit", (res) => {
       const response = JSON.parse(res);
       handleSelectUnit(response, dispatch);
-    }
-  }
-}
+    });
 
-const subscribeDeselectUnit = () => {
-  return (dispatch) => {
     socket.on("deselect_unit", (res) => {
       const response = JSON.parse(res);
-      handleDeelectUnit(response, dispatch);
-    }
-  }
-}
+      handleDeselectUnit(response, dispatch);
+    });
 
-const subscribeMoveUnits = () => {
-  return (dispatch) => {
     socket.on("move_units", (res) => {
       const response = JSON.parse(res);
       handleMoveUnits(response, dispatch);
-    }
-  }
-}
+    });
 
-const subscribeRequestToEdit = () => {
-  return (dispatch) => {
     socket.on("request_to_edit", (res) => {
       const response = JSON.parse(res);
       handleRequestToEdit(response, dispatch);
-    }
-  }
-}
+    });
 
-const subscribeDeeditUnit = () => {
-  return (dispatch) => {
     socket.on("deedit_unit", (res) => {
       const response = JSON.parse(res);
       handleDeeditUnit(response, dispatch);
-    }
-  }
-}
+    });
 
-const subscribeEditUnit = () => {
-  return (dispatch) => {
     socket.on("edit_unit", (res) => {
       const response = JSON.parse(res);
       handleEditUnit(response, dispatch);
-    }
-  }
-}
+    });
+  };
+};
 
 export {
   enterDiscussion,
@@ -735,18 +703,6 @@ export {
   requestEdit,
   deeditUnit,
   editUnit,
-  subscribeJoin,
-  subscribeLeave,
-  subscribeLoadUnitPage,
-  subscribePost,
-  subscribeSendToDoc,
-  subscribeMoveCursor,
-  subscribeHideUnit,
-  subscribeUnhideUnit,
-  subscribeAddUnit,
-  subscribeSelectUnit,
-  subscribeDeselectUnit,
-  subscribeRequestToEdit,
-  subscribeDeeditUnit,
-  subscribeEditUnit,
+  subscribeChat,
+  subscribeDocument,
 };
