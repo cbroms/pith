@@ -54,10 +54,6 @@ class DiscussionNamespace(AsyncNamespace):
           result = None
           product = await func(self, sid, request)
 
-          # every function should have a discussion id
-          session = await self.get_session(sid)
-          discussion_id = session["discussion_id"]
-
           if is_error(product):
             result = product
           else:
@@ -98,6 +94,9 @@ class DiscussionNamespace(AsyncNamespace):
 
               result = dumps(result, cls=DictEncoder) # default returns
 
+              # every function except maybe leave should have a discussion id
+              session = await self.get_session(sid)
+              discussion_id = session["discussion_id"]
               # send to everyone else
               emit_name = func.__name__
               await self.emit(emit_name, shared, room=discussion_id, skip_sid=sid)
@@ -218,7 +217,7 @@ class DiscussionNamespace(AsyncNamespace):
         :emit: *left_user* (:ref:`dres_left_user-label`)
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID
         """
-        result = {"success": 0} # assume success
+        result = None, None # assume success
         session = await self.get_session(sid)
 
         # joined means we are in room and need to leave
