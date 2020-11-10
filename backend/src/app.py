@@ -88,15 +88,16 @@ class DiscussionNamespace(AsyncNamespace):
               if emits is not None:
                 assert(emits_res is not None)
                 for r, e in zip(emits_res, emits):
-                  serialized = dumps(r, cls=DictEncoder)
-                  shared[e] = serialized
+                  #serialized = dumps(r, cls=DictEncoder)
+                  shared[e] = r#serialized
 
               if result is None:
-                result = {}
-              result = dumps(result, cls=DictEncoder) # default returns
-
+                result = {} #{"success": 0} # non-null
               # set emitted data to return
               result["shared"] = shared
+
+              result = dumps(result, cls=DictEncoder) # default returns
+
               # send to everyone else
               emit_name = func.__name__
               await self.emit(emit_name, shared, room=discussion_id, skip_sid=sid)
@@ -224,7 +225,7 @@ class DiscussionNamespace(AsyncNamespace):
         if "joined" in session:
           discussion_id = session["discussion_id"]
           user_id = session["user_id"]
-          product = gm.discussion_manager.leave(
+          result = gm.discussion_manager.leave(
             discussion_id=discussion_id, 
             user_id=user_id
           )

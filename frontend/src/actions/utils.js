@@ -4,8 +4,9 @@ const getStatus = (response, dispatch, errorMap) => {
   let statusCode = null;
   if (Object.keys(response).includes("error")) {
     const errorStamp = response.error;
+    console.log("error", errorStamp);
     for (const key in errorMap) {
-      if (errorStamp === key) {
+      if (errorStamp === parseInt(key)) {
         statusCode = errorMap[key];
         break;
       }

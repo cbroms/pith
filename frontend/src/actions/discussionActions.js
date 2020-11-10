@@ -150,8 +150,8 @@ const enterDiscussion = (discussionId, requestId) => {
     startRequest(() => {
       socket.emit("test_connect", data, (res) => {
         const response = JSON.parse(res);
-        const statusCode = getStatus(response, dispatch, {
-          BAD_DISCUSSION_ID: INVALID_DISCUSSION,
+        let statusCode = getStatus(response, dispatch, {
+          [BAD_DISCUSSION_ID]: INVALID_DISCUSSION,
         });
 
         if (statusCode === null) {
@@ -185,8 +185,8 @@ const createUser = (discussionId, nickname, requestId) => {
       socket.emit("create_user", data, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
-          NICKNAME_EXISTS: TAKEN_NICKNAME,
-          USER_ID_EXISTS: TAKEN_USER_ID,
+          [NICKNAME_EXISTS]: TAKEN_NICKNAME,
+          [USER_ID_EXISTS]: TAKEN_USER_ID,
         });
         if (statusCode === null) {
           // set the value in localStorage
@@ -386,7 +386,7 @@ const hideUnit = (unitId, requestId) => {
       socket.emit("hide_unit", data, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
-          BAD_EDIT_TRY: EDIT_DISABLED,
+          [BAD_EDIT_TRY]: EDIT_DISABLED,
         });
         if (statusCode === null) {
           handleHideUnit(response.shared, dispatch);
@@ -438,7 +438,7 @@ const selectUnit = (unitId, requestId) => {
       socket.emit("select_unit", data, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
-          FAILED_POSITION_ACQUIRE: MOVE_DISABLED,
+          [FAILED_POSITION_ACQUIRE]: MOVE_DISABLED,
         });
         if (statusCode === null) {
           handleSelectUnit(response.shared, dispatch);
@@ -465,7 +465,7 @@ const deselectUnit = (unitId, requestId) => {
       socket.emit("deselect_unit", data, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
-          BAD_POSITION_TRY: MOVE_DISABLED,
+          [BAD_POSITION_TRY]: MOVE_DISABLED,
         });
         if (statusCode === null) {
           handleDeselectUnit(response.shared, dispatch);
@@ -496,8 +496,8 @@ const moveUnits = (units, parentUnit, position, requestId) => {
       socket.emit("move_units", data, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
-          BAD_POSITION_TRY: MOVE_DISABLED,
-          BAD_PARENT: BAD_TARGET,
+          [BAD_POSITION_TRY]: MOVE_DISABLED,
+          [BAD_PARENT]: BAD_TARGET,
         });
         if (statusCode === null) {
           handleMoveUnits(response.shared, dispatch);
@@ -524,7 +524,7 @@ const requestEdit = (unitId, requestId) => {
       socket.emit("request_to_edit", data, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
-          FAILED_EDIT_ACQUIRE: EDIT_DISABLED,
+          [FAILED_EDIT_ACQUIRE]: EDIT_DISABLED,
         });
         if (statusCode === null) {
           handleRequestToEdit(response.shared, dispatch);
@@ -551,7 +551,7 @@ const deeditUnit = (unitId, requestId) => {
       socket.emit("deedit_unit", data, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
-          BAD_EDIT_TRY: EDIT_DISABLED,
+          [BAD_EDIT_TRY]: EDIT_DISABLED,
         });
         if (statusCode === null) {
           handleDeeditUnit(response.shared, dispatch);
@@ -578,7 +578,7 @@ const editUnit = (unitId, requestId) => {
       socket.emit("edit_unit", data, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
-          BAD_EDIT_TRY: EDIT_DISABLED,
+          [BAD_EDIT_TRY]: EDIT_DISABLED,
         });
         if (statusCode === null) {
           handleEditUnit(response.shared, dispatch);

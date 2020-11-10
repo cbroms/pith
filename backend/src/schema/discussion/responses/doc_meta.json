@@ -1,4 +1,4 @@
-"doc_meta": {
+{
   "$$target": "doc_meta.json#/doc_meta",
   "type": "array",
   "items": {

@@ -1,4 +1,4 @@
-"chat_meta": {
+{
   "$$target": "chat_meta.json#/chat_meta",
   "type": "array",
   "items": {
