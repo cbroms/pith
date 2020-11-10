@@ -3,6 +3,7 @@ import { getValue, setValue } from "../api/local";
 import { cleanUpRequest, createRequestWrapper } from "./queue";
 
 import {
+  getStatus,
   unpackCursors,
   unpackChildren,
   unpackBacklinks,
@@ -85,26 +86,6 @@ import {
   LOAD_UNIT_PAGE_FULFILLED,
   SEARCH_FULFILLED,
 } from "../reducers/types";
-
-const getStatus = (response, dispatch, errorMap) => {
-  let statusCode = null;
-  if (Object.keys(response).includes("error")) {
-    const errorStamp = response.error;
-    for (const key in errorMap) {
-      if (errorStamp === key) {
-        statusCode = errorMap[key];
-        break;
-      }
-    }
-    if (statusCode === null) {
-      statusCode = GENERIC_ERROR;
-      dispatch({
-        type: SYSTEM_ERROR,
-      });
-    }
-  }
-  return statusCode;
-};
 
 const joinUser = (discussionId, requestId) => {
   return (dispatch) => {

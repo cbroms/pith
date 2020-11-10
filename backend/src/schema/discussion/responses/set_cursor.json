@@ -9,7 +9,6 @@
     "required": ["user_id", "nickname", "cursor"]
   },
   "definitions": {
-    "$$target": ["#/definitions/cursor"],
     "cursor": {"$ref": "cursor.json#/cursor"}
   }
 }

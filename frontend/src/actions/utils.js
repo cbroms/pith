@@ -1,3 +1,25 @@
+import { GENERIC_ERROR, SYSTEM_ERROR } from "../utils/errors";
+
+const getStatus = (response, dispatch, errorMap) => {
+  let statusCode = null;
+  if (Object.keys(response).includes("error")) {
+    const errorStamp = response.error;
+    for (const key in errorMap) {
+      if (errorStamp === key) {
+        statusCode = errorMap[key];
+        break;
+      }
+    }
+    if (statusCode === null) {
+      statusCode = GENERIC_ERROR;
+      dispatch({
+        type: SYSTEM_ERROR,
+      });
+    }
+  }
+  return statusCode;
+};
+
 const unpackCursors = (cursorsArr = []) => {
   const cursors = [];
   for (const entry of cursorsArr) {
@@ -78,7 +100,7 @@ const unpackDocMeta = (docMetaArr = []) => {
       editLock: unit.edit_privilege,
       positionLock: unit.position_privilege,
       children: unit.children,
-      backlinks: unit.backlinks
+      backlinks: unit.backlinks,
     };
   }
   return docMeta;
@@ -102,6 +124,7 @@ const unpackContext = (contextObj = {}) => {
 };
 
 export {
+  getStatus,
   unpackCursors,
   unpackChildren,
   unpackBacklinks,
