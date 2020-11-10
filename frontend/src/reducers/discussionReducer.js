@@ -11,7 +11,7 @@ import {
   COMPLETE_REQUEST,
   REQUEST_TIMEOUT,
   RESET_REQUEST_TIMEOUT,
-} from "../actions/types";
+} from "../reducer/types";
 
 const defaultState = {
   systemError: false,
