@@ -25,7 +25,7 @@ const useRequest = (completedRequests) => {
 				made: true,
 			});
 		}
-	});
+	}, [status.pending, status.made, status.requestId, completedRequests]);
 
 	const makeRequest = (reqFunc) => {
 		// make some kind of request (usually dispatch an action)

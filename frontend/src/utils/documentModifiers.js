@@ -92,7 +92,9 @@ const handleDrag = (doc, dragged, dragTarget) => {
 // We want any content right of their cursor position in the current unit
 // to be copied into the new unit.
 const handleEnter = (store, caretPos, content, position) => {
-    const newUnitPith = content.substring(caretPos, content.length);
+    let newUnitPith = content.substring(caretPos, content.length);
+
+    if (newUnitPith === "<br>") newUnitPith = "";
 
     // generate a new random id.
     // TODO: record this id and reconcile it with the new id received through
@@ -131,8 +133,8 @@ const handleEnter = (store, caretPos, content, position) => {
     // add the new unit to the store
     store[newUnitId] = newUnit;
 
-    console.log(caretPos);
-    console.log("new:", content.substring(0, caretPos));
+    // console.log(caretPos);
+    // console.log("new:", newUnitPith));
 
     return [content.substring(0, caretPos), newUnitId, store];
 };

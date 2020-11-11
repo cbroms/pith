@@ -107,6 +107,8 @@ const joinUser = (discussionId, requestId) => {
     startRequest(() => {
       socket.emit("join", data, (res) => {
         const response = JSON.parse(res);
+        console.log("res", response);
+
         const statusCode = getStatus(response, dispatch, {});
         console.log("join", response);
 
@@ -117,14 +119,14 @@ const joinUser = (discussionId, requestId) => {
           handleChatMeta(response.chat_meta, dispatch);
 
           const timeline = unpackTimeline(response.timeline);
-          const cursors = unpackCursors(response.cursors);
+          const icons = unpackCursors(response.cursors);
           dispatch({
             type: JOIN_USER_FULFILLED,
             payload: {
               discussionId: discussionId,
               userId: userId,
               nickname: response.nickname,
-              icons: cursors,
+              icons: icons,
               currentUnit: response.current_unit,
               timeline: timeline,
               chatHistory: response.chat_history || [],
@@ -226,11 +228,13 @@ const getPage = (unitId, requestId) => {
           handleDocMeta(response.doc_meta, dispatch);
           dispatch({
             type: LOAD_UNIT_PAGE_FULFILLED,
-            ancestors: response.ancestors,
-            currentUnit: response.cursor.unit_id,
-            timelineEntry: timelineEntry,
-            children: children,
-            backlinks: backlinks,
+            payload: {
+              ancestors: response.ancestors,
+              currentUnit: unitId,
+              timelineEntry: timelineEntry,
+              children: children,
+              backlinks: backlinks,
+            },
           });
         }
         endRequest(statusCode);

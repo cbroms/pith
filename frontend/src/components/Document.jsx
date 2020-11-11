@@ -111,6 +111,10 @@ class Document extends React.Component {
             this.state.dragTarget
         );
 
+        this.setState({
+            dragTarget: null,
+        });
+
         // if (newDoc !== null) {
         //     this.setState({
         //         dragged: null,
@@ -140,18 +144,26 @@ class Document extends React.Component {
     }
 
     handleDragEnter(e, childPosition, grandchildPosition, asChild, atEnd) {
-        this.setState({
-            dragTarget: {
-                child: childPosition,
-                grandchild: grandchildPosition,
-                asChild: asChild,
-                atEnd: atEnd,
-            },
-        });
+        const targ = this.state.dragTarget;
+        if (
+            targ === null ||
+            targ.child !== childPosition ||
+            targ.grandchild !== grandchildPosition ||
+            targ.asChild !== asChild ||
+            targ.atEnd !== atEnd
+        ) {
+            this.setState({
+                dragTarget: {
+                    child: childPosition,
+                    grandchild: grandchildPosition,
+                    asChild: asChild,
+                    atEnd: atEnd,
+                },
+            });
+        }
     }
 
     render() {
-        console.log(this.state.focused);
         // create a unit for a given location
         const createUnit = (pith, id, position) => {
             return (
@@ -204,6 +216,7 @@ class Document extends React.Component {
                         )
                     }
                     onDragOver={(e) => e.preventDefault()}
+                    onUnitEnter={() => this.props.openUnit(id)}
                     over={over}
                     overAsChild={asChild}
                     overAtEnd={atEnd}
@@ -285,8 +298,23 @@ class Document extends React.Component {
             </DocumentSectionLayout>
         );
 
-        const timeline = <TimelineLayout pages={this.props.timeline} />;
-        const ancestors = <AncestorsLayout ancestors={this.props.ancestors} />;
+        const timeline = (
+            <TimelineLayout
+                pages={this.props.timeline}
+                openUnit={this.props.openUnit}
+                units={store}
+            />
+        );
+        const ancestors = (
+            <AncestorsLayout
+                ancestors={this.props.ancestors}
+                currentUnit={this.props.currentUnit}
+                openUnit={this.props.openUnit}
+                units={store}
+                getUnitContext={this.props.getUnitContext}
+                gettingUnitContext={this.props.gettingUnitContext}
+            />
+        );
         const users = (
             <UsersLayout
                 users={this.props.users}

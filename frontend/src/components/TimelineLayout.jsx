@@ -6,7 +6,7 @@ import * as utc from "dayjs/plugin/utc";
 import * as relativeTime from "dayjs/plugin/relativeTime";
 
 import TooltipLayout from "./TooltipLayout";
-import Unit from "./Unit";
+import UnitContext from "./UnitContext";
 
 dayjs.extend(relativeTime);
 dayjs.extend(duration);
@@ -51,10 +51,13 @@ const StyledUnitRepresentation = styled.div`
 
 const TimelineLayout = (props) => {
     //  const [discussionActive, setDiscussionActive] = useState(true);
-
-    const calculatedPages = props.pages.map((page) => {
-        const startTime = dayjs(page.start_time).utc();
-        const endTime = dayjs(page.end_time).utc();
+    const pages = props.pages.slice(
+        props.pages.length - 26,
+        props.pages.length - 1
+    );
+    const calculatedPages = pages.map((page) => {
+        const startTime = dayjs(page.startTime).utc();
+        const endTime = dayjs(page.endTime).utc();
 
         // calcuate the total amount of time the page was active
         const timeSpent = dayjs.duration(endTime.diff(startTime));
@@ -81,18 +84,29 @@ const TimelineLayout = (props) => {
 
     const unitSections = calculatedPages.map((page, i) => {
         return (
-            <span key={`${props.pages[i].unit_id}-${page.span}-${i}`}>
+            <span
+                key={`${pages[i].unitId}-${page.span}-${i}`}
+                onClick={() => props.openUnit(pages[i].unitId)}
+            >
                 <StyledUnitRepresentation
                     data-tip
-                    data-for={`${props.pages[i].unit_id}-${page.span}`}
+                    data-for={`${pages[i].unitId}-${page.span}`}
                     scaledDuration={(page.span / total) * 100}
                 />
-                <TooltipLayout id={`${props.pages[i].unit_id}-${page.span}`}>
-                    <span>
-                        <StyledTooltipTime>{page.diff}</StyledTooltipTime>
-                        <Unit pith={page.pith} charLimited />
-                    </span>
-                </TooltipLayout>
+                <TooltipLayout
+                    id={`${pages[i].unitId}-${page.span}`}
+                    getContent={() => (
+                        <span>
+                            <StyledTooltipTime>{page.diff}</StyledTooltipTime>
+                            <UnitContext
+                                id={pages[i].unitId}
+                                units={props.units}
+                                getUnitContext={props.getUnitContext}
+                                gettingUnitContext={props.gettingUnitContext}
+                            />
+                        </span>
+                    )}
+                ></TooltipLayout>
             </span>
         );
     });

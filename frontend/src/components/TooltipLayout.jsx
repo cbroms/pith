@@ -29,7 +29,13 @@ const StyledTooltip = styled(ReactTooltip)`
 
 const TooltipLayout = (props) => {
     return (
-        <StyledTooltip clickable {...props} delayHide={50} effect="solid">
+        <StyledTooltip
+            clickable
+            {...props}
+            globalEventOff="click"
+            delayHide={0}
+            effect="solid"
+        >
             {props.children}
         </StyledTooltip>
     );

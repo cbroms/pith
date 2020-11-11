@@ -146,7 +146,7 @@ const DocumentSectionLayout = (props) => {
 
     const enterButton =
         props.level > 1 ? (
-            <StyledButton onClick={() => console.log("open")} noBackground>
+            <StyledButton onClick={props.onUnitEnter} noBackground>
                 <RightDoubleChevron />
             </StyledButton>
         ) : null;

@@ -27,6 +27,7 @@ const StyledContainer = styled.div`
 `;
 
 const StyledEditor = styled(ContentEditable)`
+    display: ${(props) => (props.$shown ? "block" : "none")};
     box-sizing: border-box;
     display: inline-block;
     padding-right: ${(props) => (props.$showButton ? 50 : 0)}px;
@@ -44,29 +45,33 @@ const StyledEditor = styled(ContentEditable)`
     }
 `;
 
+const StyledRenderedEditor = styled.div`
+    display: ${(props) => (props.$shown ? "block" : "none")};
+`;
+
 const TextEditorLayout = (props) => {
     return (
         <StyledContainer showButton={props.showButton}>
-            {props.showRendered && props.renderedContent !== null ? (
-                // when the editor is not focused, show the
-                // rendered version of it
-                <div onClick={props.onFocus}>{props.renderedContent}</div>
-            ) : (
-                // in the case the editor is focused, add the text editable container
-                <StyledEditor
-                    $showButton={props.showButton}
-                    $placeholder={props.placeholder}
-                    innerRef={props.innerRef}
-                    className={props.className}
-                    html={props.html}
-                    disabled={props.disabled}
-                    onChange={props.onChange}
-                    onFocus={props.onFocus}
-                    onBlur={props.onBlur}
-                    onKeyDown={props.onKeyDown}
-                    spellCheck={props.focused}
-                />
-            )}
+            <StyledRenderedEditor
+                onClick={props.onFocus}
+                shown={props.showRendered && props.renderedContent !== null}
+            >
+                {props.renderedContent}
+            </StyledRenderedEditor>
+            <StyledEditor
+                $showButton={props.showButton}
+                $placeholder={props.placeholder}
+                $shown={props.showRendered && props.renderedContent === null}
+                innerRef={props.innerRef}
+                className={props.className}
+                html={props.html}
+                disabled={props.disabled}
+                onChange={props.onChange}
+                onFocus={props.onFocus}
+                onBlur={props.onBlur}
+                onKeyDown={props.onKeyDown}
+                spellCheck={props.focused}
+            />
 
             {props.showButton ? (
                 <StyledButton onClick={props.makeSubmit}>

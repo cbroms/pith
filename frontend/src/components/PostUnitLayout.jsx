@@ -13,6 +13,8 @@ const StyledUnitContainer = styled.div`
     margin-bottom: ${(props) => (props.bottomTransclude ? 5 : 0)}px;
     font-style: ${(props) => (props.transcluded ? "italic" : "inherit")};
 
+    color: ${(props) => (props.greyed ? props.theme.shade2 : "inherit")};
+
     :hover {
         .move {
             visibility: visible;
@@ -39,6 +41,7 @@ const StyledMoveButton = styled.div`
 const PostUnitLayout = (props) => {
     return (
         <StyledUnitContainer
+            greyed={props.greyed}
             transcluded={props.transcluded}
             topTransclude={props.topTransclude}
             bottomTransclude={props.bottomTransclude}
