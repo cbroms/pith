@@ -1,10 +1,10 @@
 FROM pith-api_common
 
-RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
+# RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
 RUN apt-get update && \
     apt-get install -y \
-      vim \
-      python3-sphinx
+      vim 
+# python3-sphinx
 
 ENV PYTHONPATH /api:
 

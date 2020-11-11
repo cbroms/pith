@@ -4,22 +4,30 @@
   "items": {
     "type": "object",
     "properties": {
-      "unit_id": {"type": "string"},
-      "pith": {"type": "string"},
-      "hidden": {"type": "boolean"},
-      "created_at": {"type": "string"},
-      "edit_privilege": {"type": "string"},
-      "position_privilege": {"type": "string"},
+      "unit_id": { "type": "string" },
+      "pith": { "type": "string" },
+      "hidden": { "type": "boolean" },
+      "created_at": { "type": "string" },
+      "edit_privilege": { "type": ["string", "null"] },
+      "position_privilege": { "type": ["string", "null"] },
       "children": {
         "type": "array",
-        "items": {"type": "string"}
+        "items": { "type": "string" }
       },
       "backlinks": {
         "type": "array",
-        "items": {"type": "string"}
+        "items": { "type": "string" }
       }
     },
-    "required": ["unit_id", "pith", "hidden", "created_at", "edit_privilege", "position_privilege", "children", "backlinks"]
+    "required": [
+      "unit_id",
+      "pith",
+      "hidden",
+      "created_at",
+      "edit_privilege",
+      "position_privilege",
+      "children",
+      "backlinks"
+    ]
   }
 }
-

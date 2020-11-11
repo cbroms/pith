@@ -66,6 +66,8 @@ class DiscussionNamespace(AsyncNamespace):
                 validate(instance=ret_res, schema=dres.schema[ret])
                 result = ret_res
               except ValidationError:
+                logger.info("Return response: {}".format(ret_res))
+                logger.info("Return schema: {}".format(ret))
                 bad_response = True
 
             if emits is not None:
@@ -74,6 +76,8 @@ class DiscussionNamespace(AsyncNamespace):
                 try:
                   validate(instance=r, schema=dres.schema[e])
                 except ValidationError:
+                  logger.info("Emit response: {}".format(r))
+                  logger.info("Emit schema: {}".format(e))
                   bad_response = True
 
             if bad_response: # we cannot send off emits

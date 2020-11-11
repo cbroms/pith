@@ -67,10 +67,11 @@ const TimelineLayout = (props) => {
 
         // calcuate the time from now the page was active
         const timeFromNow = dayjs
-            .duration(dayjs().diff(endTime.local()))
+            .duration(dayjs.utc().diff(endTime))
             .humanize();
 
         return {
+            ...page,
             span: timeActive,
             diff: `${timeFromNow} ago for ${timeSpent.humanize()}`,
             pith: page.pith,
@@ -82,24 +83,24 @@ const TimelineLayout = (props) => {
         0
     );
 
-    const unitSections = calculatedPages.map((page, i) => {
+    const unitSections = calculatedPages.reverse().map((page, i) => {
         return (
             <span
-                key={`${pages[i].unitId}-${page.span}-${i}`}
-                onClick={() => props.openUnit(pages[i].unitId)}
+                key={`${pages.unitId}-${page.span}-${i}`}
+                onClick={() => props.openUnit(page.unitId)}
             >
                 <StyledUnitRepresentation
                     data-tip
-                    data-for={`${pages[i].unitId}-${page.span}`}
+                    data-for={`${page.unitId}-${page.span}-${i}`}
                     scaledDuration={(page.span / total) * 100}
                 />
                 <TooltipLayout
-                    id={`${pages[i].unitId}-${page.span}`}
+                    id={`${page.unitId}-${page.span}-${i}`}
                     getContent={() => (
                         <span>
                             <StyledTooltipTime>{page.diff}</StyledTooltipTime>
                             <UnitContext
-                                id={pages[i].unitId}
+                                id={page.unitId}
                                 units={props.units}
                                 getUnitContext={props.getUnitContext}
                                 gettingUnitContext={props.gettingUnitContext}
