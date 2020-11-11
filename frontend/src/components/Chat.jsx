@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 import * as dayjs from "dayjs";
 import * as calendar from "dayjs/plugin/calendar";
@@ -21,12 +22,30 @@ const Chat = (props) => {
         num: null,
     });
 
-    const postGroups = [];
+    const [lastPosted, setLastPosted] = useState({});
 
-    for (const i in props.posts) {
-        const post = { ...props.content[props.posts[i]], id: props.posts[i] };
+    const postGroups = [];
+    let posts = [...props.posts];
+    let content = { ...props.content };
+
+    // if a post is pending, add it to the list of posts
+    if (props.postPending && !posts.includes(lastPosted.id)) {
+        const tempPost = {
+            ...lastPosted,
+            author: props.nickname || "you",
+            createdAt: new Date().toISOString(),
+        };
+        content[lastPosted.id] = tempPost;
+        posts.push(lastPosted.id);
+    } else if (posts.includes(lastPosted.id)) {
+        posts = props.posts;
+        content = props.content;
+    }
+
+    for (const i in posts) {
+        const post = { ...content[posts[i]], id: posts[i] };
         if (i > 0) {
-            const prevPost = props.content[props.posts[i - 1]];
+            const prevPost = content[posts[i - 1]];
             // TODO: check if some duration of time has passed between posts
             if (prevPost.author === post.author) {
                 const group = postGroups.pop();
@@ -44,9 +63,7 @@ const Chat = (props) => {
 
     // calculate the post times before adding the transclusions
     for (const group of postGroups) {
-        const date = dayjs(group[0].createdAt)
-            .utc()
-            .local();
+        const date = dayjs(group[0].createdAt).utc().local();
 
         const formattedDate = dayjs(date).calendar(null, {
             sameDay: "[Today at] h:mm a",
@@ -68,8 +85,8 @@ const Chat = (props) => {
                 const link = links[k];
 
                 const obj = {
-                    ...props.content[link],
-                    id: `${group[j].id}-${props.content[link].id}`,
+                    ...content[link],
+                    id: `${group[j].id}-${content[link].id}`,
                     transcluded: true,
                     transcludeNum: links.length - k,
                     totalTranscluded: links.length,
@@ -79,7 +96,7 @@ const Chat = (props) => {
         }
     }
 
-    const posts = postGroups.map((group, i) => {
+    const postList = postGroups.map((group, i) => {
         const units = group.map((post) => {
             const unit = (
                 <Unit
@@ -104,6 +121,7 @@ const Chat = (props) => {
             );
             return (
                 <PostUnitLayout
+                    greyed={post.temporary}
                     topTransclude={post?.transcludeNum === 1}
                     bottomTransclude={
                         post?.totalTranscluded === post?.transcludeNum
@@ -137,13 +155,14 @@ const Chat = (props) => {
             closeSearch={props.closeSearch}
             setQuery={props.setQuery}
             unitEnter={(pos, content) => {
+                setLastPosted({ pith: content, id: uuidv4(), temporary: true });
                 props.addPost(content);
             }}
         />
     );
     return (
         <ChatLayout loading={props.loading} editor={editor}>
-            {posts}
+            {postList}
         </ChatLayout>
     );
 };

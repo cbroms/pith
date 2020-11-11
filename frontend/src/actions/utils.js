@@ -22,13 +22,13 @@ const getStatus = (response, dispatch, errorMap) => {
 };
 
 const unpackCursors = (cursorsArr = []) => {
-  const cursors = [];
+  const cursors = {};
   for (const entry of cursorsArr) {
-    cursors.push({
+    cursors[entry.user_id] = {
       userId: entry.user_id,
       nickname: entry.nickname,
       unitId: entry.cursor.unit_id,
-    });
+    };
   }
   return cursors;
 };

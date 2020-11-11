@@ -35,7 +35,8 @@ class TextEditor extends React.Component {
   componentDidUpdate() {
     if (
       this.props.content !== undefined &&
-      (this.props.content !== this.state.html && !this.state.editedSinceChange)
+      this.props.content !== this.state.html &&
+      !this.state.editedSinceChange
     ) {
       this.setState({ html: this.props.content });
     }
@@ -50,20 +51,27 @@ class TextEditor extends React.Component {
 
       // remove the prior focus and move the cursor to the first position in this
       // element
-      window.setTimeout(() => {
-        try {
-          this.ref.current.focus();
-          const setpos = document.createRange();
-          const set = window.getSelection();
-          setpos.setStart(this.ref.current.childNodes[0], 0);
-          setpos.collapse(true);
-          set.removeAllRanges();
-          set.addRange(setpos);
-          this.ref.current.focus();
-        } catch {
-          console.log("couldn't set focus");
-        }
-      }, 50);
+      // window.setTimeout(() => {
+      try {
+        this.ref.current.focus();
+        const setpos = document.createRange();
+        const set = window.getSelection();
+        const last = this.ref.current.childNodes[
+          this.ref.current.childNodes.length - 1
+        ];
+        console.log(last);
+        setpos.setStart(
+          this.ref.current.childNodes[this.ref.current.childNodes.length - 1],
+          last.textContent.length
+        );
+        setpos.collapse(true);
+        set.removeAllRanges();
+        set.addRange(setpos);
+        this.ref.current.focus();
+      } catch {
+        console.log("couldn't set focus");
+      }
+      //   }, 50);
     }
   }
 

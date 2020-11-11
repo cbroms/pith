@@ -22,13 +22,13 @@ const StyledAncestorLayer = styled.div`
 const AncestorsLayout = (props) => {
     const units = props.ancestors.map((unit, i) => {
         return (
-            <span key={unit.unit_id}>
-                <StyledAncestorLayer data-tip data-for={`${unit.unit_id}`}>
+            <span key={unit}>
+                <StyledAncestorLayer data-tip data-for={`${unit}`}>
                     {i !== props.ancestors.length - 1 ? <UpChevron /> : <Dot />}
                     {i !== props.ancestors.length - 1 ? <VerticalLine /> : null}
                 </StyledAncestorLayer>
-                <TooltipLayout id={unit.unit_id} place="right">
-                    <Unit pith={unit.pith} charLimited />
+                <TooltipLayout id={unit} place="right">
+                    {/* <Unit pith={unit.pith} charLimited /> */}
                 </TooltipLayout>
             </span>
         );

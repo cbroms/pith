@@ -151,7 +151,6 @@ class Document extends React.Component {
     }
 
     render() {
-        console.log(this.state.focused);
         // create a unit for a given location
         const createUnit = (pith, id, position) => {
             return (
@@ -204,6 +203,7 @@ class Document extends React.Component {
                         )
                     }
                     onDragOver={(e) => e.preventDefault()}
+                    onUnitEnter={() => this.props.openUnit(id)}
                     over={over}
                     overAsChild={asChild}
                     overAtEnd={atEnd}

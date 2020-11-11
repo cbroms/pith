@@ -22,6 +22,7 @@ import {
     createUser,
     joinUser,
     createPost,
+    getPage,
     sendToDoc,
     subscribeChat,
     subscribeDocument,
@@ -51,10 +52,13 @@ const Discussion = (props) => {
         props.completedRequests
     );
     const [joinUserStatus, makeJoinUser] = useRequest(props.completedRequests);
+    const [getPageStatus, makeGetPage] = useRequest(props.completedRequests);
+    const [postStatus, makePost] = useRequest(props.completedRequests);
 
     // create status vars for convenience
     const joined = joinUserStatus.made && !joinUserStatus.pending;
-    const loading = joinUserStatus.pending;
+    const loading =
+        joinUserStatus.pending || getPageStatus.pending || !getPageStatus.made;
 
     const badDiscussion = enterDiscussionStatus.status === INVALID_DISCUSSION;
     const createNickname = enterDiscussionStatus.status === NO_USER_ID;
@@ -87,6 +91,11 @@ const Discussion = (props) => {
                     props.dispatch(joinUser(discussionId, requestId))
                 );
             }
+        } else if (joined && !getPageStatus.made) {
+            // we've fully joined, now load the unit
+            makeGetPage((requestId) =>
+                props.dispatch(getPage(props.currentUnit, requestId))
+            );
         }
     });
 
@@ -105,9 +114,13 @@ const Discussion = (props) => {
             openSearch={() => setChatSearchOpen(true)}
             closeSearch={() => setChatSearchOpen(false)}
             setQuery={(query) => setQuery(query)}
+            postPending={postStatus.pending}
+            nickname={props.icons[props.userId]?.nickname}
             addPost={(content) => {
                 console.log("posted:", content);
-                props.dispatch(createPost(content, uuidv4()));
+                makePost((requestId) =>
+                    props.dispatch(createPost(content, requestId))
+                );
             }}
             sendPostToDoc={(id) => {
                 console.log("moved:", id);
@@ -124,6 +137,10 @@ const Discussion = (props) => {
             currentUnit={props.currentUnit}
             users={props.icons}
             timeline={props.timeline}
+            openUnit={(id) => {
+                console.log("opened:", id);
+                props.dispatch(getPage(id, uuidv4()));
+            }}
         />
     );
     const search = <Search query={query} />;
