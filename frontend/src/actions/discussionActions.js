@@ -491,7 +491,7 @@ const moveUnit = (unitId, parentUnit, position, requestId) => {
       unit_id: unitId,
     }
     const data2 = {
-      units = [unitId],
+      units : [unitId],
       parent: parentUnit,
       position: position,
     }
@@ -502,33 +502,32 @@ const moveUnit = (unitId, parentUnit, position, requestId) => {
       requestId
     );
 
-    startRequest(() =>
-      socket.emit("move_units", data, (res) => {
+    startRequest(() => {
+      socket.emit("select_unit", data1, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
-          [BAD_POSITION_TRY]: MOVE_DISABLED,
-          [BAD_PARENT]: BAD_TARGET,
+          [FAILED_POSITION_ACQUIRE]: MOVE_DISABLED,
         });
         if (statusCode === null) {
-          handleMoveUnits(response.shared, dispatch);
-
+          handleSelectUnit(response.shared, dispatch);
           // next emit
-          socket.emit("select_unit", data, (res) => {
+          socket.emit("move_units", data2, (res) => {
             const response = JSON.parse(res);
             const statusCode = getStatus(response, dispatch, {
-              [FAILED_POSITION_ACQUIRE]: MOVE_DISABLED,
+              [BAD_POSITION_TRY]: MOVE_DISABLED,
+              [BAD_PARENT]: BAD_TARGET,
             });
             if (statusCode === null) {
-              handleSelectUnit(response.shared, dispatch);
+              handleMoveUnits(response.shared, dispatch);
             }
             endRequest(statusCode);
-          })
+          });
         }
         else {
-          endRequest(statusCode);
+          endRequest(statusCode); // end early
         }
-      }
-    );
+      });
+    });
   }
 }
 
