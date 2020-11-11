@@ -68,9 +68,9 @@ const handleLoadUnitPage = (shared, dispatch) => {
   handleSetCursor(shared.set_cursor, dispatch);
 };
 const handlePost = (shared, dispatch) => {
-  handleCreatedPost(shared.created_post, dispatch);
   handleDocMeta(shared.doc_meta, dispatch);
   handleChatMeta(shared.chat_meta, dispatch);
+  handleCreatedPost(shared.created_post, dispatch);
 };
 const handleSendToDoc = (shared, dispatch) => {
   handleDocMeta(shared.doc_meta, dispatch);

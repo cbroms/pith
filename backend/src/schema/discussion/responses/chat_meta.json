@@ -4,12 +4,11 @@
   "items": {
     "type": "object",
     "properties": {
-      "unit_id": {"type": "string"},
-      "pith": {"type": "string"},
-      "author": {"type": "string"},
-      "created_at": {"type": "datetime"}
+      "unit_id": { "type": "string" },
+      "pith": { "type": "string" },
+      "author": { "type": "string" },
+      "created_at": { "type": "string" }
     },
     "required": ["unit_id", "pith", "author", "created_at"]
   }
 }
-

@@ -109,7 +109,7 @@ class DiscussionManager:
         "edit_privilege": unit.edit_privilege,
         "position_privilege": unit.position_privilege,
         "children": list(unit.children),
-        "backlinks": list(unit.backlinks),
+        "backlinks": list(unit.backward_links),
       }
       return response
 
@@ -380,7 +380,7 @@ class DiscussionManager:
 
         user = discussion.get().users.filter(id=user_id).get()
 
-        response = load_user(discussion_id, user_id)
+        response = self.load_user(discussion_id=discussion_id, user_id=user_id)
         cursor_response = {
           "user_id": user_id,
           "nickname": user.name,

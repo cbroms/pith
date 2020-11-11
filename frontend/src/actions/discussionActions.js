@@ -254,7 +254,9 @@ const createPost = (pith, requestId) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {});
         if (statusCode === null) {
+          console.log("response", response);
           handlePost(response.shared, dispatch);
+          console.log("handled");
         }
         endRequest(statusCode);
       });
@@ -670,6 +672,7 @@ const subscribeDocument = () => {
 export {
   enterDiscussion,
   createUser,
+  joinUser,
   getPage,
   createPost,
   getContext,

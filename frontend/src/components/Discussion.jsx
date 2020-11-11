@@ -27,7 +27,7 @@ import {
     subscribeDocument,
 } from "../actions/discussionActions";
 
-import usePending from "../hooks/usePending";
+import useRequest from "../hooks/useRequest";
 
 import Chat from "./Chat";
 import Document from "./Document";
@@ -43,14 +43,16 @@ const Discussion = (props) => {
     const [subscribed, setSubscribed] = useState(false);
     const [query, setQuery] = useState("");
 
-    const [enterDiscussionStatus, makeEnterDiscussion] = usePending(
+    // request hooks
+    const [enterDiscussionStatus, makeEnterDiscussion] = useRequest(
         props.completedRequests
     );
-    const [createUserStatus, makeCreateUser] = usePending(
+    const [createUserStatus, makeCreateUser] = useRequest(
         props.completedRequests
     );
-    const [joinUserStatus, makeJoinUser] = usePending(props.completedRequests);
+    const [joinUserStatus, makeJoinUser] = useRequest(props.completedRequests);
 
+    // create status vars for convenience
     const joined = joinUserStatus.made && !joinUserStatus.pending;
     const loading = joinUserStatus.pending;
 
@@ -63,42 +65,36 @@ const Discussion = (props) => {
 
     useEffect(() => {
         if (!enterDiscussionStatus.made) {
-            console.log("entering discussion");
             // we have yet to enter the discussion, so do that now
             makeEnterDiscussion((requestId) =>
                 props.dispatch(enterDiscussion(discussionId, requestId))
             );
-        } else if (!enterDiscussionStatus.pending && !badDiscussion) {
-            console.log("entered discussion sucessfully");
+        } else if (
+            !enterDiscussionStatus.pending &&
+            !badDiscussion &&
+            !joined &&
+            !joinUserStatus.pending
+        ) {
             // we're done entering the discussion and it's a valid id and we have not yet
             // tried to join with the user
-            if (enterDiscussionStatus.status === 0) {
+            if (
+                enterDiscussionStatus.status === null ||
+                createUserStatus.status === null
+            ) {
                 // if we entered the discussion and it indicated we have a userId already,
-                // go ahead and join
-                console.log("joining user");
+                // go ahead and join. Do the same if we just created a nickname sucessfully.
                 makeJoinUser((requestId) =>
-                    props.dispatch(joinDiscussion(discussionId))
+                    props.dispatch(joinUser(discussionId, requestId))
                 );
             }
         }
-        // => invalidDiscussion is not true
-        // join
-        // => check state i joined
-        //  loadUser
-        // else if (enterDiscussion && !subscribed) {
-        //     props.dispatch(subscribeChat());
-        //     props.dispatch(subscribeDocument());
-        //     setSubscribed(true);
-        // }
     });
 
     const joinDiscussion = (nickname) => {
         // join the discussion with a given nickname
-        console.log("creating user");
         makeCreateUser((requestId) =>
             props.dispatch(createUser(discussionId, nickname, requestId))
         );
-        // call join manually
     };
 
     const chat = (
@@ -115,7 +111,7 @@ const Discussion = (props) => {
             }}
             sendPostToDoc={(id) => {
                 console.log("moved:", id);
-                props.dispatch(sendToDoc(id));
+                props.dispatch(sendToDoc(id, uuidv4()));
             }}
         />
     );
