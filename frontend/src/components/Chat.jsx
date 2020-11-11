@@ -38,16 +38,22 @@ const Chat = (props) => {
         content[lastPosted.id] = tempPost;
         posts.push(lastPosted.id);
     } else if (posts.includes(lastPosted.id)) {
-        posts = props.posts;
-        content = props.content;
+        // TODO: keep the objects the same, just replace the id of the temporary
+        // post with the acutal id provided by the backend
+        posts = [...props.posts];
+        content = { ...props.content };
     }
 
     for (const i in posts) {
         const post = { ...content[posts[i]], id: posts[i] };
         if (i > 0) {
             const prevPost = content[posts[i - 1]];
-            // TODO: check if some duration of time has passed between posts
-            if (prevPost.author === post.author) {
+            // check if 30 minutes has passed between posts
+            const prevTime = Date.parse(prevPost.createdAt);
+            const thisTime = Date.parse(post.createdAt);
+            const minDiff = Math.floor((thisTime - prevTime) / 1000 / 60);
+            // group posts by the same author made within 30 mins of the last post together
+            if (prevPost.author === post.author && minDiff < 30) {
                 const group = postGroups.pop();
                 group.push(post);
                 postGroups.push(group);

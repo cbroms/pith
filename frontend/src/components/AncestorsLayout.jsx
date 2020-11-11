@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 import { UpChevron, VerticalLine, Dot } from "./Symbols";
 import TooltipLayout from "./TooltipLayout";
-import Unit from "./Unit";
+import UnitContext from "./UnitContext";
 
 const StyledContainer = styled.div`
     margin-top: 10px;
@@ -21,17 +21,35 @@ const StyledAncestorLayer = styled.div`
 
 const AncestorsLayout = (props) => {
     const units = props.ancestors.map((unit, i) => {
-        return (
-            <span key={unit}>
-                <StyledAncestorLayer data-tip data-for={`${unit}`}>
-                    {i !== props.ancestors.length - 1 ? <UpChevron /> : <Dot />}
-                    {i !== props.ancestors.length - 1 ? <VerticalLine /> : null}
-                </StyledAncestorLayer>
-                <TooltipLayout id={unit} place="right">
-                    {/* <Unit pith={unit.pith} charLimited /> */}
-                </TooltipLayout>
-            </span>
-        );
+        if (unit !== props.currentUnit) {
+            return (
+                <span key={unit} onClick={() => props.openUnit(unit)}>
+                    <StyledAncestorLayer data-tip data-for={`${unit}`}>
+                        {i !== props.ancestors.length - 1 ? (
+                            <UpChevron />
+                        ) : (
+                            <Dot />
+                        )}
+                        {i !== props.ancestors.length - 1 ? (
+                            <VerticalLine />
+                        ) : null}
+                    </StyledAncestorLayer>
+                    <TooltipLayout
+                        id={unit}
+                        place="right"
+                        getContent={() => (
+                            <UnitContext
+                                id={unit}
+                                units={props.units}
+                                getUnitContext={props.getUnitContext}
+                                gettingUnitContext={props.gettingUnitContext}
+                            />
+                        )}
+                    ></TooltipLayout>
+                </span>
+            );
+        }
+        return null;
     });
     return <StyledContainer>{units}</StyledContainer>;
 };

@@ -186,9 +186,6 @@ class App extends React.Component {
 										setDarkMode={(val) =>
 											this.setDarkModeActive(val)
 										}
-										timeline={timelineDummy}
-										document={documentDummy}
-										users={usersDummy}
 									/>
 								</Route>
 								<Route path="/">

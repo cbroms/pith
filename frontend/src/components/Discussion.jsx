@@ -54,6 +54,9 @@ const Discussion = (props) => {
     const [joinUserStatus, makeJoinUser] = useRequest(props.completedRequests);
     const [getPageStatus, makeGetPage] = useRequest(props.completedRequests);
     const [postStatus, makePost] = useRequest(props.completedRequests);
+    const [getContextStatus, makeGetContext] = useRequest(
+        props.completedRequests
+    );
 
     // create status vars for convenience
     const joined = joinUserStatus.made && !joinUserStatus.pending;
@@ -106,6 +109,13 @@ const Discussion = (props) => {
         );
     };
 
+    const getUnitContext = (id) => {
+        // get a unit's pith (should only be called if the unit is not in the map already)
+        makeGetContext((requestId) => {
+            props.dispatch(getPage(id, requestId));
+        });
+    };
+
     const chat = (
         <Chat
             loading={loading}
@@ -122,6 +132,8 @@ const Discussion = (props) => {
                     props.dispatch(createPost(content, requestId))
                 );
             }}
+            getUnitContext={getUnitContext}
+            gettingUnitContext={getContextStatus.pending}
             sendPostToDoc={(id) => {
                 console.log("moved:", id);
                 props.dispatch(sendToDoc(id, uuidv4()));
@@ -141,6 +153,8 @@ const Discussion = (props) => {
                 console.log("opened:", id);
                 props.dispatch(getPage(id, uuidv4()));
             }}
+            getUnitContext={getUnitContext}
+            gettingUnitContext={getContextStatus.pending}
         />
     );
     const search = <Search query={query} />;
