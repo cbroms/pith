@@ -16,6 +16,7 @@ export const HIDE_UNIT = "HIDE_UNIT";
 export const UNHIDE_UNIT = "UNHIDE_UNIT";
 export const SELECT_UNIT = "SELECT_UNIT";
 export const DESELECT_UNIT = "DESELECT_UNIT";
+export const MOVE_UNIT = "MOVE_UNIT";
 export const MOVE_UNITS = "MOVE_UNIT";
 export const REQUEST_EDIT_UNIT = "REQUEST_EDIT_UNIT";
 export const DEEDIT_UNIT = "DEEDIT_UNIT";

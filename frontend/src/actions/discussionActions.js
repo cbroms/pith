@@ -74,6 +74,7 @@ import {
   UNHIDE_UNIT,
   SELECT_UNIT,
   DESELECT_UNIT,
+  MOVE_UNIT,
   MOVE_UNITS,
   REQUEST_EDIT_UNIT,
   DEEDIT_UNIT,
@@ -480,6 +481,52 @@ const deselectUnit = (unitId, requestId) => {
 };
 
 // TODO moveUnit for drag-and-drop or keyboard
+const moveUnit = (unitId, parentUnit, position, requestId) => {
+  return (dispatch) => {
+    const data1 = {
+      unit_id: unitId,
+    }
+    const data2 = {
+      units = [unitId],
+      parent: parentUnit,
+      position: position,
+    }
+
+    const [startRequest, endRequest] = createRequestWrapper(
+      MOVE_UNIT,
+      dispatch,
+      requestId
+    );
+
+    startRequest(() =>
+      socket.emit("move_units", data, (res) => {
+        const response = JSON.parse(res);
+        const statusCode = getStatus(response, dispatch, {
+          [BAD_POSITION_TRY]: MOVE_DISABLED,
+          [BAD_PARENT]: BAD_TARGET,
+        });
+        if (statusCode === null) {
+          handleMoveUnits(response.shared, dispatch);
+
+          // next emit
+          socket.emit("select_unit", data, (res) => {
+            const response = JSON.parse(res);
+            const statusCode = getStatus(response, dispatch, {
+              [FAILED_POSITION_ACQUIRE]: MOVE_DISABLED,
+            });
+            if (statusCode === null) {
+              handleSelectUnit(response.shared, dispatch);
+            }
+            endRequest(statusCode);
+          })
+        }
+        else {
+          endRequest(statusCode);
+        }
+      }
+    );
+  }
+}
 
 const moveUnits = (units, parentUnit, position, requestId) => {
   return (dispatch) => {
