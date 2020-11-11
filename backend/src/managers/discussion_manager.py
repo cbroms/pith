@@ -119,7 +119,7 @@ class DiscussionManager:
         user = discussion.get().users.filter(id=user_id).get()
         parent = self._get_unit(parent_id)
 
-        doc_meta = []
+        doc_meta_ids = []
 
         # remove from old
         for unit_id in units:
@@ -129,7 +129,7 @@ class DiscussionManager:
             pull__children=unit_id
           )
           # TODO don't need to add unit to doc_meta
-          doc_meta.append(old_parent)
+          doc_meta_ids.append(old_parent)
 
         # add to new
         key = "push__children__{}".format(position)
@@ -140,7 +140,9 @@ class DiscussionManager:
             set__parent=parent_id,
           )
           self._release_position(unit_id)
-        doc_meta.append(parent)
+        doc_meta_ids.append(parent_id)
+
+        doc_meta = [self._doc_meta(id) for id in list(set(doc_meta_ids))]
       
         return doc_meta
 
@@ -322,8 +324,8 @@ class DiscussionManager:
         discussion = self._get(discussion_id).get()
         user = discussion.users.filter(id=user_id).get()
 
-        doc_meta = []
-        chat_meta = []
+        doc_meta_ids = []
+        chat_meta_ids = []
 
         cursors = []
         for p in discussion.users:
@@ -333,7 +335,7 @@ class DiscussionManager:
               "nickname": p.name, 
               "cursor": p.cursor.to_mongo().to_dict()
             })
-          doc_meta.append(self._doc_meta(discussion_id, p.cursor.unit_id))
+          doc_meta_ids.append(p.cursor.unit_id)
 
         timeline = []
         for i in user.timeline: 
@@ -342,7 +344,7 @@ class DiscussionManager:
             "start_time": i.start_time.strftime(constants.DATE_TIME_FMT),
             "end_time": i.end_time.strftime(constants.DATE_TIME_FMT),
           })
-          doc_meta.append(self._doc_meta(discussion_id, i.unit_id))
+          doc_meta_ids.append(i.unit_id)
 
         unit_ids = []
         for u in discussion.chat:
@@ -353,7 +355,10 @@ class DiscussionManager:
 
         for u in unit_ids: # chat units and forward links
           unit = self._get_unit(u).get()
-          chat_meta.append(self._chat_meta(discussion_id, u))
+          chat_meta_ids.append(u)
+
+        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
+        chat_meta = [self._chat_meta(discussion_id, id) for id in list(set(chat_meta_ids))]
 
         response = {
           "nickname": user.name,
@@ -418,18 +423,18 @@ class DiscussionManager:
         # perform unit-based operations
         unit = self._get_unit(unit_id).get()
 
-        doc_meta = []
-        doc_meta.append(self._doc_meta(discussion_id, unit_id))
+        doc_meta_ids = []
+        doc_meta_ids.append(unit_id)
         for c in unit.children:
           c_unit = self._get_unit(c).get()
+          doc_meta_ids.append(c)
           for g in c_unit.children:
-            doc_meta.append(self._doc_meta(discussion_id, g))
-          doc_meta.append(self._doc_meta(discussion_id, c))
+            doc_meta_ids.append(g)
         for b in unit.backward_links:
           b_unit = self._get_unit(b).get()
+          doc_meta_ids.append(b)
           for g in b_unit.backward_links:
-            doc_meta.append(self._doc_meta(discussion_id, g))
-          doc_meta.append(self._doc_meta(discussion_id, b))
+            doc_meta_ids.append(g)
 
         # update cursor
         discussion.filter(users__id=user_id).update(
@@ -456,7 +461,9 @@ class DiscussionManager:
         # ancestors
         ancestors = self._get_ancestors(unit_id)
         for a in ancestors:
-          doc_meta.append(self._doc_meta(discussion_id, a))
+          doc_meta_ids.append(a)
+
+        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
 
         response = {
           "ancestors": ancestors,
@@ -476,9 +483,11 @@ class DiscussionManager:
     def get_ancestors(self, discussion_id, unit_id):
         ancestors = self._get_ancestors(unit_id)
 
-        doc_meta = []
+        doc_meta_ids = []
         for a in ancestors:
-          doc_meta.append(a)
+          doc_meta_ids.append(a)
+
+        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_id))]
 
         response = {
           "ancestors": ancestors,
@@ -508,16 +517,16 @@ class DiscussionManager:
     def post(self, discussion_id, user_id, pith):
         discussion = self._get(discussion_id)
 
-        chat_meta = []
-        doc_meta = []
+        chat_meta_ids = []
+        doc_meta_ids = []
 
         forward_links = self._retrieve_links(pith)
         for f in forward_links:
             unit = self._get_unit(f)
             if unit.get().in_chat:
-              chat_meta.append(self._chat_meta(discussion_id, f))
+              chat_meta_ids.append(f)
             else:
-              doc_meta.append(self._doc_meta(discussion_id, f))
+              doc_meta_ids.append(f)
 
         unit = Unit(
           pith=pith,
@@ -530,7 +539,7 @@ class DiscussionManager:
         unit_id = unit.id
         unit.save()
         discussion.update(push__chat=unit_id)
-        chat_meta.append(self._chat_meta(discussion_id, unit_id))
+        chat_meta_ids.append(unit_id)
 
         # make backlinks
         for f in forward_links:
@@ -539,9 +548,12 @@ class DiscussionManager:
           )
           unit = self._get_unit(f)
           if unit.get().in_chat:
-            chat_meta.append(self._chat_meta(discussion_id, f))
+            chat_meta_ids.append(f)
           else:
-            doc_meta.append(self._doc_meta(discussion_id, f))
+            doc_meta_ids.append(f)
+
+        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
+        chat_meta = [self._chat_meta(discussion_id, id) for id in list(set(chat_meta_ids))]
 
         post = {
           "unit_id": unit_id,
@@ -559,8 +571,8 @@ class DiscussionManager:
         chat = []
         doc = []
 
-        chat_meta = []
-        doc_meta = []
+        chat_meta_ids = []
+        doc_meta_ids = []
 
         for unit in results: # dict form
           unit_id = unit["_id"]
@@ -569,10 +581,13 @@ class DiscussionManager:
           }
           if unit["in_chat"]:
             chat.append(entry)
-            chat_meta.append(self._chat_meta(discussion_id, unit_id))
+            chat_meta_ids.append(unit_id)
           else:
             doc.append(entry)
-            doc_meta.append(self._doc_meta(discussion_id, unit_id))
+            doc_meta_ids.append(unit_id)
+
+        chat_meta = [self._chat_meta(id) for id in list(set(chat_meta_ids))]
+        doc_meta = [self._doc_meta(id) for id in list(set(doc_meta_ids))]
 
         response = {
           "chat_units": chat,
@@ -614,23 +629,26 @@ class DiscussionManager:
         key = "push__children__{}".format(position)
         parent.update(**{key: [unit_id]})
 
-        doc_meta = []
-        chat_meta = []
-        doc_meta.append(self._doc_meta(discussion_id, unit_id))
-        doc_meta.append(self._doc_meta(discussion_id, parent))
+        doc_meta_ids = []
+        chat_meta_ids = []
+        doc_meta_ids.append(unit_id)
+        doc_meta_ids.append(parent_id)
 
         for f in forward_links:
           unit = self._get_unit(f)
           if unit.get().in_chat:
-            chat_meta.append(self._chat_meta(discussion_id, f))
+            chat_meta_ids.append(f)
           else:
-            doc_meta.append(self._doc_meta(discussion_id, f))
+            doc_meta_ids.append(f)
 
         for f in forward_links:
           self._get_unit(f).update(
             push__backward_links = unit_id
           )
-          doc_meta.append(self._doc_meta(discussion_id, f))
+          doc_meta_ids.append(f)
+
+        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
+        chat_meta = [self._chat_meta(discussion_id, id) for id in list(set(chat_meta_ids))]
         
         return None, [doc_meta, chat_meta]
 
@@ -702,17 +720,17 @@ class DiscussionManager:
         key = "push__children__{}".format(position)
         parent_ptr.update(**{key: [unit_id]})
 
-        doc_meta = []
-        chat_meta = []
-        doc_meta.append(self._doc_meta(discussion_id, unit_id))
-        doc_meta.append(self._doc_meta(discussion_id, parent))
+        doc_meta_ids = []
+        chat_meta_ids = []
+        doc_meta_ids.append(unit_id)
+        doc_meta_ids.append(parent)
 
         for f in forward_links:
           unit = self._get_unit(f)
           if unit.get().in_chat:
-            chat_meta.append(self._chat_meta(discussion_id, f))
+            chat_meta_ids.append(f)
           else:
-            doc_meta.append(self._doc_meta(discussion_id, f))
+            doc_meta_ids.append(f)
 
         # make backlinks
         for f in forward_links:
@@ -721,9 +739,12 @@ class DiscussionManager:
           )
           unit = self._get_unit(f)
           if unit.get().in_chat:
-            chat_meta.append(self._chat_meta(discussion_id, f))
+            chat_meta_ids.append(f)
           else:
-            doc_meta.append(self._doc_meta(discussion_id, f))
+            doc_meta_ids.append(f)
+
+        doc_meta = [self._doc_meta(discussion_id, id) for id in doc_meta_ids]
+        chat_meta = [self._chat_meta(discussion_id, id) for id in chat_meta_ids]
 
         return None, [doc_meta, chat_meta]
 
@@ -790,7 +811,9 @@ class DiscussionManager:
         doc_meta2 = self._move_units(discussion_id, user_id, units, 
           added_unit["unit_id"], 0) # put at head
 
-        doc_meta += doc_meta2
+        # get most up-to-date information
+        doc_meta_ids = [d["unit_id"] for d in doc_meta+doc_meta2]
+        doc_meta = [self._doc_meta(id) for id in list(set(doc_meta_ids))]
 
         return None, [doc_meta]
 
@@ -850,16 +873,19 @@ class DiscussionManager:
             push__backward_links = unit_id
           )
 
-        doc_meta = []
-        chat_meta = []
-        doc_meta.append(self._doc_meta(discussion_id, unit_id))
+        doc_meta_ids = []
+        chat_meta_ids = []
+        doc_meta_ids.append(unit_id)
 
         # backward links added/removed
         for b in removed_links + added_links:
           unit = self._get_unit(b)
           if unit.get().in_chat:
-            chat_meta.append(self._chat_meta(discussion_id, b))
+            chat_meta_ids.append(b)
           else:
-            doc_meta.append(self._doc_meta(discussion_id, b))
+            doc_meta_ids.append(b)
+
+        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
+        chat_meta = [self._chat_meta(discussion_id, id) for id in list(set(chat_meta_ids))]
 
         return None, [doc_meta, chat_meta]

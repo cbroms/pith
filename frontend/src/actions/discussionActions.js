@@ -107,6 +107,7 @@ const joinUser = (discussionId, requestId) => {
       socket.emit("join", data, (res) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {});
+        console.log("join", response);
 
         if (statusCode === null) {
           // success
