@@ -34,7 +34,7 @@ const StyledUnitAndEnter = styled.div`
     width: 100%;
     grid-template-columns: ${(props) =>
         props.level !== 1
-            ? "[grab] 5px [grab-end unit]"
+            ? "[grab] 15px [grab-end unit]"
             : "[unit]"} 1fr [unit-end open] 40px [open-end];
     grid-template-rows: [content] 1fr [content-end];
 
@@ -54,6 +54,8 @@ const StyledUnit = styled.div`
 
     font-size: ${(props) =>
         props.level === 1 ? props.theme.largeFont : "inherit"};
+
+    transition: border ${(props) => props.theme.animation};
 
     border: ${(props) =>
         props.over
@@ -80,6 +82,8 @@ const StyledGrab = styled.div`
     grid-row-start: content;
     grid-row-end: content-end;
 
+    transition: border ${(props) => props.theme.animation};
+
     cursor: grab;
     height: 100%;
 
@@ -90,7 +94,7 @@ const StyledGrab = styled.div`
     border-right: 5px solid ${(props) => props.theme.shade2};
 
     :hover {
-        border-right: 5px solid ${(props) => props.theme.shade3};
+        border-right: 15px solid ${(props) => props.theme.shade3};
     }
 `;
 
@@ -109,6 +113,7 @@ const StyledEndDragMarker = styled.div`
 `;
 
 const StyledDragMarkerLine = styled.div`
+    transition: background-color ${(props) => props.theme.animation};
     margin: 4px 0;
     height: 3px;
     background-color: ${(props) =>

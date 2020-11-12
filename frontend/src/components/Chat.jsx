@@ -69,7 +69,7 @@ const Chat = (props) => {
 
     // calculate the post times before adding the transclusions
     for (const group of postGroups) {
-        const date = dayjs(group[0].createdAt).utc().local();
+        const date = dayjs(group[0].createdAt).local();
 
         const formattedDate = dayjs(date).calendar(null, {
             sameDay: "[Today at] h:mm a",
@@ -130,6 +130,7 @@ const Chat = (props) => {
                     greyed={post.temporary}
                     topTransclude={post?.transcludeNum === 1}
                     bottomTransclude={
+                        post.transcluded &&
                         post?.totalTranscluded === post?.transcludeNum
                     }
                     transcluded={post.transcluded}

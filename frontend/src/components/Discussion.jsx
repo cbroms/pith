@@ -180,7 +180,7 @@ const Discussion = (props) => {
                             badDiscussion={badDiscussion}
                             onComplete={(nickname) => joinDiscussion(nickname)}
                             id={discussionId}
-                            loadingScreen={loading}
+                            loadingScreen={joinUserStatus.pending}
                         />
                     )}
                 </Route>

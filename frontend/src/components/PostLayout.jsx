@@ -8,6 +8,7 @@ const StyledContainer = styled.div`
 
 const StyledAuthor = styled.div`
     margin-right: 10px;
+    margin-bottom: 5px;
     display: inline-block;
     font-family: ${(props) => props.theme.sans};
     font-weight: bold;

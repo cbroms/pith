@@ -17,7 +17,14 @@ const UnitContext = (props) => {
 	}, [hasContext, props]);
 
 	return (
-		<Unit pith={hasContext ? props.units[props.id].pith : ""} charLimited />
+		<Unit
+			pith={
+				hasContext && props.units[props.id]?.pith
+					? props.units[props.id].pith
+					: ""
+			}
+			charLimited
+		/>
 	);
 };
 

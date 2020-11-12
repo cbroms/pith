@@ -4,6 +4,7 @@ import {
     handleDrag,
     handleEnter,
     handleDelete,
+    handleTab,
     handleEdit,
 } from "../utils/documentModifiers";
 
@@ -34,6 +35,7 @@ class Document extends React.Component {
         this.onUnitDelete = this.onUnitDelete.bind(this);
         this.onUnitEnter = this.onUnitEnter.bind(this);
         this.onUnitEdit = this.onUnitEdit.bind(this);
+        this.onUnitTab = this.onUnitTab.bind(this);
 
         this.getDragInfo = this.getDragInfo.bind(this);
     }
@@ -58,13 +60,14 @@ class Document extends React.Component {
         return { ...store };
     }
 
-    onUnitDelete(isEmpty, content, position) {
+    onUnitDelete(isEmpty, content, id, pid) {
         const store = this.getStoreCopy();
         const [focused, newStore] = handleDelete(
             store,
             isEmpty,
             content,
-            position
+            id,
+            pid
         );
         if (newStore !== null) {
             this.setState({
@@ -74,13 +77,24 @@ class Document extends React.Component {
         }
     }
 
-    onUnitEnter(caretPos, content, position) {
+    onUnitTab(shifted, id, pid, ppid) {
+        const store = this.getStoreCopy();
+        const newStore = handleTab(store, shifted, id, pid, ppid);
+        if (newStore !== null) {
+            this.setState({
+                tempUnitCopy: newStore,
+            });
+        }
+    }
+
+    onUnitEnter(caretPos, content, id, pid) {
         const store = this.getStoreCopy();
         const [newContent, focused, newStore] = handleEnter(
             store,
             caretPos,
             content,
-            position
+            id,
+            pid
         );
         if (newStore !== null) {
             this.setState({
@@ -91,9 +105,9 @@ class Document extends React.Component {
         return newContent;
     }
 
-    onUnitEdit(content, position) {
+    onUnitEdit(content, id, pid) {
         const store = this.getStoreCopy();
-        const newStore = handleEdit(store, content, position);
+        const newStore = handleEdit(store, content, id, pid);
         if (newStore !== null) {
             this.setState({
                 tempUnitCopy: newStore,
@@ -124,38 +138,35 @@ class Document extends React.Component {
         // }
     }
 
-    getDragInfo(child, grandchild) {
-        const over =
-            this.state.dragTarget?.child === child &&
-            this.state.dragTarget?.grandchild === grandchild;
+    getDragInfo(id) {
+        const over = this.state.dragTarget?.id === id;
 
         const overAsChild = over && this.state.dragTarget?.asChild;
         const overAtEnd = over && this.state.dragTarget?.atEnd;
         return [over, overAsChild, overAtEnd];
     }
 
-    handleDragStart(e, childPosition, grandchildPosition) {
+    handleDragStart(e, id, pid) {
         this.setState({
             dragged: {
-                child: childPosition,
-                grandchild: grandchildPosition,
+                id: id,
+                pid: pid,
             },
         });
     }
 
-    handleDragEnter(e, childPosition, grandchildPosition, asChild, atEnd) {
+    handleDragEnter(e, id, pid, asChild, atEnd) {
         const targ = this.state.dragTarget;
         if (
             targ === null ||
-            targ.child !== childPosition ||
-            targ.grandchild !== grandchildPosition ||
+            targ.id !== id ||
             targ.asChild !== asChild ||
             targ.atEnd !== atEnd
         ) {
             this.setState({
                 dragTarget: {
-                    child: childPosition,
-                    grandchild: grandchildPosition,
+                    id: id,
+                    pid: pid,
                     asChild: asChild,
                     atEnd: atEnd,
                 },
@@ -165,19 +176,22 @@ class Document extends React.Component {
 
     render() {
         // create a unit for a given location
-        const createUnit = (pith, id, position) => {
+        const createUnit = (pith, id, pid, ppid) => {
             return (
                 <Unit
                     editable
                     unitEnter={(pos, content) =>
-                        this.onUnitEnter(pos, content, position)
+                        this.onUnitEnter(pos, content, id, pid)
                     }
                     unitDelete={(isEmpty, content) =>
-                        this.onUnitDelete(isEmpty, content, position)
+                        this.onUnitDelete(isEmpty, content, id, pid)
                     }
                     unitEdit={(content) => {
-                        this.onUnitEdit(content, position);
+                        this.onUnitEdit(content, id, pid);
                     }}
+                    unitTab={(shifted) =>
+                        this.onUnitTab(shifted, id, pid, ppid)
+                    }
                     onFocus={() => this.setState({ focused: id })}
                     onBlur={() => this.setState({ focused: null })}
                     focused={this.state.focused === id}
@@ -189,31 +203,16 @@ class Document extends React.Component {
             );
         };
 
-        const createSection = (content, id, position, isLast, pith, level) => {
-            const [over, asChild, atEnd] = this.getDragInfo(
-                position.child,
-                position.grandchild
-            );
+        const createSection = (content, id, pid, isLast, pith, level) => {
+            const [over, asChild, atEnd] = this.getDragInfo(id);
 
             return (
                 <DocumentSectionLayout
                     draggable={this.state.focused !== id}
                     onDragEnd={this.handleDragEnd}
-                    onDragStart={(e) =>
-                        this.handleDragStart(
-                            e,
-                            position.child,
-                            position.grandchild
-                        )
-                    }
+                    onDragStart={(e) => this.handleDragStart(e, id, pid)}
                     onDragEnter={(e, asChild, atEnd) =>
-                        this.handleDragEnter(
-                            e,
-                            position.child,
-                            position.grandchild,
-                            asChild,
-                            atEnd
-                        )
+                        this.handleDragEnter(e, id, pid, asChild, atEnd)
                     }
                     onDragOver={(e) => e.preventDefault()}
                     onUnitEnter={() => this.props.openUnit(id)}
@@ -241,37 +240,35 @@ class Document extends React.Component {
                 const grandchildren = store[childId]?.children?.map(
                     (grandchildId, grandchildIndex) => {
                         const grandchild = store[grandchildId];
-                        const position = {
-                            child: childIndex,
-                            grandchild: grandchildIndex,
-                            parentId: childId,
-                            id: grandchildId,
-                        };
                         return createSection(
                             null,
                             grandchildId,
-                            position,
+                            childId,
                             grandchildIndex === child.children.length - 1,
-                            createUnit(grandchild.pith, grandchildId, position),
+                            createUnit(
+                                grandchild.pith,
+                                grandchildId,
+                                childId,
+                                this.props.currentUnit
+                            ),
                             3
                         );
                     }
                 );
 
                 // create the child section
-                const position = {
-                    child: childIndex,
-                    grandchild: null,
-                    parentId: this.props.currentUnit,
-                    id: childId,
-                };
                 return createSection(
                     grandchildren,
                     childId,
-                    position,
+                    this.props.currentUnit,
                     childIndex ===
                         store[this.props.currentUnit].children.length - 1,
-                    createUnit(child.pith, childId, position),
+                    createUnit(
+                        child.pith,
+                        childId,
+                        this.props.currentUnit,
+                        null
+                    ),
                     2
                 );
             }
@@ -279,12 +276,8 @@ class Document extends React.Component {
         const pithUnit = createUnit(
             store[this.props.currentUnit].pith,
             this.props.currentUnit,
-            {
-                child: null,
-                grandchild: null,
-                id: this.props.currentUnit,
-                parentId: null,
-            }
+            null,
+            null
         );
 
         const doc = (

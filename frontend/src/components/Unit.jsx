@@ -79,6 +79,7 @@ const Unit = (props) => {
                     showRenderDisplay={pith.length > 0}
                     unitEnter={props.unitEnter}
                     unitDelete={props.unitDelete}
+                    unitTab={props.unitTab}
                     showButton={props.showButton}
                     renderedContent={content} // pass the rendered version of the unit (with link icons)
                     content={pith}

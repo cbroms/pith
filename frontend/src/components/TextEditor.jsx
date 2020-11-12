@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import DOMPurify from "dompurify";
+// import { escape } from "html-escaper";
 
 import TextEditorLayout from "./TextEditorLayout";
 
@@ -59,11 +60,8 @@ class TextEditor extends React.Component {
         const last = this.ref.current.childNodes[
           this.ref.current.childNodes.length - 1
         ];
-        console.log(last);
-        setpos.setStart(
-          this.ref.current.childNodes[this.ref.current.childNodes.length - 1],
-          last.textContent.length
-        );
+        console.log(this.ref.current);
+        setpos.setStart(last, last.textContent.length);
         setpos.collapse(true);
         set.removeAllRanges();
         set.addRange(setpos);
@@ -255,6 +253,14 @@ class TextEditor extends React.Component {
         });
         this.props.openSearch();
       }
+    }
+    // on tab
+    if (e.keyCode === 9) {
+      if (this.props.unitTab) {
+        this.onBlur();
+        this.props.unitTab(e.shiftKey);
+      }
+      e.preventDefault();
     }
     // on delete
     if (e.keyCode === 8) {
