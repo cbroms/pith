@@ -29,7 +29,6 @@ const StyledContainer = styled.div`
 const StyledEditor = styled(ContentEditable)`
     display: ${(props) => (props.$shown ? "block" : "none")};
     box-sizing: border-box;
-    display: inline-block;
     padding-right: ${(props) => (props.$showButton ? 50 : 0)}px;
     width: 100%;
     margin: 0;
@@ -47,6 +46,7 @@ const StyledEditor = styled(ContentEditable)`
 
 const StyledRenderedEditor = styled.div`
     display: ${(props) => (props.$shown ? "block" : "none")};
+    background-color: IndianRed;
 `;
 
 const TextEditorLayout = (props) => {
@@ -54,14 +54,14 @@ const TextEditorLayout = (props) => {
         <StyledContainer showButton={props.showButton}>
             <StyledRenderedEditor
                 onClick={props.onFocus}
-                shown={props.showRendered && props.renderedContent !== null}
+                $shown={props.showRendered}
             >
                 {props.renderedContent}
             </StyledRenderedEditor>
             <StyledEditor
                 $showButton={props.showButton}
                 $placeholder={props.placeholder}
-                $shown={props.showRendered && props.renderedContent === null}
+                $shown={!props.showRendered}
                 innerRef={props.innerRef}
                 className={props.className}
                 html={props.html}

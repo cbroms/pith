@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { getDecodedLengthOfPith } from "./pithModifiers";
 
 // given a document, handle inserting a dropped element and removing it from
 // its previous position
@@ -73,7 +74,11 @@ const handleEnter = (store, caretPos, content, id, pid) => {
     console.log(content);
     console.log(newUnitPith);
 
+    // check for a few cases where we want to clean up the new unit
     if (newUnitPith === "<br>") newUnitPith = "";
+    if (newUnitPith.charAt(0) === " ")
+        newUnitPith = newUnitPith.substring(1, newUnitPith.length - 1);
+    if (newUnitPith === " ") newUnitPith = "";
 
     // generate a new random id.
     // TODO: record this id and reconcile it with the new id received through
@@ -108,14 +113,17 @@ const handleDelete = (store, isEmpty, content, id, pid) => {
         // get the deleted units position
         const pos = store[pid].children.indexOf(id);
         let newFocus = null;
+        let newPosition;
 
         if (pos === 0 && !isEmpty) {
             // if it was in the first position, add its contents to the parent
+            newPosition = getDecodedLengthOfPith(store[pid].pith);
             store[pid].pith += content;
             newFocus = pid;
         } else {
             // add the content to the sibling above
             const siblingId = store[pid].children[pos - 1];
+            newPosition = getDecodedLengthOfPith(store[siblingId].pith);
             if (!isEmpty) store[siblingId].pith += content;
             newFocus = siblingId;
         }
@@ -123,13 +131,14 @@ const handleDelete = (store, isEmpty, content, id, pid) => {
         // remove the unit
         store[pid].children.splice(pos, 1);
 
-        return [newFocus, store];
+        return [newFocus, newPosition, store];
     }
-    return [null, null];
+    return [null, null, null];
 };
 
 // edit the pith of a unit
 const handleEdit = (store, content, id, pid) => {
+    console.log("editing");
     store[id].pith = content;
     return store;
 };

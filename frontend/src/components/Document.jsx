@@ -8,6 +8,8 @@ import {
     handleEdit,
 } from "../utils/documentModifiers";
 
+import { getDecodedLengthOfPith } from "../utils/pithModifiers";
+
 import Unit from "./Unit";
 import AncestorsLayout from "./AncestorsLayout";
 import DocumentLayout from "./DocumentLayout";
@@ -23,6 +25,7 @@ class Document extends React.Component {
             dragged: null,
             dragTarget: null,
             focused: null,
+            focusedPosition: null,
         };
 
         this.getStore = this.getStore.bind(this);
@@ -62,7 +65,7 @@ class Document extends React.Component {
 
     onUnitDelete(isEmpty, content, id, pid) {
         const store = this.getStoreCopy();
-        const [focused, newStore] = handleDelete(
+        const [focused, focusedPosition, newStore] = handleDelete(
             store,
             isEmpty,
             content,
@@ -72,6 +75,7 @@ class Document extends React.Component {
         if (newStore !== null) {
             this.setState({
                 focused: focused,
+                focusedPosition: focusedPosition,
                 tempUnitCopy: newStore,
             });
         }
@@ -99,6 +103,7 @@ class Document extends React.Component {
         if (newStore !== null) {
             this.setState({
                 focused: focused,
+                focusedPosition: 0,
                 tempUnitCopy: newStore,
             });
         }
@@ -192,9 +197,19 @@ class Document extends React.Component {
                     unitTab={(shifted) =>
                         this.onUnitTab(shifted, id, pid, ppid)
                     }
-                    onFocus={() => this.setState({ focused: id })}
+                    onFocus={() => {
+                        this.setState({
+                            focused: id,
+                            focusedPosition: getDecodedLengthOfPith(pith),
+                        });
+                    }}
                     onBlur={() => this.setState({ focused: null })}
                     focused={this.state.focused === id}
+                    focusedPosition={
+                        this.state.focused === id
+                            ? this.state.focusedPosition
+                            : null
+                    }
                     placeholder={"type a pith..."}
                     pith={pith}
                     id={id}

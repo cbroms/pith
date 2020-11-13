@@ -90,6 +90,7 @@ const Unit = (props) => {
                         props.onBlur();
                     }}
                     focused={props.focused}
+                    focusedPosition={props.focusedPosition}
                     placeholder={props.placeholder}
                 />
             );

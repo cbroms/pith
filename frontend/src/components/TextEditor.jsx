@@ -1,7 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import DOMPurify from "dompurify";
-// import { escape } from "html-escaper";
+import { escape } from "html-escaper";
+
+import { getDecodedLengthOfPith } from "../utils/pithModifiers";
 
 import TextEditorLayout from "./TextEditorLayout";
 
@@ -10,7 +12,7 @@ class TextEditor extends React.Component {
     super(props);
     this.state = {
       html: this.props.content || "",
-      renderDisplay: false,
+      renderDisplay: !this.props.focused,
       editedSinceChange: false,
       editable: true,
       queryStartPos: null,
@@ -48,28 +50,52 @@ class TextEditor extends React.Component {
 
   checkFocus() {
     if (this.props.focused && document.activeElement !== this.ref.current) {
-      console.log("checking focus ");
+      // console.log(this.props.focusedPosition);
+      // console.log("checking focus ");
 
-      // remove the prior focus and move the cursor to the first position in this
-      // element
-      // window.setTimeout(() => {
-      try {
-        this.ref.current.focus();
-        const setpos = document.createRange();
-        const set = window.getSelection();
-        const last = this.ref.current.childNodes[
-          this.ref.current.childNodes.length - 1
-        ];
-        console.log(this.ref.current);
-        setpos.setStart(last, last.textContent.length);
-        setpos.collapse(true);
-        set.removeAllRanges();
-        set.addRange(setpos);
-        this.ref.current.focus();
-      } catch {
-        console.log("couldn't set focus");
-      }
-      //   }, 50);
+      // set the cursor position in the element
+      // this is wrapped in a timeout because we want it to excecute only after this.ref.current
+      // has updated from the rerender
+      window.setTimeout(() => {
+        // make sure we haven't *just* focused, since there's no other way to tell if we already
+        // updated focus since we're using a timeout and reference (no state info here)
+        if (document.activeElement !== this.ref.current) {
+          //this.ref.current.focus();
+          const setpos = document.createRange();
+          const set = window.getSelection();
+          // console.log(this.ref.current.childNodes);
+
+          const focusedPosition =
+            this.props.focusedPosition !== null
+              ? this.props.focusedPosition
+              : getDecodedLengthOfPith(this.state.html);
+          let position = focusedPosition;
+          let targetNode = this.ref.current.childNodes[0] || this.ref.current;
+          let lenSoFar = 0;
+
+          // find the node to focus in
+          for (const node of this.ref.current.childNodes) {
+            if (lenSoFar + node.textContent.length > focusedPosition) {
+              // we found the node we should be focusing in
+              // now get the position within the node we should place the cursor
+              if (lenSoFar === 0) position = this.props.focusedPosition;
+              else
+                position =
+                  lenSoFar +
+                  node.textContent.length -
+                  this.props.focusedPosition;
+            }
+          }
+
+          // console.log(targetNode, position);
+
+          setpos.setStart(targetNode, position);
+          setpos.collapse(true);
+          set.removeAllRanges();
+          set.addRange(setpos);
+          this.ref.current.focus();
+        }
+      }, 50);
     }
   }
 
@@ -143,7 +169,26 @@ class TextEditor extends React.Component {
       // get the caret position (this is in the rendered text)
       const pos = sel.getRangeAt(0);
       const start = pos.endContainer;
-      const startOffset = pos.endOffset;
+      let startOffset = pos.endOffset;
+
+      console.log(start, startOffset);
+
+      // we need to ensure the string doesn't contain any encoded html entities, or else
+      // the offset provided will be shorter (account for cases like ">" -> "&gt;")
+      if (start.textContent.length !== escape(start.textContent).length) {
+        let adjustedLen = 0;
+        for (let i = 0; i < startOffset; i++) {
+          const char = start.textContent.charAt(i);
+          // for some reason our content editable element doesn;t encode ' and " as html entities,
+          // so only escape the char if it isnt one of those
+          if (!['"', "'"].includes(char)) {
+            adjustedLen += escape(char).length;
+          } else adjustedLen += 1;
+        }
+
+        startOffset = adjustedLen;
+      }
+      console.log(startOffset);
 
       // is the comparison element in one of the element's children in pos 0?
       const isFirstChild = (comp, elt) => {
@@ -186,7 +231,7 @@ class TextEditor extends React.Component {
             //  increase the length of the offset with the element's content
             offset +=
               tagNameOffset === 0
-                ? pChild.textContent.length
+                ? escape(pChild.textContent).length
                 : pChild.innerHTML.length + tagNameOffset;
           }
         } else {
@@ -305,7 +350,11 @@ class TextEditor extends React.Component {
         focused={this.props.focused}
         html={this.state.html}
         renderedContent={this.props.renderedContent}
-        showRendered={this.state.renderDisplay && this.props.showRenderDisplay}
+        showRendered={
+          this.state.renderDisplay &&
+          this.props.showRenderDisplay &&
+          !this.props.focused
+        }
         disabled={!this.state.editable}
         onChange={this.handleChange}
         onFocus={this.onFocus}
