@@ -586,8 +586,8 @@ class DiscussionManager:
             doc.append(entry)
             doc_meta_ids.append(unit_id)
 
-        chat_meta = [self._chat_meta(id) for id in list(set(chat_meta_ids))]
-        doc_meta = [self._doc_meta(id) for id in list(set(doc_meta_ids))]
+        chat_meta = [self._chat_meta(discussion_id, id) for id in list(set(chat_meta_ids))]
+        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
 
         response = {
           "chat_units": chat,

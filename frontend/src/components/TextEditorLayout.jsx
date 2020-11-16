@@ -46,7 +46,7 @@ const StyledEditor = styled(ContentEditable)`
 
 const StyledRenderedEditor = styled.div`
     display: ${(props) => (props.$shown ? "block" : "none")};
-    background-color: IndianRed;
+    // background-color: IndianRed;
 `;
 
 const TextEditorLayout = (props) => {

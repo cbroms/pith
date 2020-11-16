@@ -316,8 +316,10 @@ const search = (query, requestId) => {
           handleChatMeta(response.chat_meta, dispatch);
           dispatch({
             type: SEARCH_FULFILLED,
-            chatResults: response.chat_units,
-            docResults: response.doc_units,
+            payload: {
+              chatResults: response.chat_units,
+              docResults: response.doc_units,
+            },
           });
         }
         endRequest(statusCode);
@@ -489,12 +491,12 @@ const moveUnit = (unitId, parentUnit, position, requestId) => {
   return (dispatch) => {
     const data1 = {
       unit_id: unitId,
-    }
+    };
     const data2 = {
-      units : [unitId],
+      units: [unitId],
       parent: parentUnit,
       position: position,
-    }
+    };
 
     const [startRequest, endRequest] = createRequestWrapper(
       MOVE_UNIT,
@@ -522,14 +524,13 @@ const moveUnit = (unitId, parentUnit, position, requestId) => {
             }
             endRequest(statusCode);
           });
-        }
-        else {
+        } else {
           endRequest(statusCode); // end early
         }
       });
     });
-  }
-}
+  };
+};
 
 const moveUnits = (units, parentUnit, position, requestId) => {
   return (dispatch) => {

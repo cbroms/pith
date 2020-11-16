@@ -12,6 +12,17 @@ const useRequest = (completedRequests) => {
 		requestId: null,
 	});
 
+	const [queue, setQueue] = useState([]);
+
+	const execute = (func) => {
+		// make some kind of request (usually dispatch an action)
+		const requestId = uuidv4();
+		// here we pass a randomly generated id to identify this request in
+		// the completedRequests array in the redux store
+		func(requestId);
+		setStatus({ made: true, pending: true, requestId: requestId });
+	};
+
 	// check if the request has completed when the props change
 	useEffect(() => {
 		if (
@@ -24,16 +35,26 @@ const useRequest = (completedRequests) => {
 				pending: false,
 				made: true,
 			});
+
+			if (queue.length > 0) {
+				// get the last first from the queue
+				execute(queue[0]);
+				const newQueue = [...queue];
+				newQueue.splice(0, 1);
+				console.log(newQueue);
+				setQueue(newQueue);
+			}
 		}
 	}, [status.pending, status.made, status.requestId, completedRequests]);
 
 	const makeRequest = (reqFunc) => {
-		// make some kind of request (usually dispatch an action)
-		const requestId = uuidv4();
-		// here we pass a randomly generated id to identify this request in
-		// the completedRequests array in the redux store
-		reqFunc(requestId);
-		setStatus({ made: true, pending: true, requestId: requestId });
+		if (!status.pending && queue.length === 0) {
+			execute(reqFunc);
+		} else {
+			const newQueue = [...queue];
+			newQueue.push(reqFunc);
+			setQueue(newQueue);
+		}
 	};
 
 	return [status, makeRequest];

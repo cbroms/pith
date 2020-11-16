@@ -161,6 +161,7 @@ const Chat = (props) => {
             openSearch={props.openSearch}
             closeSearch={props.closeSearch}
             setQuery={props.setQuery}
+            contentToAdd={props.chatTransclusionToAdd}
             unitEnter={(pos, content) => {
                 setLastPosted({ pith: content, id: uuidv4(), temporary: true });
                 props.addPost(content);

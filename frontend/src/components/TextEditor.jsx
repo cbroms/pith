@@ -16,6 +16,8 @@ class TextEditor extends React.Component {
       editedSinceChange: false,
       editable: true,
       queryStartPos: null,
+      queryEndPos: null,
+      focusedPosition: null,
     };
 
     this.onBlur = this.onBlur.bind(this);
@@ -43,13 +45,32 @@ class TextEditor extends React.Component {
     ) {
       this.setState({ html: this.props.content });
     }
+
+    // TODO: make this work for when someone tries to add two references to the same unit
+    if (
+      this.props.contentToAdd &&
+      !this.state.html.includes(this.props.contentToAdd)
+    ) {
+      // if we have a query started, add this content where the query was
+      if (this.state.queryStartPos !== null) {
+        const newContent = [
+          this.state.html.slice(0, this.state.queryStartPos),
+          this.props.contentToAdd,
+          this.state.html.slice(this.state.queryEndPos),
+        ].join("");
+        this.setState({ html: newContent });
+      }
+    }
     this.checkFocus();
 
     //TODO check for renderedContent update too
   }
 
-  checkFocus() {
-    if (this.props.focused && document.activeElement !== this.ref.current) {
+  checkFocus(force) {
+    if (
+      force ||
+      (this.props.focused && document.activeElement !== this.ref.current)
+    ) {
       // console.log(this.props.focusedPosition);
       // console.log("checking focus ");
 
@@ -59,16 +80,20 @@ class TextEditor extends React.Component {
       window.setTimeout(() => {
         // make sure we haven't *just* focused, since there's no other way to tell if we already
         // updated focus since we're using a timeout and reference (no state info here)
-        if (document.activeElement !== this.ref.current) {
+        if (document.activeElement !== this.ref.current || force) {
           //this.ref.current.focus();
           const setpos = document.createRange();
           const set = window.getSelection();
           // console.log(this.ref.current.childNodes);
 
           const focusedPosition =
-            this.props.focusedPosition !== null
+            this.state.focusedPosition !== null
+              ? this.state.focusedPosition
+              : this.props.focusedPosition !== null
               ? this.props.focusedPosition
               : getDecodedLengthOfPith(this.state.html);
+
+          console.log(focusedPosition);
           let position = focusedPosition;
           let targetNode = this.ref.current.childNodes[0] || this.ref.current;
           let lenSoFar = 0;
@@ -78,7 +103,7 @@ class TextEditor extends React.Component {
             if (lenSoFar + node.textContent.length > focusedPosition) {
               // we found the node we should be focusing in
               // now get the position within the node we should place the cursor
-              if (lenSoFar === 0) position = this.props.focusedPosition;
+              if (lenSoFar === 0) position = focusedPosition;
               else
                 position =
                   lenSoFar +
@@ -87,7 +112,7 @@ class TextEditor extends React.Component {
             }
           }
 
-          // console.log(targetNode, position);
+          console.log(targetNode, position);
 
           setpos.setStart(targetNode, position);
           setpos.collapse(true);
@@ -149,14 +174,16 @@ class TextEditor extends React.Component {
 
       // if we're in search mode, send the query
       if (this.state.queryStartPos !== null) {
-        // completely sanitize the string
-        const query = DOMPurify.sanitize(
-          this.state.html.substring(
-            this.state.queryStartPos,
-            this.state.html.length
-          ),
-          this.sanitizeCompleteConf
+        // get the end position of the search
+        const end = this.state.html.substring(
+          this.state.queryStartPos,
+          this.state.html.length
         );
+        console.log(end);
+        const queryRaw = end.substring(0, end.indexOf("&lt;"));
+        console.log(queryRaw);
+        // completely sanitize the string
+        const query = DOMPurify.sanitize(queryRaw, this.sanitizeCompleteConf);
 
         this.props.setQuery(query);
       }
@@ -290,12 +317,23 @@ class TextEditor extends React.Component {
     // shift + > for start query
     if (e.keyCode === 190 && e.shiftKey) {
       if (this.props.openSearch) {
-        // start the search
-        this.setState({
-          queryStartPos: this.state.html.includes("<br>")
-            ? this.state.html.length
-            : this.state.html.length + 4,
-        });
+        e.preventDefault();
+
+        let [caretAtStart, caretPos] = this.getCaretPosition();
+        // set the start position of the query and add the closing "<"
+        this.setState(
+          {
+            queryStartPos: caretPos + 4,
+            html:
+              this.state.html.slice(0, caretPos) +
+              "><" +
+              this.state.html.slice(caretPos),
+            focusedPosition: caretPos + 1,
+          },
+          () => {
+            this.checkFocus(true);
+          }
+        );
         this.props.openSearch();
       }
     }
@@ -323,8 +361,16 @@ class TextEditor extends React.Component {
 
       // check if the query start character has been deleted
       // add 3 to the caret pos because > is represented as &gt;
-      if (caretPos + 3 === this.state.queryStartPos) {
-        this.setState({ queryStartPos: null });
+      if (caretPos === this.state.queryStartPos) {
+        console.log(this.state.html, this.state.queryStartPos);
+        this.setState({
+          queryStartPos: null,
+          queryEndPos: null,
+          html:
+            this.state.html.slice(0, this.state.queryStartPos - 4) +
+            this.state.html.slice(this.state.queryStartPos + 4),
+        });
+        e.preventDefault();
         this.props.closeSearch();
       }
     }

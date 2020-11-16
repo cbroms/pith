@@ -24,6 +24,7 @@ import {
     createPost,
     getPage,
     sendToDoc,
+    search,
     subscribeChat,
     subscribeDocument,
 } from "../actions/discussionActions";
@@ -57,7 +58,7 @@ const Discussion = (props) => {
     const [getContextStatus, makeGetContext] = useRequest(
         props.completedRequests
     );
-
+    const [searchStatus, makeSearch] = useRequest(props.completedRequests);
     // create status vars for convenience
     const joined = joinUserStatus.made && !joinUserStatus.pending;
     const loading =
@@ -123,7 +124,13 @@ const Discussion = (props) => {
             posts={props.posts}
             openSearch={() => setChatSearchOpen(true)}
             closeSearch={() => setChatSearchOpen(false)}
-            setQuery={(query) => setQuery(query)}
+            setQuery={(query) => {
+                console.log("searching for:", query);
+                makeSearch((requestId) => {
+                    props.dispatch(search(query, requestId));
+                });
+                setQuery(query);
+            }}
             postPending={postStatus.pending}
             nickname={props.icons[props.userId]?.nickname}
             addPost={(content) => {
@@ -157,7 +164,16 @@ const Discussion = (props) => {
             gettingUnitContext={getContextStatus.pending}
         />
     );
-    const search = <Search query={query} />;
+    const searchComp = (
+        <Search
+            query={query}
+            searching={searchStatus.pending}
+            docResults={props.searchResults.doc}
+            chatResults={props.searchResults.chat}
+            docUnits={props.docMap}
+            chatUnits={props.chatMap}
+        />
+    );
     const menu = <Menu setDarkMode={props.setDarkMode} />;
 
     return (
@@ -202,7 +218,7 @@ const Discussion = (props) => {
                             chat={chat}
                             document={doc}
                             menu={menu}
-                            search={search}
+                            search={searchComp}
                             searchActive={chatSearchOpen}
                         />
                     )}
