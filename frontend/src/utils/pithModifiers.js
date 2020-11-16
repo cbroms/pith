@@ -8,4 +8,20 @@ const getDecodedLengthOfPith = (pith) => {
 	return unescape(pith).length;
 };
 
-export { getDecodedLengthOfPith };
+const addHighlight = (pith, highlight) => {
+	const ind = pith.indexOf(highlight);
+	if (ind > -1) {
+		return [
+			pith.slice(0, ind),
+			"<mark>",
+			highlight,
+			"</mark>",
+			pith.slice(ind + highlight.length),
+		].join("");
+	}
+};
+
+const createCitation = (id) => {
+	return "<cite>" + id + "</cite>&nbsp;<br>";
+};
+export { getDecodedLengthOfPith, createCitation, addHighlight };

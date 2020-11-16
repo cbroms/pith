@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 
+import { addHighlight } from "../utils/pithModifiers";
 import { splitAtLinks, parseLinks } from "../utils/parseLinks";
 
 import LinkIcon from "./LinkIcon";
@@ -11,8 +12,11 @@ import UnitLayout from "./UnitLayout";
 const Unit = (props) => {
     let pith = props.pith;
 
-    const links = parseLinks(pith);
-    const splitPith = splitAtLinks(pith);
+    const modPith = props.highlight
+        ? addHighlight(pith, props.highlight)
+        : pith;
+    const links = parseLinks(modPith);
+    const splitPith = splitAtLinks(modPith);
 
     let content = [];
 

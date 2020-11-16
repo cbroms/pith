@@ -130,6 +130,10 @@ const MoveRightChevron = styled.div`
     }
 `;
 
+const MoveDownChevron = styled(MoveRightChevron)`
+    transform: rotate(90deg);
+`;
+
 const VerticalLine = styled.div`
     box-sizing: border-box;
     position: relative;
@@ -296,6 +300,7 @@ export {
     UpChevron,
     RightDoubleChevron,
     MoveRightChevron,
+    MoveDownChevron,
     VerticalLine,
     Dot,
     DiscussionIcon,

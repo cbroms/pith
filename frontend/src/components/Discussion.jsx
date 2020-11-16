@@ -29,6 +29,8 @@ import {
     subscribeDocument,
 } from "../actions/discussionActions";
 
+import { createCitation } from "../utils/pithModifiers";
+
 import useRequest from "../hooks/useRequest";
 
 import Chat from "./Chat";
@@ -43,6 +45,7 @@ import DiscussionLayout from "./DiscussionLayout";
 const Discussion = (props) => {
     const [chatSearchOpen, setChatSearchOpen] = useState(false);
     const [subscribed, setSubscribed] = useState(false);
+    const [chatTransclusion, setChatTransclusion] = useState(null);
     const [query, setQuery] = useState("");
 
     // request hooks
@@ -100,6 +103,11 @@ const Discussion = (props) => {
             makeGetPage((requestId) =>
                 props.dispatch(getPage(props.currentUnit, requestId))
             );
+        } else if (joined && !subscribed) {
+            // fully loaded now, so we can subscribe
+            props.dispatch(subscribeChat(uuidv4()));
+            props.dispatch(subscribeDocument(uuidv4()));
+            setSubscribed(true);
         }
     });
 
@@ -145,6 +153,7 @@ const Discussion = (props) => {
                 console.log("moved:", id);
                 props.dispatch(sendToDoc(id, uuidv4()));
             }}
+            chatTransclusionToAdd={chatTransclusion}
         />
     );
 
@@ -172,6 +181,11 @@ const Discussion = (props) => {
             chatResults={props.searchResults.chat}
             docUnits={props.docMap}
             chatUnits={props.chatMap}
+            selectUnit={(id) => {
+                console.log("selected:", id);
+                setChatTransclusion(createCitation(id));
+                setChatSearchOpen(false);
+            }}
         />
     );
     const menu = <Menu setDarkMode={props.setDarkMode} />;

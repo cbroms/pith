@@ -20,6 +20,12 @@ const StyledContainer = styled.div`
 
     background-color: ${(props) =>
         props.transcludeHoverActive ? props.theme.shade2 : "inherit"};
+
+    mark {
+        padding: 0 2px;
+        background-color: ${(props) => props.theme.shade3};
+        color: ${(props) => props.theme.shade1};
+    }
 `;
 
 const StyledRefNum = styled.span`
@@ -32,7 +38,7 @@ const StyledRefNum = styled.span`
 
 const StyledContent = styled.div`
     display: inline-block;
-    width: 100%;
+    width: ${(props) => (props.transcluded ? "calc(100% - 18px)" : "100%")};
 `;
 
 const UnitLayout = (props) => {
@@ -41,7 +47,9 @@ const UnitLayout = (props) => {
             {props.transcludeNum ? (
                 <StyledRefNum>{props.transcludeNum}</StyledRefNum>
             ) : null}
-            <StyledContent>{props.content}</StyledContent>
+            <StyledContent transcluded={props.transcluded}>
+                {props.content}
+            </StyledContent>
         </StyledContainer>
     );
 };

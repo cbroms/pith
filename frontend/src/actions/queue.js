@@ -10,10 +10,10 @@ const queue = [];
 const requests = {};
 
 const execNext = () => {
-  console.log("queue", queue);
+  //console.log("queue", queue);
   if (queue.length > 0) {
     const id = queue[0];
-    console.log("executing request", id);
+    //console.log("executing request", id);
     requests[id].exec();
   }
 };
@@ -24,7 +24,7 @@ const createRequestWrapper = (actionType, dispatch, id, timeout = 5000) => {
   let elapsed = 0;
 
   const startRequest = (func) => {
-    console.log("adding request", id);
+    // console.log("adding request", id);
     // add the function to the queue
     queue.push(id);
     // add the function to the map
@@ -54,7 +54,7 @@ const createRequestWrapper = (actionType, dispatch, id, timeout = 5000) => {
   const endRequest = (statusCode) => {
     clearInterval(interval);
 
-    console.log("removing request", id);
+    //console.log("removing request", id);
 
     // remove the request from the queue
     queue.shift();

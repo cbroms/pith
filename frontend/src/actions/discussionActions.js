@@ -107,10 +107,8 @@ const joinUser = (discussionId, requestId) => {
     startRequest(() => {
       socket.emit("join", data, (res) => {
         const response = JSON.parse(res);
-        console.log("res", response);
 
         const statusCode = getStatus(response, dispatch, {});
-        console.log("join", response);
 
         if (statusCode === null) {
           // success
@@ -646,6 +644,7 @@ const editUnit = (unitId, requestId) => {
 const subscribeChat = () => {
   return (dispatch) => {
     socket.on("post", (res) => {
+      console.log("post");
       const response = JSON.parse(res);
       handlePost(response, dispatch);
     });
@@ -670,6 +669,7 @@ const subscribeDocument = () => {
     });
 
     socket.on("post", (res) => {
+      console.log("post");
       const response = JSON.parse(res);
       handleSendToDoc(response, dispatch);
     });

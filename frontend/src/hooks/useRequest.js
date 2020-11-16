@@ -12,7 +12,11 @@ const useRequest = (completedRequests) => {
 		requestId: null,
 	});
 
-	const [queue, setQueue] = useState([]);
+	// sometimes the UI will make multiple requests to the same function. In this
+	// case we want to buffer them so that we're not trying to make a bunch of the
+	// same requests at once. Here we make the assumption that the most recent request
+	// is the most pertient and we throw away all the others before the most recent.
+	const [buffer, setBuffer] = useState([]);
 
 	const execute = (func) => {
 		// make some kind of request (usually dispatch an action)
@@ -36,24 +40,30 @@ const useRequest = (completedRequests) => {
 				made: true,
 			});
 
-			if (queue.length > 0) {
-				// get the last first from the queue
-				execute(queue[0]);
-				const newQueue = [...queue];
-				newQueue.splice(0, 1);
-				console.log(newQueue);
-				setQueue(newQueue);
+			if (buffer.length > 0) {
+				// execute the last added request in the buffer
+				execute(buffer[buffer.length - 1]);
+				// reset the buffer
+				setBuffer([]);
 			}
 		}
-	}, [status.pending, status.made, status.requestId, completedRequests]);
+	}, [
+		status.pending,
+		status.made,
+		status.requestId,
+		buffer,
+		completedRequests,
+	]);
 
 	const makeRequest = (reqFunc) => {
-		if (!status.pending && queue.length === 0) {
+		if (!status.pending && buffer.length === 0) {
 			execute(reqFunc);
 		} else {
-			const newQueue = [...queue];
-			newQueue.push(reqFunc);
-			setQueue(newQueue);
+			// we're currently waiting for a request to complete, so add the request to
+			// the buffer and execute it when the first request is done
+			const newBuffer = [...buffer];
+			newBuffer.push(reqFunc);
+			setBuffer(newBuffer);
 		}
 	};
 

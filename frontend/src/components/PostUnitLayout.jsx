@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-import { MoveRightChevron } from "./Symbols";
+import { MoveRightChevron, MoveDownChevron } from "./Symbols";
 import { Button } from "./StandardUI";
 
 const StyledUnitContainer = styled.div`
@@ -15,11 +15,20 @@ const StyledUnitContainer = styled.div`
 
     color: ${(props) => (props.greyed ? props.theme.shade2 : "inherit")};
 
-    :hover {
+    ${(props) =>
+        props.down
+            ? `
         .move {
             visibility: visible;
         }
-    }
+    `
+            : `:hover {
+        .move {
+            visibility: visible;
+        }
+    }`}
+
+   // max-width: ${(props) => (props.down ? "350px" : "100%")};
 `;
 
 const StyledUnit = styled.div`
@@ -41,6 +50,7 @@ const StyledMoveButton = styled.div`
 const PostUnitLayout = (props) => {
     return (
         <StyledUnitContainer
+            down={props.down}
             greyed={props.greyed}
             transcluded={props.transcluded}
             topTransclude={props.topTransclude}
@@ -49,7 +59,7 @@ const PostUnitLayout = (props) => {
             <StyledUnit>{props.unit}</StyledUnit>
             <StyledMoveButton className="move">
                 <Button onClick={props.onMove} noBackground>
-                    <MoveRightChevron />
+                    {props.down ? <MoveDownChevron /> : <MoveRightChevron />}
                 </Button>
             </StyledMoveButton>
         </StyledUnitContainer>

@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-import * as dayjs from "dayjs";
-import * as calendar from "dayjs/plugin/calendar";
-import * as utc from "dayjs/plugin/utc";
-
+import { parseTime } from "../utils/parseTime";
 import { parseLinks } from "../utils/parseLinks";
 
 import ChatLayout from "./ChatLayout";
@@ -12,9 +9,6 @@ import PostUnitLayout from "./PostUnitLayout";
 import PostLayout from "./PostLayout";
 import Unit from "./Unit";
 import TextEditor from "./TextEditor";
-
-dayjs.extend(calendar);
-dayjs.extend(utc);
 
 const Chat = (props) => {
     const [currentlyActive, setCurrentlyActive] = useState({
@@ -69,36 +63,34 @@ const Chat = (props) => {
 
     // calculate the post times before adding the transclusions
     for (const group of postGroups) {
-        const date = dayjs(group[0].createdAt).local();
-
-        const formattedDate = dayjs(date).calendar(null, {
-            sameDay: "[Today at] h:mm a",
-            lastDay: "[Yesterday at] h:mm a",
-            lastWeek: "dddd [at] h:mm a",
-            sameElse: "MM/D/YY [at] h:mm a",
+        meta.push({
+            date: parseTime(group[0].createdAt),
+            author: group[0].author,
         });
-
-        meta.push({ date: formattedDate, author: group[0].author });
     }
 
     // add the referenced posts to the groups
     for (const i in postGroups) {
         const group = postGroups[i];
+        let totalNumAdded = 0;
         for (const j in group) {
-            const links = parseLinks(group[j].pith).reverse();
+            let adjustedInd = parseInt(j) + totalNumAdded;
+            const links = parseLinks(postGroups[i][adjustedInd].pith).reverse();
 
             for (const k in links) {
                 const link = links[k];
 
                 const obj = {
                     ...content[link],
-                    id: `${group[j].id}-${content[link].id}`,
+                    id: `${group[adjustedInd].id}-${link}`,
                     transcluded: true,
                     transcludeNum: links.length - k,
                     totalTranscluded: links.length,
                 };
-                postGroups[i].splice(j, 0, obj);
+
+                postGroups[i].splice(adjustedInd, 0, obj);
             }
+            totalNumAdded += links.length;
         }
     }
 
