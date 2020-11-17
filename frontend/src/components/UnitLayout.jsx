@@ -15,11 +15,11 @@ const StyledContainer = styled.div`
         props.transcluded
             ? !props.transcludeHoverActive
                 ? props.theme.shade2
-                : "inherit"
+                : props.theme.shade1
             : "inherit"};
 
     background-color: ${(props) =>
-        props.transcludeHoverActive ? props.theme.shade2 : "inherit"};
+        props.transcludeHoverActive ? props.theme.shade3 : "inherit"};
 
     mark {
         padding: 0 2px;
@@ -44,9 +44,9 @@ const StyledContent = styled.div`
 const UnitLayout = (props) => {
     return (
         <StyledContainer {...props}>
-            {props.transcludeNum ? (
+            {/* {props.transcludeNum ? (
                 <StyledRefNum>{props.transcludeNum}</StyledRefNum>
-            ) : null}
+            ) : null}*/}
             <StyledContent transcluded={props.transcluded}>
                 {props.content}
             </StyledContent>

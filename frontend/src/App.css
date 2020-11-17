@@ -10,9 +10,6 @@ html {
     font-size: 16px;
 }
 
-cite::before {
-    content: ">cite:";
-}
-cite::after {
-    content: "<";
-}
+/*cite::before {
+    content: "cite:";
+}*/

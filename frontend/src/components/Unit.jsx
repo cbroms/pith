@@ -20,24 +20,23 @@ const Unit = (props) => {
 
     let content = [];
 
-    if (props.charLimited) {
+    if (props.charLimited || props.transcluded) {
         // in the case that we want a short preview of the pith, reconstruct it and
         // replace links with • character
         const cleanPith = splitPith.reduce((allParts, part, i) => {
             return allParts + part + (links[i] ? " • " : " ");
         }, "");
 
-        content = [
+        content = (
             <span
                 dangerouslySetInnerHTML={{
                     __html:
-                        cleanPith.length > 140
-                            ? cleanPith.substring(0, 140) + "..."
+                        props.charLimited && cleanPith.length > 140
+                            ? cleanPith.substring(0, 137) + "..."
                             : cleanPith,
                 }}
-                key={`ref-${props.id}`}
-            />,
-        ];
+            />
+        );
     } else {
         // construct the pith parts with icons where links are
         for (const i in splitPith) {
@@ -53,7 +52,11 @@ const Unit = (props) => {
                         <LinkIcon
                             onMouseOver={() =>
                                 props.chat
-                                    ? props.linkHovered(parseInt(i) + 1)
+                                    ? props.linkHovered(
+                                          parseInt(i) +
+                                              1 +
+                                              props.transclusionStartingRef
+                                      )
                                     : null
                             }
                             onMouseOut={() =>
@@ -62,7 +65,13 @@ const Unit = (props) => {
                             data-tip
                             data-for={`ref-${props.id}-${i}`}
                             forward
-                            referenceNum={props.chat ? parseInt(i) + 1 : null}
+                            referenceNum={
+                                props.chat
+                                    ? parseInt(i) +
+                                      1 +
+                                      props.transclusionStartingRef
+                                    : null
+                            }
                         />
                         {!props.chat ? (
                             <TooltipLayout id={`ref-${props.id}-${i}`}>

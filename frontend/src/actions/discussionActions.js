@@ -340,7 +340,9 @@ const sendToDoc = (unitId, requestId) => {
 
     startRequest(() =>
       socket.emit("send_to_doc", data, (res) => {
+        console.log("send_to_doc received");
         const response = JSON.parse(res);
+        console.log(response);
         const statusCode = getStatus(response, dispatch, {});
         if (statusCode === null) {
           handleSendToDoc(response.shared, dispatch);
@@ -668,8 +670,8 @@ const subscribeDocument = () => {
       handleLoadUnitPage(response, dispatch);
     });
 
-    socket.on("post", (res) => {
-      console.log("post");
+    socket.on("send_to_doc", (res) => {
+      console.log("send_to_doc");
       const response = JSON.parse(res);
       handleSendToDoc(response, dispatch);
     });

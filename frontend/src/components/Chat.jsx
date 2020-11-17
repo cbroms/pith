@@ -77,6 +77,9 @@ const Chat = (props) => {
             let adjustedInd = parseInt(j) + totalNumAdded;
             const links = parseLinks(postGroups[i][adjustedInd].pith).reverse();
 
+            // set the unit's starting position for any references it contains
+            postGroups[i][adjustedInd].startingRef = totalNumAdded;
+
             for (const k in links) {
                 const link = links[k];
 
@@ -84,24 +87,29 @@ const Chat = (props) => {
                     ...content[link],
                     id: `${group[adjustedInd].id}-${link}`,
                     transcluded: true,
-                    transcludeNum: links.length - k,
+                    transcludeNum: links.length - k + totalNumAdded,
                     totalTranscluded: links.length,
                 };
 
                 postGroups[i].splice(adjustedInd, 0, obj);
             }
             totalNumAdded += links.length;
+            // postGroups[i][
+            //     adjustedInd + links.length
+            // ].numTransclusionsInGroup = totalNumAdded;
         }
     }
 
     const postList = postGroups.map((group, i) => {
-        const units = group.map((post) => {
+        let realPosition = 0;
+        const units = group.map((post, j) => {
             const unit = (
                 <Unit
                     chat
                     id={post.id}
                     pith={post.pith}
                     transcludeNum={post.transcludeNum}
+                    transclusionStartingRef={post.startingRef}
                     transcluded={post.transcluded}
                     transcludeHoverActive={
                         post.transcluded
@@ -110,13 +118,17 @@ const Chat = (props) => {
                             : false
                     }
                     linkHovered={(num) => {
-                        setCurrentlyActive({ id: post.id, num: num });
+                        setCurrentlyActive({
+                            id: post.id,
+                            num: num,
+                        });
                     }}
                     linkUnhovered={() => {
                         setCurrentlyActive({ id: null, num: null });
                     }}
                 />
             );
+            if (post.transcludeNum !== undefined) realPosition++;
             return (
                 <PostUnitLayout
                     greyed={post.temporary}

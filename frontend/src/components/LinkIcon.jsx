@@ -17,25 +17,32 @@ const StyledIcon = styled.div`
         position: absolute;
         width: 15px;
         height: 10px;
-        border-top: ${(props) => (props.forward ? "2px solid" : "none")};
-        border-right: ${(props) => (props.forward ? "2px solid" : "none")};
-        border-left: ${(props) => (props.backward ? "2px solid" : "none")};
-        border-bottom: ${(props) => (props.backward ? "2px solid" : "none")};
+        border-top: ${(props) => (props.forward ? "1px solid" : "none")};
+        border-right: ${(props) => (props.forward ? "1px solid" : "none")};
+        border-left: ${(props) => (props.backward ? "1px solid" : "none")};
+        border-bottom: ${(props) => (props.backward ? "1px solid" : "none")};
         right: 0;
     }
     
     color: ${(props) => props.theme.shade2};
 
     ::after {
-       padding-left: ${(props) => (props.backward ? 6 : 3)}px;
-       content: "${(props) =>
-           props.referenceNum ? props.referenceNum : "•"}"; 
+       padding-left: ${(props) => (props.backward ? 6 : 5)}px;
+      // content: "${(props) =>
+          props.referenceNum ? props.referenceNum : "•"}"; 
+      content: "•"; 
        color: ${(props) => props.theme.shade2};
     }
 
     :hover {
         cursor: pointer;
-        background-color: ${(props) => props.theme.shade2};
+        background-color: ${(props) => props.theme.shade3};
+        color: ${(props) => props.theme.shade3};
+
+        ::after {
+       
+       color: ${(props) => props.theme.shade1};
+    }
     }
 `;
 

@@ -138,13 +138,17 @@ class TextEditor extends React.Component {
               // now get the position within the node we should place the cursor
               if (lenSoFar === 0) position = focusedPosition;
               else {
-                position = lenSoFar + length - this.props.focusedPosition;
+                position = length - (lenSoFar + length - focusedPosition);
+                // add the number of citation tags to the position since we're adding the cite:
+                // decorator through css which adds to the total length so add the number of
+                // characters in the dectorator
+                // if (node.nodeName === "CITE") position += 5;
               }
               break;
             } else lenSoFar += length;
           }
 
-          console.log(targetNode, position);
+          // console.log("setting:", targetNode, position);
 
           setpos.setStart(targetNode, position);
           setpos.collapse(true);
@@ -220,8 +224,7 @@ class TextEditor extends React.Component {
           const queryRaw = end.substring(0, end.indexOf("&lt;"));
           // completely sanitize the string
           const query = DOMPurify.sanitize(queryRaw, this.sanitizeCompleteConf);
-
-          this.props.setQuery(query);
+          if (query !== "") this.props.setQuery(query);
         }, 500);
       }
     });
@@ -235,7 +238,7 @@ class TextEditor extends React.Component {
       const start = pos.endContainer;
       let startOffset = pos.endOffset;
 
-      console.log(start, startOffset);
+      // console.log("pos:", start, startOffset);
 
       // we need to ensure the string doesn't contain any encoded html entities, or else
       // the offset provided will be shorter (account for cases like ">" -> "&gt;")
@@ -252,7 +255,7 @@ class TextEditor extends React.Component {
 
         startOffset = adjustedLen;
       }
-      console.log(startOffset);
+      // console.log(startOffset);
 
       // is the comparison element in one of the element's children in pos 0?
       const isFirstChild = (comp, elt) => {
@@ -276,11 +279,6 @@ class TextEditor extends React.Component {
             : curr.nodeName.length + 2;
         offset += tagNameOffset;
 
-        // return the offset when we get to the top level element
-        if (curr.parentElement?.innerHTML === this.state.html) {
-          return offset;
-        }
-
         // sum the lengths of the children before the current elt in the list
         if (curr.parentElement !== null) {
           for (const pChild of curr.parentElement.childNodes) {
@@ -302,6 +300,11 @@ class TextEditor extends React.Component {
           return 0;
         }
 
+        // return the offset when we get to the top level element
+        if (curr.parentElement?.innerHTML === this.state.html) {
+          return offset;
+        }
+
         // add the offsets of the parent's children up to the current elt
         return getOffset(curr.parentElement, offset);
       };
@@ -312,7 +315,7 @@ class TextEditor extends React.Component {
 
       // console.log("offset:", offset);
       // console.log(this.state.html.substring(0, offset));
-      console.log([isAtStart, offset]);
+      // console.log([isAtStart, offset]);
       return [isAtStart, offset];
     }
     return null;
@@ -357,20 +360,42 @@ class TextEditor extends React.Component {
         e.preventDefault();
 
         let [caretAtStart, caretPos] = this.getCaretPosition();
+
+        // in the case that the caret is on a space, remove the space first, then add
+        // the content, then place the space back afterward
+        if (
+          this.state.html.substring(caretPos - 1, caretPos + 5) === "&nbsp;"
+        ) {
+          this.setState(
+            {
+              queryStartPos: caretPos + 3,
+              html:
+                this.state.html.slice(0, caretPos - 1) +
+                "><" +
+                this.state.html.slice(caretPos - 1),
+              focusedPosition: caretPos,
+            },
+            () => {
+              this.checkFocus(true);
+            }
+          );
+        } else {
+          this.setState(
+            {
+              queryStartPos: caretPos + 4,
+              html:
+                this.state.html.slice(0, caretPos) +
+                "><" +
+                this.state.html.slice(caretPos),
+              focusedPosition: caretPos + 1,
+            },
+            () => {
+              this.checkFocus(true);
+            }
+          );
+        }
         // set the start position of the query and add the closing "<"
-        this.setState(
-          {
-            queryStartPos: caretPos + 4,
-            html:
-              this.state.html.slice(0, caretPos) +
-              "><" +
-              this.state.html.slice(caretPos),
-            focusedPosition: caretPos + 1,
-          },
-          () => {
-            this.checkFocus(true);
-          }
-        );
+
         this.props.openSearch();
       }
     }
@@ -399,10 +424,8 @@ class TextEditor extends React.Component {
       // check if the query start character has been deleted
       // add 3 to the caret pos because > is represented as &gt;
       if (caretPos === this.state.queryStartPos) {
-        console.log(this.state.html, this.state.queryStartPos);
         this.setState({
           queryStartPos: null,
-          queryEndPos: null,
           html:
             this.state.html.slice(0, this.state.queryStartPos - 4) +
             this.state.html.slice(this.state.queryStartPos + 4),
@@ -445,7 +468,11 @@ class TextEditor extends React.Component {
         onKeyDown={this.handleKeyDown}
         makeSubmit={() => {
           this.props.unitEnter(this.getCaretPosition()[1], this.state.html);
-          this.setState({ html: "" });
+          this.setState({
+            html: "",
+            addedTransclusions: {},
+            focusedPosition: null,
+          });
         }}
       />
     );

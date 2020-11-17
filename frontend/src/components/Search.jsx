@@ -47,7 +47,7 @@ const Search = (props) => {
 			) : results?.length > 0 ? (
 				results
 			) : (
-				<Paragraph>No results!</Paragraph>
+				<Paragraph>No results.</Paragraph>
 			)}
 		</SearchLayout>
 	);
