@@ -187,7 +187,12 @@ const Chat = (props) => {
     );
 
     const scroller = (
-        <ChatScroller numPosts={posts.length}>{postList}</ChatScroller>
+        <ChatScroller
+            numPosts={posts.length}
+            tempPost={props.posts.length !== posts.length}
+        >
+            {postList}
+        </ChatScroller>
     );
     return (
         <ChatLayout

@@ -71,7 +71,7 @@ class ChatScroller extends React.Component {
 			// we're at the bottom of the scrollbar, so adjust the height to account for the new post
 			const scrollElt = this.listRef.current;
 			scrollElt.scrollTop = scrollElt.scrollHeight - snapshot;
-		} else if (snapshot === -1) {
+		} else if (snapshot === -1 && !this.props.tempPost) {
 			this.setState({ numMissed: this.state.numMissed + 1 });
 		}
 	}
