@@ -235,6 +235,16 @@ added_unit
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/added_unit.json
 
+sent_to_doc
+=====================================
+
+.. jsonschema:: ../../backend/src/schema/discussion/responses/sent_to_doc.json
+
+merged_units
+=====================================
+
+.. jsonschema:: ../../backend/src/schema/discussion/responses/merged_units.json
+
 chat_meta
 =====================================
 

@@ -24,8 +24,8 @@ class DiscussionManagerTest(unittest.TestCase):
         gm.start()
 
         # restart mongo collections!
-        # Discussion.objects().delete()
-        # Unit.objects().delete()
+        Discussion.objects().delete()
+        Unit.objects().delete()
 
         self.discussion_manager = gm.discussion_manager
         self.board_manager = gm.board_manager
@@ -37,7 +37,7 @@ class DiscussionManagerTest(unittest.TestCase):
         res1 = checker(self.discussion_manager, discussion_id=discussion_id)
         res2 = checker(self.discussion_manager, discussion_id="...")
         self.assertTrue(res1 is None)
-        self.assertEqual(res2["error"], Errors.BAD_DISCUSSION_ID)
+        self.assertEqual(res2, Errors.BAD_DISCUSSION_ID)
 
     def test__check_unit_id(self) -> None:
         discussion_id = self.board_manager.create()["discussion_id"]
@@ -46,7 +46,7 @@ class DiscussionManagerTest(unittest.TestCase):
         res1 = checker(self.discussion_manager, unit_id=discussion.document)
         res2 = checker(self.discussion_manager, unit_id="...")
         self.assertTrue(res1 is None)
-        self.assertEqual(res2["error"], Errors.BAD_UNIT_ID)
+        self.assertEqual(res2, Errors.BAD_UNIT_ID)
 
     def test_create_user(self) -> None:
         nickname = "whales"
@@ -59,13 +59,13 @@ class DiscussionManagerTest(unittest.TestCase):
         res2 = checker(self.discussion_manager, 
           discussion_id=discussion_id, user_id="...")
         self.assertTrue(res1 is None)
-        self.assertEqual(res2["error"], Errors.BAD_USER_ID)
+        self.assertEqual(res2, Errors.BAD_USER_ID)
         res = self.discussion_manager.create_user(
           discussion_id=discussion_id, nickname=nickname)
-        self.assertEqual(res["error"], Errors.NICKNAME_EXISTS)
+        self.assertEqual(res, Errors.NICKNAME_EXISTS)
         res = self.discussion_manager.create_user(
           discussion_id=discussion_id, nickname="monkey", user_id=user_id)
-        self.assertEqual(res["error"], Errors.USER_ID_EXISTS)
+        self.assertEqual(res, Errors.USER_ID_EXISTS)
         user_id2_ = "blahblah"
         user_id2 = self.discussion_manager.create_user(
           discussion_id=discussion_id, nickname="monkey", user_id=user_id2_)[0]["user_id"]
@@ -114,62 +114,62 @@ class DiscussionManagerTest(unittest.TestCase):
         # can request if no one has lock
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
-        )[1][0]   
-        self.assertEqual(res["unit_id"], unit_id) # works
+        )[1][0]
+        self.assertTrue(isinstance(res, list))
         # cannot request if another has it
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
         )   
-        self.assertEqual(res["error"], Errors.FAILED_EDIT_ACQUIRE) # fails
+        self.assertEqual(res, Errors.FAILED_EDIT_ACQUIRE) # fails
         # cannot re-request
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
         )        
-        self.assertEqual(res["error"], Errors.FAILED_EDIT_ACQUIRE) # fails
+        self.assertEqual(res, Errors.FAILED_EDIT_ACQUIRE) # fails
 
         # hide that doesn't work
         res = self.discussion_manager.hide_unit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id)
-        self.assertEqual(res["error"], Errors.BAD_EDIT_TRY)
+        self.assertEqual(res, Errors.BAD_EDIT_TRY)
         # lock is not released 
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
         )        
-        self.assertEqual(res["error"], Errors.FAILED_EDIT_ACQUIRE) # fails
+        self.assertEqual(res, Errors.FAILED_EDIT_ACQUIRE) # fails
         # hide that works
-        hide_res = self.discussion_manager.hide_unit(
+        res = self.discussion_manager.hide_unit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id)[1][0]
-        self.assertEqual(hide_res["unit_id"], unit_id)
+        self.assertTrue(isinstance(res, list))
 
         # lock is released 
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
-        )[1][0] 
-        self.assertEqual(res["unit_id"], unit_id) # works
+        )[1][0]
+        self.assertTrue(isinstance(res, list))
 
         # edit that doesn't work
         res = self.discussion_manager.edit_unit(
           discussion_id=discussion_id, user_id=user_id1, 
           unit_id=unit_id, pith="blahblah"
         )
-        self.assertEqual(res["error"], Errors.BAD_EDIT_TRY)
+        self.assertEqual(res, Errors.BAD_EDIT_TRY)
         # lock is not released 
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
         )        
-        self.assertEqual(res["error"], Errors.FAILED_EDIT_ACQUIRE) # fails
+        self.assertEqual(res, Errors.FAILED_EDIT_ACQUIRE) # fails
         # edit that works
-        edited = self.discussion_manager.edit_unit(
+        res = self.discussion_manager.edit_unit(
           discussion_id=discussion_id, user_id=user_id2, 
           unit_id=unit_id, pith="blahblah"
         )[1][0]
-        self.assertEqual(edited["unit_id"], unit_id)
+        self.assertTrue(isinstance(res, list))
 
         # lock is released 
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
         )[1][0]   
-        self.assertEqual(res["unit_id"], unit_id) # works
+        self.assertTrue(isinstance(res, list)) # works
         # edit lock is held, and this makes no difference to position lock...
         
         #### position lock ####
@@ -177,62 +177,62 @@ class DiscussionManagerTest(unittest.TestCase):
         # can request if no one has lock
         res = self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
-        )[1][0][0] 
-        self.assertEqual(res["unit_id"], unit_id) # works
+        )[1][0]
+        self.assertTrue(isinstance(res, list))
         # cannot request if another has it
         res = self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
         )        
-        self.assertEqual(res["error"], Errors.FAILED_POSITION_ACQUIRE) # fails
+        self.assertEqual(res, Errors.FAILED_POSITION_ACQUIRE) # fails
         # cannot re-request
         res = self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
         )        
-        self.assertEqual(res["error"], Errors.FAILED_POSITION_ACQUIRE) # fails
+        self.assertEqual(res, Errors.FAILED_POSITION_ACQUIRE) # fails
 
         # move that doesn't work
         res = self.discussion_manager.move_units(
           discussion_id=discussion_id, user_id=user_id2, units=[unit_id],
           parent=root, position=0)
-        self.assertEqual(res["error"], Errors.BAD_POSITION_TRY)
+        self.assertEqual(res, Errors.BAD_POSITION_TRY)
         # lock not released
         res = self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
         )        
-        self.assertEqual(res["error"], Errors.FAILED_POSITION_ACQUIRE) # fails
+        self.assertEqual(res, Errors.FAILED_POSITION_ACQUIRE) # fails
         # move that works
         res = self.discussion_manager.move_units(
           discussion_id=discussion_id, user_id=user_id1, units=[unit_id],
           parent=root, position=0)[1][0]
-        self.assertEqual(res[0]["unit_id"], unit_id)
+        self.assertTrue(isinstance(res, list))
 
         # now can request lock
         res = self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
-        )[1][0][0]
-        self.assertEqual(res["unit_id"], unit_id) # works
+        )[1][0]
+        self.assertTrue(isinstance(res, list))
 
         # merge that doesn't work
         res = self.discussion_manager.merge_units(
           discussion_id=discussion_id, user_id=user_id1, units=[unit_id],
           parent=root, position=0)
-        self.assertEqual(res["error"], Errors.BAD_POSITION_TRY)
+        self.assertEqual(res, Errors.BAD_POSITION_TRY)
         # lock not released
         res = self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
         )        
-        self.assertEqual(res["error"], Errors.FAILED_POSITION_ACQUIRE) # fails
+        self.assertEqual(res, Errors.FAILED_POSITION_ACQUIRE) # fails
         # merge that works
-        repos = self.discussion_manager.merge_units(
+        res = self.discussion_manager.merge_units(
           discussion_id=discussion_id, user_id=user_id2, units=[unit_id],
           parent=root, position=0)[1][0]
-        self.assertEqual(repos[0]["unit_id"], unit_id)
+        self.assertTrue(isinstance(res, dict))
 
         # now can request lock
         res = self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
-        )[1][0][0]  
-        self.assertEqual(res["unit_id"], unit_id) # works
+        )[1][0]
+        self.assertTrue(isinstance(res, list))
 
         self.discussion_manager.leave(
           discussion_id=discussion_id, user_id=user_id1)
@@ -287,17 +287,15 @@ class DiscussionManagerTest(unittest.TestCase):
         nickname = "whales"
         user_id = self.discussion_manager.create_user(
           discussion_id=discussion_id, nickname=nickname)[0]["user_id"]
-        self.discussion_manager.join(
-          discussion_id=discussion_id, user_id=user_id)
+        res = self.discussion_manager.join(
+          discussion_id=discussion_id, user_id=user_id)[0]
+        self.assertFalse(res is None)
         added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="yaddi", parent=root, position=0
         )[1][0]
         unit_id = added["unit_id"]
 
-        res = self.discussion_manager.load_user(discussion_id=discussion_id,
-          user_id=user_id)[0]
-        self.assertFalse(res is None)
         res = self.discussion_manager.load_unit_page(discussion_id=discussion_id,
           user_id=user_id, unit_id=unit_id)[0]
         self.assertFalse(res is None)
@@ -351,12 +349,8 @@ class DiscussionManagerTest(unittest.TestCase):
         nickname = "whales"
         user_id = self.discussion_manager.create_user(
           discussion_id=discussion_id, nickname=nickname)[0]["user_id"]
-        self.discussion_manager.join(
-          discussion_id=discussion_id, user_id=user_id)
-
-        res = self.discussion_manager.load_user(
-          discussion_id=discussion_id, user_id=user_id
-        )[0]
+        res = self.discussion_manager.join(
+          discussion_id=discussion_id, user_id=user_id)[0]
         self.assertEqual(len(res["timeline"]), 0)
 
         # make tree of units
@@ -417,11 +411,8 @@ class DiscussionManagerTest(unittest.TestCase):
 
         self.discussion_manager.leave(
           discussion_id=discussion_id, user_id=user_id)
-        self.discussion_manager.join(
-          discussion_id=discussion_id, user_id=user_id)
-        res = self.discussion_manager.load_user(
-          discussion_id=discussion_id, user_id=user_id
-        )[0]
+        res = self.discussion_manager.join(
+          discussion_id=discussion_id, user_id=user_id)[0]
         self.assertEqual(res["timeline"][:-1], timeline) # don't include most recently made (from leave)
         self.assertEqual(res["timeline"][-1]["unit_id"], unit_id5) # we got last one
         self.assertEqual(res["current_unit"], unit_id5)
@@ -506,9 +497,9 @@ class DiscussionManagerTest(unittest.TestCase):
 
         res = self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id5
-        )[0]
-        self.assertEqual(res["cursor"].unit_id, unit_id5)
-        self.assertEqual(res["cursor"].position, -1)
+        )[1][0]
+        self.assertEqual(res["cursor"]["unit_id"], unit_id5)
+        self.assertEqual(res["cursor"]["position"], -1)
 
         """
         1 -> [4, 5 -> [2, 3]]
@@ -521,11 +512,10 @@ class DiscussionManagerTest(unittest.TestCase):
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id3
         )
         # perform the move
-        res = self.discussion_manager.move_units(
+        self.discussion_manager.move_units(
           discussion_id=discussion_id, user_id=user_id, units=[unit_id2, unit_id3],
           parent = unit_id5, position = 0
-        )[1][0]
-        self.assertEqual(len(res), 2)
+        )
         # check tree structure
         """
         1 -> [4, 5 -> [2, 3]]
@@ -534,10 +524,10 @@ class DiscussionManagerTest(unittest.TestCase):
         parent1 = self.discussion_manager._get_unit(unit_id1).get().parent
         children1 = self.discussion_manager._get_unit(unit_id1).get().children
         parent2 = self.discussion_manager._get_unit(unit_id2).get().parent
-        position2 = res[0]["position"]
+        position2 = self.discussion_manager._get_position(parent2, unit_id2)
         children2 = self.discussion_manager._get_unit(unit_id2).get().children
         parent3 = self.discussion_manager._get_unit(unit_id3).get().parent
-        position3 = res[1]["position"]
+        position3 = self.discussion_manager._get_position(parent3, unit_id3)
         children3 = self.discussion_manager._get_unit(unit_id3).get().children
         parent4 = self.discussion_manager._get_unit(unit_id4).get().parent
         children4 = self.discussion_manager._get_unit(unit_id4).get().children
@@ -573,14 +563,11 @@ class DiscussionManagerTest(unittest.TestCase):
         )
 
         # perform the merge
-        res = self.discussion_manager.merge_units(
+        added = self.discussion_manager.merge_units(
           discussion_id=discussion_id, user_id=user_id, units=[unit_id2, unit_id4],
           parent=unit_id3, position=0
-        )[1]
-        moved = res[0]
-        added = res[1]
+        )[1][0]
         unit_id6 = added["unit_id"]
-        self.assertEqual(len(moved), 2)
         # check tree structure
         """
         1 -> [5 -> [3 -> [6 -> [2, 4]]]]
@@ -589,12 +576,12 @@ class DiscussionManagerTest(unittest.TestCase):
         parent1 = self.discussion_manager._get_unit(unit_id1).get().parent
         children1 = self.discussion_manager._get_unit(unit_id1).get().children
         parent2 = self.discussion_manager._get_unit(unit_id2).get().parent
-        position2 = moved[0]["position"]
+        position2 = self.discussion_manager._get_position(parent2, unit_id2)
         children2 = self.discussion_manager._get_unit(unit_id2).get().children
         parent3 = self.discussion_manager._get_unit(unit_id3).get().parent
         children3 = self.discussion_manager._get_unit(unit_id3).get().children
         parent4 = self.discussion_manager._get_unit(unit_id4).get().parent
-        position4 = moved[1]["position"]
+        position4 = self.discussion_manager._get_position(parent4, unit_id4)
         children4 = self.discussion_manager._get_unit(unit_id4).get().children
         parent5 = self.discussion_manager._get_unit(unit_id5).get().parent
         children5 = self.discussion_manager._get_unit(unit_id5).get().children
@@ -622,9 +609,9 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertEqual(len(children2), 0)
         self.assertEqual(len(children4), 0)
 
-        res = self.discussion_manager.load_unit_page(
+        self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4
-        )[0]
+        )
 
         """
         1 -> [7 -> [2, 5 -> [3 -> 6 -> [4]]]]
@@ -641,15 +628,15 @@ class DiscussionManagerTest(unittest.TestCase):
           discussion_id=discussion_id, user_id=user_id, units=[unit_id2, unit_id5],
           parent=unit_id4, position=0
         )
-        self.assertEqual(res["error"], Errors.BAD_PARENT)
+        self.assertEqual(res, Errors.BAD_PARENT)
         # perform the legal merge
-        res = self.discussion_manager.load_unit_page(
+        self.discussion_manager.load_unit_page(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id1
-        )[0]
+        )
         added = self.discussion_manager.merge_units(
           discussion_id=discussion_id, user_id=user_id, units=[unit_id2, unit_id5],
           parent=unit_id1, position=0
-        )[1][1]
+        )[1][0]
         unit_id7 = added["unit_id"]
         # check tree structure
         """
@@ -659,14 +646,14 @@ class DiscussionManagerTest(unittest.TestCase):
         parent1 = self.discussion_manager._get_unit(unit_id1).get().parent
         children1 = self.discussion_manager._get_unit(unit_id1).get().children
         parent2 = self.discussion_manager._get_unit(unit_id2).get().parent
-        position2 = moved[0]["position"]
+        position2 = self.discussion_manager._get_position(parent2, unit_id2)
         children2 = self.discussion_manager._get_unit(unit_id2).get().children
         parent3 = self.discussion_manager._get_unit(unit_id3).get().parent
         children3 = self.discussion_manager._get_unit(unit_id3).get().children
         parent4 = self.discussion_manager._get_unit(unit_id4).get().parent
         children4 = self.discussion_manager._get_unit(unit_id4).get().children
         parent5 = self.discussion_manager._get_unit(unit_id5).get().parent
-        position5 = moved[1]["position"]
+        position5 = self.discussion_manager._get_position(parent5, unit_id5)
         children5 = self.discussion_manager._get_unit(unit_id5).get().children
         parent6 = self.discussion_manager._get_unit(unit_id6).get().parent
         children6 = self.discussion_manager._get_unit(unit_id6).get().children
@@ -720,12 +707,11 @@ class DiscussionManagerTest(unittest.TestCase):
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4
         )
         # do a move flatten 
-        res = self.discussion_manager.move_units(
+        self.discussion_manager.move_units(
           discussion_id=discussion_id, user_id=user_id, units=[
             unit_id2, unit_id3, unit_id4, unit_id5, unit_id6, unit_id7
           ], parent=unit_id1, position=0
-        )[1][0]
-        self.assertEqual(len(res), 6)
+        )
         # check tree structure
         """
         1 -> [2, 3, 4, 5, 6, 7]
@@ -734,22 +720,22 @@ class DiscussionManagerTest(unittest.TestCase):
         parent1 = self.discussion_manager._get_unit(unit_id1).get().parent
         children1 = self.discussion_manager._get_unit(unit_id1).get().children
         parent2 = self.discussion_manager._get_unit(unit_id2).get().parent
-        position2 = res[0]["position"]
+        position2 = self.discussion_manager._get_position(parent2, unit_id2)
         children2 = self.discussion_manager._get_unit(unit_id2).get().children
         parent3 = self.discussion_manager._get_unit(unit_id3).get().parent
-        position3 = res[1]["position"]
+        position3 = self.discussion_manager._get_position(parent3, unit_id3)
         children3 = self.discussion_manager._get_unit(unit_id3).get().children
         parent4 = self.discussion_manager._get_unit(unit_id4).get().parent
-        position4 = res[2]["position"]
+        position4 = self.discussion_manager._get_position(parent4, unit_id4)
         children4 = self.discussion_manager._get_unit(unit_id4).get().children
         parent5 = self.discussion_manager._get_unit(unit_id5).get().parent
-        position5 = res[3]["position"]
+        position5 = self.discussion_manager._get_position(parent5, unit_id5)
         children5 = self.discussion_manager._get_unit(unit_id5).get().children
         parent6 = self.discussion_manager._get_unit(unit_id6).get().parent
-        position6 = res[4]["position"]
+        position6 = self.discussion_manager._get_position(parent6, unit_id6)
         children6 = self.discussion_manager._get_unit(unit_id6).get().children
         parent7 = self.discussion_manager._get_unit(unit_id7).get().parent
-        position7 = res[5]["position"]
+        position7 = self.discussion_manager._get_position(parent7, unit_id7)
         children7 = self.discussion_manager._get_unit(unit_id7).get().children
 
         self.assertTrue(unit_id1 in children_root)
@@ -771,9 +757,9 @@ class DiscussionManagerTest(unittest.TestCase):
         self.assertEqual(len(children6), 0)
         self.assertEqual(len(children7), 0)
 
-        res = self.discussion_manager.move_cursor(
+        self.discussion_manager.move_cursor(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id7, position=0
-        )[1][0]
+        )
 
         user = discussion.get().users.filter(id=user_id).get()
         self.assertEqual(user.cursor.unit_id, unit_id7)
@@ -788,8 +774,8 @@ class DiscussionManagerTest(unittest.TestCase):
           discussion_id=discussion_id, user_id=user_id)[1][0]
 
         # we are where we left off
-        self.assertEqual(res["cursor"].unit_id, unit_id7)
-        self.assertEqual(res["cursor"].position, 0)
+        self.assertEqual(res["cursor"]["unit_id"], unit_id7)
+        self.assertEqual(res["cursor"]["position"], 0)
 
         self.discussion_manager.leave(
           discussion_id=discussion_id, user_id=user_id)

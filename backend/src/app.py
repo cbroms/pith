@@ -30,14 +30,16 @@ async def on_create(sid, request):
     :return: :ref:`bres_created-label`
     :errors: BAD_RESPONSE 
     """
-    result = await gm.discussion_manager.create()
+    product = await gm.board_manager.create()
 
-    if not is_error(result):
+    if not is_error(product):
       try:
-        validate(instance=result, schema=bres.created)
-        serialized = dumps(result, cls=DictEncoder)
+        validate(instance=product, schema=bres.created)
+        serialized = dumps(product, cls=DictEncoder)
       except ValidationError:
         serialized = make_error(Errors.BAD_RESPONSE)
+    else:
+      serialized = make_error(product)
     return serialized
 
 class DiscussionNamespace(AsyncNamespace):
@@ -358,7 +360,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["doc_meta", "chat_meta"], emit_name="send_to_doc")
+    @_process_responses(emits=["sent_to_doc", "doc_meta", "chat_meta"], emit_name="send_to_doc")
     @_validate_request("send_to_doc")
     @_check_user_session
     async def on_send_to_doc(self, sid, request):
@@ -525,16 +527,18 @@ class DiscussionNamespace(AsyncNamespace):
         position = request["position"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
+        user_id = session["user_id"]
 
         result = gm.discussion_manager.move_units(
           discussion_id=discussion_id, 
+          user_id=user_id,
           units=units,
           parent=parent,
           position=position
         )
         return result
 
-    @_process_responses(emits=["doc_meta"], emit_name="merge_units")
+    @_process_responses(emits=["merged_units", "doc_meta"], emit_name="merge_units")
     @_validate_request("merge_units")
     @_check_user_session
     async def on_merge_units(self, sid, request): 
@@ -550,9 +554,11 @@ class DiscussionNamespace(AsyncNamespace):
         position = request["position"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
+        user_id = session["user_id"]
 
         result = gm.discussion_manager.merge_units(
           discussion_id=discussion_id, 
+          user_id=user_id,
           units=units,
           parent=parent,
           position=position

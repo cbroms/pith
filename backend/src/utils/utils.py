@@ -53,7 +53,8 @@ sys.excepthook = exception_handler
 def is_error(src): # TODO should be dict
   if src is None:
     return False
-  return "error" in src
+  return isinstance(src, Errors) 
+  #return "error" in src
 
 def make_error(err):
   exp = {

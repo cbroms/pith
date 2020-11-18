@@ -511,10 +511,10 @@ class DiscussionManager:
         doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
         chat_meta = [self._chat_meta(discussion_id, id) for id in list(set(chat_meta_ids))]
 
-        post = {
+        response = {
           "unit_id": unit_id,
         }
-        return None, [post, doc_meta, chat_meta]
+        return None, [response, doc_meta, chat_meta]
 
     @_check_discussion_id
     def search(self, discussion_id, query):
@@ -602,10 +602,11 @@ class DiscussionManager:
           )
           doc_meta_ids.append(f)
 
+        response = {"unit_id": unit_id}
         doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
         chat_meta = [self._chat_meta(discussion_id, id) for id in list(set(chat_meta_ids))]
         
-        return None, [doc_meta, chat_meta]
+        return None, [response, doc_meta, chat_meta]
 
     @_check_discussion_id
     @_check_user_id
@@ -729,10 +730,11 @@ class DiscussionManager:
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
+    @_check_user_id
     @_check_units
     @_verify_positions_privilege
     @_verify_parent
-    def move_units(self, discussion_id, units, parent, position):
+    def move_units(self, discussion_id, user_id, units, parent, position):
         """
           Releases position lock.
           Removes each of the units from old parent and puts under new parent.
@@ -761,16 +763,17 @@ class DiscussionManager:
           self._release_position(unit_id)
         doc_meta_ids.append(parent)
 
-        doc_meta = [self._doc_meta(id) for id in list(set(doc_meta_ids))]
+        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
       
         return None, [doc_meta]
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
+    @_check_user_id
     @_check_units
     @_verify_positions_privilege
     @_verify_parent
-    def merge_units(self, discussion_id, units, parent, position):
+    def merge_units(self, discussion_id, user_id, units, parent, position):
         """
           Releases position lock.
           Removes each of the units from old parent and puts under new parent.
@@ -778,17 +781,21 @@ class DiscussionManager:
         added_unit_response = self.add_unit(
           discussion_id=discussion_id, pith="", 
           parent=parent, position=position
-        )[1][0] 
+        )[1] 
         added_unit = added_unit_response[0]
         doc_meta = added_unit_response[1]
-        doc_meta2 = self.move_units(discussion_id=discussion_id, units=units, 
-          parent=added_unit["unit_id"], position=0) # put at head
+        unit_id = added_unit["unit_id"]
+
+        move_units_response = self.move_units(discussion_id=discussion_id, user_id=user_id, units=units, 
+          parent=unit_id, position=0)[1] # put at head
+        doc_meta2 = move_units_response[0]
 
         # get most up-to-date information
-        doc_meta_ids = [d["unit_id"] for d in doc_meta+doc_meta2]
-        doc_meta = [self._doc_meta(id) for id in list(set(doc_meta_ids))]
+        doc_meta_ids = [d["unit_id"] for d in doc_meta + doc_meta2]
+        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
+        response = {"unit_id": unit_id}
 
-        return None, [doc_meta]
+        return None, [response, doc_meta]
 
     @_check_discussion_id
     @_check_user_id
@@ -852,7 +859,7 @@ class DiscussionManager:
         doc_meta_ids.append(unit_id)
 
         # backward links added/removed
-        for b in removed_links + added_links:
+        for b in removed_links.union(added_links):
           unit = self._get_unit(b)
           if unit.get().in_chat:
             chat_meta_ids.append(b)
