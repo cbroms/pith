@@ -47,7 +47,6 @@ const discussionReducer = (state = defaultState, action) => {
         timeline: action.payload.timeline,
         posts: action.payload.chatHistory,
       };
-      break;
     }
     case LOAD_UNIT_PAGE_FULFILLED: {
       const timeline = [...state.timeline];
@@ -61,7 +60,6 @@ const discussionReducer = (state = defaultState, action) => {
         documentTree: action.payload.children,
         backlinkTree: action.payload.backlinks,
       };
-      break;
     }
     case SEARCH_FULFILLED: {
       const searchResults = { ...state.searchResults };
@@ -72,7 +70,6 @@ const discussionReducer = (state = defaultState, action) => {
         requestTimeout: false,
         searchResults: searchResults,
       };
-      break;
     }
     case CHAT_MAP: {
       const chatMap = { ...state.chatMap };
@@ -80,7 +77,6 @@ const discussionReducer = (state = defaultState, action) => {
         ...state,
         chatMap: Object.assign(chatMap, action.payload.chatMapAdd),
       };
-      break;
     }
     case DOC_MAP: {
       const docMap = { ...state.docMap };
@@ -88,7 +84,6 @@ const discussionReducer = (state = defaultState, action) => {
         ...state,
         docMap: Object.assign(docMap, action.payload.docMapAdd),
       };
-      break;
     }
     case SET_CURSOR: {
       const icons = { ...state.icons };
@@ -97,7 +92,6 @@ const discussionReducer = (state = defaultState, action) => {
         ...state,
         icons: icons,
       };
-      break;
     }
     case LEFT_USER: {
       const icons = { ...state.icons };
@@ -106,7 +100,6 @@ const discussionReducer = (state = defaultState, action) => {
         ...state,
         icons: icons,
       };
-      break;
     }
     case CREATED_POST: {
       const posts = [...state.posts];
@@ -115,14 +108,12 @@ const discussionReducer = (state = defaultState, action) => {
         ...state,
         posts: posts,
       };
-      break;
     }
     case SYSTEM_ERROR: {
       return {
         ...state,
         systemError: true,
       };
-      break;
     }
     case COMPLETE_REQUEST: {
       const completedRequests = { ...state.completedRequests };
@@ -131,21 +122,18 @@ const discussionReducer = (state = defaultState, action) => {
         ...state,
         completedRequests: completedRequests,
       };
-      break;
     }
     case REQUEST_TIMEOUT: {
       return {
         ...state,
         requestTimeout: true,
       };
-      break;
     }
     case RESET_REQUEST_TIMEOUT: {
       return {
         ...state,
         requestTimeout: false,
       };
-      break;
     }
     default: {
       return { ...state };

@@ -1,6 +1,6 @@
 import { socket } from "./socket";
 import { getValue, setValue } from "../api/local";
-import { cleanUpRequest, createRequestWrapper } from "./queue";
+import { createRequestWrapper } from "./queue";
 
 import {
   getStatus,
@@ -13,12 +13,7 @@ import {
 } from "./utils";
 
 import {
-  INVALID_USER_SESSION,
-  BAD_REQUEST,
-  BAD_RESPONSE,
   BAD_DISCUSSION_ID,
-  BAD_USER_ID,
-  BAD_UNIT_ID,
   BAD_POSITION,
   BAD_EDIT_TRY,
   BAD_POSITION_TRY,
@@ -30,7 +25,6 @@ import {
 } from "./errors";
 
 import {
-  GENERIC_ERROR,
   INVALID_DISCUSSION,
   NO_USER_ID,
   TAKEN_NICKNAME,
