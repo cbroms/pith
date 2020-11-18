@@ -36,6 +36,9 @@ const RightArrow = styled(UpArrow)`
     transform: rotate(90deg);
 `;
 
+const DownArrow = styled(UpArrow)`
+    transform: rotate(180deg);
+`;
 const DownChevron = styled.div`
     box-sizing: border-box;
     position: relative;
@@ -295,6 +298,7 @@ const CloseIcon = styled.div`
 export {
     UpArrow,
     RightArrow,
+    DownArrow,
     DownChevron,
     RightChevron,
     UpChevron,

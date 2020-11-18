@@ -330,7 +330,8 @@ class TextEditor extends React.Component {
         // we expect unitEnter to return true if we should reset the editor content
         const res = this.props.unitEnter(
           this.getCaretPosition()[1],
-          this.state.html
+          this.state.html,
+          DOMPurify.sanitize(this.state.html, this.sanitizeCompleteConf)
         );
         if (res) {
           this.setState({ html: res, editedSinceChange: true });

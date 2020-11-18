@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { parseTime } from "../utils/parseTime";
 import { parseLinks } from "../utils/parseLinks";
+
+import ChatScroller from "./ChatScroller";
 
 import ChatLayout from "./ChatLayout";
 import PostUnitLayout from "./PostUnitLayout";
@@ -17,26 +19,31 @@ const Chat = (props) => {
     });
 
     const [lastPosted, setLastPosted] = useState({});
+    const [postContent, setPostContent] = useState({
+        posts: props.posts,
+        content: props.content,
+    });
+
+    let { content, posts } = postContent;
 
     const postGroups = [];
-    let posts = [...props.posts];
-    let content = { ...props.content };
 
-    // if a post is pending, add it to the list of posts
-    if (props.postPending && !posts.includes(lastPosted.id)) {
-        const tempPost = {
-            ...lastPosted,
-            author: props.nickname || "you",
-            createdAt: new Date().toISOString(),
-        };
-        content[lastPosted.id] = tempPost;
-        posts.push(lastPosted.id);
-    } else if (posts.includes(lastPosted.id)) {
-        // TODO: keep the objects the same, just replace the id of the temporary
-        // post with the acutal id provided by the backend
-        posts = [...props.posts];
-        content = { ...props.content };
-    }
+    useEffect(() => {
+        if (props.postPending && !posts.includes(lastPosted.id)) {
+            // if a post is pending, add the temporary post to the list of posts
+            const newContent = { ...content };
+            newContent[lastPosted.id] = lastPosted;
+            const newPosts = [...posts];
+            newPosts.push(lastPosted.id);
+            setPostContent({ posts: newPosts, content: newContent });
+        } else if (!props.postPending && posts.includes(lastPosted.id)) {
+            setPostContent({ posts: props.posts, content: props.content });
+        } else {
+            // TODO: rather than copy props to state, switch which we render depending on if we're
+            // loading or not
+            setPostContent({ posts: props.posts, content: props.content });
+        }
+    }, [props.posts, props.content, props.postPending]);
 
     for (const i in posts) {
         const post = { ...content[posts[i]], id: posts[i] };
@@ -167,15 +174,28 @@ const Chat = (props) => {
             setQuery={props.setQuery}
             contentToAdd={props.chatTransclusionToAdd}
             unitEnter={(pos, content) => {
-                setLastPosted({ pith: content, id: uuidv4(), temporary: true });
+                setLastPosted({
+                    pith: content,
+                    id: uuidv4(),
+                    temporary: true,
+                    author: props.nickname || "you",
+                    createdAt: new Date().toISOString(),
+                });
                 props.addPost(content);
             }}
         />
     );
+
+    const scroller = (
+        <ChatScroller numPosts={posts.length}>{postList}</ChatScroller>
+    );
     return (
-        <ChatLayout loading={props.loading} editor={editor}>
-            {postList}
-        </ChatLayout>
+        <ChatLayout
+            empty={postList.length === 0}
+            loading={props.loading}
+            editor={editor}
+            scroller={scroller}
+        />
     );
 };
 
