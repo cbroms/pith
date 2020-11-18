@@ -31,6 +31,13 @@ class DiscussionManagerTest(unittest.TestCase):
         self.board_manager = gm.board_manager
         self.log = logging.getLogger("DiscussionManagerTest")
 
+    def test_extract_pith(self) -> None:
+      res = self.discussion_manager._retrieve_links(
+        "<cite>tears</cite> Something seems to be alright <cite>happy</cite>."
+        " Everything is good <cite>fine</cite>."
+      )
+      self.assertEqual(res, ["tears", "happy", "fine"])
+
     def test__check_discussion_id(self) -> None:
         discussion_id = self.board_manager.create()["discussion_id"]
         checker = DiscussionManager._check_discussion_id(nothing)
@@ -780,13 +787,6 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.leave(
           discussion_id=discussion_id, user_id=user_id)
 
-    def test_extract_pith(self) -> None:
-      res = self.discussion_manager._retrieve_links(
-        "<cite>tears</cite> Something seems to be alright <cite>happy</cite>."
-        " Everything is good <cite>fine</cite>."
-      )
-      self.assertEqual(res, ["tears", "happy", "fine"])
-
     def test_hiding(self) -> None:
         discussion_id = self.board_manager.create()["discussion_id"]
         discussion = self.discussion_manager._get(discussion_id)
@@ -849,8 +849,8 @@ class DiscussionManagerTest(unittest.TestCase):
         1
         2 -> 1
         """
-        res = self.discussion_manager.post(discussion_id=discussion_id, 
-          user_id=user_id, pith="<cite>{}</cite>".format(unit_id1))[1][0]
+        res = self.discussion_manager.add_unit(discussion_id=discussion_id, 
+          pith="<cite>{}</cite>".format(unit_id1), parent=root, position=0)[1][0]
         unit_id2 = res["unit_id"]
 
         forward1 = self.discussion_manager._get_unit(unit_id1).get().forward_links
@@ -904,10 +904,14 @@ class DiscussionManagerTest(unittest.TestCase):
         1
         2 -> 1
         3 -> 1, 2
-        4(2 -> 1)
+        4(X -> 1)
+        X -> 1
         """
+        res = self.discussion_manager.post(discussion_id=discussion_id, 
+          user_id=user_id, pith="<cite>{}</cite>".format(unit_id1))[1][0]
+        unit_idx = res["unit_id"]
         res = self.discussion_manager.send_to_doc(discussion_id=discussion_id,
-          user_id=user_id, unit_id=unit_id2)[1][0] 
+          user_id=user_id, unit_id=unit_idx)[1][0] 
         unit_id4 = res["unit_id"]
 
         forward1 = self.discussion_manager._get_unit(unit_id1).get().forward_links
@@ -920,13 +924,14 @@ class DiscussionManagerTest(unittest.TestCase):
         backward4 = self.discussion_manager._get_unit(unit_id4).get().backward_links
         source4 = self.discussion_manager._get_unit(unit_id4).get().source_unit_id
 
-        self.assertEqual(source4, unit_id2)
+        self.assertEqual(source4, unit_idx)
 
         self.assertEqual(len(forward1), 0)
-        self.assertEqual(len(backward1), 3)
+        self.assertEqual(len(backward1), 4)
         self.assertTrue(unit_id2 in backward1)
         self.assertTrue(unit_id3 in backward1)
         self.assertTrue(unit_id4 in backward1)
+        self.assertTrue(unit_idx in backward1)
 
         self.assertEqual(len(forward2), 1)
         self.assertTrue(unit_id1 in forward2)
@@ -947,6 +952,7 @@ class DiscussionManagerTest(unittest.TestCase):
         2 -> 1
         3 -> 1, 2
         4 -> 2, 3
+        X -> 1
         """
         self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4
@@ -966,12 +972,13 @@ class DiscussionManagerTest(unittest.TestCase):
         backward4 = self.discussion_manager._get_unit(unit_id4).get().backward_links
         source4 = self.discussion_manager._get_unit(unit_id4).get().source_unit_id
 
-        self.assertEqual(source4, unit_id2)
+        self.assertEqual(source4, unit_idx)
 
         self.assertEqual(len(forward1), 0)
-        self.assertEqual(len(backward1), 2)
+        self.assertEqual(len(backward1), 3)
         self.assertTrue(unit_id2 in backward1)
         self.assertTrue(unit_id3 in backward1)
+        self.assertTrue(unit_idx in backward1)
 
         self.assertEqual(len(forward2), 1)
         self.assertTrue(unit_id1 in forward2)
@@ -995,6 +1002,7 @@ class DiscussionManagerTest(unittest.TestCase):
         2 -> 1
         3 -> 2, 4
         4 -> 2, 3
+        X -> 1
         """
         self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id3
@@ -1013,11 +1021,12 @@ class DiscussionManagerTest(unittest.TestCase):
         forward4 = self.discussion_manager._get_unit(unit_id4).get().forward_links
         backward4 = self.discussion_manager._get_unit(unit_id4).get().backward_links
 
-        self.assertEqual(source4, unit_id2)
+        self.assertEqual(source4, unit_idx)
 
         self.assertEqual(len(forward1), 0)
-        self.assertEqual(len(backward1), 1)
+        self.assertEqual(len(backward1), 2)
         self.assertTrue(unit_id2 in backward1)
+        self.assertTrue(unit_idx in backward1)
 
         self.assertEqual(len(forward2), 1)
         self.assertTrue(unit_id1 in forward2)
@@ -1039,6 +1048,73 @@ class DiscussionManagerTest(unittest.TestCase):
 
         self.discussion_manager.leave(
           discussion_id=discussion_id, user_id=user_id)
+
+    def test_chat_references(self) -> None:
+        discussion_id = self.board_manager.create()["discussion_id"]
+        discussion = self.discussion_manager._get(discussion_id)
+        root = discussion.get().document
+
+        nickname = "whales"
+        user_id = self.discussion_manager.create_user(
+          discussion_id=discussion_id, nickname=nickname)[0]["user_id"]
+        self.discussion_manager.join(
+          discussion_id=discussion_id, user_id=user_id)
+
+        res = self.discussion_manager.post(discussion_id=discussion_id, 
+          user_id=user_id, pith="blahblah")[1][0]
+        unit_id1 = res["unit_id"]
+
+        res = self.discussion_manager.add_unit(
+          discussion_id=discussion_id, 
+          pith="referencing <cite>{}</cite>".format(unit_id1), parent=root, position=0
+        )
+        self.assertEqual(res, Errors.INVALID_REFERENCE)
+
+        added = self.discussion_manager.add_unit(
+          discussion_id=discussion_id, 
+          pith="referencing null", parent=root, position=1
+        )[1][0]
+        unit_id2 = added["unit_id"]
+
+        self.discussion_manager.request_to_edit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id2
+        )
+        res = self.discussion_manager.edit_unit(
+          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id2,
+          pith="referencing <cite>{}</cite>".format(unit_id1)
+        )
+        self.assertEqual(res, Errors.INVALID_REFERENCE)
+
+        self.discussion_manager.leave(
+          discussion_id=discussion_id, user_id=user_id)
+       
+    def test_remove_chat_links(self) -> None:
+        discussion_id = self.board_manager.create()["discussion_id"]
+        discussion = self.discussion_manager._get(discussion_id)
+        root = discussion.get().document
+
+        nickname = "whales"
+        user_id = self.discussion_manager.create_user(
+          discussion_id=discussion_id, nickname=nickname)[0]["user_id"]
+        self.discussion_manager.join(
+          discussion_id=discussion_id, user_id=user_id)
+
+        res = self.discussion_manager.post(discussion_id=discussion_id, 
+          user_id=user_id, pith="blahblah")[1][0]
+        unit_id1 = res["unit_id"]
+
+        res = self.discussion_manager.post(discussion_id=discussion_id, 
+          user_id=user_id, pith="yaddiyaddiyah")[1][0]
+        unit_id2 = res["unit_id"]
+
+        pith = "I am some text <cite>{}</cite> and more text <cite>{}</cite> and yet more text <cite>{}</cite>".format(unit_id1, unit_id2, unit_id1)
+        new_pith = self.discussion_manager._remove_chat_links(pith)
+        expected = "I am some text <cite></cite> and more text <cite></cite> and yet more text <cite></cite>"
+        self.assertEqual(new_pith, expected)
+
+        self.discussion_manager.leave(
+          discussion_id=discussion_id, user_id=user_id)
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

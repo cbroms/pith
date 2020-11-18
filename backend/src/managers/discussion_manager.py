@@ -72,7 +72,23 @@ class DiscussionManager:
         unit.update(position_privilege=None)
 
     def _retrieve_links(self, pith):
-      return constants.link_pattern.findall(pith)
+      return constants.LINK_PATTERN.findall(pith)
+
+    def _contains_chat_link(self, links):
+      for unit_id in links:
+          unit = self._get_unit(unit_id).get()
+          if unit.in_chat:
+            return True
+      return False
+
+    def _remove_chat_links(self, pith):
+      links = self._retrieve_links(pith)
+      chat_links = [unit_id for unit_id in links \
+        if self._get_unit(unit_id).get().in_chat]
+      formatted = set([constants.LINK_WRAPPER.format(c) for c in chat_links])
+      for f in formatted:
+        pith = pith.replace(f, constants.DEAD_LINK)
+      return pith
 
     def _get_position(self, parent, unit_id):
       children = self._get_unit(parent).get().children
@@ -106,6 +122,14 @@ class DiscussionManager:
       }
       return response
 
+    def _chat_metas(self, discussion_id, chat_meta_ids):
+        chat_meta = [self._chat_meta(discussion_id, id) for id in list(set(chat_meta_ids))]
+        return chat_meta
+
+    def _doc_metas(self, discussion_id, doc_meta_ids):
+        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
+        return doc_meta
+
     """
     Verification functions. Require specific arguments in most cases.
     args should only contain self. Other arguments should be in kwargs so they are queryable.
@@ -122,7 +146,7 @@ class DiscussionManager:
           #Discussion.objects.get(id=discussion_id)
           return func(self, **kwargs)
         except DoesNotExist:
-          return Errors.BAD_DISCUSSION_ID # utils.make_error(Errors.BAD_DISCUSSION_ID)
+          return Errors.BAD_DISCUSSION_ID
       return helper
           
     def _check_user_id(func):
@@ -135,7 +159,7 @@ class DiscussionManager:
         user_id = kwargs["user_id"]
         discussion = self._get(discussion_id)
         if len(discussion.filter(users__id=user_id)) == 0:
-          return Errors.BAD_USER_ID # utils.make_error(Errors.BAD_USER_ID)
+          return Errors.BAD_USER_ID
         else:
           return func(self, **kwargs)
       return helper
@@ -150,7 +174,7 @@ class DiscussionManager:
           Unit.objects.get(id=unit_id)
           return func(self, **kwargs)
         except DoesNotExist:
-          return Errors.BAD_UNIT_ID #utils.make_error(Errors.BAD_UNIT_ID)
+          return Errors.BAD_UNIT_ID
       return helper 
 
     def _check_units(func):
@@ -164,7 +188,7 @@ class DiscussionManager:
             Unit.objects.get(id=unit_id)
           return func(self, **kwargs)
         except DoesNotExist:
-          return  Errors.BAD_UNIT_ID #utils.make_error(Errors.BAD_UNIT_ID)
+          return  Errors.BAD_UNIT_ID
       return helper 
 
     def _verify_position(func):
@@ -177,7 +201,7 @@ class DiscussionManager:
         position = kwargs["position"]
         unit = self._get_unit(unit_id).get()
         if position > len(unit.children) or position < -1:
-          return Errors.BAD_POSITION #utils.make_error(Errors.BAD_POSITION)
+          return Errors.BAD_POSITION
         else: 
           return func(self, **kwargs)
       return helper
@@ -192,7 +216,7 @@ class DiscussionManager:
         user_id = kwargs["user_id"]
         unit = self._get_unit(unit_id).get()
         if unit.edit_privilege != user_id:
-          return Errors.BAD_EDIT_TRY #utils.make_error(Errors.BAD_EDIT_TRY)
+          return Errors.BAD_EDIT_TRY
         else:
           return func(self, **kwargs)
       return helper
@@ -208,7 +232,7 @@ class DiscussionManager:
         for unit_id in units:
           unit = self._get_unit(unit_id).get()
           if unit.position_privilege != user_id:
-            return Errors.BAD_POSITION_TRY #utils.make_error(Errors.BAD_POSITION_TRY)
+            return Errors.BAD_POSITION_TRY
         return func(self, **kwargs)
       return helper
 
@@ -226,16 +250,16 @@ class DiscussionManager:
         try:
           Unit.objects.get(id=parent)
         except DoesNotExist:
-          return Errors.BAD_UNIT_ID #utils.make_error(Errors.BAD_UNIT_ID)
+          return Errors.BAD_UNIT_ID
 
         parent_ptr = self._get_unit(parent)
         if position > len(parent_ptr.get().children) or position < 0: # fixed
-          return Errors.BAD_POSITION #utils.make_error(Errors.BAD_POSITION)
+          return Errors.BAD_POSITION 
 
         ancestors = self._get_ancestors(parent)
         inter = set(ancestors).intersection(set(units))
         if len(inter) > 0:
-          return Errors.BAD_PARENT #utils.make_error(Errors.BAD_PARENT)
+          return Errors.BAD_PARENT 
         else:
           return func(self, **kwargs)
       return helper
@@ -249,16 +273,16 @@ class DiscussionManager:
           self._get(discussion_id).get()
           return None, None
         except DoesNotExist:
-          return Errors.BAD_DISCUSSION_ID #utils.make_error(Errors.BAD_DISCUSSION_ID)
+          return Errors.BAD_DISCUSSION_ID 
 
     @_check_discussion_id
     def create_user(self, discussion_id, nickname, user_id=None):
         discussion = self._get(discussion_id)
         if len(discussion.filter(users__name=nickname)) > 0:
-          return Errors.NICKNAME_EXISTS #utils.make_error(Errors.NICKNAME_EXISTS)
+          return Errors.NICKNAME_EXISTS 
         if user_id is not None:
           if len(discussion.filter(users__id=user_id)) > 0:
-            return Errors.USER_ID_EXISTS #utils.make_error(Errors.USER_ID_EXISTS)
+            return Errors.USER_ID_EXISTS 
 
         unit_id = discussion.get().document
         cursor = Cursor(unit_id=unit_id, position=-1) 
@@ -313,8 +337,8 @@ class DiscussionManager:
           unit = self._get_unit(u).get()
           chat_meta_ids.append(u)
 
-        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
-        chat_meta = [self._chat_meta(discussion_id, id) for id in list(set(chat_meta_ids))]
+        doc_meta = self._doc_metas(discussion_id, doc_meta_ids)
+        chat_meta = self._chat_metas(discussion_id, chat_meta_ids)
 
         response = {
           "nickname": user.name,
@@ -419,7 +443,7 @@ class DiscussionManager:
         for a in ancestors:
           doc_meta_ids.append(a)
 
-        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
+        doc_meta = self._doc_metas(discussion_id, doc_meta_ids)
 
         response = {
           "ancestors": ancestors,
@@ -443,7 +467,7 @@ class DiscussionManager:
         for a in ancestors:
           doc_meta_ids.append(a)
 
-        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
+        doc_meta = self._doc_metas(discussion_id, doc_meta_ids)
 
         response = {
           "ancestors": ancestors,
@@ -464,6 +488,9 @@ class DiscussionManager:
     @_check_discussion_id
     @_check_unit_id
     def get_unit_context(self, discussion_id, unit_id):
+        """
+        Make sure the unit is in the document.
+        """
         response = self._doc_meta(discussion_id, unit_id)
         return response, None
 
@@ -508,8 +535,8 @@ class DiscussionManager:
           else:
             doc_meta_ids.append(f)
 
-        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
-        chat_meta = [self._chat_meta(discussion_id, id) for id in list(set(chat_meta_ids))]
+        doc_meta = self._doc_metas(discussion_id, doc_meta_ids)
+        chat_meta = self._chat_metas(discussion_id, chat_meta_ids)
 
         response = {
           "unit_id": unit_id,
@@ -541,8 +568,8 @@ class DiscussionManager:
             doc.append(entry)
             doc_meta_ids.append(unit_id)
 
-        chat_meta = [self._chat_meta(discussion_id, id) for id in list(set(chat_meta_ids))]
-        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
+        chat_meta = self._chat_metas(discussion_id, chat_meta_ids)
+        doc_meta = self._doc_metas(discussion_id, doc_meta_ids)
 
         response = {
           "chat_units": chat,
@@ -568,14 +595,18 @@ class DiscussionManager:
 
         position = user.cursor.position if user.cursor.position != -1 else \
           len(self._get_unit(user.cursor.unit_id).get().children)
-        forward_links = chat_unit.forward_links
         parent_id = user.cursor.unit_id
+
+        # remove chat links
+        pith = self._remove_chat_links(chat_unit.pith)
+        forward_links = self._retrieve_links(pith)
+
         unit = Unit(
           pith=chat_unit.pith,
           forward_links=forward_links,
           parent=parent_id,
           source_unit_id=unit_id, # from chat
-          original_pith=chat_unit.pith
+          original_pith=chat_unit.pith,
         )
         unit.save()
         unit_id = unit.id
@@ -603,8 +634,8 @@ class DiscussionManager:
           doc_meta_ids.append(f)
 
         response = {"unit_id": unit_id}
-        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
-        chat_meta = [self._chat_meta(discussion_id, id) for id in list(set(chat_meta_ids))]
+        doc_meta = self._doc_metas(discussion_id, doc_meta_ids)
+        chat_meta = self._chat_metas(discussion_id, chat_meta_ids)
         
         return None, [response, doc_meta, chat_meta]
 
@@ -641,7 +672,7 @@ class DiscussionManager:
         
         self._release_edit(unit_id)
 
-        doc_meta = [self._doc_meta(discussion_id, unit_id)]
+        doc_meta = self._doc_metas(discussion_id, [unit_id])
         return None, [doc_meta]
         
     @_check_discussion_id
@@ -650,7 +681,7 @@ class DiscussionManager:
         unit = self._get_unit(unit_id)
         unit.update(hidden=False)
         
-        doc_meta = [self._doc_meta(discussion_id, unit_id)]
+        doc_meta = self._doc_metas(discussion_id, [unit_id])
         return None, [doc_meta]
 
     # TODO: MULTIPLE MONGO OPERATIONS
@@ -661,6 +692,8 @@ class DiscussionManager:
           Releases edit lock.
         """
         forward_links = self._retrieve_links(pith)
+        if self._contains_chat_link(forward_links):
+          return Errors.INVALID_REFERENCE
 
         unit = Unit(
           pith=pith,
@@ -698,8 +731,8 @@ class DiscussionManager:
             doc_meta_ids.append(f)
 
         response = {"unit_id": unit_id}
-        doc_meta = [self._doc_meta(discussion_id, id) for id in doc_meta_ids]
-        chat_meta = [self._chat_meta(discussion_id, id) for id in chat_meta_ids]
+        doc_meta = self._doc_metas(discussion_id, doc_meta_ids)
+        chat_meta = self._chat_metas(discussion_id, chat_meta_ids)
 
         return None, [response, doc_meta, chat_meta]
 
@@ -713,10 +746,10 @@ class DiscussionManager:
         """
         unit = self._get_unit(unit_id) 
         if unit.get().position_privilege is not None: 
-          return Errors.FAILED_POSITION_ACQUIRE #utils.make_error(Errors.FAILED_POSITION_ACQUIRE)
+          return Errors.FAILED_POSITION_ACQUIRE 
         unit.update(position_privilege=user_id)
 
-        doc_meta = [self._doc_meta(discussion_id, unit_id)]
+        doc_meta = self._doc_metas(discussion_id, [unit_id])
         return None, [doc_meta]
 
     @_check_discussion_id
@@ -725,7 +758,7 @@ class DiscussionManager:
     @_verify_positions_privilege
     def deselect_unit(self, discussion_id, user_id, unit_id):
         self._release_position(unit_id)
-        doc_meta = [self._doc_meta(discussion_id, unit_id)]
+        doc_meta = self._doc_metas(discussion_id, [unit_id])
         return None, [doc_meta]
 
     # TODO: MULTIPLE MONGO OPERATIONS
@@ -763,7 +796,7 @@ class DiscussionManager:
           self._release_position(unit_id)
         doc_meta_ids.append(parent)
 
-        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
+        doc_meta = self._doc_metas(discussion_id, doc_meta_ids)
       
         return None, [doc_meta]
 
@@ -792,7 +825,8 @@ class DiscussionManager:
 
         # get most up-to-date information
         doc_meta_ids = [d["unit_id"] for d in doc_meta + doc_meta2]
-        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
+        doc_meta = self._doc_metas(discussion_id, doc_meta_ids)
+
         response = {"unit_id": unit_id}
 
         return None, [response, doc_meta]
@@ -804,13 +838,12 @@ class DiscussionManager:
         """
           Takes edit lock.
         """
-        discussion = self._get(discussion_id)
         unit = self._get_unit(unit_id) 
         if unit.get().edit_privilege is not None: 
-          return Errors.FAILED_EDIT_ACQUIRE #utils.make_error(Errors.FAILED_EDIT_ACQUIRE)
+          return Errors.FAILED_EDIT_ACQUIRE
         unit.update(edit_privilege=user_id)
 
-        doc_meta = [self._doc_meta(discussion, unit_id)]
+        doc_meta = self._doc_metas(discussion_id, [unit_id])
         return None, [doc_meta]
 
     @_check_discussion_id
@@ -818,9 +851,8 @@ class DiscussionManager:
     @_check_unit_id
     @_verify_edit_privilege
     def deedit_unit(self, discussion_id, user_id, unit_id):
-        discussion = self._get(discussion_id)
         self._release_edit(unit_id)
-        doc_meta = [self._doc_meta(discussion, unit_id)]
+        doc_meta = self._doc_metas(discussion_id, [unit_id])
         return None, [doc_meta]
 
     # TODO: MULTIPLE MONGO OPERATIONS
@@ -832,9 +864,13 @@ class DiscussionManager:
         """
           Releases edit lock.
         """
+        forward_links = self._retrieve_links(pith)
+        if self._contains_chat_link(forward_links):
+          return Errors.INVALID_REFERENCE
+
         unit = self._get_unit(unit_id) 
         old_forward_links = unit.get().forward_links
-        forward_links = self._retrieve_links(pith)
+
         unit.update(
           pith=pith, 
           forward_links=forward_links,
@@ -866,7 +902,7 @@ class DiscussionManager:
           else:
             doc_meta_ids.append(b)
 
-        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
-        chat_meta = [self._chat_meta(discussion_id, id) for id in list(set(chat_meta_ids))]
+        doc_meta = self._doc_metas(discussion_id, doc_meta_ids)
+        chat_meta = self._chat_metas(discussion_id, chat_meta_ids)
 
         return None, [doc_meta, chat_meta]

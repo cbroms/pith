@@ -1,10 +1,11 @@
-import { GENERIC_ERROR, SYSTEM_ERROR } from "../utils/errors";
+import { GENERIC_ERROR } from "../utils/errors";
+import { SYSTEM_ERROR } from "./types";
 
 const getStatus = (response, dispatch, errorMap) => {
   let statusCode = null;
   if (Object.keys(response).includes("error")) {
     const errorStamp = response.error;
-    console.log("error", errorStamp);
+    console.log("error", response._id, errorStamp);
     for (const key in errorMap) {
       if (errorStamp === parseInt(key)) {
         statusCode = errorMap[key];
@@ -12,6 +13,7 @@ const getStatus = (response, dispatch, errorMap) => {
       }
     }
     if (statusCode === null) {
+      // INVALID_REFERENCE, among others
       statusCode = GENERIC_ERROR;
       dispatch({
         type: SYSTEM_ERROR,

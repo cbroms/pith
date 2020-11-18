@@ -2,6 +2,7 @@
 export const CREATE_DISCUSSION = "CREATE_DISCUSSION";
 
 // discussion
+export const SYSTEM_ERROR = "SYSTEM_ERROR";
 export const TEST_CONNECT = "TEST_CONNECT";
 export const CREATE_USER = "CREATE_USER";
 export const JOIN_USER = "JOIN_USER";

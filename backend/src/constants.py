@@ -34,4 +34,6 @@ MONGODB_NAME = os.getenv("MONGODB_NAME", "pith")
 LOG_FILENAME = "app_log"
 
 # compiled searcher for link pattern
-link_pattern = re.compile(r"<cite>([^<]*)<\/cite>")
+LINK_PATTERN = re.compile(r"<cite>([^<]*)<\/cite>")
+LINK_WRAPPER = "<cite>{}</cite>"
+DEAD_LINK = "<cite></cite>"

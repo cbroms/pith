@@ -1,5 +1,4 @@
 export const GENERIC_ERROR = "GENERIC_ERROR";
-export const SYSTEM_ERROR = "SYSTEM_ERROR";
 // test connect
 export const INVALID_DISCUSSION = "INVALID_DISCUSSION";
 // create user

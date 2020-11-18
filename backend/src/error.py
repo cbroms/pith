@@ -71,3 +71,8 @@ class Errors(enum.Enum):
   """
   Given ID for user already is in use in discussion.
   """
+
+  INVALID_REFERENCE = -15
+  """
+  A document unit cannot reference a chat unit.
+  """

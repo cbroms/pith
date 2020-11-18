@@ -12,3 +12,4 @@ export const FAILED_EDIT_ACQUIRE = -11;
 export const FAILED_POSITION_ACQUIRE = -12;
 export const NICKNAME_EXISTS = -13;
 export const USER_ID_EXISTS = -14;
+export const INVALID_REFERENCE = -15;
