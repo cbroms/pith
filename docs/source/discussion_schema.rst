@@ -230,6 +230,11 @@ set_cursor
 
 .. jsonschema:: ../../backend/src/schema/discussion/responses/set_cursor.json
 
+added_unit
+=====================================
+
+.. jsonschema:: ../../backend/src/schema/discussion/responses/added_unit.json
+
 chat_meta
 =====================================
 

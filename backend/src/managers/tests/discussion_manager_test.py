@@ -24,8 +24,8 @@ class DiscussionManagerTest(unittest.TestCase):
         gm.start()
 
         # restart mongo collections!
-        Discussion.objects().delete()
-        Unit.objects().delete()
+        # Discussion.objects().delete()
+        # Unit.objects().delete()
 
         self.discussion_manager = gm.discussion_manager
         self.board_manager = gm.board_manager

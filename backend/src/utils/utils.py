@@ -50,7 +50,7 @@ def exception_handler(type, value, tb):
   logger.exception(str(value))
 sys.excepthook = exception_handler
 
-def is_error(src):
+def is_error(src): # TODO should be dict
   if src is None:
     return False
   return "error" in src

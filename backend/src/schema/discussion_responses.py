@@ -16,6 +16,7 @@ schema_names = [
   "created_post",
   "search",
   "set_cursor",
+  "added_unit",
   "doc_meta",
   "chat_meta"
 ]

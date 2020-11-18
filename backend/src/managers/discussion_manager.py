@@ -6,13 +6,6 @@ Many of the unit functions have no need of the discussion information.
 from datetime import datetime
 import logging
 from mongoengine import DoesNotExist
-from typing import (
-  Any,
-  Dict,
-  List,
-  Optional,
-  Tuple,
-)
 
 import constants
 from error import Errors
@@ -113,39 +106,6 @@ class DiscussionManager:
       }
       return response
 
-    # TODO: MULTIPLE MONGO OPERATIONS
-    def _move_units(self, discussion_id, user_id, units, parent_id, position):
-        discussion = self._get(discussion_id)
-        user = discussion.get().users.filter(id=user_id).get()
-        parent = self._get_unit(parent_id)
-
-        doc_meta_ids = []
-
-        # remove from old
-        for unit_id in units:
-          unit = self._get_unit(unit_id)
-          old_parent = unit.get().parent
-          self._get_unit(old_parent).update(
-            pull__children=unit_id
-          )
-          # TODO don't need to add unit to doc_meta
-          doc_meta_ids.append(old_parent)
-
-        # add to new
-        key = "push__children__{}".format(position)
-        parent.update(**{key: units})
-        for unit_id in units:
-          unit = self._get_unit(unit_id)
-          unit.update(
-            set__parent=parent_id,
-          )
-          self._release_position(unit_id)
-        doc_meta_ids.append(parent_id)
-
-        doc_meta = [self._doc_meta(id) for id in list(set(doc_meta_ids))]
-      
-        return doc_meta
-
     """
     Verification functions. Require specific arguments in most cases.
     args should only contain self. Other arguments should be in kwargs so they are queryable.
@@ -162,7 +122,7 @@ class DiscussionManager:
           #Discussion.objects.get(id=discussion_id)
           return func(self, **kwargs)
         except DoesNotExist:
-          return utils.make_error(Errors.BAD_DISCUSSION_ID)
+          return Errors.BAD_DISCUSSION_ID # utils.make_error(Errors.BAD_DISCUSSION_ID)
       return helper
           
     def _check_user_id(func):
@@ -175,7 +135,7 @@ class DiscussionManager:
         user_id = kwargs["user_id"]
         discussion = self._get(discussion_id)
         if len(discussion.filter(users__id=user_id)) == 0:
-          return utils.make_error(Errors.BAD_USER_ID)
+          return Errors.BAD_USER_ID # utils.make_error(Errors.BAD_USER_ID)
         else:
           return func(self, **kwargs)
       return helper
@@ -190,7 +150,7 @@ class DiscussionManager:
           Unit.objects.get(id=unit_id)
           return func(self, **kwargs)
         except DoesNotExist:
-          return utils.make_error(Errors.BAD_UNIT_ID)
+          return Errors.BAD_UNIT_ID #utils.make_error(Errors.BAD_UNIT_ID)
       return helper 
 
     def _check_units(func):
@@ -204,7 +164,7 @@ class DiscussionManager:
             Unit.objects.get(id=unit_id)
           return func(self, **kwargs)
         except DoesNotExist:
-          return utils.make_error(Errors.BAD_UNIT_ID)
+          return  Errors.BAD_UNIT_ID #utils.make_error(Errors.BAD_UNIT_ID)
       return helper 
 
     def _verify_position(func):
@@ -217,7 +177,7 @@ class DiscussionManager:
         position = kwargs["position"]
         unit = self._get_unit(unit_id).get()
         if position > len(unit.children) or position < -1:
-          return utils.make_error(Errors.BAD_POSITION)
+          return Errors.BAD_POSITION #utils.make_error(Errors.BAD_POSITION)
         else: 
           return func(self, **kwargs)
       return helper
@@ -232,7 +192,7 @@ class DiscussionManager:
         user_id = kwargs["user_id"]
         unit = self._get_unit(unit_id).get()
         if unit.edit_privilege != user_id:
-          return utils.make_error(Errors.BAD_EDIT_TRY)
+          return Errors.BAD_EDIT_TRY #utils.make_error(Errors.BAD_EDIT_TRY)
         else:
           return func(self, **kwargs)
       return helper
@@ -248,7 +208,7 @@ class DiscussionManager:
         for unit_id in units:
           unit = self._get_unit(unit_id).get()
           if unit.position_privilege != user_id:
-            return utils.make_error(Errors.BAD_POSITION_TRY)
+            return Errors.BAD_POSITION_TRY #utils.make_error(Errors.BAD_POSITION_TRY)
         return func(self, **kwargs)
       return helper
 
@@ -256,30 +216,26 @@ class DiscussionManager:
       """
       Check parent and position are valid.
       If any of the units are the potential parent or ancestors of the parent, the parent is invalid.
-      NOTE: Requires _check_user_id _check_units on units. 
+      NOTE: Requires _check_units on units. 
       """
       def helper(self, **kwargs):
-        discussion_id = kwargs["discussion_id"]
-        user_id = kwargs["user_id"]
         units = kwargs["units"]
         parent = kwargs["parent"]
         position = kwargs["position"]
-        discussion = self._get(discussion_id)
-        user = discussion.get().users.filter(id=user_id).get()
 
         try:
           Unit.objects.get(id=parent)
         except DoesNotExist:
-          return utils.make_error(Errors.BAD_UNIT_ID)
+          return Errors.BAD_UNIT_ID #utils.make_error(Errors.BAD_UNIT_ID)
 
         parent_ptr = self._get_unit(parent)
         if position > len(parent_ptr.get().children) or position < 0: # fixed
-          return utils.make_error(Errors.BAD_POSITION)
+          return Errors.BAD_POSITION #utils.make_error(Errors.BAD_POSITION)
 
         ancestors = self._get_ancestors(parent)
         inter = set(ancestors).intersection(set(units))
         if len(inter) > 0:
-          return utils.make_error(Errors.BAD_PARENT)
+          return Errors.BAD_PARENT #utils.make_error(Errors.BAD_PARENT)
         else:
           return func(self, **kwargs)
       return helper
@@ -293,16 +249,16 @@ class DiscussionManager:
           self._get(discussion_id).get()
           return None, None
         except DoesNotExist:
-          return utils.make_error(Errors.BAD_DISCUSSION_ID)
+          return Errors.BAD_DISCUSSION_ID #utils.make_error(Errors.BAD_DISCUSSION_ID)
 
     @_check_discussion_id
     def create_user(self, discussion_id, nickname, user_id=None):
         discussion = self._get(discussion_id)
         if len(discussion.filter(users__name=nickname)) > 0:
-          return utils.make_error(Errors.NICKNAME_EXISTS)
+          return Errors.NICKNAME_EXISTS #utils.make_error(Errors.NICKNAME_EXISTS)
         if user_id is not None:
           if len(discussion.filter(users__id=user_id)) > 0:
-            return utils.make_error(Errors.USER_ID_EXISTS)
+            return Errors.USER_ID_EXISTS #utils.make_error(Errors.USER_ID_EXISTS)
 
         unit_id = discussion.get().document
         cursor = Cursor(unit_id=unit_id, position=-1) 
@@ -487,7 +443,7 @@ class DiscussionManager:
         for a in ancestors:
           doc_meta_ids.append(a)
 
-        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_id))]
+        doc_meta = [self._doc_meta(discussion_id, id) for id in list(set(doc_meta_ids))]
 
         response = {
           "ancestors": ancestors,
@@ -565,7 +521,6 @@ class DiscussionManager:
         """
         https://docs.mongodb.com/manual/reference/operator/query/text/
         """
-        discussion = self._get(discussion_id)
         results = Unit.objects()._collection.find({"$text": {"$search": query}})
 
         chat = []
@@ -704,8 +659,6 @@ class DiscussionManager:
           Try to use previous to place new unit, otherwise use position.
           Releases edit lock.
         """
-        discussion = self._get(discussion_id)
-
         forward_links = self._retrieve_links(pith)
 
         unit = Unit(
@@ -743,10 +696,11 @@ class DiscussionManager:
           else:
             doc_meta_ids.append(f)
 
+        response = {"unit_id": unit_id}
         doc_meta = [self._doc_meta(discussion_id, id) for id in doc_meta_ids]
         chat_meta = [self._chat_meta(discussion_id, id) for id in chat_meta_ids]
 
-        return None, [doc_meta, chat_meta]
+        return None, [response, doc_meta, chat_meta]
 
     # TODO: might support multi-select
     @_check_discussion_id
@@ -756,10 +710,9 @@ class DiscussionManager:
         """
           Takes position lock.
         """
-        discussion = self._get(discussion_id)
         unit = self._get_unit(unit_id) 
         if unit.get().position_privilege is not None: 
-          return utils.make_error(Errors.FAILED_POSITION_ACQUIRE)
+          return Errors.FAILED_POSITION_ACQUIRE #utils.make_error(Errors.FAILED_POSITION_ACQUIRE)
         unit.update(position_privilege=user_id)
 
         doc_meta = [self._doc_meta(discussion_id, unit_id)]
@@ -776,40 +729,60 @@ class DiscussionManager:
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
-    @_check_user_id
     @_check_units
     @_verify_positions_privilege
     @_verify_parent
-    def move_units(self, discussion_id, user_id, units, parent, position):
+    def move_units(self, discussion_id, units, parent, position):
         """
           Releases position lock.
           Removes each of the units from old parent and puts under new parent.
         """
-        discussion = self._get(discussion_id)
-        user = discussion.get().users.filter(id=user_id).get()
-        doc_meta = self._move_units(discussion_id, user_id, units, parent, position)
+        doc_meta_ids = []
 
+        # remove from old
+        for unit_id in units:
+          unit = self._get_unit(unit_id)
+          old_parent = unit.get().parent
+          self._get_unit(old_parent).update(
+            pull__children=unit_id
+          )
+          # TODO don't need to add unit to doc_meta
+          doc_meta_ids.append(old_parent)
+
+        # add to new
+        key = "push__children__{}".format(position)
+        parent_ptr = self._get_unit(parent)
+        parent_ptr.update(**{key: units})
+        for unit_id in units:
+          unit = self._get_unit(unit_id)
+          unit.update(
+            set__parent=parent,
+          )
+          self._release_position(unit_id)
+        doc_meta_ids.append(parent)
+
+        doc_meta = [self._doc_meta(id) for id in list(set(doc_meta_ids))]
+      
         return None, [doc_meta]
 
     # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
-    @_check_user_id
     @_check_units
     @_verify_positions_privilege
     @_verify_parent
-    def merge_units(self, discussion_id, user_id, units, parent, position):
+    def merge_units(self, discussion_id, units, parent, position):
         """
           Releases position lock.
           Removes each of the units from old parent and puts under new parent.
         """
-        discussion = self._get(discussion_id)
-        user = discussion.get().users.filter(id=user_id).get()
-        doc_meta = self.add_unit(
+        added_unit_response = self.add_unit(
           discussion_id=discussion_id, pith="", 
           parent=parent, position=position
         )[1][0] 
-        doc_meta2 = self._move_units(discussion_id, user_id, units, 
-          added_unit["unit_id"], 0) # put at head
+        added_unit = added_unit_response[0]
+        doc_meta = added_unit_response[1]
+        doc_meta2 = self.move_units(discussion_id=discussion_id, units=units, 
+          parent=added_unit["unit_id"], position=0) # put at head
 
         # get most up-to-date information
         doc_meta_ids = [d["unit_id"] for d in doc_meta+doc_meta2]
@@ -827,7 +800,7 @@ class DiscussionManager:
         discussion = self._get(discussion_id)
         unit = self._get_unit(unit_id) 
         if unit.get().edit_privilege is not None: 
-          return utils.make_error(Errors.FAILED_EDIT_ACQUIRE)
+          return Errors.FAILED_EDIT_ACQUIRE #utils.make_error(Errors.FAILED_EDIT_ACQUIRE)
         unit.update(edit_privilege=user_id)
 
         doc_meta = [self._doc_meta(discussion, unit_id)]
@@ -838,6 +811,7 @@ class DiscussionManager:
     @_check_unit_id
     @_verify_edit_privilege
     def deedit_unit(self, discussion_id, user_id, unit_id):
+        discussion = self._get(discussion_id)
         self._release_edit(unit_id)
         doc_meta = [self._doc_meta(discussion, unit_id)]
         return None, [doc_meta]

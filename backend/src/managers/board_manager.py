@@ -1,19 +1,10 @@
-import datetime
 import logging
-from typing import (
-  Any,
-  Dict,
-  List,
-  Optional,
-  Tuple,
-)
 
 import constants
 from utils import utils
 
 from models.discussion import (
   Unit,
-  User,
   Discussion,
 )
 

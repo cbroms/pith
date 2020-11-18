@@ -1,5 +1,5 @@
 from aiohttp import web
-from json import dumps, loads
+from json import dumps
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from socketio import AsyncNamespace
@@ -16,8 +16,6 @@ from utils.utils import (
   is_error, 
   make_error,
   DictEncoder, 
-  ErrorEncoder,
-  sum_dicts, 
 )
 
 
@@ -55,7 +53,7 @@ class DiscussionNamespace(AsyncNamespace):
           product = await func(self, sid, request)
 
           if is_error(product):
-            result = product
+            result = make_error(product) # TODO
           else:
             ret_res, emits_res = product
 
@@ -446,7 +444,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["doc_meta", "chat_meta"], emit_name="add_unit")
+    @_process_responses(emits=["added_unit", "doc_meta", "chat_meta"], emit_name="add_unit")
     @_validate_request("add_unit")
     @_check_user_session
     async def on_add_unit(self, sid, request): 
@@ -527,11 +525,9 @@ class DiscussionNamespace(AsyncNamespace):
         position = request["position"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
-        user_id = session["user_id"]
 
         result = gm.discussion_manager.move_units(
           discussion_id=discussion_id, 
-          user_id=user_id, 
           units=units,
           parent=parent,
           position=position
@@ -554,11 +550,9 @@ class DiscussionNamespace(AsyncNamespace):
         position = request["position"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
-        user_id = session["user_id"]
 
         result = gm.discussion_manager.merge_units(
           discussion_id=discussion_id, 
-          user_id=user_id, 
           units=units,
           parent=parent,
           position=position

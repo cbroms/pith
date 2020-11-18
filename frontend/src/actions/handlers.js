@@ -83,6 +83,7 @@ const handleUnhideUnit = (shared, dispatch) => {
   handleDocMeta(shared.doc_meta, dispatch);
 };
 const handleAddUnit = (shared, dispatch) => {
+  // no need to address added_unit
   handleDocMeta(shared.doc_meta, dispatch);
   handleChatMeta(shared.chat_meta, dispatch);
 };
