@@ -5,6 +5,8 @@ import { ThemeProvider } from "styled-components";
 
 import "./App.css";
 
+import { setValue, getValue } from "./api/local";
+
 import AppLayout from "./AppLayout";
 
 import Discussion from "./components/Discussion";
@@ -143,7 +145,7 @@ class App extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			darkModeActive: localStorage.getItem("darkModeActive"),
+			darkModeActive: getValue("darkModeActive"),
 		};
 
 		this.setDarkModeActive = this.setDarkModeActive.bind(this);
@@ -159,6 +161,7 @@ class App extends React.Component {
 	}
 
 	setDarkModeActive(mode) {
+		setValue("darkModeActive", mode);
 		this.setState({ darkModeActive: mode });
 	}
 

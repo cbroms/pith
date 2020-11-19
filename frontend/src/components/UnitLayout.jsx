@@ -26,6 +26,10 @@ const StyledContainer = styled.div`
         background-color: ${(props) => props.theme.shade3};
         color: ${(props) => props.theme.shade1};
     }
+
+    a {
+        color: ${(props) => props.theme.shade3};
+    }
 `;
 
 const StyledRefNum = styled.span`

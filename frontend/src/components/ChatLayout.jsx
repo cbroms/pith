@@ -17,19 +17,6 @@ const StyledContainer = styled.div`
     }
 `;
 
-const StyledChatOverflow = styled.div`
-    height: 100%;
-    overflow-y: auto;
-`;
-
-const StyledChat = styled.div`
-    min-height: 100%;
-    display: flex;
-    align-items: flex-end;
-    flex-wrap: wrap;
-    align-content: flex-end;
-`;
-
 const StyledChatEditor = styled.div`
     position: relative;
     border-top: 1px solid ${(props) => props.theme.shade2};
@@ -39,6 +26,11 @@ const StyledChatEditor = styled.div`
 const StyledNoContentContainer = styled.div`
     font-style: italic;
     color: ${(props) => props.theme.shade2};
+
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    align-content: flex-end;
 `;
 
 const StyledLoadingContainer = styled.div`
@@ -47,9 +39,9 @@ const StyledLoadingContainer = styled.div`
 `;
 
 const ChatLayout = (props) => {
-    let postContent = props.children;
+    let postContent = props.scroller;
 
-    if (postContent.length <= 0 && !props.loading) {
+    if (props.empty && !props.loading) {
         postContent = (
             <StyledNoContentContainer>No posts yet</StyledNoContentContainer>
         );
@@ -60,9 +52,8 @@ const ChatLayout = (props) => {
     }
     return (
         <StyledContainer>
-            <StyledChatOverflow>
-                <StyledChat>{postContent}</StyledChat>
-            </StyledChatOverflow>
+            {postContent}
+
             <StyledChatEditor>{props.editor}</StyledChatEditor>
         </StyledContainer>
     );

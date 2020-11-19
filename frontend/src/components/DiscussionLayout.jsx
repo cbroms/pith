@@ -159,6 +159,7 @@ const StyledDiscussionContainer = styled.div`
 
     padding: 10px;
     z-index: 5;
+
     background-color: ${(props) => props.theme.shade1};
 
     @media (max-width: 768px) {

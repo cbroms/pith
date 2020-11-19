@@ -14,9 +14,9 @@ const DiscussionJoin = (props) => {
             focus
             buttonDir="right"
             placeholder="type a nickname..."
-            unitEnter={(caret, content) => {
-                props.onComplete(content);
-                setNickname(content);
+            unitEnter={(caret, content, cleanContent) => {
+                props.onComplete(cleanContent);
+                setNickname(cleanContent);
             }}
         />
     );
