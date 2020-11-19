@@ -906,3 +906,34 @@ class DiscussionManager:
         chat_meta = self._chat_metas(discussion_id, chat_meta_ids)
 
         return None, [doc_meta, chat_meta]
+
+    def test(self, a):
+      return a
+
+    async def call_test(self):
+      print("1")
+      job = await self.redis_queue.enqueue_job("test", 4)
+      print("2")
+      print("result", await job.result(timeout=3))
+
+#     def export_unit_tree(self, unit_id):
+# 
+#     def export_units(self, units, method):
+#       """
+#       method = doc, pdf, raw, html
+#       """
+#       doc = []
+#       for unit_id in units:
+#         doc.append(self.export_unit_tree(unit_id))
+#       # process doc according to method
+#       # call function to upload
+# 
+#     def export_document(self, discussion_id, method):
+#       """
+#       method = doc, pdf, raw, html
+#       """
+#       discussion = self._get(discussion_id).get()
+#       root = discussion.document
+#       doc = self.export_unit_tree(root)
+#       # process doc according to method
+#       # call function to upload

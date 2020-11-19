@@ -28,4 +28,4 @@ COPY /backend/src /api
 
 WORKDIR /api
 
-CMD [ "arq", "worker.WorkerSettings" ]
+CMD [ "arq", "worker.worker.WorkerSettings" ]

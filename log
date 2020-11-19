@@ -1,61 +1,59 @@
-Starting pith_redis_1 ... 
-Starting pith_mongo_1 ... 
+pith_redis_1 is up-to-date
+pith_mongo_1 is up-to-date
 Starting pith_common_1 ... 
-[3A[2KStarting pith_redis_1  ... [32mdone[0m[3B[1A[2KStarting pith_common_1 ... [32mdone[0m[1B[2A[2KStarting pith_mongo_1  ... [32mdone[0m[2BStarting pith_app_1    ... 
-[1A[2KStarting pith_app_1    ... [32mdone[0m[1BStarting pith_worker_1 ... 
-Starting pith_static_1 ... 
-[2A[2KStarting pith_worker_1 ... [32mdone[0m[2BStarting pith_tests_1  ... 
-[2A[2KStarting pith_static_1 ... [32mdone[0m[2B[1A[2KStarting pith_tests_1  ... [32mdone[0m[1BAttaching to pith_redis_1, pith_common_1, pith_mongo_1, pith_app_1, pith_worker_1, pith_static_1, pith_tests_1
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:45.636+00:00"},"s":"I",  "c":"CONTROL",  "id":23285,   "ctx":"main","msg":"Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'"}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:45.668+00:00"},"s":"W",  "c":"ASIO",     "id":22601,   "ctx":"main","msg":"No TransportLayer configured during NetworkInterface startup"}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:45.668+00:00"},"s":"I",  "c":"NETWORK",  "id":4648601, "ctx":"main","msg":"Implicit TCP FastOpen unavailable. If TCP FastOpen is required, set tcpFastOpenServer, tcpFastOpenClient, and tcpFastOpenQueueSize."}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:45.669+00:00"},"s":"I",  "c":"STORAGE",  "id":4615611, "ctx":"initandlisten","msg":"MongoDB starting","attr":{"pid":1,"port":27017,"dbPath":"/data/db","architecture":"64-bit","host":"e12030bb9aef"}}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:45.669+00:00"},"s":"I",  "c":"CONTROL",  "id":23403,   "ctx":"initandlisten","msg":"Build Info","attr":{"buildInfo":{"version":"4.4.0","gitVersion":"563487e100c4215e2dce98d0af2a6a5a2d67c5cf","openSSLVersion":"OpenSSL 1.1.1  11 Sep 2018","modules":[],"allocator":"tcmalloc","environment":{"distmod":"ubuntu1804","distarch":"x86_64","target_arch":"x86_64"}}}}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:45.669+00:00"},"s":"I",  "c":"CONTROL",  "id":51765,   "ctx":"initandlisten","msg":"Operating System","attr":{"os":{"name":"Ubuntu","version":"18.04"}}}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:45.669+00:00"},"s":"I",  "c":"CONTROL",  "id":21951,   "ctx":"initandlisten","msg":"Options set by command line","attr":{"options":{"net":{"bindIp":"*"},"security":{"authorization":"enabled"}}}}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:45.671+00:00"},"s":"W",  "c":"STORAGE",  "id":22271,   "ctx":"initandlisten","msg":"Detected unclean shutdown - Lock file is not empty","attr":{"lockFile":"/data/db/mongod.lock"}}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:45.671+00:00"},"s":"I",  "c":"STORAGE",  "id":22270,   "ctx":"initandlisten","msg":"Storage engine to use detected by data files","attr":{"dbpath":"/data/db","storageEngine":"wiredTiger"}}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:45.671+00:00"},"s":"W",  "c":"STORAGE",  "id":22302,   "ctx":"initandlisten","msg":"Recovering data from the last clean checkpoint."}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:45.671+00:00"},"s":"I",  "c":"STORAGE",  "id":22297,   "ctx":"initandlisten","msg":"Using the XFS filesystem is strongly recommended with the WiredTiger storage engine. See http://dochub.mongodb.org/core/prodnotes-filesystem","tags":["startupWarnings"]}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:45.671+00:00"},"s":"I",  "c":"STORAGE",  "id":22315,   "ctx":"initandlisten","msg":"Opening WiredTiger","attr":{"config":"create,cache_size=256M,session_max=33000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000,close_scan_interval=10,close_handle_minimum=250),statistics_log=(wait=0),verbose=[recovery_progress,checkpoint_progress,compact_progress],"}}
-[33mpith_common_1 exited with code 0
-[0m[35mredis_1   |[0m 1:C 10 Nov 2020 22:05:44.403 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
-[35mredis_1   |[0m 1:C 10 Nov 2020 22:05:44.403 # Redis version=6.0.7, bits=64, commit=00000000, modified=0, pid=1, just started
-[35mredis_1   |[0m 1:C 10 Nov 2020 22:05:44.403 # Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf
-[35mredis_1   |[0m 1:M 10 Nov 2020 22:05:44.408 * Running mode=standalone, port=6379.
-[35mredis_1   |[0m 1:M 10 Nov 2020 22:05:44.408 # WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.
-[35mredis_1   |[0m 1:M 10 Nov 2020 22:05:44.408 # Server initialized
-[35mredis_1   |[0m 1:M 10 Nov 2020 22:05:44.408 # WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.
-[35mredis_1   |[0m 1:M 10 Nov 2020 22:05:44.408 # WARNING you have Transparent Huge Pages (THP) support enabled in your kernel. This will create latency and memory usage issues with Redis. To fix this issue run the command 'echo never > /sys/kernel/mm/transparent_hugepage/enabled' as root, and add it to your /etc/rc.local in order to retain the setting after a reboot. Redis must be restarted after THP is disabled.
-[35mredis_1   |[0m 1:M 10 Nov 2020 22:05:44.409 * Loading RDB produced by version 6.0.7
-[35mredis_1   |[0m 1:M 10 Nov 2020 22:05:44.409 * RDB age 1065089 seconds
-[35mredis_1   |[0m 1:M 10 Nov 2020 22:05:44.409 * RDB memory usage when created 0.77 Mb
-[35mredis_1   |[0m 1:M 10 Nov 2020 22:05:44.409 * DB loaded from disk: 0.000 seconds
-[35mredis_1   |[0m 1:M 10 Nov 2020 22:05:44.409 * Ready to accept connections
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:49.768+00:00"},"s":"I",  "c":"STORAGE",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":"[1605045949:768700][1:0x7f9af87c8a80], txn-recover: [WT_VERB_RECOVERY_PROGRESS] Recovering log 21 through 22"}}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:50.105+00:00"},"s":"I",  "c":"STORAGE",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":"[1605045950:105489][1:0x7f9af87c8a80], txn-recover: [WT_VERB_RECOVERY_PROGRESS] Recovering log 22 through 22"}}
+[1A[2KStarting pith_common_1 ... [32mdone[0m[1Bpith_app_1 is up-to-date
+pith_static_1 is up-to-date
+pith_worker_1 is up-to-date
+pith_tests_1 is up-to-date
+Attaching to pith_redis_1, pith_mongo_1, pith_common_1, pith_app_1, pith_static_1, pith_worker_1, pith_tests_1
+[36mapp_1     |[0m [02:19:38] watching "/api" and reloading "app.main" on changes...
+[32mmongo_1   |[0m about to fork child process, waiting until server is ready for connections.
+[32mmongo_1   |[0m forked process: 26
+[32mmongo_1   |[0m 
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:32.251+00:00"},"s":"W",  "c":"CONTROL",  "id":20698,   "ctx":"main","msg":"***** SERVER RESTARTED *****","tags":["startupWarnings"]}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:32.275+00:00"},"s":"I",  "c":"CONTROL",  "id":23285,   "ctx":"main","msg":"Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:32.285+00:00"},"s":"W",  "c":"ASIO",     "id":22601,   "ctx":"main","msg":"No TransportLayer configured during NetworkInterface startup"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:32.286+00:00"},"s":"I",  "c":"NETWORK",  "id":4648601, "ctx":"main","msg":"Implicit TCP FastOpen unavailable. If TCP FastOpen is required, set tcpFastOpenServer, tcpFastOpenClient, and tcpFastOpenQueueSize."}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:32.287+00:00"},"s":"I",  "c":"STORAGE",  "id":4615611, "ctx":"initandlisten","msg":"MongoDB starting","attr":{"pid":26,"port":27017,"dbPath":"/data/db","architecture":"64-bit","host":"6565970cd08b"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:32.287+00:00"},"s":"I",  "c":"CONTROL",  "id":23403,   "ctx":"initandlisten","msg":"Build Info","attr":{"buildInfo":{"version":"4.4.0","gitVersion":"563487e100c4215e2dce98d0af2a6a5a2d67c5cf","openSSLVersion":"OpenSSL 1.1.1  11 Sep 2018","modules":[],"allocator":"tcmalloc","environment":{"distmod":"ubuntu1804","distarch":"x86_64","target_arch":"x86_64"}}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:32.287+00:00"},"s":"I",  "c":"CONTROL",  "id":51765,   "ctx":"initandlisten","msg":"Operating System","attr":{"os":{"name":"Ubuntu","version":"18.04"}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:32.287+00:00"},"s":"I",  "c":"CONTROL",  "id":21951,   "ctx":"initandlisten","msg":"Options set by command line","attr":{"options":{"net":{"bindIp":"127.0.0.1","port":27017,"tls":{"mode":"disabled"}},"processManagement":{"fork":true,"pidFilePath":"/tmp/docker-entrypoint-temp-mongod.pid"},"systemLog":{"destination":"file","logAppend":true,"path":"/proc/1/fd/1"}}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:32.289+00:00"},"s":"I",  "c":"STORAGE",  "id":22297,   "ctx":"initandlisten","msg":"Using the XFS filesystem is strongly recommended with the WiredTiger storage engine. See http://dochub.mongodb.org/core/prodnotes-filesystem","tags":["startupWarnings"]}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:32.289+00:00"},"s":"I",  "c":"STORAGE",  "id":22315,   "ctx":"initandlisten","msg":"Opening WiredTiger","attr":{"config":"create,cache_size=256M,session_max=33000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000,close_scan_interval=10,close_handle_minimum=250),statistics_log=(wait=0),verbose=[recovery_progress,checkpoint_progress,compact_progress],"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.407+00:00"},"s":"I",  "c":"STORAGE",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":"[1605752376:407472][26:0x7f6d16e5ca80], txn-recover: [WT_VERB_RECOVERY | WT_VERB_RECOVERY_PROGRESS] Set global recovery timestamp: (0, 0)"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.414+00:00"},"s":"I",  "c":"STORAGE",  "id":4795906, "ctx":"initandlisten","msg":"WiredTiger opened","attr":{"durationMillis":4125}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.425+00:00"},"s":"I",  "c":"RECOVERY", "id":23987,   "ctx":"initandlisten","msg":"WiredTiger recoveryTimestamp","attr":{"recoveryTimestamp":{"$timestamp":{"t":0,"i":0}}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.446+00:00"},"s":"I",  "c":"STORAGE",  "id":22262,   "ctx":"initandlisten","msg":"Timestamp monitor starting"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.450+00:00"},"s":"W",  "c":"CONTROL",  "id":22120,   "ctx":"initandlisten","msg":"Access control is not enabled for the database. Read and write access to data and configuration is unrestricted","tags":["startupWarnings"]}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.461+00:00"},"s":"I",  "c":"STORAGE",  "id":20320,   "ctx":"initandlisten","msg":"createCollection","attr":{"namespace":"admin.system.version","uuidDisposition":"provided","uuid":{"uuid":{"$uuid":"1bd0fa5b-1b69-464b-b8d2-7bc1aaa03c8a"}},"options":{"uuid":{"$uuid":"1bd0fa5b-1b69-464b-b8d2-7bc1aaa03c8a"}}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.478+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"initandlisten","msg":"Index build: done building","attr":{"buildUUID":null,"namespace":"admin.system.version","index":"_id_","commitTimestamp":{"$timestamp":{"t":0,"i":0}}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.479+00:00"},"s":"I",  "c":"COMMAND",  "id":20459,   "ctx":"initandlisten","msg":"Setting featureCompatibilityVersion","attr":{"newVersion":"4.4"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.485+00:00"},"s":"I",  "c":"STORAGE",  "id":20536,   "ctx":"initandlisten","msg":"Flow Control is enabled on this deployment"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.489+00:00"},"s":"I",  "c":"STORAGE",  "id":20320,   "ctx":"initandlisten","msg":"createCollection","attr":{"namespace":"local.startup_log","uuidDisposition":"generated","uuid":{"uuid":{"$uuid":"a5b5a38c-51a1-4a28-88a7-14c43a4009fc"}},"options":{"capped":true,"size":10485760}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.503+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"initandlisten","msg":"Index build: done building","attr":{"buildUUID":null,"namespace":"local.startup_log","index":"_id_","commitTimestamp":{"$timestamp":{"t":0,"i":0}}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.503+00:00"},"s":"I",  "c":"FTDC",     "id":20625,   "ctx":"initandlisten","msg":"Initializing full-time diagnostic data capture","attr":{"dataDirectory":"/data/db/diagnostic.data"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.512+00:00"},"s":"I",  "c":"NETWORK",  "id":23015,   "ctx":"listener","msg":"Listening on","attr":{"address":"/tmp/mongodb-27017.sock"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.513+00:00"},"s":"I",  "c":"NETWORK",  "id":23015,   "ctx":"listener","msg":"Listening on","attr":{"address":"127.0.0.1"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.515+00:00"},"s":"I",  "c":"NETWORK",  "id":23016,   "ctx":"listener","msg":"Waiting for connections","attr":{"port":27017,"ssl":"off"}}
+[32mmongo_1   |[0m child process started successfully, parent exiting
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.533+00:00"},"s":"I",  "c":"STORAGE",  "id":20320,   "ctx":"LogicalSessionCacheRefresh","msg":"createCollection","attr":{"namespace":"config.system.sessions","uuidDisposition":"generated","uuid":{"uuid":{"$uuid":"62ff822e-73d8-4958-a856-a88fb225487f"}},"options":{}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.547+00:00"},"s":"I",  "c":"CONTROL",  "id":20712,   "ctx":"LogicalSessionCacheReap","msg":"Sessions collection is not set up; waiting until next sessions reap interval","attr":{"error":"NamespaceNotFound: config.system.sessions does not exist"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.574+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"LogicalSessionCacheRefresh","msg":"Index build: done building","attr":{"buildUUID":null,"namespace":"config.system.sessions","index":"_id_","commitTimestamp":{"$timestamp":{"t":0,"i":0}}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.577+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"LogicalSessionCacheRefresh","msg":"Index build: done building","attr":{"buildUUID":null,"namespace":"config.system.sessions","index":"lsidTTLIndex","commitTimestamp":{"$timestamp":{"t":0,"i":0}}}}
+[35mredis_1   |[0m 1:C 19 Nov 2020 02:19:31.937 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+[35mredis_1   |[0m 1:C 19 Nov 2020 02:19:31.937 # Redis version=6.0.7, bits=64, commit=00000000, modified=0, pid=1, just started
+[35mredis_1   |[0m 1:C 19 Nov 2020 02:19:31.937 # Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf
+[35mredis_1   |[0m 1:M 19 Nov 2020 02:19:31.939 * Running mode=standalone, port=6379.
+[35mredis_1   |[0m 1:M 19 Nov 2020 02:19:31.939 # WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.
+[35mredis_1   |[0m 1:M 19 Nov 2020 02:19:31.939 # Server initialized
+[35mredis_1   |[0m 1:M 19 Nov 2020 02:19:31.939 # WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.
+[35mredis_1   |[0m 1:M 19 Nov 2020 02:19:31.939 # WARNING you have Transparent Huge Pages (THP) support enabled in your kernel. This will create latency and memory usage issues with Redis. To fix this issue run the command 'echo never > /sys/kernel/mm/transparent_hugepage/enabled' as root, and add it to your /etc/rc.local in order to retain the setting after a reboot. Redis must be restarted after THP is disabled.
+[35mredis_1   |[0m 1:M 19 Nov 2020 02:19:31.941 * Ready to accept connections
 [34mstatic_1  |[0m 
 [34mstatic_1  |[0m > pith-frontend@0.1.0 start /static
 [34mstatic_1  |[0m > react-scripts start
 [34mstatic_1  |[0m 
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:50.459+00:00"},"s":"I",  "c":"STORAGE",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":"[1605045950:459671][1:0x7f9af87c8a80], txn-recover: [WT_VERB_RECOVERY | WT_VERB_RECOVERY_PROGRESS] Main recovery loop: starting at 21/10409088 to 22/256"}}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:50.461+00:00"},"s":"I",  "c":"STORAGE",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":"[1605045950:461878][1:0x7f9af87c8a80], txn-recover: [WT_VERB_RECOVERY_PROGRESS] Recovering log 21 through 22"}}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:50.893+00:00"},"s":"I",  "c":"STORAGE",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":"[1605045950:893408][1:0x7f9af87c8a80], txn-recover: [WT_VERB_RECOVERY_PROGRESS] Recovering log 22 through 22"}}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:51.115+00:00"},"s":"I",  "c":"STORAGE",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":"[1605045951:115303][1:0x7f9af87c8a80], txn-recover: [WT_VERB_RECOVERY | WT_VERB_RECOVERY_PROGRESS] Set global recovery timestamp: (0, 0)"}}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:51.199+00:00"},"s":"I",  "c":"STORAGE",  "id":4795906, "ctx":"initandlisten","msg":"WiredTiger opened","attr":{"durationMillis":5528}}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:51.200+00:00"},"s":"I",  "c":"RECOVERY", "id":23987,   "ctx":"initandlisten","msg":"WiredTiger recoveryTimestamp","attr":{"recoveryTimestamp":{"$timestamp":{"t":0,"i":0}}}}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:51.232+00:00"},"s":"I",  "c":"STORAGE",  "id":22262,   "ctx":"initandlisten","msg":"Timestamp monitor starting"}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:51.276+00:00"},"s":"I",  "c":"STORAGE",  "id":20536,   "ctx":"initandlisten","msg":"Flow Control is enabled on this deployment"}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:51.296+00:00"},"s":"I",  "c":"FTDC",     "id":20625,   "ctx":"initandlisten","msg":"Initializing full-time diagnostic data capture","attr":{"dataDirectory":"/data/db/diagnostic.data"}}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:51.303+00:00"},"s":"I",  "c":"NETWORK",  "id":23015,   "ctx":"listener","msg":"Listening on","attr":{"address":"/tmp/mongodb-27017.sock"}}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:51.308+00:00"},"s":"I",  "c":"NETWORK",  "id":23015,   "ctx":"listener","msg":"Listening on","attr":{"address":"0.0.0.0"}}
-[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:51.309+00:00"},"s":"I",  "c":"NETWORK",  "id":23016,   "ctx":"listener","msg":"Waiting for connections","attr":{"port":27017,"ssl":"off"}}
-[36mpith_app_1 exited with code 1
-[0m[32mmongo_1   |[0m {"t":{"$date":"2020-11-10T22:05:52.230+00:00"},"s":"I",  "c":"FTDC",     "id":20631,   "ctx":"ftdc","msg":"Unclean full-time diagnostic data capture shutdown detected, found interim file, some metrics may have been lost","attr":{"error":{"code":0,"codeName":"OK"}}}
-[33;1mworker_1  |[0m Task was destroyed but it is pending!
-[33;1mworker_1  |[0m task: <Task pending name='Task-3' coro=<RedisConnection._read_data() running at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:186> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7ff8a7760ee0>()]> cb=[RedisConnection.__init__.<locals>.<lambda>() at /usr/local/lib/python3.8/dist-packages/aioredis/connection.py:168]>
-[33;1mpith_worker_1 exited with code 1
-[0m[34mstatic_1  |[0m [34mℹ[39m [90m｢wds｣[39m: Project is running at http://172.19.0.6/
+[34mstatic_1  |[0m [34mℹ[39m [90m｢wds｣[39m: Project is running at http://172.19.0.6/
 [34mstatic_1  |[0m [34mℹ[39m [90m｢wds｣[39m: webpack output is served from 
 [34mstatic_1  |[0m [34mℹ[39m [90m｢wds｣[39m: Content not from webpack is served from /static/public
 [34mstatic_1  |[0m [34mℹ[39m [90m｢wds｣[39m: 404s will fallback to /
@@ -63,29 +61,71 @@ Starting pith_static_1 ...
 [34mstatic_1  |[0m 
 [34mstatic_1  |[0m Compiled with warnings.
 [34mstatic_1  |[0m 
-[34mstatic_1  |[0m ./src/components/Document.jsx
-[34mstatic_1  |[0m   Line 108:15:  'newDoc' is assigned a value but never used  no-unused-vars
+[34mstatic_1  |[0m ./src/components/Chat.jsx
+[34mstatic_1  |[0m   Line 104:13:  'realPosition' is assigned a value but never used  no-unused-vars
 [34mstatic_1  |[0m 
 [34mstatic_1  |[0m ./src/App.js
-[34mstatic_1  |[0m   Line 11:8:  'DiscussionJoin' is defined but never used       no-unused-vars
-[34mstatic_1  |[0m   Line 21:7:  'postsDummy' is assigned a value but never used  no-unused-vars
-[34mstatic_1  |[0m   Line 23:7:  'postUnits' is assigned a value but never used   no-unused-vars
+[34mstatic_1  |[0m   Line 11:8:   'DiscussionJoin' is defined but never used          no-unused-vars
+[34mstatic_1  |[0m   Line 21:7:   'postsDummy' is assigned a value but never used     no-unused-vars
+[34mstatic_1  |[0m   Line 23:7:   'postUnits' is assigned a value but never used      no-unused-vars
+[34mstatic_1  |[0m   Line 44:7:   'documentDummy' is assigned a value but never used  no-unused-vars
+[34mstatic_1  |[0m   Line 92:7:   'usersDummy' is assigned a value but never used     no-unused-vars
+[34mstatic_1  |[0m   Line 107:7:  'timelineDummy' is assigned a value but never used  no-unused-vars
+[34mstatic_1  |[0m 
+[34mstatic_1  |[0m ./src/components/Document.jsx
+[34mstatic_1  |[0m   Line 127:15:  'newDoc' is assigned a value but never used  no-unused-vars
+[34mstatic_1  |[0m 
+[34mstatic_1  |[0m ./src/actions/discussionActions.js
+[34mstatic_1  |[0m   Line 12:3:   'unpackContext' is defined but never used      no-unused-vars
+[34mstatic_1  |[0m   Line 17:3:   'BAD_POSITION' is defined but never used       no-unused-vars
+[34mstatic_1  |[0m   Line 61:3:   'LOAD_USER' is defined but never used          no-unused-vars
+[34mstatic_1  |[0m   Line 79:3:   'SYSTEM_ERROR' is defined but never used       no-unused-vars
+[34mstatic_1  |[0m   Line 484:7:  'moveUnit' is assigned a value but never used  no-unused-vars
 [34mstatic_1  |[0m 
 [34mstatic_1  |[0m ./src/components/Discussion.jsx
-[34mstatic_1  |[0m   Line 12:5:   'GENERIC_ERROR' is defined but never used           no-unused-vars
-[34mstatic_1  |[0m   Line 16:5:   'TAKEN_USER_ID' is defined but never used           no-unused-vars
-[34mstatic_1  |[0m   Line 23:5:   'joinUser' is defined but never used                no-unused-vars
-[34mstatic_1  |[0m   Line 26:5:   'subscribeChat' is defined but never used           no-unused-vars
-[34mstatic_1  |[0m   Line 27:5:   'subscribeDocument' is defined but never used       no-unused-vars
-[34mstatic_1  |[0m   Line 43:12:  'subscribed' is assigned a value but never used     no-unused-vars
-[34mstatic_1  |[0m   Line 43:24:  'setSubscribed' is assigned a value but never used  no-unused-vars
-[34mstatic_1  |[0m 
-[34mstatic_1  |[0m ./src/hooks/usePending.js
-[34mstatic_1  |[0m   Line 14:2:  React Hook useEffect contains a call to 'setStatus'. Without a list of dependencies, this can lead to an infinite chain of updates. To fix this, pass [status.pending, status.made, completedRequests, requestId] as a second argument to the useEffect Hook  react-hooks/exhaustive-deps
+[34mstatic_1  |[0m   Line 12:5:  'GENERIC_ERROR' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                    no-unused-vars
+[34mstatic_1  |[0m   Line 16:5:  'TAKEN_USER_ID' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                    no-unused-vars
+[34mstatic_1  |[0m   Line 77:5:  React Hook useEffect contains a call to 'setSubscribed'. Without a list of dependencies, this can lead to an infinite chain of updates. To fix this, pass [enterDiscussionStatus.made, enterDiscussionStatus.pending, enterDiscussionStatus.status, badDiscussion, joined, joinUserStatus.pending, getPageStatus.made, subscribed, makeEnterDiscussion, props, discussionId, createUserStatus.status, makeJoinUser, makeGetPage] as a second argument to the useEffect Hook  react-hooks/exhaustive-deps
 [34mstatic_1  |[0m 
 [34mstatic_1  |[0m ./src/components/AlphaBoardLayout.jsx
 [34mstatic_1  |[0m   Line 1:17:  'useState' is defined but never used  no-unused-vars
 [34mstatic_1  |[0m 
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.985+00:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"connection accepted","attr":{"remote":"127.0.0.1:53486","sessionId":1,"connectionCount":1}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:36.986+00:00"},"s":"I",  "c":"NETWORK",  "id":51800,   "ctx":"conn1","msg":"client metadata","attr":{"remote":"127.0.0.1:53486","client":"conn1","doc":{"application":{"name":"MongoDB Shell"},"driver":{"name":"MongoDB Internal Client","version":"4.4.0"},"os":{"type":"Linux","name":"Ubuntu","architecture":"x86_64","version":"18.04"}}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.029+00:00"},"s":"I",  "c":"NETWORK",  "id":22944,   "ctx":"conn1","msg":"connection ended","attr":{"remote":"127.0.0.1:53486","connectionCount":0}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.378+00:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"connection accepted","attr":{"remote":"127.0.0.1:53488","sessionId":2,"connectionCount":1}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.379+00:00"},"s":"I",  "c":"NETWORK",  "id":51800,   "ctx":"conn2","msg":"client metadata","attr":{"remote":"127.0.0.1:53488","client":"conn2","doc":{"application":{"name":"MongoDB Shell"},"driver":{"name":"MongoDB Internal Client","version":"4.4.0"},"os":{"type":"Linux","name":"Ubuntu","architecture":"x86_64","version":"18.04"}}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.550+00:00"},"s":"I",  "c":"STORAGE",  "id":20320,   "ctx":"conn2","msg":"createCollection","attr":{"namespace":"admin.system.users","uuidDisposition":"generated","uuid":{"uuid":{"$uuid":"b148a3ae-1a4e-445c-b652-ca45db1f4412"}},"options":{}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.571+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"conn2","msg":"Index build: done building","attr":{"buildUUID":null,"namespace":"admin.system.users","index":"_id_","commitTimestamp":{"$timestamp":{"t":0,"i":0}}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.575+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"conn2","msg":"Index build: done building","attr":{"buildUUID":null,"namespace":"admin.system.users","index":"user_1_db_1","commitTimestamp":{"$timestamp":{"t":0,"i":0}}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.577+00:00"},"s":"I",  "c":"COMMAND",  "id":51803,   "ctx":"conn2","msg":"Slow query","attr":{"type":"command","ns":"admin.$cmd","appName":"MongoDB Shell","command":{"createUser":"root","pwd":"xxx","roles":[{"role":"root","db":"admin"}],"digestPassword":true,"writeConcern":{"w":"majority","wtimeout":600000.0},"lsid":{"id":{"$uuid":"1bd54757-e25d-499e-8269-1f7422c3955d"}},"$db":"admin"},"numYields":0,"reslen":38,"locks":{"ParallelBatchWriterMode":{"acquireCount":{"r":4}},"ReplicationStateTransition":{"acquireCount":{"w":4}},"Global":{"acquireCount":{"w":4}},"Database":{"acquireCount":{"W":4}},"Collection":{"acquireCount":{"r":1,"w":4}},"Mutex":{"acquireCount":{"r":4}}},"flowControl":{"acquireCount":4,"timeAcquiringMicros":8},"writeConcern":{"w":"majority","wtimeout":600000,"provenance":"clientSupplied"},"storage":{},"protocol":"op_msg","durationMillis":170}}
+[32mmongo_1   |[0m Successfully added user: {
+[32mmongo_1   |[0m 	"user" : "root",
+[32mmongo_1   |[0m 	"roles" : [
+[32mmongo_1   |[0m 		{
+[32mmongo_1   |[0m 			"role" : "root",
+[32mmongo_1   |[0m 			"db" : "admin"
+[32mmongo_1   |[0m 		}
+[32mmongo_1   |[0m 	]
+[32mmongo_1   |[0m }
+[32mmongo_1   |[0m Error saving history file: FileOpenFailed Unable to open() file /home/mongodb/.dbshell: No such file or directory
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.604+00:00"},"s":"I",  "c":"NETWORK",  "id":22944,   "ctx":"conn2","msg":"connection ended","attr":{"remote":"127.0.0.1:53488","connectionCount":0}}
+[32mmongo_1   |[0m 
+[32mmongo_1   |[0m /usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+[32mmongo_1   |[0m 
+[32mmongo_1   |[0m 
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.691+00:00"},"s":"W",  "c":"CONTROL",  "id":20698,   "ctx":"main","msg":"***** SERVER RESTARTED *****","tags":["startupWarnings"]}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.699+00:00"},"s":"I",  "c":"CONTROL",  "id":23285,   "ctx":"main","msg":"Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.710+00:00"},"s":"W",  "c":"ASIO",     "id":22601,   "ctx":"main","msg":"No TransportLayer configured during NetworkInterface startup"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.713+00:00"},"s":"I",  "c":"NETWORK",  "id":4648601, "ctx":"main","msg":"Implicit TCP FastOpen unavailable. If TCP FastOpen is required, set tcpFastOpenServer, tcpFastOpenClient, and tcpFastOpenQueueSize."}
+[32mmongo_1   |[0m killing process with pid: 26
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.714+00:00"},"s":"I",  "c":"CONTROL",  "id":23377,   "ctx":"SignalHandler","msg":"Received signal","attr":{"signal":15,"error":"Terminated"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.714+00:00"},"s":"I",  "c":"CONTROL",  "id":23378,   "ctx":"SignalHandler","msg":"Signal was sent by kill(2)","attr":{"pid":80,"uid":999}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.714+00:00"},"s":"I",  "c":"CONTROL",  "id":23381,   "ctx":"SignalHandler","msg":"will terminate after current cmd ends"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.717+00:00"},"s":"I",  "c":"NETWORK",  "id":20562,   "ctx":"SignalHandler","msg":"Shutdown: going to close listening sockets"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.729+00:00"},"s":"I",  "c":"NETWORK",  "id":23017,   "ctx":"listener","msg":"removing socket file","attr":{"path":"/tmp/mongodb-27017.sock"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.730+00:00"},"s":"I",  "c":"-",        "id":20520,   "ctx":"SignalHandler","msg":"Stopping further Flow Control ticket acquisitions."}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.731+00:00"},"s":"I",  "c":"-",        "id":4695300, "ctx":"SignalHandler","msg":"Interrupted all currently running operations","attr":{"opsKilled":3}}
 [34mstatic_1  |[0m ./src/components/Unit.jsx
 [34mstatic_1  |[0m   Line 1:17:  'useState' is defined but never used  no-unused-vars
 [34mstatic_1  |[0m 
@@ -96,54 +136,109 @@ Starting pith_static_1 ...
 [34mstatic_1  |[0m   Line 2:10:  'Redirect' is defined but never used  no-unused-vars
 [34mstatic_1  |[0m 
 [34mstatic_1  |[0m ./src/components/TextEditor.jsx
-[34mstatic_1  |[0m   Line 2:8:  'ReactDOM' is defined but never used  no-unused-vars
+[34mstatic_1  |[0m   Line 2:8:     'ReactDOM' is defined but never used               no-unused-vars
+[34mstatic_1  |[0m   Line 362:14:  'caretAtStart' is assigned a value but never used  no-unused-vars
 [34mstatic_1  |[0m 
-[34mstatic_1  |[0m ./src/actions/discussionActions.js
-[34mstatic_1  |[0m   Line 3:10:    'cleanUpRequest' is defined but never used           no-unused-vars
-[34mstatic_1  |[0m   Line 12:3:    'unpackContext' is defined but never used            no-unused-vars
-[34mstatic_1  |[0m   Line 16:3:    'INVALID_USER_SESSION' is defined but never used     no-unused-vars
-[34mstatic_1  |[0m   Line 17:3:    'BAD_REQUEST' is defined but never used              no-unused-vars
-[34mstatic_1  |[0m   Line 18:3:    'BAD_RESPONSE' is defined but never used             no-unused-vars
-[34mstatic_1  |[0m   Line 19:3:    'BAD_DISCUSSION_ID' is defined but never used        no-unused-vars
-[34mstatic_1  |[0m   Line 20:3:    'BAD_USER_ID' is defined but never used              no-unused-vars
-[34mstatic_1  |[0m   Line 21:3:    'BAD_UNIT_ID' is defined but never used              no-unused-vars
-[34mstatic_1  |[0m   Line 22:3:    'BAD_POSITION' is defined but never used             no-unused-vars
-[34mstatic_1  |[0m   Line 23:3:    'BAD_EDIT_TRY' is defined but never used             no-unused-vars
-[34mstatic_1  |[0m   Line 24:3:    'BAD_POSITION_TRY' is defined but never used         no-unused-vars
-[34mstatic_1  |[0m   Line 25:3:    'BAD_PARENT' is defined but never used               no-unused-vars
-[34mstatic_1  |[0m   Line 26:3:    'FAILED_EDIT_ACQUIRE' is defined but never used      no-unused-vars
-[34mstatic_1  |[0m   Line 27:3:    'FAILED_POSITION_ACQUIRE' is defined but never used  no-unused-vars
-[34mstatic_1  |[0m   Line 28:3:    'NICKNAME_EXISTS' is defined but never used          no-unused-vars
-[34mstatic_1  |[0m   Line 29:3:    'USER_ID_EXISTS' is defined but never used           no-unused-vars
-[34mstatic_1  |[0m   Line 33:3:    'GENERIC_ERROR' is defined but never used            no-unused-vars
-[34mstatic_1  |[0m   Line 67:3:    'LOAD_USER' is defined but never used                no-unused-vars
-[34mstatic_1  |[0m   Line 84:3:    'SYSTEM_ERROR' is defined but never used             no-unused-vars
-[34mstatic_1  |[0m   Line 90:7:    'joinUser' is assigned a value but never used        no-unused-vars
-[34mstatic_1  |[0m   Line 161:13:  'statusCode' is constant                             no-const-assign
-[34mstatic_1  |[0m 
-[34mstatic_1  |[0m ./src/reducers/discussionReducer.js
-[34mstatic_1  |[0m   Line 50:7:   Unreachable code  no-unreachable
-[34mstatic_1  |[0m   Line 64:7:   Unreachable code  no-unreachable
-[34mstatic_1  |[0m   Line 75:7:   Unreachable code  no-unreachable
-[34mstatic_1  |[0m   Line 83:7:   Unreachable code  no-unreachable
-[34mstatic_1  |[0m   Line 91:7:   Unreachable code  no-unreachable
-[34mstatic_1  |[0m   Line 100:7:  Unreachable code  no-unreachable
-[34mstatic_1  |[0m   Line 109:7:  Unreachable code  no-unreachable
-[34mstatic_1  |[0m   Line 118:7:  Unreachable code  no-unreachable
-[34mstatic_1  |[0m   Line 125:7:  Unreachable code  no-unreachable
-[34mstatic_1  |[0m   Line 134:7:  Unreachable code  no-unreachable
-[34mstatic_1  |[0m   Line 141:7:  Unreachable code  no-unreachable
-[34mstatic_1  |[0m   Line 148:7:  Unreachable code  no-unreachable
+[34mstatic_1  |[0m ./src/components/UnitLayout.jsx
+[34mstatic_1  |[0m   Line 31:7:  'StyledRefNum' is assigned a value but never used  no-unused-vars
 [34mstatic_1  |[0m 
 [34mstatic_1  |[0m Search for the keywords to learn more about each warning.
 [34mstatic_1  |[0m To ignore, add // eslint-disable-next-line to the line before.
 [34mstatic_1  |[0m 
-Stopping pith_tests_1  ... 
+[33;1mworker_1  |[0m INFO:engineio.server:Server initialized for aiohttp.
+[33;1mworker_1  |[0m DEBUG:asyncio:Using selector: EpollSelector
+[33;1mworker_1  |[0m DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
+[33;1mworker_1  |[0m DEBUG:aioredis:Creating tcp connection to ('redis', 6379)
+[33;1mworker_1  |[0m 02:19:43: Starting worker for 1 functions: test
+[33;1mworker_1  |[0m INFO:arq.worker:Starting worker for 1 functions: test
+[33;1mworker_1  |[0m 02:19:43: redis_version=6.0.7 mem_usage=886.10K clients_connected=3 db_keys=0
+[33;1mworker_1  |[0m INFO:arq.worker:redis_version=6.0.7 mem_usage=886.10K clients_connected=3 db_keys=0
+[33;1mworker_1  |[0m INFO:root:Starting new worker...
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.731+00:00"},"s":"I",  "c":"CONTROL",  "id":20609,   "ctx":"SignalHandler","msg":"Shutting down free monitoring"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.732+00:00"},"s":"I",  "c":"FTDC",     "id":20626,   "ctx":"SignalHandler","msg":"Shutting down full-time diagnostic data capture"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.735+00:00"},"s":"I",  "c":"STORAGE",  "id":20282,   "ctx":"SignalHandler","msg":"Deregistering all the collections"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.741+00:00"},"s":"I",  "c":"STORAGE",  "id":22261,   "ctx":"SignalHandler","msg":"Timestamp monitor shutting down"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.745+00:00"},"s":"I",  "c":"STORAGE",  "id":22317,   "ctx":"SignalHandler","msg":"WiredTigerKVEngine shutting down"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.749+00:00"},"s":"I",  "c":"STORAGE",  "id":22318,   "ctx":"SignalHandler","msg":"Shutting down session sweeper thread"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.749+00:00"},"s":"I",  "c":"STORAGE",  "id":22319,   "ctx":"SignalHandler","msg":"Finished shutting down session sweeper thread"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.749+00:00"},"s":"I",  "c":"STORAGE",  "id":22320,   "ctx":"SignalHandler","msg":"Shutting down journal flusher thread"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.749+00:00"},"s":"I",  "c":"STORAGE",  "id":22321,   "ctx":"SignalHandler","msg":"Finished shutting down journal flusher thread"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.749+00:00"},"s":"I",  "c":"STORAGE",  "id":22322,   "ctx":"SignalHandler","msg":"Shutting down checkpoint thread"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.750+00:00"},"s":"I",  "c":"STORAGE",  "id":22323,   "ctx":"SignalHandler","msg":"Finished shutting down checkpoint thread"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.750+00:00"},"s":"I",  "c":"STORAGE",  "id":4795902, "ctx":"SignalHandler","msg":"Closing WiredTiger","attr":{"closeConfig":"leak_memory=true,"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.836+00:00"},"s":"I",  "c":"STORAGE",  "id":4795901, "ctx":"SignalHandler","msg":"WiredTiger closed","attr":{"durationMillis":86}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.837+00:00"},"s":"I",  "c":"STORAGE",  "id":22279,   "ctx":"SignalHandler","msg":"shutdown: removing fs lock..."}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.837+00:00"},"s":"I",  "c":"CONTROL",  "id":20565,   "ctx":"SignalHandler","msg":"Now exiting"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:37.837+00:00"},"s":"I",  "c":"CONTROL",  "id":23138,   "ctx":"SignalHandler","msg":"Shutting down","attr":{"exitCode":0}}
+[32mmongo_1   |[0m 
+[32mmongo_1   |[0m MongoDB init process complete; ready for start up.
+[32mmongo_1   |[0m 
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:38.820+00:00"},"s":"I",  "c":"CONTROL",  "id":23285,   "ctx":"main","msg":"Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:38.841+00:00"},"s":"W",  "c":"ASIO",     "id":22601,   "ctx":"main","msg":"No TransportLayer configured during NetworkInterface startup"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:38.846+00:00"},"s":"I",  "c":"NETWORK",  "id":4648601, "ctx":"main","msg":"Implicit TCP FastOpen unavailable. If TCP FastOpen is required, set tcpFastOpenServer, tcpFastOpenClient, and tcpFastOpenQueueSize."}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:38.846+00:00"},"s":"I",  "c":"STORAGE",  "id":4615611, "ctx":"initandlisten","msg":"MongoDB starting","attr":{"pid":1,"port":27017,"dbPath":"/data/db","architecture":"64-bit","host":"6565970cd08b"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:38.846+00:00"},"s":"I",  "c":"CONTROL",  "id":23403,   "ctx":"initandlisten","msg":"Build Info","attr":{"buildInfo":{"version":"4.4.0","gitVersion":"563487e100c4215e2dce98d0af2a6a5a2d67c5cf","openSSLVersion":"OpenSSL 1.1.1  11 Sep 2018","modules":[],"allocator":"tcmalloc","environment":{"distmod":"ubuntu1804","distarch":"x86_64","target_arch":"x86_64"}}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:38.847+00:00"},"s":"I",  "c":"CONTROL",  "id":51765,   "ctx":"initandlisten","msg":"Operating System","attr":{"os":{"name":"Ubuntu","version":"18.04"}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:38.847+00:00"},"s":"I",  "c":"CONTROL",  "id":21951,   "ctx":"initandlisten","msg":"Options set by command line","attr":{"options":{"net":{"bindIp":"*"},"security":{"authorization":"enabled"}}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:38.849+00:00"},"s":"I",  "c":"STORAGE",  "id":22270,   "ctx":"initandlisten","msg":"Storage engine to use detected by data files","attr":{"dbpath":"/data/db","storageEngine":"wiredTiger"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:38.850+00:00"},"s":"I",  "c":"STORAGE",  "id":22297,   "ctx":"initandlisten","msg":"Using the XFS filesystem is strongly recommended with the WiredTiger storage engine. See http://dochub.mongodb.org/core/prodnotes-filesystem","tags":["startupWarnings"]}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:38.850+00:00"},"s":"I",  "c":"STORAGE",  "id":22315,   "ctx":"initandlisten","msg":"Opening WiredTiger","attr":{"config":"create,cache_size=256M,session_max=33000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000,close_scan_interval=10,close_handle_minimum=250),statistics_log=(wait=0),verbose=[recovery_progress,checkpoint_progress,compact_progress],"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:41.976+00:00"},"s":"I",  "c":"STORAGE",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":"[1605752381:976407][1:0x7f758631fa80], txn-recover: [WT_VERB_RECOVERY_PROGRESS] Recovering log 1 through 2"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:42.286+00:00"},"s":"I",  "c":"STORAGE",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":"[1605752382:286782][1:0x7f758631fa80], txn-recover: [WT_VERB_RECOVERY_PROGRESS] Recovering log 2 through 2"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:42.613+00:00"},"s":"I",  "c":"STORAGE",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":"[1605752382:613348][1:0x7f758631fa80], txn-recover: [WT_VERB_RECOVERY | WT_VERB_RECOVERY_PROGRESS] Main recovery loop: starting at 1/25728 to 2/256"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:42.933+00:00"},"s":"I",  "c":"STORAGE",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":"[1605752382:933680][1:0x7f758631fa80], txn-recover: [WT_VERB_RECOVERY_PROGRESS] Recovering log 1 through 2"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.119+00:00"},"s":"I",  "c":"STORAGE",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":"[1605752383:119058][1:0x7f758631fa80], txn-recover: [WT_VERB_RECOVERY_PROGRESS] Recovering log 2 through 2"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.268+00:00"},"s":"I",  "c":"STORAGE",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":"[1605752383:268278][1:0x7f758631fa80], txn-recover: [WT_VERB_RECOVERY | WT_VERB_RECOVERY_PROGRESS] Set global recovery timestamp: (0, 0)"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.303+00:00"},"s":"I",  "c":"STORAGE",  "id":4795906, "ctx":"initandlisten","msg":"WiredTiger opened","attr":{"durationMillis":4453}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.306+00:00"},"s":"I",  "c":"RECOVERY", "id":23987,   "ctx":"initandlisten","msg":"WiredTiger recoveryTimestamp","attr":{"recoveryTimestamp":{"$timestamp":{"t":0,"i":0}}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.327+00:00"},"s":"I",  "c":"STORAGE",  "id":22262,   "ctx":"initandlisten","msg":"Timestamp monitor starting"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.353+00:00"},"s":"I",  "c":"STORAGE",  "id":20536,   "ctx":"initandlisten","msg":"Flow Control is enabled on this deployment"}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.363+00:00"},"s":"I",  "c":"FTDC",     "id":20625,   "ctx":"initandlisten","msg":"Initializing full-time diagnostic data capture","attr":{"dataDirectory":"/data/db/diagnostic.data"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.366+00:00"},"s":"I",  "c":"NETWORK",  "id":23015,   "ctx":"listener","msg":"Listening on","attr":{"address":"/tmp/mongodb-27017.sock"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.368+00:00"},"s":"I",  "c":"NETWORK",  "id":23015,   "ctx":"listener","msg":"Listening on","attr":{"address":"0.0.0.0"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.368+00:00"},"s":"I",  "c":"NETWORK",  "id":23016,   "ctx":"listener","msg":"Waiting for connections","attr":{"port":27017,"ssl":"off"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.404+00:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"connection accepted","attr":{"remote":"172.19.0.5:35086","sessionId":1,"connectionCount":1}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.405+00:00"},"s":"I",  "c":"NETWORK",  "id":51800,   "ctx":"conn1","msg":"client metadata","attr":{"remote":"172.19.0.5:35086","client":"conn1","doc":{"driver":{"name":"PyMongo","version":"3.10.1"},"os":{"type":"Linux","name":"Linux","architecture":"x86_64","version":"4.15.0-112-generic"},"platform":"CPython 3.8.5.final.0"}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.407+00:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"connection accepted","attr":{"remote":"172.19.0.5:35088","sessionId":2,"connectionCount":2}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.407+00:00"},"s":"I",  "c":"NETWORK",  "id":51800,   "ctx":"conn2","msg":"client metadata","attr":{"remote":"172.19.0.5:35088","client":"conn2","doc":{"driver":{"name":"PyMongo","version":"3.10.1"},"os":{"type":"Linux","name":"Linux","architecture":"x86_64","version":"4.15.0-112-generic"},"platform":"CPython 3.8.5.final.0"}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.435+00:00"},"s":"I",  "c":"ACCESS",   "id":20250,   "ctx":"conn2","msg":"Successful authentication","attr":{"mechanism":"SCRAM-SHA-256","principalName":"root","authenticationDatabase":"admin","client":"172.19.0.5:35088"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.453+00:00"},"s":"I",  "c":"ACCESS",   "id":20250,   "ctx":"conn2","msg":"Successful authentication","attr":{"mechanism":"SCRAM-SHA-256","principalName":"root","authenticationDatabase":"admin","client":"172.19.0.5:35088"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.457+00:00"},"s":"I",  "c":"STORAGE",  "id":20320,   "ctx":"conn2","msg":"createCollection","attr":{"namespace":"pith.unit","uuidDisposition":"generated","uuid":{"uuid":{"$uuid":"16460174-c467-4d7d-98ed-c12cd40ecd0b"}},"options":{}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.469+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"conn2","msg":"Index build: done building","attr":{"buildUUID":null,"namespace":"pith.unit","index":"_id_","commitTimestamp":{"$timestamp":{"t":0,"i":0}}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.469+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"conn2","msg":"Index build: done building","attr":{"buildUUID":null,"namespace":"pith.unit","index":"pith_text","commitTimestamp":{"$timestamp":{"t":0,"i":0}}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.554+00:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"connection accepted","attr":{"remote":"172.19.0.2:42274","sessionId":3,"connectionCount":3}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.555+00:00"},"s":"I",  "c":"NETWORK",  "id":51800,   "ctx":"conn3","msg":"client metadata","attr":{"remote":"172.19.0.2:42274","client":"conn3","doc":{"driver":{"name":"PyMongo","version":"3.10.1"},"os":{"type":"Linux","name":"Linux","architecture":"x86_64","version":"4.15.0-112-generic"},"platform":"CPython 3.8.5.final.0"}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.556+00:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"connection accepted","attr":{"remote":"172.19.0.2:42276","sessionId":4,"connectionCount":4}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.556+00:00"},"s":"I",  "c":"NETWORK",  "id":51800,   "ctx":"conn4","msg":"client metadata","attr":{"remote":"172.19.0.2:42276","client":"conn4","doc":{"driver":{"name":"PyMongo","version":"3.10.1"},"os":{"type":"Linux","name":"Linux","architecture":"x86_64","version":"4.15.0-112-generic"},"platform":"CPython 3.8.5.final.0"}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.573+00:00"},"s":"I",  "c":"ACCESS",   "id":20250,   "ctx":"conn4","msg":"Successful authentication","attr":{"mechanism":"SCRAM-SHA-256","principalName":"root","authenticationDatabase":"admin","client":"172.19.0.2:42276"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:43.589+00:00"},"s":"I",  "c":"ACCESS",   "id":20250,   "ctx":"conn4","msg":"Successful authentication","attr":{"mechanism":"SCRAM-SHA-256","principalName":"root","authenticationDatabase":"admin","client":"172.19.0.2:42276"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:49.393+00:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"connection accepted","attr":{"remote":"172.19.0.5:35096","sessionId":5,"connectionCount":5}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:49.394+00:00"},"s":"I",  "c":"NETWORK",  "id":51800,   "ctx":"conn5","msg":"client metadata","attr":{"remote":"172.19.0.5:35096","client":"conn5","doc":{"driver":{"name":"PyMongo","version":"3.10.1"},"os":{"type":"Linux","name":"Linux","architecture":"x86_64","version":"4.15.0-112-generic"},"platform":"CPython 3.8.5.final.0"}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:52.071+00:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"connection accepted","attr":{"remote":"172.19.0.2:42280","sessionId":6,"connectionCount":6}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:52.073+00:00"},"s":"I",  "c":"NETWORK",  "id":51800,   "ctx":"conn6","msg":"client metadata","attr":{"remote":"172.19.0.2:42280","client":"conn6","doc":{"driver":{"name":"PyMongo","version":"3.10.1"},"os":{"type":"Linux","name":"Linux","architecture":"x86_64","version":"4.15.0-112-generic"},"platform":"CPython 3.8.5.final.0"}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:58.860+00:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"connection accepted","attr":{"remote":"172.19.0.7:52654","sessionId":7,"connectionCount":7}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:58.866+00:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"connection accepted","attr":{"remote":"172.19.0.7:52656","sessionId":8,"connectionCount":8}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:58.867+00:00"},"s":"I",  "c":"NETWORK",  "id":51800,   "ctx":"conn8","msg":"client metadata","attr":{"remote":"172.19.0.7:52656","client":"conn8","doc":{"driver":{"name":"PyMongo","version":"3.10.1"},"os":{"type":"Linux","name":"Linux","architecture":"x86_64","version":"4.15.0-112-generic"},"platform":"CPython 3.8.5.final.0"}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:58.868+00:00"},"s":"I",  "c":"NETWORK",  "id":51800,   "ctx":"conn7","msg":"client metadata","attr":{"remote":"172.19.0.7:52654","client":"conn7","doc":{"driver":{"name":"PyMongo","version":"3.10.1"},"os":{"type":"Linux","name":"Linux","architecture":"x86_64","version":"4.15.0-112-generic"},"platform":"CPython 3.8.5.final.0"}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:58.870+00:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"connection accepted","attr":{"remote":"172.19.0.7:52660","sessionId":9,"connectionCount":9}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:58.871+00:00"},"s":"I",  "c":"NETWORK",  "id":51800,   "ctx":"conn9","msg":"client metadata","attr":{"remote":"172.19.0.7:52660","client":"conn9","doc":{"driver":{"name":"PyMongo","version":"3.10.1"},"os":{"type":"Linux","name":"Linux","architecture":"x86_64","version":"4.15.0-112-generic"},"platform":"CPython 3.8.5.final.0"}}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:58.894+00:00"},"s":"I",  "c":"ACCESS",   "id":20250,   "ctx":"conn9","msg":"Successful authentication","attr":{"mechanism":"SCRAM-SHA-256","principalName":"root","authenticationDatabase":"admin","client":"172.19.0.7:52660"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:19:58.908+00:00"},"s":"I",  "c":"ACCESS",   "id":20250,   "ctx":"conn9","msg":"Successful authentication","attr":{"mechanism":"SCRAM-SHA-256","principalName":"root","authenticationDatabase":"admin","client":"172.19.0.7:52660"}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:21:48.701+00:00"},"s":"I",  "c":"NETWORK",  "id":22944,   "ctx":"conn7","msg":"connection ended","attr":{"remote":"172.19.0.7:52654","connectionCount":8}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:21:48.810+00:00"},"s":"I",  "c":"NETWORK",  "id":22944,   "ctx":"conn9","msg":"connection ended","attr":{"remote":"172.19.0.7:52660","connectionCount":7}}
+[32mmongo_1   |[0m {"t":{"$date":"2020-11-19T02:21:48.811+00:00"},"s":"I",  "c":"NETWORK",  "id":22944,   "ctx":"conn8","msg":"connection ended","attr":{"remote":"172.19.0.7:52656","connectionCount":6}}
+[33mpith_common_1 exited with code 0
+[0mStopping pith_tests_1  ... 
 Stopping pith_static_1 ... 
-Stopping pith_redis_1  ... 
+Stopping pith_worker_1 ... 
+Stopping pith_app_1    ... 
 Stopping pith_mongo_1  ... 
-[3A[2KStopping pith_static_1 ... [32mdone[0m[3BKilling pith_tests_1   ... 
-Killing pith_redis_1   ... 
+Stopping pith_redis_1  ... 
+Killing pith_tests_1   ... 
+Killing pith_static_1  ... 
+Killing pith_worker_1  ... 
+Killing pith_app_1     ... 
 Killing pith_mongo_1   ... 
-Aborting.
+Killing pith_redis_1   ... 
+[5A[2KKilling pith_static_1  ... [31merror[0m[5BAborting.
 Gracefully stopping... (press Ctrl+C again to force)

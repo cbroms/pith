@@ -1,7 +1,8 @@
 import arq
 import logging
+logging.basicConfig(level=logging.DEBUG)
 
-from worker_functions import expire_discussion
+from worker.worker_functions import test  
 import constants
 
 
@@ -19,4 +20,4 @@ class WorkerSettings(arq.worker.Worker):
     max_tries = constants.MAX_QUEUED_JOB_RETRIES
     on_startup = startup
     on_shutdown = shutdown
-    functions = [expire_discussion]
+    functions = [test]

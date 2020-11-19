@@ -28,6 +28,8 @@ services:
       MONGODB_CONN: ${MONGO}
       MONGODB_NAME: ${MONGO_NAME}
       REDIS_IP: ${REDIS}
+      AWS_ACCESS_KEY: ${AWS_WORKER_ACCESS_KEY}
+      AWS_SECRET: ${AWS_WORKER_SECRET_KEY}
     working_dir: /api
   static:
     build:
