@@ -568,6 +568,7 @@ const requestEdit = (unitId, requestId) => {
       requestId
     );
 
+    console.log("requesting edit ");
     startRequest(() =>
       socket.emit("request_to_edit", data, (res) => {
         const response = JSON.parse(res);
@@ -610,10 +611,11 @@ const deeditUnit = (unitId, requestId) => {
   };
 };
 
-const editUnit = (unitId, requestId) => {
+const editUnit = (unitId, pith, requestId) => {
   return (dispatch) => {
     const data = {
       unit_id: unitId,
+      pith: pith,
     };
 
     const [startRequest, endRequest] = createRequestWrapper(

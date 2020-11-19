@@ -19,8 +19,8 @@ const execNext = () => {
 };
 
 // the handler we use to wrap all requests to the api
-const createRequestWrapper = (actionType, dispatch, id, timeout = 5000) => {
-  let interval;
+const createRequestWrapper = (actionType, dispatch, id, timeoutTime = 5000) => {
+  let timeout;
   let elapsed = 0;
 
   const startRequest = (func) => {
@@ -33,17 +33,12 @@ const createRequestWrapper = (actionType, dispatch, id, timeout = 5000) => {
         // exectute the request (socket.emit...)
         func();
         // check that the request is still active after some duration
-        interval = setInterval(() => {
-          elapsed += 1000;
-
-          if (elapsed >= timeout) {
-            console.error("request timed out", func);
-            dispatch({
-              type: REQUEST_TIMEOUT,
-            });
-            clearInterval(interval);
-          }
-        }, 1000);
+        timeout = setTimeout(() => {
+          console.error("request timed out", func);
+          dispatch({
+            type: REQUEST_TIMEOUT,
+          });
+        }, timeoutTime);
       },
     };
 
@@ -52,7 +47,7 @@ const createRequestWrapper = (actionType, dispatch, id, timeout = 5000) => {
 
   // when the request completes, clear the interval
   const endRequest = (statusCode) => {
-    clearInterval(interval);
+    clearTimeout(timeout);
 
     //console.log("removing request", id);
 

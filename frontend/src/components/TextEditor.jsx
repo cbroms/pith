@@ -122,7 +122,6 @@ class TextEditor extends React.Component {
               : this.props.focusedPosition !== null
               ? this.props.focusedPosition
               : getDecodedLengthOfPith(this.state.html);
-          console.log(this.state.focusedPosition, this.props.focusedPosition);
 
           let position = focusedPosition;
           let targetNode = this.ref.current.childNodes[0] || this.ref.current;

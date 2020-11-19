@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { v4 as uuidv4 } from "uuid";
 import {
     BrowserRouter as Router,
     Switch,
@@ -16,7 +17,6 @@ import {
     TAKEN_USER_ID,
 } from "../utils/errors";
 
-import { v4 as uuidv4 } from "uuid";
 import {
     enterDiscussion,
     createUser,
@@ -34,7 +34,7 @@ import { createCitation } from "../utils/pithModifiers";
 import useRequest from "../hooks/useRequest";
 
 import Chat from "./Chat";
-import Document from "./Document";
+import DocumentContextController from "./DocumentContextController";
 import Menu from "./Menu";
 import Search from "./Search";
 import DiscussionJoin from "./DiscussionJoin";
@@ -158,13 +158,9 @@ const Discussion = (props) => {
     );
 
     const doc = (
-        <Document
+        <DocumentContextController
+            {...props}
             loading={loading}
-            units={props.docMap}
-            ancestors={props.ancestors}
-            currentUnit={props.currentUnit}
-            users={props.icons}
-            timeline={props.timeline}
             openUnit={(id) => {
                 console.log("opened:", id);
                 props.dispatch(getPage(id, uuidv4()));

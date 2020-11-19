@@ -39,6 +39,7 @@ class Document extends React.Component {
         this.onUnitEnter = this.onUnitEnter.bind(this);
         this.onUnitEdit = this.onUnitEdit.bind(this);
         this.onUnitTab = this.onUnitTab.bind(this);
+        this.onUnitFocus = this.onUnitFocus.bind(this);
 
         this.getDragInfo = this.getDragInfo.bind(this);
     }
@@ -53,7 +54,7 @@ class Document extends React.Component {
     // return whichever store we're using (locally modified or global from props)
     getStore() {
         if (Object.keys(this.state.tempUnitCopy).length === 0)
-            return this.props.units;
+            return this.props.docMap;
         return this.state.tempUnitCopy;
     }
 
@@ -111,6 +112,8 @@ class Document extends React.Component {
     }
 
     onUnitEdit(content, id, pid) {
+        this.props.onUnitEdit(id, content);
+        this.props.onUnitDefocus(id);
         const store = this.getStoreCopy();
         const newStore = handleEdit(store, content, id, pid);
         if (newStore !== null) {
@@ -120,9 +123,17 @@ class Document extends React.Component {
         }
     }
 
+    onUnitFocus(id, pith) {
+        this.props.onUnitFocus(id);
+        this.setState({
+            focused: id,
+            focusedPosition: getDecodedLengthOfPith(pith),
+        });
+    }
+
     handleDragEnd(e) {
         // TODO: change this
-        const store = { ...this.props.units };
+        const store = this.getStoreCopy();
 
         const newDoc = handleDrag(
             store,
@@ -198,10 +209,7 @@ class Document extends React.Component {
                         this.onUnitTab(shifted, id, pid, ppid)
                     }
                     onFocus={() => {
-                        this.setState({
-                            focused: id,
-                            focusedPosition: getDecodedLengthOfPith(pith),
-                        });
+                        this.onUnitFocus(id, pith);
                     }}
                     onBlur={() => this.setState({ focused: null })}
                     focused={this.state.focused === id}
@@ -325,7 +333,7 @@ class Document extends React.Component {
         );
         const users = (
             <UsersLayout
-                users={this.props.users}
+                users={this.props.icons}
                 currentUnit={this.props.currentUnit}
             />
         );
