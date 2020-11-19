@@ -876,7 +876,8 @@ class DiscussionManager:
           forward_links=forward_links,
           edit_count=unit.get().edit_count + 1 # increment
         )
-        self._release_edit(unit_id)
+        # do not release lock yet
+        #self._release_edit(unit_id)
 
         # handle backlinks
         removed_links = set(old_forward_links).difference(set(forward_links)) 
