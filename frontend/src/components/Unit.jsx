@@ -97,11 +97,9 @@ const Unit = (props) => {
                     renderedContent={content} // pass the rendered version of the unit (with link icons)
                     content={pith}
                     isEmpty={pith.length === 0}
-                    onFocus={props.onFocus}
-                    onBlur={(temp) => {
-                        props.unitEdit(temp);
-                        props.onBlur();
-                    }}
+                    unitFocus={props.unitFocus}
+                    unitEdit={props.unitEdit}
+                    unitBlur={props.unitBlur}
                     focused={props.focused}
                     focusedPosition={props.focusedPosition}
                     placeholder={props.placeholder}

@@ -28,6 +28,7 @@ const StyledChat = styled.div`
 	align-items: flex-end;
 	flex-wrap: wrap;
 	align-content: flex-end;
+	width: 100%;
 `;
 
 class ChatScroller extends React.Component {

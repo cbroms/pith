@@ -568,7 +568,6 @@ const requestEdit = (unitId, requestId) => {
       requestId
     );
 
-    console.log("requesting edit ");
     startRequest(() =>
       socket.emit("request_to_edit", data, (res) => {
         const response = JSON.parse(res);
@@ -652,16 +651,19 @@ const subscribeChat = () => {
 const subscribeDocument = () => {
   return (dispatch) => {
     socket.on("join", (res) => {
+      console.log("join");
       const response = JSON.parse(res);
       handleJoin(response, dispatch);
     });
 
     socket.on("leave", (res) => {
+      console.log("leave");
       const response = JSON.parse(res);
       handleLeave(response, dispatch);
     });
 
     socket.on("load_unit_page", (res) => {
+      console.log("load_unit_page");
       const response = JSON.parse(res);
       handleLoadUnitPage(response, dispatch);
     });
@@ -673,46 +675,55 @@ const subscribeDocument = () => {
     });
 
     socket.on("hide_unit", (res) => {
+      console.log("hide_unit");
       const response = JSON.parse(res);
       handleHideUnit(response, dispatch);
     });
 
     socket.on("unhide_unit", (res) => {
+      console.log("unhide_unit");
       const response = JSON.parse(res);
       handleUnhideUnit(response, dispatch);
     });
 
     socket.on("add_unit", (res) => {
+      console.log("add_unit");
       const response = JSON.parse(res);
       handleAddUnit(response, dispatch);
     });
 
     socket.on("select_unit", (res) => {
+      console.log("select_unit");
       const response = JSON.parse(res);
       handleSelectUnit(response, dispatch);
     });
 
     socket.on("deselect_unit", (res) => {
+      console.log("deselect_unit");
       const response = JSON.parse(res);
       handleDeselectUnit(response, dispatch);
     });
 
     socket.on("move_units", (res) => {
+      console.log("move_units");
       const response = JSON.parse(res);
       handleMoveUnits(response, dispatch);
     });
 
     socket.on("request_to_edit", (res) => {
+      console.log("request_to_edit");
       const response = JSON.parse(res);
       handleRequestToEdit(response, dispatch);
     });
 
     socket.on("deedit_unit", (res) => {
+      console.log("deedit_unit");
       const response = JSON.parse(res);
       handleDeeditUnit(response, dispatch);
     });
 
     socket.on("edit_unit", (res) => {
+      console.log("edit_unit");
       const response = JSON.parse(res);
       handleEditUnit(response, dispatch);
     });

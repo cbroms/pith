@@ -21,7 +21,7 @@ class Document extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            tempUnitCopy: {}, // a temporary copy of the unit store while we're editing
+            tempUnitCopy: this.props.docMap, // a temporary copy of the unit store while we're editing
             dragged: null,
             dragTarget: null,
             focused: null,
@@ -40,22 +40,20 @@ class Document extends React.Component {
         this.onUnitEdit = this.onUnitEdit.bind(this);
         this.onUnitTab = this.onUnitTab.bind(this);
         this.onUnitFocus = this.onUnitFocus.bind(this);
+        this.onUnitBlur = this.onUnitBlur.bind(this);
 
         this.getDragInfo = this.getDragInfo.bind(this);
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        // wipe any local updates
-        // if (this.state.documentCopy.length > 0) {
-        //     this.setState({ documentCopy: [] });
-        // }
-    }
-
     // return whichever store we're using (locally modified or global from props)
     getStore() {
-        if (Object.keys(this.state.tempUnitCopy).length === 0)
+        if (this.props.docMap === null) {
+            // use the copy since some request is pending and the state is not up to date
+            // with the local version we have stored
+            return this.state.tempUnitCopy;
+        } else {
             return this.props.docMap;
-        return this.state.tempUnitCopy;
+        }
     }
 
     // get a copy of whichever store we're using,
@@ -94,13 +92,16 @@ class Document extends React.Component {
 
     onUnitEnter(caretPos, content, id, pid) {
         const store = this.getStoreCopy();
-        const [newContent, focused, newStore] = handleEnter(
+        const [newContent, newUnitPith, focused, pos, newStore] = handleEnter(
             store,
             caretPos,
             content,
             id,
             pid
         );
+
+        this.props.onCreateUnit(newUnitPith, pid, pos);
+
         if (newStore !== null) {
             this.setState({
                 focused: focused,
@@ -108,12 +109,12 @@ class Document extends React.Component {
                 tempUnitCopy: newStore,
             });
         }
+        //
         return newContent;
     }
 
     onUnitEdit(content, id, pid) {
         this.props.onUnitEdit(id, content);
-        this.props.onUnitDefocus(id);
         const store = this.getStoreCopy();
         const newStore = handleEdit(store, content, id, pid);
         if (newStore !== null) {
@@ -129,6 +130,11 @@ class Document extends React.Component {
             focused: id,
             focusedPosition: getDecodedLengthOfPith(pith),
         });
+    }
+
+    onUnitBlur(id) {
+        this.props.onUnitBlur(id);
+        this.setState({ focused: null });
     }
 
     handleDragEnd(e) {
@@ -208,10 +214,12 @@ class Document extends React.Component {
                     unitTab={(shifted) =>
                         this.onUnitTab(shifted, id, pid, ppid)
                     }
-                    onFocus={() => {
+                    unitFocus={() => {
                         this.onUnitFocus(id, pith);
                     }}
-                    onBlur={() => this.setState({ focused: null })}
+                    unitBlur={() => {
+                        this.onUnitBlur(id);
+                    }}
                     focused={this.state.focused === id}
                     focusedPosition={
                         this.state.focused === id

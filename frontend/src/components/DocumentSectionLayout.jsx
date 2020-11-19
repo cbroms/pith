@@ -55,7 +55,7 @@ const StyledUnit = styled.div`
     font-size: ${(props) =>
         props.level === 1 ? props.theme.largeFont : "inherit"};
 
-    transition: border ${(props) => props.theme.animation};
+   // transition: border ${(props) => props.theme.animation};
 
     border: ${(props) =>
         props.over
@@ -64,9 +64,9 @@ const StyledUnit = styled.div`
             ? "2px solid " + props.theme.shade2
             : "2px solid transparent"};
 
-    :active {
-        cursor: grabbing;
-    }
+    // :active {
+    //     cursor: grabbing;
+    // }
 `;
 
 const StyledEnter = styled.div`

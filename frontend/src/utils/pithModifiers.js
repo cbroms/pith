@@ -2,8 +2,8 @@ import { unescape } from "html-escaper";
 
 const getDecodedLengthOfPith = (pith) => {
 	// return the position without any html encoded chars
-	if (pith.includes("<br>")) {
-		return unescape(pith.replace("<br>", "")).length;
+	if (pith.includes("<br>") || pith.includes("&nbsp;")) {
+		return unescape(pith.replace("<br>", "").replace("&nbsp;", " ")).length;
 	}
 	return unescape(pith).length;
 };

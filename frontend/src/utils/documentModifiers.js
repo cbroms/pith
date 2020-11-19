@@ -71,8 +71,6 @@ const handleTab = (store, shift, id, pid, ppid) => {
 // to be copied into the new unit.
 const handleEnter = (store, caretPos, content, id, pid) => {
     let newUnitPith = content.substring(caretPos, content.length);
-    console.log(content);
-    console.log(newUnitPith);
 
     // check for a few cases where we want to clean up the new unit
     if (newUnitPith === "<br>") newUnitPith = "";
@@ -90,11 +88,14 @@ const handleEnter = (store, caretPos, content, id, pid) => {
         children: [],
     };
 
+    let pos;
+
     if (pid !== null) {
-        const pos = store[pid].children.indexOf(id);
+        pos = store[pid].children.indexOf(id);
         // add the unit as a child
         store[pid].children.splice(pos + 1, 0, newUnitId);
     } else {
+        pos = 0;
         // add a child unit to the first position
         store[id].children.splice(0, 0, newUnitId);
     }
@@ -105,7 +106,7 @@ const handleEnter = (store, caretPos, content, id, pid) => {
     // console.log(caretPos);
     // console.log("new:", newUnitPith));
 
-    return [content.substring(0, caretPos), newUnitId, store];
+    return [content.substring(0, caretPos), newUnitPith, newUnitId, pos, store];
 };
 
 const handleDelete = (store, isEmpty, content, id, pid) => {
@@ -138,7 +139,6 @@ const handleDelete = (store, isEmpty, content, id, pid) => {
 
 // edit the pith of a unit
 const handleEdit = (store, content, id, pid) => {
-    console.log("editing");
     store[id].pith = content;
     return store;
 };

@@ -21,10 +21,10 @@ const useRequest = (completedRequests) => {
 	const execute = (func) => {
 		// make some kind of request (usually dispatch an action)
 		const requestId = uuidv4();
+		setStatus({ made: true, pending: true, requestId: requestId });
 		// here we pass a randomly generated id to identify this request in
 		// the completedRequests array in the redux store
 		func(requestId);
-		setStatus({ made: true, pending: true, requestId: requestId });
 	};
 
 	// check if the request has completed when the props change

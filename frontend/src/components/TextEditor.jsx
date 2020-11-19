@@ -1,8 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import DOMPurify from "dompurify";
-import { escape } from "html-escaper";
 
+import { getCaretPosition, setFocus } from "../utils/editorModifiers";
 import { getDecodedLengthOfPith } from "../utils/pithModifiers";
 
 import TextEditorLayout from "./TextEditorLayout";
@@ -104,61 +104,14 @@ class TextEditor extends React.Component {
       // console.log(this.props.focusedPosition);
       // console.log("checking focus ");
 
-      // set the cursor position in the element
-      // this is wrapped in a timeout because we want it to excecute only after this.ref.current
-      // has updated from the rerender
-      window.setTimeout(() => {
-        // make sure we haven't *just* focused, since there's no other way to tell if we already
-        // updated focus since we're using a timeout and reference (no state info here)
-        if (document.activeElement !== this.ref.current || force) {
-          //this.ref.current.focus();
-          const setpos = document.createRange();
-          const set = window.getSelection();
-          // console.log(this.ref.current.childNodes);
+      const focusedPosition =
+        this.state.focusedPosition !== null
+          ? this.state.focusedPosition
+          : this.props.focusedPosition !== null
+          ? this.props.focusedPosition
+          : getDecodedLengthOfPith(this.state.html);
 
-          const focusedPosition =
-            this.state.focusedPosition !== null
-              ? this.state.focusedPosition
-              : this.props.focusedPosition !== null
-              ? this.props.focusedPosition
-              : getDecodedLengthOfPith(this.state.html);
-
-          let position = focusedPosition;
-          let targetNode = this.ref.current.childNodes[0] || this.ref.current;
-          let lenSoFar = 0;
-
-          // find the node to focus in
-          for (const node of this.ref.current.childNodes) {
-            targetNode = node;
-            let length = 0;
-            // get the length of the content
-            if (node.nodeName === "#text") length = node.textContent.length;
-            else length = node.innerHTML.length + node.nodeName.length * 2 + 5;
-
-            if (lenSoFar + length >= focusedPosition) {
-              // we found the node we should be focusing in
-              // now get the position within the node we should place the cursor
-              if (lenSoFar === 0) position = focusedPosition;
-              else {
-                position = length - (lenSoFar + length - focusedPosition);
-                // add the number of citation tags to the position since we're adding the cite:
-                // decorator through css which adds to the total length so add the number of
-                // characters in the dectorator
-                // if (node.nodeName === "CITE") position += 5;
-              }
-              break;
-            } else lenSoFar += length;
-          }
-
-          // console.log("setting:", targetNode, position);
-
-          setpos.setStart(targetNode, position);
-          setpos.collapse(true);
-          set.removeAllRanges();
-          set.addRange(setpos);
-          this.ref.current.focus();
-        }
-      }, 0);
+      setFocus(this.ref.current, focusedPosition, force);
     }
   }
 
@@ -182,22 +135,41 @@ class TextEditor extends React.Component {
   };
 
   onBlur() {
-    this.sanitize();
+    // reset the keypress timer so we don't end up sending the content twice!
+    clearTimeout(this.keyPressTimer);
+    this.keyPressTimer = null;
+    // we have clicked away from the editor, so emit the changes
+    if (this.props.unitEdit)
+      this.props.unitEdit(this.sanitize(this.state.html));
+    if (this.props.unitBlur) {
+      this.props.unitBlur();
+    }
     this.setState({ renderDisplay: true, editedSinceChange: false });
-    if (this.props.onBlur) this.props.onBlur(this.state.html);
   }
 
   onFocus() {
-    if (this.props.onFocus) this.props.onFocus();
+    if (this.props.unitFocus) this.props.unitFocus();
     this.setState({ renderDisplay: false });
   }
 
   handleChange(e) {
     this.setState({ html: e.target.value, editedSinceChange: true }, () => {
-      // TODO: time the duration that we've been editing, and periodically
-      // emit updates to the server. This should change props.content, so we
-      // want to keep a copy of all teh content created after the emit, then
-      // add it to the end of the new content, and adjust the cursor position.
+      // periodically emit edit updates so the server can sync changes as they happen
+      if (this.keyPressTimer === null) {
+        this.keyPressTimer = setTimeout(() => {
+          // emit the most recent state of the editor
+          if (this.props.unitEdit)
+            this.props.unitEdit(this.sanitize(this.state.html));
+
+          // keep track of the fact we're now expecting props.content to change with this
+          // most recent state. We don't want to update the content on this update, or it
+          // will wipe out everything *after* the typed content
+          // (taken care of by setting editedSinceChange to true)
+
+          clearTimeout(this.keyPressTimer);
+          this.keyPressTimer = null;
+        }, 3000); // emit every three seconds
+      }
 
       // TODO: add a color difference around text that is not yet updated on
       // the server (make it grey) like https://stackoverflow.com/a/38037538
@@ -212,7 +184,8 @@ class TextEditor extends React.Component {
 
       // if we're in search mode, send the query
       if (this.state.queryStartPos !== null) {
-        // remove the last added timer and wait another 500ms
+        // remove the last added timer and wait another 500ms so the query is only made
+        // when the user stops typing for 500ms
         clearTimeout(this.keyPressTimer);
         // this is called when the user stops typing
         this.keyPressTimer = setTimeout(() => {
@@ -226,6 +199,7 @@ class TextEditor extends React.Component {
           const queryRaw = end.substring(0, end.indexOf("&lt;"));
           // completely sanitize the string
           const query = DOMPurify.sanitize(queryRaw, this.sanitizeCompleteConf);
+          // send the query
           if (query !== "") this.props.setQuery(query);
         }, 500);
       }
@@ -233,94 +207,7 @@ class TextEditor extends React.Component {
   }
 
   getCaretPosition() {
-    let sel = window.getSelection();
-    if (sel.rangeCount) {
-      // get the caret position (this is in the rendered text)
-      const pos = sel.getRangeAt(0);
-      const start = pos.endContainer;
-      let startOffset = pos.endOffset;
-
-      // console.log("pos:", start, startOffset);
-
-      // we need to ensure the string doesn't contain any encoded html entities, or else
-      // the offset provided will be shorter (account for cases like ">" -> "&gt;")
-      if (start.textContent.length !== escape(start.textContent).length) {
-        let adjustedLen = 0;
-        for (let i = 0; i < startOffset; i++) {
-          const char = start.textContent.charAt(i);
-          // for some reason our content editable element doesn;t encode ' and " as html entities,
-          // so only escape the char if it isnt one of those
-          if (!['"', "'"].includes(char)) {
-            adjustedLen += escape(char).length;
-          } else adjustedLen += 1;
-        }
-
-        startOffset = adjustedLen;
-      }
-      // console.log(startOffset);
-
-      // is the comparison element in one of the element's children in pos 0?
-      const isFirstChild = (comp, elt) => {
-        if (elt === comp) return true;
-        else if (elt.childNodes.length > 0) {
-          return isFirstChild(comp, elt.childNodes[0]);
-        } else {
-          return false;
-        }
-      };
-
-      // is the cursor in the first position?
-      const isAtStart =
-        pos.endOffset === 0 && isFirstChild(start, this.ref.current);
-
-      const getOffset = (curr, offset) => {
-        // add the length of the element's start tag to the offset
-        const tagNameOffset =
-          curr.nodeName === "#text" || curr.nodeName === "SPAN"
-            ? 0
-            : curr.nodeName.length + 2;
-        offset += tagNameOffset;
-
-        // sum the lengths of the children before the current elt in the list
-        if (curr.parentElement !== null) {
-          for (const pChild of curr.parentElement.childNodes) {
-            if (pChild === curr) {
-              break;
-            }
-
-            // add both start and end tag offset length for a child element
-            const tagNameOffset =
-              pChild.nodeName === "#text" ? 0 : 2 * pChild.nodeName.length + 5;
-
-            //  increase the length of the offset with the element's content
-            offset +=
-              tagNameOffset === 0
-                ? escape(pChild.textContent).length
-                : pChild.innerHTML.length + tagNameOffset;
-          }
-        } else {
-          return 0;
-        }
-
-        // return the offset when we get to the top level element
-        if (curr.parentElement?.innerHTML === this.state.html) {
-          return offset;
-        }
-
-        // add the offsets of the parent's children up to the current elt
-        return getOffset(curr.parentElement, offset);
-      };
-
-      // get the offset of the cursor position in DOM tree so that it's relative to
-      // the top level element
-      const offset = isAtStart ? 0 : getOffset(start, startOffset);
-
-      // console.log("offset:", offset);
-      // console.log(this.state.html.substring(0, offset));
-      // console.log([isAtStart, offset]);
-      return [isAtStart, offset];
-    }
-    return null;
+    return getCaretPosition(this.ref.current, this.state.html);
   }
 
   handleKeyDown(e) {
@@ -440,9 +327,7 @@ class TextEditor extends React.Component {
   }
 
   sanitize() {
-    this.setState({
-      html: DOMPurify.sanitize(this.state.html, this.sanitizeConf),
-    });
+    return DOMPurify.sanitize(this.state.html, this.sanitizeConf);
   }
 
   toggleEditable() {
@@ -481,43 +366,5 @@ class TextEditor extends React.Component {
     );
   }
 }
-/*
-<div>
-  <h3>editable contents</h3>
-
-  <h3>source</h3>
-  <textarea
-    className="editable"
-    value={this.state.html}
-    onChange={this.handleChange}
-    onBlur={this.sanitize}
-  />
-  <h3>actions</h3>
-  <EditButton cmd="italic" />
-  <EditButton cmd="bold" />
-  <EditButton cmd="formatBlock" arg="h1" name="heading" />
-  <EditButton
-    cmd="createLink"
-    arg="https://github.com/lovasoa/react-contenteditable"
-    name="hyperlink"
-  />
-  <button onClick={this.toggleEditable}>
-    Make {this.state.editable ? "readonly" : "editable"}
-  </button>
-</div>; */
-
-// function EditButton(props) {
-//   return (
-//     <button
-//       key={props.cmd}
-//       onMouseDown={(evt) => {
-//         evt.preventDefault(); // Avoids loosing focus from the editable area
-//         document.execCommand(props.cmd, false, props.arg); // Send the command to the browser
-//       }}
-//     >
-//       {props.name || props.cmd}
-//     </button>
-//   );
-// }
 
 export default TextEditor;
