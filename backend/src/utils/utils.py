@@ -50,16 +50,16 @@ def exception_handler(type, value, tb):
   logger.exception(str(value))
 sys.excepthook = exception_handler
 
-def is_error(src): # TODO should be dict
+def is_error(src):
   if src is None:
     return False
   return isinstance(src, Errors) 
-  #return "error" in src
 
-def make_error(err):
+def make_error(err, info={}):
   exp = {
     "_id": uuid4().hex,
-    "error": err
+    "error": err,
+    "info": info
   }
   logger.exception(exp)
   return dumps(exp, cls=ErrorEncoder)

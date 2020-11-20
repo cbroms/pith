@@ -172,6 +172,8 @@ class DiscussionManagerTest(unittest.TestCase):
         )[1][0]
         self.assertTrue(isinstance(res, list))
 
+        self.discussion_manager.deedit_unit(discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id)
+
         # lock is released 
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
@@ -235,14 +237,39 @@ class DiscussionManagerTest(unittest.TestCase):
           parent=root, position=0)[1][0]
         self.assertTrue(isinstance(res, dict))
 
-        # now can request lock
+        # release held edit lock
+        self.discussion_manager.deedit_unit(
+          discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
+        )
+
+        # now user1 requests edit and position lock
+
+        res = self.discussion_manager.request_to_edit(
+          discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
+        )[1][0]
+        self.assertTrue(isinstance(res, list))
+
         res = self.discussion_manager.select_unit(
           discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id
         )[1][0]
         self.assertTrue(isinstance(res, list))
 
+        # should release locks
         self.discussion_manager.leave(
           discussion_id=discussion_id, user_id=user_id1)
+
+        # now user2 requests edit and position lock
+
+        res = self.discussion_manager.request_to_edit(
+          discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
+        )[1][0]
+        self.assertTrue(isinstance(res, list))
+
+        res = self.discussion_manager.select_unit(
+          discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
+        )[1][0]
+        self.assertTrue(isinstance(res, list))
+
         self.discussion_manager.leave(
           discussion_id=discussion_id, user_id=user_id2)
 
@@ -962,6 +989,8 @@ class DiscussionManagerTest(unittest.TestCase):
           pith="<cite>{}</cite> <cite>{}</cite>".format(unit_id2, unit_id3)
         ) # now cites original post 
 
+        self.discussion_manager.deedit_unit(discussion_id=discussion_id, user_id=user_id, unit_id=unit_id4)
+
         forward1 = self.discussion_manager._get_unit(unit_id1).get().forward_links
         backward1 = self.discussion_manager._get_unit(unit_id1).get().backward_links
         forward2 = self.discussion_manager._get_unit(unit_id2).get().forward_links
@@ -1011,6 +1040,8 @@ class DiscussionManagerTest(unittest.TestCase):
           discussion_id=discussion_id, user_id=user_id, unit_id=unit_id3,
           pith="<cite>{}</cite> <cite>{}</cite>".format(unit_id2, unit_id4)
         )        
+
+        self.discussion_manager.deedit_unit(discussion_id=discussion_id, user_id=user_id, unit_id=unit_id3)
 
         forward1 = self.discussion_manager._get_unit(unit_id1).get().forward_links
         backward1 = self.discussion_manager._get_unit(unit_id1).get().backward_links
@@ -1084,6 +1115,8 @@ class DiscussionManagerTest(unittest.TestCase):
           pith="referencing <cite>{}</cite>".format(unit_id1)
         )
         self.assertEqual(res, Errors.INVALID_REFERENCE)
+
+        self.discussion_manager.deedit_unit(discussion_id=discussion_id, user_id=user_id, unit_id=unit_id2)
 
         self.discussion_manager.leave(
           discussion_id=discussion_id, user_id=user_id)

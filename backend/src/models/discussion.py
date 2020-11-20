@@ -232,6 +232,20 @@ class User(EmbeddedDocument):
     :required: False
     :default: []
     """
+  
+    editing = ListField(StringField(), default=[]) # unit ids
+    """
+    :type: *List[str]*
+    :required: False
+    :default: []
+    """
+
+    moving = ListField(StringField(), default=[]) # unit ids
+    """
+    :type: *List[str]*
+    :required: False
+    :default: []
+    """
 
 
 class Discussion(Document):

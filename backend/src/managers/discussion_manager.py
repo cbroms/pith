@@ -38,6 +38,16 @@ class DiscussionManager:
     def _get_unit(self, unit_id):
         return Unit.objects(id=unit_id)
 
+    # access
+    def _get_user(self, discussion_id, user_id):
+        discussion = self._get(discussion_id)
+        return discussion.get().users.filter(id=user_id)
+
+    # pointer
+    def _get_user_ref(self, discussion_id, user_id):
+        discussion = self._get(discussion_id)
+        return discussion.filter(users__id=user_id)
+
     def _get_ancestors(self, unit_id):
         ancestors = []
         curr = unit_id
@@ -51,25 +61,55 @@ class DiscussionManager:
         """
         NOTE: Requires viewed_unit to be properly set.
         """
-        discussion = self._get(discussion_id)
-        user = discussion.get().users.filter(id=user_id).get()
-        now = datetime.utcnow() #.strftime(constants.DATE_TIME_FMT)
+        user = self._get_user(discussion_id, user_id)
+        now = datetime.utcnow()
         time_interval = TimeInterval(
-          unit_id=user.viewed_unit,
-          start_time=user.start_time,
+          unit_id=user.get().viewed_unit,
+          start_time=user.get().start_time,
           end_time=now) 
-        discussion.filter(users__id=user_id).update(
+
+        user_ref = self._get_user_ref(discussion_id, user_id)
+        #### MONGO
+        user_ref.update(
           push__users__S__timeline=time_interval,
           set__users__S__start_time=now # update start time for new unit
         )
+        #### MONGO
 
-    def _release_edit(self, unit_id):
+        user = self._get_user(discussion_id, user_id)
+        return user.get().timeline[-1] #time_interval
+
+    def _acquire_edit(self, discussion_id, user_id, unit_id):
         unit = self._get_unit(unit_id)
+        user_ref = self._get_user_ref(discussion_id, user_id)
+        #### MONGO
+        unit.update(edit_privilege=user_id)
+        user_ref.update(push__users__S__editing=unit_id)
+        #### MONGO
+
+    def _acquire_position(self, discussion_id, user_id, unit_id):
+        unit = self._get_unit(unit_id)
+        user_ref = self._get_user_ref(discussion_id, user_id)
+        #### MONGO
+        unit.update(position_privilege=user_id)
+        user_ref.update(push__users__S__moving=unit_id)
+        #### MONGO
+
+    def _release_edit(self, discussion_id, user_id, unit_id):
+        unit = self._get_unit(unit_id)
+        user_ref = self._get_user_ref(discussion_id, user_id)
+        #### MONGO
         unit.update(edit_privilege=None)
+        user_ref.update(pull__users__S__editing=unit_id)
+        #### MONGO
 
-    def _release_position(self, unit_id):
+    def _release_position(self, discussion_id, user_id, unit_id):
         unit = self._get_unit(unit_id)
+        user_ref = self._get_user_ref(discussion_id, user_id)
+        #### MONGO
         unit.update(position_privilege=None)
+        user_ref.update(pull__users__S__moving=unit_id)
+        #### MONGO
 
     def _retrieve_links(self, pith):
       return constants.LINK_PATTERN.findall(pith)
@@ -99,11 +139,11 @@ class DiscussionManager:
 
     def _chat_meta(self, discussion_id, unit_id):
       unit = self._get_unit(unit_id).get()
-      user = self._get(discussion_id).get().users.filter(id=unit.author).get()
+      user = self._get_user(discussion_id, unit.author)
       response = {
         "unit_id": unit_id,
         "pith": unit.pith,
-        "author": user.name,
+        "author": user.get().name,
         "created_at": unit.created_at.strftime(constants.DATE_TIME_FMT)
       }
       return response
@@ -157,8 +197,8 @@ class DiscussionManager:
       def helper(self, **kwargs):
         discussion_id = kwargs["discussion_id"]
         user_id = kwargs["user_id"]
-        discussion = self._get(discussion_id)
-        if len(discussion.filter(users__id=user_id)) == 0:
+        user_ref = self._get_user_ref(discussion_id, user_id)
+        if len(user_ref) == 0:
           return Errors.BAD_USER_ID
         else:
           return func(self, **kwargs)
@@ -280,8 +320,10 @@ class DiscussionManager:
         discussion = self._get(discussion_id)
         if len(discussion.filter(users__name=nickname)) > 0:
           return Errors.NICKNAME_EXISTS 
+
         if user_id is not None:
-          if len(discussion.filter(users__id=user_id)) > 0:
+          user_ref = self._get_user_ref(discussion_id, user_id)
+          if len(user_ref) > 0:
             return Errors.USER_ID_EXISTS 
 
         unit_id = discussion.get().document
@@ -294,7 +336,11 @@ class DiscussionManager:
         ) 
         if user_id is not None: # use pre-chosen id
           user.id = user_id
+
+        #### MONGO
         discussion.update(push__users=user)
+        #### MONGO
+
         response = {"user_id": user.id}
         return response, None
 
@@ -302,7 +348,7 @@ class DiscussionManager:
     @_check_user_id
     def load_user(self, discussion_id, user_id):
         discussion = self._get(discussion_id).get()
-        user = discussion.users.filter(id=user_id).get()
+        user = self._get_user(discussion_id, user_id)
 
         doc_meta_ids = []
         chat_meta_ids = []
@@ -318,7 +364,7 @@ class DiscussionManager:
           doc_meta_ids.append(p.cursor.unit_id)
 
         timeline = []
-        for i in user.timeline: 
+        for i in user.get().timeline: 
           timeline.append({
             "unit_id": i.unit_id,
             "start_time": i.start_time.strftime(constants.DATE_TIME_FMT),
@@ -341,9 +387,9 @@ class DiscussionManager:
         chat_meta = self._chat_metas(discussion_id, chat_meta_ids)
 
         response = {
-          "nickname": user.name,
+          "nickname": user.get().name,
           "cursors": cursors,
-          "current_unit": user.viewed_unit, 
+          "current_unit": user.get().viewed_unit, 
           "timeline": timeline,
           "chat_history": list(discussion.chat), 
           "chat_meta": chat_meta,
@@ -356,38 +402,51 @@ class DiscussionManager:
         """
         Update start time of current unit.
         """
-        discussion = self._get(discussion_id)
-        discussion.filter(users__id=user_id).update(
+        user_ref = self._get_user_ref(discussion_id, user_id)
+      
+        #### MONGO
+        user_ref.update(
           set__users__S__active=True,
           set__users__S__start_time=
-            datetime.utcnow() #.strftime(constants.DATE_TIME_FMT)
+            datetime.utcnow()
         ) 
-
-        user = discussion.get().users.filter(id=user_id).get()
+        #### MONGO
 
         response = self.load_user(discussion_id=discussion_id, user_id=user_id)
+        user = self._get_user(discussion_id, user_id)
         cursor_response = {
           "user_id": user_id,
-          "nickname": user.name,
-          "cursor": user.cursor.to_mongo().to_dict()
+          "nickname": user.get().name,
+          "cursor": user.get().cursor.to_mongo().to_dict()
         }
         return response, [cursor_response]
 
-    # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
     @_check_user_id
     def leave(self, discussion_id, user_id):
         """
         Create new time interval for last visited unit.
         """
-        discussion = self._get(discussion_id)
-        discussion.filter(users__id=user_id).update(set__users__S__active=False) 
-        self._time_entry(discussion_id, user_id)
+        user = self._get_user(discussion_id, user_id)
+        editing_locks = user.get().editing
+        position_locks = user.get().moving
 
-        nickname = discussion.get().users.filter(id=user_id).get().name
+        #### MONGO
+        for e in editing_locks:
+          self._release_edit(discussion_id, user_id, e)
+        for p in position_locks:
+          self._release_position(discussion_id, user_id, p)
+        self._time_entry(discussion_id, user_id)
+        user_ref = self._get_user_ref(discussion_id, user_id)
+        user_ref.update(
+          set__users__S__active=False
+        ) 
+        #### MONGO
+
+        user = self._get_user(discussion_id, user_id)
         response = {
           "user_id": user_id,
-          "nickname": nickname
+          "nickname": user.get().name
         }
         return None, [response]
 
@@ -399,7 +458,8 @@ class DiscussionManager:
         """
         This is the trigger for updating the timeline.
         """
-        discussion = self._get(discussion_id)
+        user_ref = self._get_user_ref(discussion_id, user_id)
+
         # perform unit-based operations
         unit = self._get_unit(unit_id).get()
 
@@ -416,27 +476,28 @@ class DiscussionManager:
           for g in b_unit.backward_links:
             doc_meta_ids.append(g)
 
+        #### MONGO
         # update cursor
-        discussion.filter(users__id=user_id).update(
+        user_ref.update(
           set__users__S__cursor__unit_id=unit_id, # new page
           set__users__S__cursor__position=-1 # for now, default to end
         )
-        # uses old viewed unit
-        self._time_entry(discussion_id, user_id)
-        user = discussion.get().users.filter(id=user_id).get()
-        nickname = user.name
-        cursor = user.cursor
-        time_interval = user.timeline[-1] # newly made
+        # add entry for old viewed_unit
+        time_interval = self._time_entry(discussion_id, user_id)
+        # update viewed unit to current
+        user_ref.update(
+          set__users__S__viewed_unit = unit_id
+        )
+        #### MONGO
+
+        user = self._get_user(discussion_id, user_id)
+        nickname = user.get().name
+        cursor = user.get().cursor
         timeline_entry = {
           "unit_id": time_interval.unit_id,
           "start_time": time_interval.start_time.strftime(constants.DATE_TIME_FMT),
           "end_time": time_interval.end_time.strftime(constants.DATE_TIME_FMT),
         }
-
-        # update viewed unit to current
-        discussion.filter(users__id=user_id).update(
-          set__users__S__viewed_unit = unit_id
-        )
 
         # ancestors
         ancestors = self._get_ancestors(unit_id)
@@ -494,7 +555,6 @@ class DiscussionManager:
         response = self._doc_meta(discussion_id, unit_id)
         return response, None
 
-    # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
     @_check_user_id
     def post(self, discussion_id, user_id, pith):
@@ -520,8 +580,12 @@ class DiscussionManager:
           original_pith=pith,
         )
         unit_id = unit.id
+
+        #### MONGO
         unit.save()
         discussion.update(push__chat=unit_id)
+        #### MONGO
+
         chat_meta_ids.append(unit_id)
 
         # make backlinks
@@ -548,6 +612,8 @@ class DiscussionManager:
         """
         https://docs.mongodb.com/manual/reference/operator/query/text/
         """
+        # by default, only search within own discussion
+        
         results = Unit.objects()._collection.find({"$text": {"$search": query}})
 
         chat = []
@@ -568,6 +634,7 @@ class DiscussionManager:
             doc.append(entry)
             doc_meta_ids.append(unit_id)
 
+        # TODO should depend on discussion!
         chat_meta = self._chat_metas(discussion_id, chat_meta_ids)
         doc_meta = self._doc_metas(discussion_id, doc_meta_ids)
 
@@ -579,7 +646,6 @@ class DiscussionManager:
         }
         return response, None
       
-    # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
     @_check_unit_id
     def send_to_doc(self, discussion_id, user_id, unit_id):
@@ -589,13 +655,12 @@ class DiscussionManager:
         Instead, we have a pointer to the chat unit, so we can use that to find
         "backlinks".
         """
-        discussion = self._get(discussion_id)
-        user = discussion.get().users.filter(id=user_id).get()
+        user = self._get_user(discussion_id, user_id)
         chat_unit = self._get_unit(unit_id).get()
 
-        position = user.cursor.position if user.cursor.position != -1 else \
-          len(self._get_unit(user.cursor.unit_id).get().children)
-        parent_id = user.cursor.unit_id
+        position = user.get().cursor.position if user.get().cursor.position != -1 else \
+          len(self._get_unit(user.get().cursor.unit_id).get().children)
+        parent_id = user.get().cursor.unit_id
 
         # remove chat links
         pith = self._remove_chat_links(chat_unit.pith)
@@ -608,12 +673,15 @@ class DiscussionManager:
           source_unit_id=unit_id, # from chat
           original_pith=chat_unit.pith,
         )
-        unit.save()
         unit_id = unit.id
 
         parent = self._get_unit(parent_id)
         key = "push__children__{}".format(position)
+
+        #### MONGO
+        unit.save()
         parent.update(**{key: [unit_id]})
+        #### MONGO
 
         doc_meta_ids = []
         chat_meta_ids = []
@@ -644,21 +712,23 @@ class DiscussionManager:
     @_check_unit_id
     @_verify_position
     def move_cursor(self, discussion_id, user_id, unit_id, position):
-        discussion = self._get(discussion_id)
-        discussion.filter(users__id=user_id).update(
+        user_ref = self._get_user_ref(discussion_id, user_id)
+
+        #### MONGO
+        user_ref.update(
           set__users__S__cursor__unit_id=unit_id,
           set__users__S__cursor__position=position
         )
+        #### MONGO
 
-        user = discussion.get().users.filter(id=user_id).get()
+        user = self._get_user(discussion_id, user_id)
         response = {
             "user_id": user_id,
-            "nickname": user.name,
-            "cursor": user.cursor.to_mongo().to_dict()
+            "nickname": user.get().name,
+            "cursor": user.get().cursor.to_mongo().to_dict()
         }
         return None, [response]
 
-    # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
     @_check_unit_id
     @_verify_edit_privilege
@@ -668,9 +738,11 @@ class DiscussionManager:
           Releases edit lock.
         """
         unit = self._get_unit(unit_id)
+
+        #### MONGO
         unit.update(hidden=True)
-        
-        self._release_edit(unit_id)
+        self._release_edit(discussion_id, user_id, unit_id)
+        #### MONGO
 
         doc_meta = self._doc_metas(discussion_id, [unit_id])
         return None, [doc_meta]
@@ -679,12 +751,14 @@ class DiscussionManager:
     @_check_unit_id
     def unhide_unit(self, discussion_id, unit_id):
         unit = self._get_unit(unit_id)
+
+        #### MONGO
         unit.update(hidden=False)
+        #### MONGO
         
         doc_meta = self._doc_metas(discussion_id, [unit_id])
         return None, [doc_meta]
 
-    # TODO: MULTIPLE MONGO OPERATIONS
     @_check_discussion_id
     def add_unit(self, discussion_id, pith, parent, position):
         """
@@ -700,12 +774,15 @@ class DiscussionManager:
           forward_links=forward_links,
           parent=parent,
         )
-        unit.save()
         unit_id = unit.id
 
         parent_ptr = self._get_unit(parent)
         key = "push__children__{}".format(position)
+
+        #### MONGO
+        unit.save()
         parent_ptr.update(**{key: [unit_id]})
+        #### MONGO
 
         doc_meta_ids = []
         chat_meta_ids = []
@@ -747,7 +824,10 @@ class DiscussionManager:
         unit = self._get_unit(unit_id) 
         if unit.get().position_privilege is not None: 
           return Errors.FAILED_POSITION_ACQUIRE 
-        unit.update(position_privilege=user_id)
+
+        #### MONGO
+        self._acquire_position(discussion_id, user_id, unit_id)
+        #### MONGO
 
         doc_meta = self._doc_metas(discussion_id, [unit_id])
         return None, [doc_meta]
@@ -757,7 +837,11 @@ class DiscussionManager:
     @_check_unit_id
     @_verify_positions_privilege
     def deselect_unit(self, discussion_id, user_id, unit_id):
-        self._release_position(unit_id)
+
+        #### MONGO
+        self._release_position(discussion_id, user_id, unit_id)
+        #### MONGO
+
         doc_meta = self._doc_metas(discussion_id, [unit_id])
         return None, [doc_meta]
 
@@ -781,7 +865,6 @@ class DiscussionManager:
           self._get_unit(old_parent).update(
             pull__children=unit_id
           )
-          # TODO don't need to add unit to doc_meta
           doc_meta_ids.append(old_parent)
 
         # add to new
@@ -793,7 +876,7 @@ class DiscussionManager:
           unit.update(
             set__parent=parent,
           )
-          self._release_position(unit_id)
+          self._release_position(discussion_id, user_id, unit_id)
         doc_meta_ids.append(parent)
 
         doc_meta = self._doc_metas(discussion_id, doc_meta_ids)
@@ -841,7 +924,10 @@ class DiscussionManager:
         unit = self._get_unit(unit_id) 
         if unit.get().edit_privilege is not None: 
           return Errors.FAILED_EDIT_ACQUIRE
-        unit.update(edit_privilege=user_id)
+
+        #### MONGO
+        self._acquire_edit(discussion_id, user_id, unit_id)
+        #### MONGO
 
         doc_meta = self._doc_metas(discussion_id, [unit_id])
         return None, [doc_meta]
@@ -851,7 +937,10 @@ class DiscussionManager:
     @_check_unit_id
     @_verify_edit_privilege
     def deedit_unit(self, discussion_id, user_id, unit_id):
-        self._release_edit(unit_id)
+        #### MONGO
+        self._release_edit(discussion_id, user_id, unit_id)
+        #### MONGO
+
         doc_meta = self._doc_metas(discussion_id, [unit_id])
         return None, [doc_meta]
 
@@ -876,8 +965,6 @@ class DiscussionManager:
           forward_links=forward_links,
           edit_count=unit.get().edit_count + 1 # increment
         )
-        # do not release lock yet
-        #self._release_edit(unit_id)
 
         # handle backlinks
         removed_links = set(old_forward_links).difference(set(forward_links)) 

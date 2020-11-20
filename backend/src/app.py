@@ -55,7 +55,7 @@ class DiscussionNamespace(AsyncNamespace):
           product = await func(self, sid, request)
 
           if is_error(product):
-            result = make_error(product) # TODO
+            result = make_error(product, info={"result": result, "request": request})
           else:
             ret_res, emits_res = product
 
@@ -66,8 +66,7 @@ class DiscussionNamespace(AsyncNamespace):
                 validate(instance=ret_res, schema=dres.schema[ret])
                 result = ret_res
               except ValidationError:
-                logger.info("Return response: {}".format(ret_res))
-                logger.info("Return schema: {}".format(ret))
+                logger.info("Return response: {}\nReturn schema: {}".format(ret_res, ret))
                 bad_response = True
 
             if emits is not None:
@@ -76,8 +75,7 @@ class DiscussionNamespace(AsyncNamespace):
                 try:
                   validate(instance=r, schema=dres.schema[e])
                 except ValidationError:
-                  logger.info("Emit response: {}".format(r))
-                  logger.info("Emit schema: {}".format(e))
+                  logger.info("Emit response: {}\nEmit schema: {}".format(r, e))
                   bad_response = True
 
             if bad_response: # we cannot send off emits
@@ -88,11 +86,10 @@ class DiscussionNamespace(AsyncNamespace):
               if emits is not None:
                 assert(emits_res is not None)
                 for r, e in zip(emits_res, emits):
-                  #serialized = dumps(r, cls=DictEncoder)
-                  shared[e] = r#serialized
+                  shared[e] = r
 
               if result is None:
-                result = {} #{"success": 0} # non-null
+                result = {}
               # set emitted data to return
               result["shared"] = shared
 
@@ -104,9 +101,6 @@ class DiscussionNamespace(AsyncNamespace):
               # send to everyone else
 
               emit_shared = dumps(shared, cls=DictEncoder)
-              logger.info(emit_name)
-              logger.info(discussion_id)
-              logger.info(emit_shared)
               await self.emit(emit_name, emit_shared, room=discussion_id, skip_sid=sid)
 
           return result
