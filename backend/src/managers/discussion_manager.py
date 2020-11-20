@@ -598,6 +598,7 @@ class DiscussionManager:
 
         unit = Unit(
           pith=pith,
+          discussion=discussion_id,
           parent="",
           author=user_id,
           in_chat=True,
@@ -638,8 +639,7 @@ class DiscussionManager:
         https://docs.mongodb.com/manual/reference/operator/query/text/
         """
         # by default, only search within own discussion
-        
-        results = Unit.objects()._collection.find({"$text": {"$search": query}})
+        results = Unit.objects(discussion=discussion_id)._collection.find({"$text": {"$search": query}})
 
         chat = []
         doc = []
@@ -693,6 +693,7 @@ class DiscussionManager:
 
         unit = Unit(
           pith=chat_unit.pith,
+          discussion=discussion_id,
           forward_links=forward_links,
           parent=parent_id,
           source_unit_id=unit_id, # from chat
@@ -797,6 +798,7 @@ class DiscussionManager:
 
         unit = Unit(
           pith=pith,
+          discussion=discussion_id,
           forward_links=forward_links,
           parent=parent,
         )

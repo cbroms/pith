@@ -13,6 +13,8 @@ Unit
       :annotation: = ID of Unit.
     .. autoattribute:: pith
       :annotation: = Pith.
+    .. autoattribute:: discussion
+      :annotation: = Source Discussion ID.
     .. autoattribute:: children
       :annotation: = Children Units.
     .. autoattribute:: forward_links
@@ -23,10 +25,10 @@ Unit
       :annotation: = Who first created the unit.
     .. autoattribute:: created_at
       :annotation: = When this Unit was created.
-    .. autoattribute:: in_chat
-      :annotation: = Whether this Unit is in the chat (true) or in the document (false).
     .. autoattribute:: parent
       :annotation: = Parent Unit.
+    .. autoattribute:: in_chat
+      :annotation: = Whether this Unit is in the chat (true) or in the document (false).
     .. autoattribute:: source_unit_id
       :annotation: = Which chat Unit this Unit was copied from. 
     .. autoattribute:: original_pith
