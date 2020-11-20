@@ -198,10 +198,17 @@ class Document extends React.Component {
 
     render() {
         // create a unit for a given location
-        const createUnit = (pith, id, pid, ppid) => {
+        const createUnit = (pith, id, pid, ppid, editLock) => {
+            const editable =
+                editLock === null || editLock === this.props.userId;
             return (
                 <Unit
-                    editable
+                    editable={editable}
+                    lockedBy={
+                        editLock !== this.props.userId
+                            ? this.props.icons[editLock]?.nickname
+                            : undefined
+                    }
                     unitEnter={(pos, content) =>
                         this.onUnitEnter(pos, content, id, pid)
                     }
@@ -280,7 +287,8 @@ class Document extends React.Component {
                                 grandchild.pith,
                                 grandchildId,
                                 childId,
-                                this.props.currentUnit
+                                this.props.currentUnit,
+                                grandchild.editLock
                             ),
                             3
                         );
@@ -298,17 +306,20 @@ class Document extends React.Component {
                         child.pith,
                         childId,
                         this.props.currentUnit,
-                        null
+                        null,
+                        child.editLock
                     ),
                     2
                 );
             }
         );
+
         const pithUnit = createUnit(
             store[this.props.currentUnit].pith,
             this.props.currentUnit,
             null,
-            null
+            null,
+            store[this.props.currentUnit].editLock
         );
 
         const doc = (

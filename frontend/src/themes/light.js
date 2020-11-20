@@ -9,6 +9,7 @@ const light = {
     smallBorder: "1px solid #828282",
     smallBorderActive: "1px solid black",
     largeBorder: "2px solid black",
+    extraSmallFont: "0.6rem",
     smallFont: "0.8rem",
     mediumFont: "1rem",
     largeFont: "1.5rem",
