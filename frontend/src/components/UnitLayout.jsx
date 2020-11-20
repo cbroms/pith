@@ -2,9 +2,15 @@ import React from "react";
 import styled from "styled-components";
 
 const StyledContainer = styled.div`
+    position: relative;
+    width: 100%;
+`;
+
+const StyledUnit = styled.div`
     box-sizing: border-box;
     display: ${(props) => (props.inline ? "inline-block" : "block")};
     width: ${(props) => (props.inline ? "auto" : "100%")};
+    //position: absolute;
     padding: 5px 10px;
     width: 100%;
     padding-left: ${(props) => (props.transcluded || props.inline ? 10 : 0)}px;
@@ -12,7 +18,7 @@ const StyledContainer = styled.div`
     border-left: ${(props) =>
         props.transcluded ? "2px solid " + props.theme.shade2 : "none"};
     color: ${(props) =>
-        props.transcluded
+        props.transcluded || props.lockedBy !== undefined
             ? !props.transcludeHoverActive
                 ? props.theme.shade2
                 : props.theme.shade1
@@ -45,15 +51,29 @@ const StyledContent = styled.div`
     width: ${(props) => (props.transcluded ? "calc(100% - 18px)" : "100%")};
 `;
 
+const StyledLockedBy = styled.div`
+    padding: 0 10px;
+    font-size: ${(props) => props.theme.smallFont};
+    font-family: ${(props) => props.theme.sans};
+    color: ${(props) => props.theme.shade2};
+`;
+
 const UnitLayout = (props) => {
     return (
-        <StyledContainer {...props}>
-            {/* {props.transcludeNum ? (
+        <StyledContainer>
+            <StyledUnit {...props}>
+                {/* {props.transcludeNum ? (
                 <StyledRefNum>{props.transcludeNum}</StyledRefNum>
             ) : null}*/}
-            <StyledContent transcluded={props.transcluded}>
-                {props.content}
-            </StyledContent>
+                <StyledContent transcluded={props.transcluded}>
+                    {props.content}
+                </StyledContent>
+            </StyledUnit>
+            {props.lockedBy ? (
+                <StyledLockedBy>
+                    {props.lockedBy} is editing this unit
+                </StyledLockedBy>
+            ) : null}
         </StyledContainer>
     );
 };

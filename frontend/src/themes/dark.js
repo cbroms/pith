@@ -8,6 +8,7 @@ const dark = {
     warningShade: "orange",
     smallBorder: "1px solid #afafaf",
     smallBorderActive: "1px solid #dbdbdb",
+    extraSmallFont: "0.6rem",
     smallFont: "0.8rem",
     mediumFont: "1rem",
     largeFont: "1.5rem",
