@@ -134,21 +134,23 @@ class DiscussionManagerTest(unittest.TestCase):
         )        
         self.assertEqual(res, Errors.FAILED_EDIT_ACQUIRE) # fails
 
-        # hide that doesn't work
-        res = self.discussion_manager.hide_unit(
-          discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id)
+        # edit that doesn't work
+        res = self.discussion_manager.edit_unit(
+          discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id, pith="")
         self.assertEqual(res, Errors.BAD_EDIT_TRY)
         # lock is not released 
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
         )        
         self.assertEqual(res, Errors.FAILED_EDIT_ACQUIRE) # fails
-        # hide that works
-        res = self.discussion_manager.hide_unit(
-          discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id)[1][0]
+        # edit that works
+        res = self.discussion_manager.edit_unit(
+          discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id, pith="")[1][0]
         self.assertTrue(isinstance(res, list))
 
         # lock is released 
+        self.discussion_manager.deedit_unit(
+          discussion_id=discussion_id, user_id=user_id1, unit_id=unit_id)
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
         )[1][0]
@@ -160,6 +162,7 @@ class DiscussionManagerTest(unittest.TestCase):
           unit_id=unit_id, pith="blahblah"
         )
         self.assertEqual(res, Errors.BAD_EDIT_TRY)
+
         # lock is not released 
         res = self.discussion_manager.request_to_edit(
           discussion_id=discussion_id, user_id=user_id2, unit_id=unit_id
@@ -832,16 +835,22 @@ class DiscussionManagerTest(unittest.TestCase):
         )[1][0]
         unit_id = added["unit_id"]
 
-        self.discussion_manager.request_to_edit(
-          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id
-        )        
+        added = self.discussion_manager.add_unit(
+          discussion_id=discussion_id, 
+          pith="I disagree.", 
+          parent=unit_id, position=0
+        )[1][0]
+        unit_id2 = added["unit_id"]
+
         res = self.discussion_manager.hide_unit(
-          discussion_id=discussion_id, user_id=user_id, unit_id=unit_id)[1][0]
+          discussion_id=discussion_id, unit_id=unit_id)[1][0]
         self.assertTrue(self.discussion_manager._get_unit(unit_id).get().hidden)
+        self.assertTrue(self.discussion_manager._get_unit(unit_id2).get().hidden)
 
         res = self.discussion_manager.unhide_unit(
           discussion_id=discussion_id, unit_id=unit_id)[1][0]
         self.assertFalse(self.discussion_manager._get_unit(unit_id).get().hidden)
+        self.assertFalse(self.discussion_manager._get_unit(unit_id2).get().hidden)
 
         self.discussion_manager.leave(
           discussion_id=discussion_id, user_id=user_id)

@@ -57,6 +57,18 @@ class DiscussionManager:
           curr = unit.parent
         return ancestors
 
+    def _get_tree(self, unit_id):
+        tree = [unit_id]
+        curr_depth = [unit_id]
+        while len(curr_depth) > 0:
+          next_depth = []
+          for c in curr_depth:
+            unit = self._get_unit(c).get()
+            next_depth += unit.children
+          tree += next_depth
+          curr_depth = next_depth
+        return tree
+
     def _time_entry(self, discussion_id, user_id):
         """
         NOTE: Requires viewed_unit to be properly set.
@@ -552,7 +564,20 @@ class DiscussionManager:
         """
         Make sure the unit is in the document.
         """
-        response = self._doc_meta(discussion_id, unit_id)
+        unit = self._get_unit(unit_id).get()
+        in_chat = unit.in_chat
+        if in_chat:
+          doc_meta = self._chat_meta(discussion_id, unit_id)
+          response = {
+            "in_chat": in_chat,
+            "doc_meta": doc_meta,
+          }
+        else:
+          chat_meta = self._doc_meta(discussion_id, unit_id)
+          response = {
+            "in_chat": in_chat,
+            "chat_meta": chat_meta,
+          }
         return response, None
 
     @_check_discussion_id
@@ -573,6 +598,7 @@ class DiscussionManager:
 
         unit = Unit(
           pith=pith,
+          discussion=discussion_id,
           parent="",
           author=user_id,
           in_chat=True,
@@ -613,8 +639,7 @@ class DiscussionManager:
         https://docs.mongodb.com/manual/reference/operator/query/text/
         """
         # by default, only search within own discussion
-        
-        results = Unit.objects()._collection.find({"$text": {"$search": query}})
+        results = Unit.objects(discussion=discussion_id)._collection.find({"$text": {"$search": query}})
 
         chat = []
         doc = []
@@ -668,6 +693,7 @@ class DiscussionManager:
 
         unit = Unit(
           pith=chat_unit.pith,
+          discussion=discussion_id,
           forward_links=forward_links,
           parent=parent_id,
           source_unit_id=unit_id, # from chat
@@ -731,32 +757,33 @@ class DiscussionManager:
 
     @_check_discussion_id
     @_check_unit_id
-    @_verify_edit_privilege
-    def hide_unit(self, discussion_id, user_id, unit_id):
-        """ 
-          Assumes we have edit lock through `request_to_edit`.
-          Releases edit lock.
+    def hide_unit(self, discussion_id, unit_id):
         """
-        unit = self._get_unit(unit_id)
+        Not a locked operation, so may hide a unit being edited/moved.
+        """
+        tree = self._get_tree(unit_id)
 
         #### MONGO
-        unit.update(hidden=True)
-        self._release_edit(discussion_id, user_id, unit_id)
+        for t in tree:
+          unit = self._get_unit(t)
+          unit.update(hidden=True)
         #### MONGO
 
-        doc_meta = self._doc_metas(discussion_id, [unit_id])
+        doc_meta = self._doc_metas(discussion_id, tree)
         return None, [doc_meta]
         
     @_check_discussion_id
     @_check_unit_id
     def unhide_unit(self, discussion_id, unit_id):
-        unit = self._get_unit(unit_id)
+        tree = self._get_tree(unit_id)
 
         #### MONGO
-        unit.update(hidden=False)
+        for t in tree:
+          unit = self._get_unit(t)
+          unit.update(hidden=False)
         #### MONGO
         
-        doc_meta = self._doc_metas(discussion_id, [unit_id])
+        doc_meta = self._doc_metas(discussion_id, tree)
         return None, [doc_meta]
 
     @_check_discussion_id
@@ -771,6 +798,7 @@ class DiscussionManager:
 
         unit = Unit(
           pith=pith,
+          discussion=discussion_id,
           forward_links=forward_links,
           parent=parent,
         )

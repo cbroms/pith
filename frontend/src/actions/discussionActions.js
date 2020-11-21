@@ -279,7 +279,11 @@ const getContext = (unitId, requestId) => {
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {});
         if (statusCode === null) {
-          handleDocMeta(response.doc_meta, dispatch);
+          if (response.in_chat) {
+            handleChatMeta(response.chat_meta, dispatch);
+          } else {
+            handleDocMeta(response.doc_meta, dispatch);
+          }
         }
         endRequest(statusCode);
       })

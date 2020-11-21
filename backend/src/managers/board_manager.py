@@ -19,10 +19,12 @@ class BoardManager:
         return Discussion.objects.get(id=discussion_id)
 
     def create(self):
-        unit = Unit(pith="", parent="")
+        unit = Unit(pith="", parent="", discussion="")
         unit.original_text = unit.pith
-        unit.save()
         discussion = Discussion(document=unit.id)
+        discussion_id = discussion.id
+        unit.discussion = discussion_id
+        unit.save()
         discussion.save()
-        response = {"discussion_id": discussion.id}
+        response = {"discussion_id": discussion_id}
         return response

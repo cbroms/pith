@@ -40,6 +40,19 @@ class Unit(Document):
     :default: None
     """
 
+    discussion = StringField(required=True)
+    """
+    :type: *str*
+    :required: True
+    :default: None
+    """
+
+    in_chat = BooleanField(default=False) # versus in document
+    """
+    :type: *bool*
+    :required: False
+    :default: False
+    """
     children = ListField(StringField(), default=[])
     """
     :type: *List[str]*
@@ -75,18 +88,18 @@ class Unit(Document):
     :default: Automatically generated.
     """
 
-    in_chat = BooleanField(default=False) # versus in document
-    """
-    :type: *bool*
-    :required: False
-    :default: False
-    """
-
     parent = StringField(required=True) 
     """
     :type: *str*
     :required: True
     :default: None
+    """
+
+    in_chat = BooleanField(default=False) # versus in document
+    """
+    :type: *bool*
+    :required: False
+    :default: False
     """
 
     # if from chat

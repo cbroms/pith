@@ -2,12 +2,15 @@
   "base": {
     "type": "object",
     "properties": {
-      "doc_meta": {"$ref": "#/definitions/doc_meta"}
+      "in_chat": {"type": "boolean"},
+      "doc_meta": {"$ref": "#/definitions/doc_meta"},
+      "chat_meta": {"$ref": "#/definitions/chat_meta"}
     },
-    "required": ["doc_meta"]
+    "required": ["in_chat"]
   },
   "definitions": {
-    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"}
+    "doc_meta": {"$ref": "doc_meta.json#/doc_meta"},
+    "chat_meta": {"$ref": "chat_meta.json#/chat_meta"}
   }
 }
 

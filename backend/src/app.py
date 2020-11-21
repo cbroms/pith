@@ -403,20 +403,16 @@ class DiscussionNamespace(AsyncNamespace):
     @_check_user_session
     async def on_hide_unit(self, sid, request): 
         """
-        NOTE: Call `request_to_edit` before this.
-
         :event: :ref:`dreq_hide_unit-label`
         :emit: *doc_meta* (:ref:`dres_doc_meta-label`)
-        :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_UNIT_ID, BAD_EDIT_TRY
+        :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_UNIT_ID
         """
         unit_id = request["unit_id"]
         session = await self.get_session(sid)
         discussion_id = session["discussion_id"]
-        user_id = session["user_id"]
 
         result = gm.discussion_manager.hide_unit(
           discussion_id=discussion_id, 
-          user_id=user_id, 
           unit_id=unit_id
         )
         return result
