@@ -368,7 +368,7 @@ const addUnit = (pith, parentUnit, position, requestId) => {
         if (statusCode === null) {
           handleAddUnit(response.shared, dispatch);
         }
-        endRequest(statusCode);
+        endRequest(statusCode, { unit_id: response.shared.added_unit.unit_id });
       })
     );
   };

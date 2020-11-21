@@ -92,7 +92,7 @@ const getCaretPosition = (topLevelElement, topLevelHtml) => {
 };
 
 const setFocus = (element, focusedPosition, force) => {
-  console.log(element, focusedPosition);
+  console.log(element.innerHTML, focusedPosition);
   // set the cursor position in the element
   // this is wrapped in a timeout because we want it to excecute only after this.ref.current
   // has updated from the rerender

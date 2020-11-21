@@ -6,6 +6,7 @@ import {
 	deeditUnit,
 	editUnit,
 	addUnit,
+	hideUnit,
 } from "../actions/discussionActions";
 
 import useRequest from "../hooks/useRequest";
@@ -21,6 +22,7 @@ const DocumentContextController = (props) => {
 		props.completedRequests
 	);
 	const [editStatus, makeEdit] = useRequest(props.completedRequests);
+	const [hideStatus, makeHide] = useRequest(props.completedRequests);
 
 	const onUnitFocus = (unitId) => {
 		// when the user clicks into the unit, request editing privilages for it
@@ -51,13 +53,29 @@ const DocumentContextController = (props) => {
 		}
 	};
 
-	const onCreateUnit = (pith, parentUnit, position) => {
+	const onUnitCreate = (pith, parentUnit, position) => {
 		if (!addUnitStatus.pending) {
 			console.log(
-				`adding unit with content ${pith} at position ${position}`
+				`adding unit with content ${pith} at position ${position + 1}`
 			);
-			makeAddUnit((requestId) => {
-				props.dispatch(addUnit(pith, parentUnit, position, requestId));
+			makeAddUnit(
+				(requestId) => {
+					props.dispatch(
+						addUnit(pith, parentUnit, position + 1, requestId)
+					);
+				},
+				(additional) => {
+					console.log(additional);
+				}
+			);
+		}
+	};
+
+	const onUnitDelete = (unitId) => {
+		if (!hideStatus.pending) {
+			console.log(`removing unit ${unitId}`);
+			makeHide((requestId) => {
+				props.dispatch(hideUnit(unitId, requestId));
 			});
 		}
 	};
@@ -68,12 +86,10 @@ const DocumentContextController = (props) => {
 	// copy of the state that reflects the user's changes.
 	let docMap = props.docMap;
 
-	if (
-		addUnitStatus.pending ||
-		requestEditStatus.pending ||
-		requestDeeditStatus.pending ||
-		editStatus.pending
-	) {
+	// dont make edit requests result in showing the state copy
+	// requestEditStatus.pending ||
+	// 	requestDeeditStatus.pending ||
+	if (addUnitStatus.pending || editStatus.pending || hideStatus.pending) {
 		//console.log("witholding state from document");
 		docMap = null;
 	}
@@ -81,11 +97,13 @@ const DocumentContextController = (props) => {
 	return (
 		<Document
 			{...props}
+			newUnitId={addUnitStatus.additional?.unit_id}
 			docMap={docMap}
 			onUnitFocus={onUnitFocus}
 			onUnitBlur={onUnitBlur}
 			onUnitEdit={onUnitEdit}
-			onCreateUnit={onCreateUnit}
+			onUnitCreate={onUnitCreate}
+			onUnitDelete={onUnitDelete}
 		/>
 	);
 };

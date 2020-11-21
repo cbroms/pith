@@ -26,6 +26,7 @@ class Document extends React.Component {
             dragTarget: null,
             focused: null,
             focusedPosition: null,
+            waitingForNew: null,
         };
 
         this.getStore = this.getStore.bind(this);
@@ -45,13 +46,28 @@ class Document extends React.Component {
         this.getDragInfo = this.getDragInfo.bind(this);
     }
 
+    componentDidUpdate() {
+        if (
+            this.state.waitingForNew !== null &&
+            this.props.newUnitId !== undefined
+        ) {
+            console.log("update after waiting for new");
+            this.setState({
+                waitingForNew: null,
+                focused: this.props.newUnitId,
+            });
+        }
+    }
+
     // return whichever store we're using (locally modified or global from props)
     getStore() {
         if (this.props.docMap === null) {
             // use the copy since some request is pending and the state is not up to date
             // with the local version we have stored
+            console.log("returning local copy");
             return this.state.tempUnitCopy;
         } else {
+            console.log("returning live");
             return this.props.docMap;
         }
     }
@@ -63,20 +79,31 @@ class Document extends React.Component {
     }
 
     onUnitDelete(isEmpty, content, id, pid) {
+        // release the edit lock, then delete
+        this.props.onUnitBlur(id);
+        this.props.onUnitDelete(id);
+
         const store = this.getStoreCopy();
-        const [focused, focusedPosition, newStore] = handleDelete(
+        const [focused, focusedPosition, newContent, newStore] = handleDelete(
             store,
             isEmpty,
             content,
             id,
             pid
         );
+        //
         if (newStore !== null) {
-            this.setState({
-                focused: focused,
-                focusedPosition: focusedPosition,
-                tempUnitCopy: newStore,
-            });
+            this.setState(
+                {
+                    focused: focused,
+                    focusedPosition: focusedPosition,
+                    tempUnitCopy: newStore,
+                },
+                () => {
+                    this.props.onUnitFocus(focused);
+                    this.props.onUnitEdit(focused, newContent);
+                }
+            );
         }
     }
 
@@ -100,10 +127,11 @@ class Document extends React.Component {
             pid
         );
 
-        this.props.onCreateUnit(newUnitPith, pid, pos);
+        this.props.onUnitCreate(newUnitPith, pid, pos);
 
         if (newStore !== null) {
             this.setState({
+                waitingForNew: focused,
                 focused: focused,
                 focusedPosition: 0,
                 tempUnitCopy: newStore,
@@ -198,17 +226,18 @@ class Document extends React.Component {
 
     render() {
         // create a unit for a given location
-        const createUnit = (pith, id, pid, ppid, editLock) => {
+        const createUnit = (unit, id, pid, ppid) => {
             const editable =
-                editLock === null || editLock === this.props.userId;
+                unit.editLock === null || unit.editLock === this.props.userId;
             return (
                 <Unit
                     editable={editable}
                     lockedBy={
-                        editLock !== this.props.userId
-                            ? this.props.icons[editLock]?.nickname
+                        unit.editLock !== this.props.userId
+                            ? this.props.icons[unit.editLock]?.nickname
                             : undefined
                     }
+                    hidden={unit.hidden}
                     unitEnter={(pos, content) =>
                         this.onUnitEnter(pos, content, id, pid)
                     }
@@ -222,7 +251,7 @@ class Document extends React.Component {
                         this.onUnitTab(shifted, id, pid, ppid)
                     }
                     unitFocus={() => {
-                        this.onUnitFocus(id, pith);
+                        this.onUnitFocus(id, unit.pith);
                     }}
                     unitBlur={() => {
                         this.onUnitBlur(id);
@@ -234,18 +263,19 @@ class Document extends React.Component {
                             : null
                     }
                     placeholder={"type a pith..."}
-                    pith={pith}
+                    pith={unit.pith}
                     id={id}
                     inline
                 />
             );
         };
 
-        const createSection = (content, id, pid, isLast, pith, level) => {
+        const createSection = (unit, content, id, pid, isLast, pith, level) => {
             const [over, asChild, atEnd] = this.getDragInfo(id);
 
             return (
                 <DocumentSectionLayout
+                    hidden={unit.hidden}
                     draggable={this.state.focused !== id}
                     onDragEnd={this.handleDragEnd}
                     onDragStart={(e) => this.handleDragStart(e, id, pid)}
@@ -268,6 +298,7 @@ class Document extends React.Component {
         };
 
         const store = this.getStore();
+        // console.log(store);
 
         // create the sections in the doc with children + grandchildren
         const sections = store[this.props.currentUnit]?.children?.map(
@@ -279,16 +310,16 @@ class Document extends React.Component {
                     (grandchildId, grandchildIndex) => {
                         const grandchild = store[grandchildId];
                         return createSection(
+                            grandchild,
                             null,
                             grandchildId,
                             childId,
                             grandchildIndex === child.children.length - 1,
                             createUnit(
-                                grandchild.pith,
+                                grandchild,
                                 grandchildId,
                                 childId,
-                                this.props.currentUnit,
-                                grandchild.editLock
+                                this.props.currentUnit
                             ),
                             3
                         );
@@ -297,29 +328,23 @@ class Document extends React.Component {
 
                 // create the child section
                 return createSection(
+                    child,
                     grandchildren,
                     childId,
                     this.props.currentUnit,
                     childIndex ===
                         store[this.props.currentUnit].children.length - 1,
-                    createUnit(
-                        child.pith,
-                        childId,
-                        this.props.currentUnit,
-                        null,
-                        child.editLock
-                    ),
+                    createUnit(child, childId, this.props.currentUnit, null),
                     2
                 );
             }
         );
 
         const pithUnit = createUnit(
-            store[this.props.currentUnit].pith,
+            store[this.props.currentUnit],
             this.props.currentUnit,
             null,
-            null,
-            store[this.props.currentUnit].editLock
+            null
         );
 
         const doc = (

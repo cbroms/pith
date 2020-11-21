@@ -52,7 +52,7 @@ const createRequestWrapper = (actionType, dispatch, id, timeoutTime = 5000) => {
   };
 
   // when the request completes, clear the interval
-  const endRequest = (statusCode) => {
+  const endRequest = (statusCode, additionalInfo = {}) => {
     clearTimeout(timeout);
 
     //console.log("removing request", id);
@@ -74,6 +74,7 @@ const createRequestWrapper = (actionType, dispatch, id, timeoutTime = 5000) => {
         value: {
           action: actionType,
           status: statusCode,
+          additional: additionalInfo,
         },
       },
     });

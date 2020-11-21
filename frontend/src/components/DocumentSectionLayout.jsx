@@ -156,6 +156,9 @@ const DocumentSectionLayout = (props) => {
             </StyledButton>
         ) : null;
 
+    if (props.hidden) {
+        return null;
+    }
     return (
         <StyledContainer level={props.level}>
             <StyledUnitContainer level={props.level} last={props.last}>

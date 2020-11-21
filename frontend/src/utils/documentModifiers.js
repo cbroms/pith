@@ -115,24 +115,31 @@ const handleDelete = (store, isEmpty, content, id, pid) => {
         const pos = store[pid].children.indexOf(id);
         let newFocus = null;
         let newPosition;
+        let newContent = "";
 
         if (pos === 0 && !isEmpty) {
             // if it was in the first position, add its contents to the parent
             newPosition = getDecodedLengthOfPith(store[pid].pith);
-            store[pid].pith += content;
+            if (!isEmpty) {
+                store[pid].pith += content;
+                newContent = store[pid].pith;
+            }
             newFocus = pid;
         } else {
             // add the content to the sibling above
             const siblingId = store[pid].children[pos - 1];
             newPosition = getDecodedLengthOfPith(store[siblingId].pith);
-            if (!isEmpty) store[siblingId].pith += content;
+            if (!isEmpty) {
+                store[siblingId].pith += content;
+                newContent = store[siblingId].pith;
+            }
             newFocus = siblingId;
         }
 
-        // remove the unit
-        store[pid].children.splice(pos, 1);
+        // hide the unit
+        //store[id].hidden = true;
 
-        return [newFocus, newPosition, store];
+        return [newFocus, newPosition, newContent, store];
     }
     return [null, null, null];
 };

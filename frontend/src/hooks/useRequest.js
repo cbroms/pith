@@ -10,6 +10,7 @@ const useRequest = (completedRequests) => {
 		pending: false,
 		made: false,
 		requestId: null,
+		additional: null,
 	});
 
 	// sometimes the UI will make multiple requests to the same function. In this
@@ -21,7 +22,12 @@ const useRequest = (completedRequests) => {
 	const execute = (func) => {
 		// make some kind of request (usually dispatch an action)
 		const requestId = uuidv4();
-		setStatus({ made: true, pending: true, requestId: requestId });
+		setStatus({
+			made: true,
+			pending: true,
+			requestId: requestId,
+			additional: null,
+		});
 		// here we pass a randomly generated id to identify this request in
 		// the completedRequests array in the redux store
 		func(requestId);
