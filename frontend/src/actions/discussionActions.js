@@ -379,7 +379,8 @@ const addUnit = (pith, parentUnit, position, requestId) => {
 };
 
 const hideUnit = (unitId, requestId) => {
-  return (dispatch) => {
+  return (dispatch) => { 
+    console.log("send hide unit")
     const data = {
       unit_id: unitId,
     };
@@ -392,6 +393,7 @@ const hideUnit = (unitId, requestId) => {
 
     startRequest(() =>
       socket.emit("hide_unit", data, (res) => {
+        console.log("hide unit response")
         const response = JSON.parse(res);
         const statusCode = getStatus(response, dispatch, {
           [BAD_EDIT_TRY]: EDIT_DISABLED,

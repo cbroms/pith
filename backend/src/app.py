@@ -398,7 +398,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["doc_meta"], emit_name="doc_meta")
+    @_process_responses(emits=["doc_meta"], emit_name="hide_unit")
     @_validate_request("hide_unit")
     @_check_user_session
     async def on_hide_unit(self, sid, request): 
