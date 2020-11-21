@@ -101,7 +101,8 @@ class Document extends React.Component {
                 },
                 () => {
                     this.props.onUnitFocus(focused);
-                    this.props.onUnitEdit(focused, newContent);
+                    if (newContent !== null)
+                        this.props.onUnitEdit(focused, newContent);
                 }
             );
         }
@@ -109,7 +110,17 @@ class Document extends React.Component {
 
     onUnitTab(shifted, id, pid, ppid) {
         const store = this.getStoreCopy();
-        const newStore = handleTab(store, shifted, id, pid, ppid);
+        const [newParent, newPosition, newStore] = handleTab(
+            store,
+            shifted,
+            id,
+            pid,
+            ppid
+        );
+
+        if (newParent !== null)
+            this.props.onUnitMove(id, newParent, newPosition);
+
         if (newStore !== null) {
             this.setState({
                 tempUnitCopy: newStore,
@@ -127,7 +138,9 @@ class Document extends React.Component {
             pid
         );
 
-        this.props.onUnitCreate(newUnitPith, pid, pos);
+        // if the use hit enter on the top level unit, make a child rather than sibling
+        if (pid === null) this.props.onUnitCreate(newUnitPith, id, -1);
+        else this.props.onUnitCreate(newUnitPith, pid, pos);
 
         if (newStore !== null) {
             this.setState({

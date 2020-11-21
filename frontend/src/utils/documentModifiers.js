@@ -1,6 +1,20 @@
 import { v4 as uuidv4 } from "uuid";
 import { getDecodedLengthOfPith } from "./pithModifiers";
 
+// get the next sibling up in the list that is not hidden
+const getNextVisibleSibling = (siblingList, thisSibling, store) => {
+    // get the index of the sibling
+    const ind = siblingList.indexOf(thisSibling);
+    console.log(ind);
+    // iterate up from the sibling towards the start of the list
+    for (let i = ind - 1; i >= 0; i--) {
+        const thisSibling = store[siblingList[i]];
+        // return when we find a visible sibling
+        if (!thisSibling.hidden) return siblingList[i];
+    }
+    return null;
+};
+
 // given a document, handle inserting a dropped element and removing it from
 // its previous position
 const handleDrag = (store, dragged, dragTarget) => {
@@ -31,22 +45,32 @@ const handleDrag = (store, dragged, dragTarget) => {
 };
 
 const handleTab = (store, shift, id, pid, ppid) => {
+    let newParent = null;
+    let newPosition = null;
+
     if (pid !== null) {
         const pos = store[pid].children.indexOf(id);
 
         // if shift isn't down, make the unit a child
-
         if (!shift) {
             // check if the unit has a sibling above it
+            // if there's no sibling, that means this is the first child of a unit and
+            // there's nothing to tab into, so ignore the case
+            const siblingId = getNextVisibleSibling(
+                store[pid].children,
+                id,
+                store
+            );
 
-            if (pos !== 0) {
-                const siblingId = store[pid].children[pos - 1];
+            if (siblingId !== null) {
                 // add the unit as a child of the sibling
                 store[siblingId].children.splice(
                     store[siblingId].children.length,
                     0,
                     id
                 );
+                newParent = siblingId;
+                newPosition = 0;
                 // remove it from its old position
                 store[pid].children.splice(pos, 1);
             }
@@ -56,6 +80,8 @@ const handleTab = (store, shift, id, pid, ppid) => {
                 const parentPos = store[ppid].children.indexOf(pid);
                 // insert after the parent unit
                 store[ppid].children.splice(parentPos + 1, 0, id);
+                newParent = ppid;
+                newPosition = parentPos + 1;
                 // remove it from its old position
                 store[pid].children.splice(pos, 1);
             }
@@ -63,7 +89,7 @@ const handleTab = (store, shift, id, pid, ppid) => {
             // i.e. ppid is null and pid is not
         }
     }
-    return store;
+    return [newParent, newPosition, store];
 };
 
 // When a user pesses the return key, add a new unit after the current one.
@@ -71,12 +97,19 @@ const handleTab = (store, shift, id, pid, ppid) => {
 // to be copied into the new unit.
 const handleEnter = (store, caretPos, content, id, pid) => {
     let newUnitPith = content.substring(caretPos, content.length);
+    let oldUnitPith = content.substring(0, caretPos);
 
     // check for a few cases where we want to clean up the new unit
     if (newUnitPith === "<br>") newUnitPith = "";
     if (newUnitPith.charAt(0) === " ")
         newUnitPith = newUnitPith.substring(1, newUnitPith.length - 1);
     if (newUnitPith === " ") newUnitPith = "";
+    if (newUnitPith === "nbsp;") {
+        // sometimes it breaks on a trailing space (&nbsp;) so fix the new unit and
+        // remove the & from the old one. It consistenly breaks the & from the nbsp;
+        newUnitPith = "";
+        oldUnitPith = oldUnitPith.substring(0, oldUnitPith.length - 1);
+    }
 
     // generate a new random id.
     // TODO: record this id and reconcile it with the new id received through
@@ -106,7 +139,7 @@ const handleEnter = (store, caretPos, content, id, pid) => {
     // console.log(caretPos);
     // console.log("new:", newUnitPith));
 
-    return [content.substring(0, caretPos), newUnitPith, newUnitId, pos, store];
+    return [oldUnitPith, newUnitPith, newUnitId, pos, store];
 };
 
 const handleDelete = (store, isEmpty, content, id, pid) => {
@@ -115,9 +148,11 @@ const handleDelete = (store, isEmpty, content, id, pid) => {
         const pos = store[pid].children.indexOf(id);
         let newFocus = null;
         let newPosition;
-        let newContent = "";
+        let newContent = null;
 
-        if (pos === 0 && !isEmpty) {
+        const siblingId = getNextVisibleSibling(store[pid].children, id, store);
+
+        if (siblingId === null) {
             // if it was in the first position, add its contents to the parent
             newPosition = getDecodedLengthOfPith(store[pid].pith);
             if (!isEmpty) {
@@ -127,7 +162,6 @@ const handleDelete = (store, isEmpty, content, id, pid) => {
             newFocus = pid;
         } else {
             // add the content to the sibling above
-            const siblingId = store[pid].children[pos - 1];
             newPosition = getDecodedLengthOfPith(store[siblingId].pith);
             if (!isEmpty) {
                 store[siblingId].pith += content;
@@ -136,8 +170,8 @@ const handleDelete = (store, isEmpty, content, id, pid) => {
             newFocus = siblingId;
         }
 
-        // hide the unit
-        //store[id].hidden = true;
+        // hide the unit so we don't have to wait for the server update to see it hidden
+        store[id].hidden = true;
 
         return [newFocus, newPosition, newContent, store];
     }

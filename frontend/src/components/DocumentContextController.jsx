@@ -7,6 +7,7 @@ import {
 	editUnit,
 	addUnit,
 	hideUnit,
+	moveUnit,
 } from "../actions/discussionActions";
 
 import useRequest from "../hooks/useRequest";
@@ -14,7 +15,7 @@ import useRequest from "../hooks/useRequest";
 import Document from "./Document";
 
 const DocumentContextController = (props) => {
-	const [addUnitStatus, makeAddUnit] = useRequest(props.completedRequests);
+	const [addStatus, makeAdd] = useRequest(props.completedRequests);
 	const [requestEditStatus, makeRequestEdit] = useRequest(
 		props.completedRequests
 	);
@@ -23,6 +24,7 @@ const DocumentContextController = (props) => {
 	);
 	const [editStatus, makeEdit] = useRequest(props.completedRequests);
 	const [hideStatus, makeHide] = useRequest(props.completedRequests);
+	const [moveStatus, makeMove] = useRequest(props.completedRequests);
 
 	const onUnitFocus = (unitId) => {
 		// when the user clicks into the unit, request editing privilages for it
@@ -54,20 +56,15 @@ const DocumentContextController = (props) => {
 	};
 
 	const onUnitCreate = (pith, parentUnit, position) => {
-		if (!addUnitStatus.pending) {
+		if (!addStatus.pending) {
 			console.log(
 				`adding unit with content ${pith} at position ${position + 1}`
 			);
-			makeAddUnit(
-				(requestId) => {
-					props.dispatch(
-						addUnit(pith, parentUnit, position + 1, requestId)
-					);
-				},
-				(additional) => {
-					console.log(additional);
-				}
-			);
+			makeAdd((requestId) => {
+				props.dispatch(
+					addUnit(pith, parentUnit, position + 1, requestId)
+				);
+			});
 		}
 	};
 
@@ -76,6 +73,19 @@ const DocumentContextController = (props) => {
 			console.log(`removing unit ${unitId}`);
 			makeHide((requestId) => {
 				props.dispatch(hideUnit(unitId, requestId));
+			});
+		}
+	};
+
+	const onUnitMove = (unitId, destinationId, position) => {
+		if (!moveStatus.pending) {
+			console.log(
+				`moving unit ${unitId} to ${destinationId} position ${position}`
+			);
+			makeMove((requestId) => {
+				props.dispatch(
+					moveUnit(unitId, destinationId, position, requestId)
+				);
 			});
 		}
 	};
@@ -89,7 +99,12 @@ const DocumentContextController = (props) => {
 	// dont make edit requests result in showing the state copy
 	// requestEditStatus.pending ||
 	// 	requestDeeditStatus.pending ||
-	if (addUnitStatus.pending || editStatus.pending || hideStatus.pending) {
+	if (
+		addStatus.pending ||
+		editStatus.pending ||
+		hideStatus.pending ||
+		moveStatus.pending
+	) {
 		//console.log("witholding state from document");
 		docMap = null;
 	}
@@ -97,13 +112,14 @@ const DocumentContextController = (props) => {
 	return (
 		<Document
 			{...props}
-			newUnitId={addUnitStatus.additional?.unit_id}
+			newUnitId={addStatus.additional?.unit_id}
 			docMap={docMap}
 			onUnitFocus={onUnitFocus}
 			onUnitBlur={onUnitBlur}
 			onUnitEdit={onUnitEdit}
 			onUnitCreate={onUnitCreate}
 			onUnitDelete={onUnitDelete}
+			onUnitMove={onUnitMove}
 		/>
 	);
 };
