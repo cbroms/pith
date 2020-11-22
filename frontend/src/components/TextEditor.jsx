@@ -56,6 +56,11 @@ class TextEditor extends React.Component {
         this.props.contentToAdd
       )
     ) {
+      console.log(
+        "content To add",
+        this.props.contentToAdd,
+        this.state.queryStartPos
+      );
       // if we have a query started, add this content where the query was
       if (this.state.queryStartPos !== null) {
         // get the end position of the search
@@ -77,17 +82,38 @@ class TextEditor extends React.Component {
         newAddedTransclusions[
           this.props.contentToAdd
         ] = this.state.queryStartPos;
-        this.setState(
-          {
-            html: newContent,
-            addedTransclusions: newAddedTransclusions,
-            queryStartPos: null,
-            focusedPosition: getDecodedLengthOfPith(newContent) - 5,
-          },
-          () => {
-            this.checkFocus(true);
-          }
-        );
+
+        console.log(newContent);
+
+        // if this unit has a parent that controls its content, change the content
+        // via the parent
+        if (this.props.unitEdit) {
+          console.log("unit edit ");
+          // since we're adding this content programatically, ensure that we first
+          // call on focus to re-aquire the edit lock.
+          this.onFocus();
+          this.props.unitEdit(newContent, () => {
+            this.setState({
+              html: newContent,
+              addedTransclusions: newAddedTransclusions,
+              queryStartPos: null,
+              focusedPosition: getDecodedLengthOfPith(newContent),
+            });
+          });
+        } else {
+          console.log("else ");
+          this.setState(
+            {
+              html: newContent,
+              addedTransclusions: newAddedTransclusions,
+              queryStartPos: null,
+              focusedPosition: getDecodedLengthOfPith(newContent),
+            },
+            () => {
+              this.checkFocus(true);
+            }
+          );
+        }
       }
     } else {
       this.checkFocus();
@@ -103,6 +129,8 @@ class TextEditor extends React.Component {
     ) {
       // console.log(this.props.focusedPosition);
       // console.log("checking focus ");
+
+      console.log(this.state.focusedPosition);
 
       const focusedPosition =
         this.state.focusedPosition !== null
@@ -251,36 +279,54 @@ class TextEditor extends React.Component {
 
         let [caretAtStart, caretPos] = this.getCaretPosition();
 
-        // in the case that the caret is on a space, remove the space first, then add
-        // the content, then place the space back afterward
+        let queryPos,
+          newContent,
+          focusPos = null;
+
         if (
           this.state.html.substring(caretPos - 1, caretPos + 5) === "&nbsp;"
         ) {
-          this.setState(
-            {
-              queryStartPos: caretPos + 3,
-              html:
-                this.state.html.slice(0, caretPos - 1) +
-                "><" +
-                this.state.html.slice(caretPos - 1),
-              focusedPosition: caretPos,
-            },
-            () => {
-              this.checkFocus(true);
-            }
-          );
+          // in the case that the caret is on a space, remove the space first, then add
+          // the content, then place the space back afterward
+          newContent =
+            this.state.html.slice(0, caretPos - 1) +
+            "><" +
+            this.state.html.slice(caretPos - 1);
+          queryPos = caretPos + 3;
+          focusPos = caretPos;
         } else {
-          // TODO: rather than setting the state directly here, send this change to
-          // the discussion parent, which would change the local store for this particular
-          // unit
+          // otherwise just add in the search characters
+          newContent =
+            this.state.html.slice(0, caretPos) +
+            "><" +
+            this.state.html.slice(caretPos);
+          queryPos = caretPos + 4;
+          focusPos = caretPos + 1;
+        }
+
+        if (this.props.unitEdit) {
+          // if this text editor has a parent controlling its content, call it rather than
+          // directly changing the state
+          this.props.unitEdit(newContent, () => {
+            // once the master has changed the content, adjust the focus position and
+            // re-check the focus
+            this.setState(
+              {
+                html: newContent,
+                queryStartPos: queryPos,
+                focusedPosition: focusPos,
+              },
+              () => {
+                this.checkFocus(true);
+              }
+            );
+          });
+        } else {
           this.setState(
             {
-              queryStartPos: caretPos + 4,
-              html:
-                this.state.html.slice(0, caretPos) +
-                "><" +
-                this.state.html.slice(caretPos),
-              focusedPosition: caretPos + 1,
+              html: newContent,
+              queryStartPos: queryPos,
+              focusedPosition: focusPos,
             },
             () => {
               this.checkFocus(true);

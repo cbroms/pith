@@ -46,7 +46,10 @@ class Document extends React.Component {
         this.getDragInfo = this.getDragInfo.bind(this);
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps) {
+        // if (this.props.docMap === null && prevProps !== null) {
+        //     this.setState({ tempUnitCopy: prevProps });
+        // }
         if (
             this.state.waitingForNew !== null &&
             this.props.newUnitId !== undefined
@@ -64,10 +67,10 @@ class Document extends React.Component {
         if (this.props.docMap === null) {
             // use the copy since some request is pending and the state is not up to date
             // with the local version we have stored
-            console.log("returning local copy");
+            // console.log("returning local copy");
             return this.state.tempUnitCopy;
         } else {
-            console.log("returning live");
+            // console.log("returning live");
             return this.props.docMap;
         }
     }
@@ -154,14 +157,19 @@ class Document extends React.Component {
         return newContent;
     }
 
-    onUnitEdit(content, id, pid) {
+    onUnitEdit(content, id, pid, callback) {
         this.props.onUnitEdit(id, content);
         const store = this.getStoreCopy();
         const newStore = handleEdit(store, content, id, pid);
         if (newStore !== null) {
-            this.setState({
-                tempUnitCopy: newStore,
-            });
+            this.setState(
+                {
+                    tempUnitCopy: newStore,
+                },
+                () => {
+                    if (callback) callback();
+                }
+            );
         }
     }
 
@@ -257,8 +265,8 @@ class Document extends React.Component {
                     unitDelete={(isEmpty, content) =>
                         this.onUnitDelete(isEmpty, content, id, pid)
                     }
-                    unitEdit={(content) => {
-                        this.onUnitEdit(content, id, pid);
+                    unitEdit={(content, callback) => {
+                        this.onUnitEdit(content, id, pid, callback);
                     }}
                     unitTab={(shifted) =>
                         this.onUnitTab(shifted, id, pid, ppid)
@@ -275,9 +283,14 @@ class Document extends React.Component {
                             ? this.state.focusedPosition
                             : null
                     }
+                    contentToAdd={
+                        this.props.transclusionUnitId === id
+                            ? this.props.transclusionToAdd
+                            : null
+                    }
                     openSearch={this.props.openSearch}
                     closeSearch={this.props.closeSearch}
-                    setQuery={this.props.setQuery}
+                    setQuery={(query) => this.props.setQuery(query, id)}
                     placeholder={"type a pith..."}
                     pith={unit.pith}
                     id={id}

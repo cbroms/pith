@@ -92,7 +92,7 @@ const getCaretPosition = (topLevelElement, topLevelHtml) => {
 };
 
 const setFocus = (element, focusedPosition, force) => {
-  console.log(element.innerHTML, focusedPosition);
+  console.log("sent:", element.innerHTML, focusedPosition);
   // set the cursor position in the element
   // this is wrapped in a timeout because we want it to excecute only after this.ref.current
   // has updated from the rerender
@@ -132,7 +132,7 @@ const setFocus = (element, focusedPosition, force) => {
         } else lenSoFar += length;
       }
 
-      // console.log("setting:", targetNode, position);
+      console.log("setting:", targetNode, position);
 
       setpos.setStart(targetNode, position);
       setpos.collapse(true);

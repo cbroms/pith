@@ -22,6 +22,6 @@ const addHighlight = (pith, highlight) => {
 };
 
 const createCitation = (id) => {
-	return "<cite>" + id + "</cite>&nbsp;<br>";
+	return "<cite>" + id + "</cite>&nbsp;";
 };
 export { getDecodedLengthOfPith, createCitation, addHighlight };

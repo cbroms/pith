@@ -43,10 +43,10 @@ import SystemError from "./SystemError";
 import DiscussionLayout from "./DiscussionLayout";
 
 const Discussion = (props) => {
-    const [chatSearchOpen, setChatSearchOpen] = useState(false);
-    const [docSearchOpen, setDocSearchOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState({ open: false, side: null });
+
     const [subscribed, setSubscribed] = useState(false);
-    const [chatTransclusion, setChatTransclusion] = useState(null);
+    const [transclusion, setTransclusion] = useState(null);
     const [query, setQuery] = useState("");
 
     // request hooks
@@ -131,14 +131,14 @@ const Discussion = (props) => {
             loading={loading}
             content={props.chatMap}
             posts={props.posts}
-            openSearch={() => setChatSearchOpen(true)}
-            closeSearch={() => setChatSearchOpen(false)}
+            openSearch={() => setSearchOpen({ side: "doc", open: true })}
+            closeSearch={() => setSearchOpen({ side: "doc", open: false })}
             setQuery={(query) => {
                 console.log("searching for:", query);
                 makeSearch((requestId) => {
                     props.dispatch(search(query, requestId));
                 });
-                setQuery(query);
+                setQuery({ query: query, id: null });
             }}
             postPending={postStatus.pending}
             nickname={props.icons[props.userId]?.nickname}
@@ -154,26 +154,28 @@ const Discussion = (props) => {
                 console.log("moved:", id);
                 props.dispatch(sendToDoc(id, uuidv4()));
             }}
-            chatTransclusionToAdd={chatTransclusion}
+            transclusionToAdd={transclusion?.content}
         />
     );
 
     const doc = (
         <DocumentContextController
             {...props}
+            transclusionToAdd={transclusion?.content}
+            transclusionUnitId={transclusion?.unitId}
             loading={loading}
             openUnit={(id) => {
                 console.log("opened:", id);
                 props.dispatch(getPage(id, uuidv4()));
             }}
-            openSearch={() => setDocSearchOpen(true)}
-            closeSearch={() => setDocSearchOpen(false)}
-            setQuery={(query) => {
+            openSearch={() => setSearchOpen({ side: "chat", open: true })}
+            closeSearch={() => setSearchOpen({ side: "chat", open: false })}
+            setQuery={(query, unitId) => {
                 console.log("searching for:", query);
                 makeSearch((requestId) => {
                     props.dispatch(search(query, requestId));
                 });
-                setQuery(query);
+                setQuery({ query: query, id: unitId });
             }}
             getUnitContext={getUnitContext}
             gettingUnitContext={getContextStatus.pending}
@@ -181,16 +183,19 @@ const Discussion = (props) => {
     );
     const searchComp = (
         <Search
-            query={query}
+            query={query.query || ""}
+            forChat={searchOpen.side === "doc"}
             searching={searchStatus.pending}
             docResults={props.searchResults.doc}
             chatResults={props.searchResults.chat}
             docUnits={props.docMap}
             chatUnits={props.chatMap}
             selectUnit={(id) => {
-                console.log("selected:", id);
-                setChatTransclusion(createCitation(id));
-                setChatSearchOpen(false);
+                setTransclusion({
+                    content: createCitation(id),
+                    unitId: query.id,
+                });
+                setSearchOpen({ ...searchOpen, open: false });
             }}
         />
     );
@@ -239,8 +244,8 @@ const Discussion = (props) => {
                             document={doc}
                             menu={menu}
                             search={searchComp}
-                            chatSearchOpen={chatSearchOpen}
-                            docSearchOpen={docSearchOpen}
+                            searchOpen={searchOpen.open}
+                            searchSide={searchOpen.side}
                         />
                     )}
                 </Route>

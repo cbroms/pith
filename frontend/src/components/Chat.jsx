@@ -172,7 +172,7 @@ const Chat = (props) => {
             openSearch={props.openSearch}
             closeSearch={props.closeSearch}
             setQuery={props.setQuery}
-            contentToAdd={props.chatTransclusionToAdd}
+            contentToAdd={props.transclusionToAdd}
             unitEnter={(pos, content) => {
                 setLastPosted({
                     pith: content,

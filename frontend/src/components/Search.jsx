@@ -15,28 +15,48 @@ const Search = (props) => {
 			? `Search results for "${props.query}"`
 			: `Type something to search...`;
 
-	const results = props.chatResults?.map((res) => {
+	const results = props.forChat ? props.chatResults : props.docResults;
+	const formattedResults = results?.map((res) => {
+		const unitContent = props.forChat
+			? props.chatUnits[res.unit_id]
+			: props.docUnits[res.unit_id];
+
+		if (unitContent.hidden) {
+			// don't show hidden units
+			return null;
+		}
 		const unit = (
 			<Unit
-				chat
+				chat={props.forChat}
 				id={res.unit_id}
-				pith={props.chatUnits[res.unit_id].pith}
+				pith={unitContent.pith}
 				highlight={props.query}
 			/>
 		);
-		return (
-			<PostLayout
-				author={props.chatUnits[res.unit_id].author}
-				time={parseTime(props.chatUnits[res.unit_id].createdAt)}
-				key={`${res.unit_id}-searchRes`}
-			>
+
+		if (props.forChat) {
+			return (
+				<PostLayout
+					author={props.chatUnits[res.unit_id].author}
+					time={parseTime(props.chatUnits[res.unit_id].createdAt)}
+					key={`${res.unit_id}-searchRes`}
+				>
+					<PostUnitLayout
+						down
+						onMove={() => props.selectUnit(res.unit_id)}
+						unit={unit}
+					/>
+				</PostLayout>
+			);
+		} else {
+			return (
 				<PostUnitLayout
-					down
+					key={`${res.unit_id}-searchRes`}
 					onMove={() => props.selectUnit(res.unit_id)}
 					unit={unit}
 				/>
-			</PostLayout>
-		);
+			);
+		}
 	});
 
 	return (
@@ -45,7 +65,7 @@ const Search = (props) => {
 			{props.searching ? (
 				<Paragraph>searching...</Paragraph>
 			) : results?.length > 0 ? (
-				results
+				formattedResults
 			) : (
 				<Paragraph>No results.</Paragraph>
 			)}

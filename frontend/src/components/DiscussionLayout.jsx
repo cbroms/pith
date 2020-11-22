@@ -237,12 +237,10 @@ const DiscussionLayout = (props) => {
                 </StyledMenuContent>
             </StyledMenuContainer>
             <StyledSearchContainer
-                left={props.docSearchOpen}
-                active={props.docSearchOpen || props.chatSearchOpen}
+                left={props.searchSide === "chat"}
+                active={props.searchOpen}
             >
-                <StyledSearchContent
-                    active={props.docSearchOpen || props.chatSearchOpen}
-                >
+                <StyledSearchContent active={props.searchOpen}>
                     {props.search}
                 </StyledSearchContent>
             </StyledSearchContainer>
