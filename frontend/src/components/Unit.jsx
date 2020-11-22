@@ -103,6 +103,9 @@ const Unit = (props) => {
                     focused={props.focused}
                     focusedPosition={props.focusedPosition}
                     placeholder={props.placeholder}
+                    openSearch={props.openSearch}
+                    closeSearch={props.closeSearch}
+                    setQuery={props.setQuery}
                 />
             );
         }

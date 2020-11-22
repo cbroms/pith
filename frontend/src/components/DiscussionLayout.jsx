@@ -110,8 +110,8 @@ const StyledSearchContainer = styled.div`
     box-sizing: border-box;
     transition: max-height ${(props) => props.theme.animation};
 
-    grid-column-start: document;
-    grid-column-end: document-end;
+    grid-column-start: ${(props) => (props.left ? "discussion" : "document")};
+    grid-column-end: ${(props) => (props.left ? "discussion" : "document")}-end;
     grid-row-start: header;
     grid-row-end: content-end;
     z-index: 10;
@@ -236,8 +236,13 @@ const DiscussionLayout = (props) => {
                     {props.menu}
                 </StyledMenuContent>
             </StyledMenuContainer>
-            <StyledSearchContainer active={props.searchActive}>
-                <StyledSearchContent active={props.searchActive}>
+            <StyledSearchContainer
+                left={props.docSearchOpen}
+                active={props.docSearchOpen || props.chatSearchOpen}
+            >
+                <StyledSearchContent
+                    active={props.docSearchOpen || props.chatSearchOpen}
+                >
                     {props.search}
                 </StyledSearchContent>
             </StyledSearchContainer>

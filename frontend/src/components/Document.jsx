@@ -275,6 +275,9 @@ class Document extends React.Component {
                             ? this.state.focusedPosition
                             : null
                     }
+                    openSearch={this.props.openSearch}
+                    closeSearch={this.props.closeSearch}
+                    setQuery={this.props.setQuery}
                     placeholder={"type a pith..."}
                     pith={unit.pith}
                     id={id}

@@ -270,6 +270,9 @@ class TextEditor extends React.Component {
             }
           );
         } else {
+          // TODO: rather than setting the state directly here, send this change to
+          // the discussion parent, which would change the local store for this particular
+          // unit
           this.setState(
             {
               queryStartPos: caretPos + 4,

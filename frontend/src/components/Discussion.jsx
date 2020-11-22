@@ -44,6 +44,7 @@ import DiscussionLayout from "./DiscussionLayout";
 
 const Discussion = (props) => {
     const [chatSearchOpen, setChatSearchOpen] = useState(false);
+    const [docSearchOpen, setDocSearchOpen] = useState(false);
     const [subscribed, setSubscribed] = useState(false);
     const [chatTransclusion, setChatTransclusion] = useState(null);
     const [query, setQuery] = useState("");
@@ -165,6 +166,15 @@ const Discussion = (props) => {
                 console.log("opened:", id);
                 props.dispatch(getPage(id, uuidv4()));
             }}
+            openSearch={() => setDocSearchOpen(true)}
+            closeSearch={() => setDocSearchOpen(false)}
+            setQuery={(query) => {
+                console.log("searching for:", query);
+                makeSearch((requestId) => {
+                    props.dispatch(search(query, requestId));
+                });
+                setQuery(query);
+            }}
             getUnitContext={getUnitContext}
             gettingUnitContext={getContextStatus.pending}
         />
@@ -229,7 +239,8 @@ const Discussion = (props) => {
                             document={doc}
                             menu={menu}
                             search={searchComp}
-                            searchActive={chatSearchOpen}
+                            chatSearchOpen={chatSearchOpen}
+                            docSearchOpen={docSearchOpen}
                         />
                     )}
                 </Route>
