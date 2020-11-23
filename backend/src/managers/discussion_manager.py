@@ -644,24 +644,21 @@ class DiscussionManager:
         results = Unit.objects()._collection.find({
           "discussion": discussion_id, "$text": {"$search": query}
         })
-
-        chat = []
-        doc = []
+        results = [r for r in results]
 
         chat_meta_ids = []
         doc_meta_ids = []
 
+        # TODO: don't show if hidden
         for unit in results: # dict form
           unit_id = unit["_id"]
-          entry = {
-            "unit_id": unit_id,
-          }
           if unit["in_chat"]:
-            chat.append(entry)
             chat_meta_ids.append(unit_id)
           else:
-            doc.append(entry)
             doc_meta_ids.append(unit_id)
+
+        chat = [{"unit_id": c} for c in chat_meta_ids] 
+        doc = [{"unit_id": d} for d in doc_meta_ids] 
 
         # TODO should depend on discussion!
         chat_meta = self._chat_metas(discussion_id, chat_meta_ids)

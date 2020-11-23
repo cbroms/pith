@@ -51,64 +51,70 @@ class DiscussionNamespace(AsyncNamespace):
       def outer(func):
         @wraps(func)
         async def helper(self, sid, request):
-          result = None
-          product = await func(self, sid, request)
-          logger.info("func_name: {}\nproduct: {}\nrequest: {}\n".format(
-            name, product, request
-          ))
+          try:
+            result = None
+            product = await func(self, sid, request)
+            logger.info("func_name: {}\nproduct: {}\nrequest: {}\n".format(
+              name, product, request
+            ))
 
-          if is_error(product):
-            result = make_error(product, info={
-              "func_name": name, "result": result, "request": request
-            })
-          else:
-            ret_res, emits_res = product
+            if is_error(product):
+              result = make_error(product, info={
+                "func_name": name, "result": result, "request": request
+              })
+            else:
+              ret_res, emits_res = product
 
-            bad_response = False
+              bad_response = False
 
-            if ret is not None:
-              try:
-                validate(instance=ret_res, schema=dres.schema[ret])
-                result = ret_res
-              except ValidationError:
-                logger.info("Return response: {}\nReturn schema: {}".format(ret_res, ret))
-                bad_response = True
-
-            if emits is not None:
-              assert(emits_res is not None)
-              for r, e in zip(emits_res, emits):
+              if ret is not None:
                 try:
-                  validate(instance=r, schema=dres.schema[e])
+                  validate(instance=ret_res, schema=dres.schema[ret])
+                  result = ret_res
                 except ValidationError:
-                  logger.info("Emit response: {}\nEmit schema: {}".format(r, e))
+                  logger.info("Return response: {}\nReturn schema: {}".format(ret_res, ret))
                   bad_response = True
 
-            if bad_response: # we cannot send off emits
-              result = make_error(Errors.BAD_RESPONSE)
-            else: # we can send off emits
-
-              shared = {}
               if emits is not None:
                 assert(emits_res is not None)
                 for r, e in zip(emits_res, emits):
-                  shared[e] = r
+                  try:
+                    validate(instance=r, schema=dres.schema[e])
+                  except ValidationError:
+                    logger.info("Emit response: {}\nEmit schema: {}".format(r, e))
+                    bad_response = True
 
-              if result is None:
-                result = {}
-              # set emitted data to return
-              result["shared"] = shared
+              if bad_response: # we cannot send off emits
+                result = make_error(Errors.BAD_RESPONSE)
+              else: # we can send off emits
 
-              result = dumps(result, cls=DictEncoder) # default returns
+                shared = {}
+                if emits is not None:
+                  assert(emits_res is not None)
+                  for r, e in zip(emits_res, emits):
+                    shared[e] = r
 
-              # every function except maybe leave should have a discussion id
-              session = await self.get_session(sid)
-              # send to everyone else
-              if "discussion_id" in session:
-                discussion_id = session["discussion_id"]
-                emit_shared = dumps(shared, cls=DictEncoder)
-                await self.emit(name, emit_shared, room=discussion_id, skip_sid=sid)
+                if result is None:
+                  result = {}
+                # set emitted data to return
+                result["shared"] = shared
 
-          return result
+                result = dumps(result, cls=DictEncoder) # default returns
+
+                # every function except maybe leave should have a discussion id
+                session = await self.get_session(sid)
+                # send to everyone else
+                if "discussion_id" in session:
+                  discussion_id = session["discussion_id"]
+                  emit_shared = dumps(shared, cls=DictEncoder)
+                  await self.emit(name, emit_shared, room=discussion_id, skip_sid=sid)
+
+            return result
+
+          except Exception as e:
+            logger.info("func_name: {}\nrequest: {}\nexception: {}\n".format(
+              name, request, e
+            ))
         return helper
       return outer
 
