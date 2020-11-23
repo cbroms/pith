@@ -2,7 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom";
 import DOMPurify from "dompurify";
 
-import { getCaretPosition, setFocus } from "../utils/editorModifiers";
+import {
+  getCaretPosition,
+  setFocus,
+  addContent,
+  standardizeContent,
+} from "../utils/editorModifiers";
 import { getDecodedLengthOfPith } from "../utils/pithModifiers";
 
 import TextEditorLayout from "./TextEditorLayout";
@@ -46,7 +51,7 @@ class TextEditor extends React.Component {
       this.props.content !== this.state.html &&
       !this.state.editedSinceChange
     ) {
-      this.setState({ html: this.props.content });
+      this.setState({ html: standardizeContent(this.props.content) });
     }
 
     // TODO: make this work for when someone tries to add two references to the same unit
@@ -56,27 +61,19 @@ class TextEditor extends React.Component {
         this.props.contentToAdd
       )
     ) {
-      console.log(
-        "content To add",
-        this.props.contentToAdd,
-        this.state.queryStartPos
-      );
+      // console.log(
+      //   "content To add",
+      //   this.props.contentToAdd,
+      //   this.state.queryStartPos
+      // );
+
       // if we have a query started, add this content where the query was
       if (this.state.queryStartPos !== null) {
-        // get the end position of the search
-        const end = this.state.html.substring(
-          this.state.queryStartPos,
-          this.state.html.length
-        );
-
-        // add the citation where the search was
-        const newContent = [
-          this.state.html.slice(0, this.state.queryStartPos - 4),
+        const newContent = addContent(
+          this.state.html,
           this.props.contentToAdd,
-          this.state.html.slice(
-            this.state.queryStartPos + end.indexOf("&lt;") + 4
-          ),
-        ].join("");
+          this.state.queryStartPos
+        );
 
         const newAddedTransclusions = { ...this.state.addedTransclusions };
         newAddedTransclusions[
@@ -130,7 +127,7 @@ class TextEditor extends React.Component {
       // console.log(this.props.focusedPosition);
       // console.log("checking focus ");
 
-      console.log(this.state.focusedPosition);
+      // console.log(this.state.focusedPosition);
 
       const focusedPosition =
         this.state.focusedPosition !== null
@@ -168,7 +165,7 @@ class TextEditor extends React.Component {
     this.keyPressTimer = null;
     // we have clicked away from the editor, so emit the changes
     if (this.props.unitEdit)
-      this.props.unitEdit(this.sanitize(this.state.html));
+      this.props.unitEdit(standardizeContent(this.sanitize(this.state.html)));
     if (this.props.unitBlur) {
       this.props.unitBlur();
     }
@@ -187,7 +184,9 @@ class TextEditor extends React.Component {
         this.keyPressTimer = setTimeout(() => {
           // emit the most recent state of the editor
           if (this.props.unitEdit)
-            this.props.unitEdit(this.sanitize(this.state.html));
+            this.props.unitEdit(
+              standardizeContent(this.sanitize(this.state.html))
+            );
 
           // keep track of the fact we're now expecting props.content to change with this
           // most recent state. We don't want to update the content on this update, or it
@@ -251,7 +250,10 @@ class TextEditor extends React.Component {
           DOMPurify.sanitize(this.state.html, this.sanitizeCompleteConf)
         );
         if (res) {
-          this.setState({ html: res, editedSinceChange: true });
+          this.setState({
+            html: standardizeContent(res),
+            editedSinceChange: true,
+          });
         } else {
           this.setState({ html: "", editedSinceChange: true });
         }
@@ -304,35 +306,37 @@ class TextEditor extends React.Component {
           focusPos = caretPos + 1;
         }
 
-        if (this.props.unitEdit) {
-          // if this text editor has a parent controlling its content, call it rather than
-          // directly changing the state
-          this.props.unitEdit(newContent, () => {
-            // once the master has changed the content, adjust the focus position and
-            // re-check the focus
-            this.setState(
-              {
-                html: newContent,
-                queryStartPos: queryPos,
-                focusedPosition: focusPos,
-              },
-              () => {
-                this.checkFocus(true);
-              }
-            );
-          });
-        } else {
-          this.setState(
-            {
-              html: newContent,
-              queryStartPos: queryPos,
-              focusedPosition: focusPos,
-            },
-            () => {
-              this.checkFocus(true);
-            }
-          );
-        }
+        newContent = standardizeContent(newContent);
+
+        // if (this.props.unitEdit) {
+        //   // if this text editor has a parent controlling its content, call it rather than
+        //   // directly changing the state
+        //   this.props.unitEdit(newContent, () => {
+        //     // once the master has changed the content, adjust the focus position and
+        //     // re-check the focus
+        //     this.setState(
+        //       {
+        //         html: newContent,
+        //         queryStartPos: queryPos,
+        //         focusedPosition: focusPos,
+        //       },
+        //       () => {
+        //         this.checkFocus(true);
+        //       }
+        //     );
+        //   });
+        // } else {
+        this.setState(
+          {
+            html: newContent,
+            queryStartPos: queryPos,
+            focusedPosition: focusPos,
+          },
+          () => {
+            this.checkFocus(true);
+          }
+        );
+        // }
         // set the start position of the query and add the closing "<"
 
         this.props.openSearch();

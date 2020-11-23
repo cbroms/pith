@@ -64,7 +64,7 @@ const Search = (props) => {
 			<LargeHeading>{heading}</LargeHeading>
 			{props.searching ? (
 				<Paragraph>searching...</Paragraph>
-			) : results?.length > 0 ? (
+			) : results?.length > 0 && props.query !== "" ? (
 				formattedResults
 			) : (
 				<Paragraph>No results.</Paragraph>

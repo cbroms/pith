@@ -12,7 +12,7 @@ const UnitContext = (props) => {
 			setHasContext(Object.keys(props.units).includes(props.id));
 		} else if (hasContext === false && !props.gettingUnitContext) {
 			// the next time we render and don't have the unit's pith, fetch it
-			props.getUnitContext(props.id);
+			if (props.getUnitContext) props.getUnitContext(props.id);
 		}
 	}, [hasContext, props]);
 

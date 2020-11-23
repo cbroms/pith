@@ -104,7 +104,7 @@ const handleEnter = (store, caretPos, content, id, pid) => {
     if (newUnitPith.charAt(0) === " ")
         newUnitPith = newUnitPith.substring(1, newUnitPith.length - 1);
     if (newUnitPith === " ") newUnitPith = "";
-    if (newUnitPith === "nbsp;") {
+    if (newUnitPith === "nbsp;" || newUnitPith.substring(0, 5) === "nbsp;") {
         // sometimes it breaks on a trailing space (&nbsp;) so fix the new unit and
         // remove the & from the old one. It consistenly breaks the & from the nbsp;
         newUnitPith = "";
