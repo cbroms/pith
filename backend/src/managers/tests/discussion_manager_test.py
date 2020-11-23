@@ -286,6 +286,7 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.join(
           discussion_id=discussion_id, user_id=user_id)
 
+        # test default scoping
         discussion_id2 = self.board_manager.create()["discussion_id"]
         discussion2 = self.discussion_manager._get(discussion_id2)
         root2 = discussion2.get().document
