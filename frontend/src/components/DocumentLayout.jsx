@@ -58,6 +58,7 @@ const StyledDocument = styled.div`
     grid-row-start: content;
     grid-row-end: content-end;
     height: 100%;
+    overflow-y: scroll;
     // background-color: SkyBlue;
 `;
 

@@ -93,6 +93,7 @@ const StyledSuperscript = styled(Paragraph)`
 
 const StyledSubtitle = styled(Paragraph)`
     font-size: 1.5rem;
+    max-width: 400px;
 `;
 
 const StyledButton = styled(Button)`
@@ -127,7 +128,7 @@ const StyledFooter = styled.div`
 `;
 
 const StyledButtonContent = styled.span`
-    margin-right: 10px;
+    // margin-right: 10px;
 `;
 
 const AlphaBoardLayout = (props) => {
@@ -144,7 +145,6 @@ const AlphaBoardLayout = (props) => {
                         <StyledButtonContent>
                             Create a discussion
                         </StyledButtonContent>
-                        <RightArrow />
                     </StyledButton>
                 </StyledIntroContent>
             </StyledIntroContainer>
