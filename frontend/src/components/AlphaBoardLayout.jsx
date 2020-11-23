@@ -148,13 +148,7 @@ const AlphaBoardLayout = (props) => {
                     </StyledButton>
                 </StyledIntroContent>
             </StyledIntroContainer>
-            <StyledFooter>
-                <StyledFooterItem>
-                    Pith <em>&alpha;lpha</em>
-                </StyledFooterItem>
-                <StyledFooterItem>&bull;</StyledFooterItem>
-                <StyledFooterItem>{props.darkToggle}</StyledFooterItem>
-            </StyledFooter>
+
             <StyledDiscussionsContainer>
                 <StyledCreateContent>
                     <MediumHeading>
