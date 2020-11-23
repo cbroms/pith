@@ -286,6 +286,16 @@ class DiscussionManagerTest(unittest.TestCase):
         self.discussion_manager.join(
           discussion_id=discussion_id, user_id=user_id)
 
+        discussion_id2 = self.board_manager.create()["discussion_id"]
+        discussion2 = self.discussion_manager._get(discussion_id2)
+        root2 = discussion2.get().document
+        nickname2 = "whales"
+        user_id2 = self.discussion_manager.create_user(
+          discussion_id=discussion_id2, nickname=nickname2)[0]["user_id"]
+        self.discussion_manager.join(
+          discussion_id=discussion_id2, user_id=user_id2)
+
+
         added = self.discussion_manager.add_unit(
           discussion_id=discussion_id, 
           pith="Monkeys are the best. Whales are the worst.", 
@@ -297,6 +307,17 @@ class DiscussionManagerTest(unittest.TestCase):
           pith="I really like monkeys.", parent=root, position=0
         )[1][0]
         unit_id2 = added["unit_id"]
+
+        added = self.discussion_manager.add_unit(
+          discussion_id=discussion_id2, 
+          pith="What are monkeys and whales?", parent=root2, position=0
+        )[1][0]
+        unit_id3 = added["unit_id"]
+        added = self.discussion_manager.add_unit(
+          discussion_id=discussion_id2, 
+          pith="Whales play with monkeys.", parent=root2, position=0
+        )[1][0]
+        unit_id4 = added["unit_id"]
 
         res = self.discussion_manager.search(
           discussion_id=discussion_id, query="monkey"
@@ -316,6 +337,8 @@ class DiscussionManagerTest(unittest.TestCase):
 
         self.discussion_manager.leave(
           discussion_id=discussion_id, user_id=user_id)
+        self.discussion_manager.leave(
+          discussion_id=discussion_id2, user_id=user_id2)
 
     def test_get_methods(self) -> None:
         discussion_id = self.board_manager.create()["discussion_id"]

@@ -47,7 +47,7 @@ class DiscussionNamespace(AsyncNamespace):
     Namespace functions for the discussion abstraction.
     """
 
-    def _process_responses(ret=None, emits=None, emit_name=None): # res is used to package emits
+    def _process_responses(name, ret=None, emits=None): # res is used to package emits
       def outer(func):
         @wraps(func)
         async def helper(self, sid, request):
@@ -55,7 +55,9 @@ class DiscussionNamespace(AsyncNamespace):
           product = await func(self, sid, request)
 
           if is_error(product):
-            result = make_error(product, info={"result": result, "request": request})
+            result = make_error(product, info={
+              "func_name": name, "result": result, "request": request
+            })
           else:
             ret_res, emits_res = product
 
@@ -101,7 +103,7 @@ class DiscussionNamespace(AsyncNamespace):
               # send to everyone else
 
               emit_shared = dumps(shared, cls=DictEncoder)
-              await self.emit(emit_name, emit_shared, room=discussion_id, skip_sid=sid)
+              await self.emit(name, emit_shared, room=discussion_id, skip_sid=sid)
 
           return result
         return helper
@@ -139,7 +141,7 @@ class DiscussionNamespace(AsyncNamespace):
       # may return error, but we do not report back
       await self.on_leave(sid, {})
 
-    @_process_responses()
+    @_process_responses("test_connect")
     @_validate_request("test_connect")
     async def on_test_connect(self, sid, request):
         """
@@ -159,7 +161,7 @@ class DiscussionNamespace(AsyncNamespace):
         # if result is None, we send back success
         return result
 
-    @_process_responses(ret="created_user")
+    @_process_responses("create_user", ret="created_user")
     @_validate_request("create_user")
     async def on_create_user(self, sid, request):
         """
@@ -180,7 +182,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(ret="joined_user", emits=["set_cursor"], emit_name="join")
+    @_process_responses("join", ret="joined_user", emits=["set_cursor"])
     @_validate_request("join")
     async def on_join(self, sid, request):
         """
@@ -213,7 +215,7 @@ class DiscussionNamespace(AsyncNamespace):
         return result
 
     # this function has to be handled manually
-    @_process_responses(ret="left_user")
+    @_process_responses("leave", ret="left_user")
     async def on_leave(self, sid, request):
         """
         :emit: *left_user* (:ref:`dres_left_user-label`)
@@ -235,7 +237,7 @@ class DiscussionNamespace(AsyncNamespace):
 
         return result
     
-    @_process_responses(ret="loaded_unit_page", emits=["set_cursor"], emit_name="loaded_unit_page")
+    @_process_responses("load_unit_page", ret="loaded_unit_page", emits=["set_cursor"])
     @_validate_request("load_unit_page")
     @_check_user_session
     async def on_load_unit_page(self, sid, request):
@@ -257,7 +259,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(ret="get_ancestors")
+    @_process_responses("get_ancestors", ret="get_ancestors")
     @_validate_request("get_ancestors")
     @_check_user_session
     async def on_get_ancestors(self, sid, request):
@@ -276,7 +278,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(ret="get_unit_content")
+    @_process_responses("get_unit_content", ret="get_unit_content")
     @_validate_request("get_unit_content")
     @_check_user_session
     async def on_get_unit_content(self, sid, request):
@@ -295,7 +297,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(ret="get_unit_context")
+    @_process_responses("get_unit_context", ret="get_unit_context")
     @_validate_request("get_unit_context")
     @_check_user_session
     async def on_get_unit_context(self, sid, request):
@@ -314,7 +316,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["created_post", "doc_meta", "chat_meta"], emit_name="post")
+    @_process_responses("post", emits=["created_post", "doc_meta", "chat_meta"])
     @_validate_request("post")
     @_check_user_session
     async def on_post(self, sid, request):
@@ -335,7 +337,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(ret="search")
+    @_process_responses("search", ret="search")
     @_validate_request("search")
     @_check_user_session
     async def on_search(self, sid, request):
@@ -352,9 +354,10 @@ class DiscussionNamespace(AsyncNamespace):
           discussion_id=discussion_id, 
           query=query
         )
+        logger.info("search result {}".format(result))
         return result
 
-    @_process_responses(emits=["sent_to_doc", "doc_meta", "chat_meta"], emit_name="send_to_doc")
+    @_process_responses("send_to_doc", emits=["sent_to_doc", "doc_meta", "chat_meta"])
     @_validate_request("send_to_doc")
     @_check_user_session
     async def on_send_to_doc(self, sid, request):
@@ -375,7 +378,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["set_cursor"], emit_name="move_cursor")
+    @_process_responses("move_cursor", emits=["set_cursor"])
     @_validate_request("move_cursor")
     @_check_user_session
     async def on_move_cursor(self, sid, request): 
@@ -398,7 +401,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["doc_meta"], emit_name="hide_unit")
+    @_process_responses("hide_unit", emits=["doc_meta"])
     @_validate_request("hide_unit")
     @_check_user_session
     async def on_hide_unit(self, sid, request): 
@@ -417,7 +420,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["doc_meta"], emit_name="unhide_unit")
+    @_process_responses("unhide_unit", emits=["doc_meta"])
     @_validate_request("unhide_unit")
     @_check_user_session
     async def on_unhide_unit(self, sid, request): 
@@ -436,7 +439,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["added_unit", "doc_meta", "chat_meta"], emit_name="add_unit")
+    @_process_responses("add_unit", emits=["added_unit", "doc_meta", "chat_meta"])
     @_validate_request("add_unit")
     @_check_user_session
     async def on_add_unit(self, sid, request): 
@@ -459,7 +462,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["doc_meta"], emit_name="select_unit")
+    @_process_responses("select_unit", emits=["doc_meta"])
     @_validate_request("select_unit")
     @_check_user_session
     async def on_select_unit(self, sid, request): 
@@ -480,7 +483,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["doc_meta"], emit_name="deselect_unit")
+    @_process_responses("deselect_unit", emits=["doc_meta"])
     @_validate_request("deselect_unit")
     @_check_user_session
     async def on_deselect_unit(self, sid, request): 
@@ -501,7 +504,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["doc_meta"], emit_name="move_units")
+    @_process_responses("move_units", emits=["doc_meta"])
     @_validate_request("move_units")
     @_check_user_session
     async def on_move_units(self, sid, request): 
@@ -528,7 +531,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["merged_units", "doc_meta"], emit_name="merge_units")
+    @_process_responses("merge_units", emits=["merged_units", "doc_meta"])
     @_validate_request("merge_units")
     @_check_user_session
     async def on_merge_units(self, sid, request): 
@@ -555,7 +558,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["doc_meta"], emit_name="request_to_edit")
+    @_process_responses("request_to_edit", emits=["doc_meta"])
     @_validate_request("request_to_edit")
     @_check_user_session
     async def on_request_to_edit(self, sid, request):
@@ -576,7 +579,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["doc_meta"], emit_name="deedit_unit")
+    @_process_responses("deedit_unit", emits=["doc_meta"])
     @_validate_request("deedit_unit")
     @_check_user_session
     async def on_deedit_unit(self, sid, request):
@@ -597,7 +600,7 @@ class DiscussionNamespace(AsyncNamespace):
         )
         return result
 
-    @_process_responses(emits=["doc_meta", "chat_meta"], emit_name="edit_unit")
+    @_process_responses("edit_unit", emits=["doc_meta", "chat_meta"])
     @_validate_request("edit_unit")
     @_check_user_session
     async def on_edit_unit(self, sid, request):

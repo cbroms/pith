@@ -639,7 +639,9 @@ class DiscussionManager:
         https://docs.mongodb.com/manual/reference/operator/query/text/
         """
         # by default, only search within own discussion
-        results = Unit.objects(discussion=discussion_id)._collection.find({"$text": {"$search": query}})
+        results = Unit.objects()._collection.find({
+          "discussion": discussion_id, "$text": {"$search": query}
+        })
 
         chat = []
         doc = []
