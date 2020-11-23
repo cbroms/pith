@@ -5,7 +5,7 @@ import { splitAtLinks, parseLinks } from "../utils/parseLinks";
 
 import LinkIcon from "./LinkIcon";
 import TextEditor from "./TextEditor";
-
+import UnitContext from "./UnitContext";
 import TooltipLayout from "./TooltipLayout";
 import UnitLayout from "./UnitLayout";
 
@@ -74,13 +74,20 @@ const Unit = (props) => {
                             }
                         />
                         {!props.chat ? (
-                            <TooltipLayout id={`ref-${props.id}-${i}`}>
-                                <span>
-                                    {" "}
-                                    A Memex is a machine introduced in Vannevar
-                                    Bush's essay <em>As We May Think</em>.{" "}
-                                </span>
-                            </TooltipLayout>
+                            <TooltipLayout
+                                id={`ref-${props.id}-${i}`}
+                                place="right"
+                                getContent={() => (
+                                    <UnitContext
+                                        id={links[i][0]}
+                                        units={props.units || {}}
+                                        getUnitContext={props.getUnitContext}
+                                        gettingUnitContext={
+                                            props.gettingUnitContext
+                                        }
+                                    />
+                                )}
+                            ></TooltipLayout>
                         ) : null}
                     </span>
                 );

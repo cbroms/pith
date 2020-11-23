@@ -109,8 +109,11 @@ const setFocus = (element, focusedPosition, force) => {
       let targetNode = element.childNodes[0] || element;
       let lenSoFar = 0;
 
+      let prevNode = targetNode;
+
       // find the node to focus in
       for (const node of element.childNodes) {
+        prevNode = targetNode;
         targetNode = node;
         let length = 0;
         // get the length of the content
@@ -134,7 +137,16 @@ const setFocus = (element, focusedPosition, force) => {
 
       console.log("setting:", targetNode, position);
 
-      setpos.setStart(targetNode, position);
+      try {
+        setpos.setStart(targetNode, position);
+      } catch {
+        // it sometimes happens that we try to set the position in a br element
+        // in this case, set the position at the end of the previous element
+        // TODO this is a nasty hack btw and we should fix it
+        const pos = prevNode.innerHTML?.length || prevNode.textContent.length;
+        setpos.setStart(prevNode, pos);
+      }
+
       setpos.collapse(true);
       set.removeAllRanges();
       set.addRange(setpos);
@@ -142,4 +154,42 @@ const setFocus = (element, focusedPosition, force) => {
     }
   }, 0);
 };
-export { getCaretPosition, setFocus };
+
+// check the end of the string and ensure it ends in a space followed by a break
+const standardizeContent = (content) => {
+  // check if there are two spaces at the end
+  const doubleEnd = content.substring(content.length - 12, content.length);
+  // if there is one space at the end
+  const singleEnd = doubleEnd.substring(6, 12);
+
+  if (doubleEnd === "&nbsp;&nbsp;") {
+    content = content.substring(0, content.length - 7) + "<br>";
+  } else if (singleEnd === "&nbsp;") {
+    content += "<br>";
+  }
+
+  // const brEnd = content.substring(content.length - 4, content.length);
+  // console.log(brEnd);
+
+  // if (brEnd !== "<br>") {
+  //   content += "<br>";
+  // }
+
+  return content;
+};
+
+// add some content to the pith at the position where the search query started with ">"
+const addContent = (content, contentToAdd, position) => {
+  // get the end position of the search
+  const end = content.substring(position, content.length);
+
+  // add the citation where the search was
+  let newContent = [
+    content.slice(0, position - 4), // subtracting 4 to account for the &gt;
+    contentToAdd,
+    content.slice(position + end.indexOf("&lt;") + 4),
+  ].join("");
+
+  return standardizeContent(newContent);
+};
+export { getCaretPosition, setFocus, addContent, standardizeContent };

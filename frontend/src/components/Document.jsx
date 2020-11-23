@@ -67,10 +67,10 @@ class Document extends React.Component {
         if (this.props.docMap === null) {
             // use the copy since some request is pending and the state is not up to date
             // with the local version we have stored
-            // console.log("returning local copy");
+            //console.log("returning local copy");
             return this.state.tempUnitCopy;
         } else {
-            // console.log("returning live");
+            //console.log("returning live");
             return this.props.docMap;
         }
     }
@@ -291,6 +291,9 @@ class Document extends React.Component {
                     openSearch={this.props.openSearch}
                     closeSearch={this.props.closeSearch}
                     setQuery={(query) => this.props.setQuery(query, id)}
+                    getUnitContext={this.props.getUnitContext}
+                    gettingUnitContext={this.props.gettingUnitContext}
+                    units={store}
                     placeholder={"type a pith..."}
                     pith={unit.pith}
                     id={id}

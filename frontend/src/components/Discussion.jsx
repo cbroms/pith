@@ -132,7 +132,11 @@ const Discussion = (props) => {
             loading={loading}
             content={props.chatMap}
             posts={props.posts}
-            openSearch={() => setSearchOpen({ side: "doc", open: true })}
+            openSearch={() => {
+                setSearchOpen({ side: "doc", open: true });
+                setTransclusion(null);
+                setQuery("");
+            }}
             closeSearch={() => setSearchOpen({ side: "doc", open: false })}
             setQuery={(query) => {
                 console.log("searching for:", query);
@@ -169,7 +173,11 @@ const Discussion = (props) => {
                 console.log("opened:", id);
                 props.dispatch(getPage(id, uuidv4()));
             }}
-            openSearch={() => setSearchOpen({ side: "chat", open: true })}
+            openSearch={() => {
+                setSearchOpen({ side: "chat", open: true });
+                setTransclusion(null);
+                setQuery("");
+            }}
             closeSearch={() => setSearchOpen({ side: "chat", open: false })}
             setQuery={(query, unitId) => {
                 console.log("searching for:", query);
