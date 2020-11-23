@@ -4,6 +4,6 @@
     "user_id": {"type": "string"},
     "nickname": {"type": "string"}
   },
-  "required": ["user_id", "nickname"]
+  "required": []
 }
 

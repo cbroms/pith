@@ -215,13 +215,14 @@ class DiscussionNamespace(AsyncNamespace):
         return result
 
     # this function has to be handled manually
-    @_process_responses("leave", ret="left_user")
+    @_process_responses("leave", emits=["left_user"])
     async def on_leave(self, sid, request):
         """
         :emit: *left_user* (:ref:`dres_left_user-label`)
         :errors: BAD_REQUEST, BAD_RESPONSE, BAD_DISCUSSION_ID, BAD_USER_ID
         """
-        result = None, None # assume success
+        # user_id and nickname are optional in case we have not joined
+        result = None, [{}] # assume success
         session = await self.get_session(sid)
 
         # joined means we are in room and need to leave
