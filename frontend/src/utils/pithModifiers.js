@@ -9,12 +9,12 @@ const getDecodedLengthOfPith = (pith) => {
 };
 
 const addHighlight = (pith, highlight) => {
-	const ind = pith.indexOf(highlight);
+	const ind = pith.toLowerCase().indexOf(highlight.toLowerCase());
 	if (ind > -1) {
 		return [
 			pith.slice(0, ind),
 			"<mark>",
-			highlight,
+			pith.slice(ind, ind + highlight.length),
 			"</mark>",
 			pith.slice(ind + highlight.length),
 		].join("");
