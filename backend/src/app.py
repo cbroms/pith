@@ -99,11 +99,11 @@ class DiscussionNamespace(AsyncNamespace):
 
               # every function except maybe leave should have a discussion id
               session = await self.get_session(sid)
-              discussion_id = session["discussion_id"]
               # send to everyone else
-
-              emit_shared = dumps(shared, cls=DictEncoder)
-              await self.emit(name, emit_shared, room=discussion_id, skip_sid=sid)
+              if "discussion_id" in session:
+                discussion_id = session["discussion_id"]
+                emit_shared = dumps(shared, cls=DictEncoder)
+                await self.emit(name, emit_shared, room=discussion_id, skip_sid=sid)
 
           return result
         return helper

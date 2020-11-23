@@ -41,15 +41,12 @@ const handleSetCursor = (response, dispatch) => {
 };
 
 const handleLeftUser = (response, dispatch) => {
-  // possible leave happened just before join
-  if (Object.keys(response).includes("user_id")) { 
-    dispatch({
-      type: LEFT_USER,
-      payload: {
-        userId: response.user_id,
-      },
-    });
-  }
+  dispatch({
+    type: LEFT_USER,
+    payload: {
+      userId: response.user_id,
+    },
+  });
 };
 
 const handleCreatedPost = (response, dispatch) => {
