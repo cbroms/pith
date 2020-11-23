@@ -20,6 +20,20 @@ const StyledFooterItem = styled.span`
     margin-right: 15px;
 `;
 
+const StyledContent = styled.div`
+    height: 100%;
+    grid-column-start: content;
+    grid-column-end: content-end;
+    grid-row-start: content;
+    grid-row-end: content-end;
+
+    // align-self: center;
+    // white-space: nowrap;
+
+    // display: flex;
+    // align-items: center;
+`;
+
 const StyledFooter = styled.div`
     height: 100%;
     grid-column-start: content;
@@ -36,6 +50,7 @@ const StyledFooter = styled.div`
 const MenuLayout = (props) => {
     return (
         <StyledContainer>
+            <StyledContent>{props.content}</StyledContent>
             <StyledFooter>
                 <StyledFooterItem>
                     Pith <em>&alpha;lpha</em>

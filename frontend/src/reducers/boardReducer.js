@@ -1,11 +1,8 @@
-import {
-  POPULATE_DISCUSSIONS,
-  ADD_DISCUSSION,
-} from "../reducer/types";
+import { POPULATE_DISCUSSIONS, ADD_DISCUSSION } from "./types";
 
 const defaultState = {
-  discussions : [],
-}
+  discussions: [],
+};
 
 const boardReducer = (state = defaultState, action) => {
   switch (action.type) {
@@ -17,7 +14,7 @@ const boardReducer = (state = defaultState, action) => {
       break;
     }
     case ADD_DISCUSSION: {
-      const discussions = {...state.discussions};
+      const discussions = [...state.discussions];
       discussions.push(action.payload.add);
       return {
         ...state,
@@ -26,9 +23,9 @@ const boardReducer = (state = defaultState, action) => {
       break;
     }
     default: {
-
+      return { ...state };
     }
   }
-}
+};
 
 export default boardReducer;

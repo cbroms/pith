@@ -1,20 +1,20 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 
-import { LargeHeading, Paragraph, Button } from "./StandardUI";
+import { LargeHeading, MediumHeading, Paragraph, Button } from "./StandardUI";
 
 import { RightArrow } from "./Symbols";
 
 const StyledContent = styled.div`
     display: grid;
     grid-template-columns: [logo] 40px [logo-end discussion] 1fr [discussion-end document] 1.25fr [document-end];
-    grid-template-rows: [header] 40px [header-end content] 1fr [content-end];
+    grid-template-rows: [header] 40px [header-end content] 1fr [content-end footer] 40px [footer-end];
 
     @media (max-width: 768px) {
         grid-template-columns: [logo] 40px [logo-end discussion] 1fr [discussion-end document] 1fr [document-end];
         grid-template-rows:
             [header] 40px [header-end content] 1fr
-            [content-end];
+            [content-end footer] 40px [footer-end];
     }
 
     width: 100%;
@@ -25,31 +25,41 @@ const StyledContent = styled.div`
     flex: 1 1 auto;
 
     z-index: 1;
+
+    a {
+        color: ${(props) => props.theme.shade3};
+    }
+
+    a:visited {
+        color: ${(props) => props.theme.shade2};
+    }
 `;
 
 const StyledIntroContainer = styled.div`
-    display: ${(props) => (props.active ? "block" : "none")};
-
     @media (min-width: 768px) {
         display: block;
     }
     grid-column-start: discussion;
     grid-column-end: discussion-end;
     grid-row-start: header;
-    grid-row-end: content-end;
+    grid-row-end: footer-end;
 
     padding: 10px;
     z-index: 5;
     background-color: ${(props) => props.theme.shade1};
 `;
 
-const StyledCreateContainer = styled.div`
+const StyledDiscussionsContainer = styled.div`
+    @media (min-width: 768px) {
+        display: block;
+    }
     grid-column-start: document;
     grid-column-end: document-end;
     grid-row-start: header;
-    grid-row-end: content-end;
+    grid-row-end: footer-end;
+
     padding: 10px;
-    z-index: 0;
+    z-index: 5;
     background-color: ${(props) => props.theme.shade1};
 `;
 
@@ -58,6 +68,10 @@ const StyledIntroContent = styled.div`
     width: 100%;
 
     border-right: 1px solid ${(props) => props.theme.shade2};
+`;
+
+const StyledCreateContent = styled.div`
+    margin-top: 40px;
 `;
 
 const StyledTitle = styled(LargeHeading)`
@@ -94,6 +108,24 @@ const StyledButton = styled(Button)`
     }
 `;
 
+const StyledFooterItem = styled.span`
+    display: inline-block;
+    margin-right: 15px;
+`;
+
+const StyledFooter = styled.div`
+    grid-column-start: discussion;
+    grid-column-end: discussion-end;
+    grid-row-start: footer;
+    grid-row-end: footer-end;
+    align-self: center;
+    white-space: nowrap;
+
+    display: flex;
+    align-items: center;
+    z-index: 10;
+`;
+
 const StyledButtonContent = styled.span`
     margin-right: 10px;
 `;
@@ -116,7 +148,21 @@ const AlphaBoardLayout = (props) => {
                     </StyledButton>
                 </StyledIntroContent>
             </StyledIntroContainer>
-            <StyledCreateContainer />
+            <StyledFooter>
+                <StyledFooterItem>
+                    Pith <em>&alpha;lpha</em>
+                </StyledFooterItem>
+                <StyledFooterItem>&bull;</StyledFooterItem>
+                <StyledFooterItem>{props.darkToggle}</StyledFooterItem>
+            </StyledFooter>
+            <StyledDiscussionsContainer>
+                <StyledCreateContent>
+                    <MediumHeading>
+                        {props.hasDiscussions ? "Your discussions" : ""}
+                    </MediumHeading>
+                    {props.discussions}
+                </StyledCreateContent>
+            </StyledDiscussionsContainer>
         </StyledContent>
     );
 };

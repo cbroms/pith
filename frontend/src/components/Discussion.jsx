@@ -9,6 +9,7 @@ import {
     useParams,
 } from "react-router-dom";
 
+import { withRouter } from "react-router";
 import {
     GENERIC_ERROR,
     INVALID_DISCUSSION,
@@ -254,4 +255,4 @@ const Discussion = (props) => {
     );
 };
 
-export default Discussion;
+export default withRouter(Discussion);

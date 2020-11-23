@@ -30,7 +30,7 @@ async def on_create(sid, request):
     :return: :ref:`bres_created-label`
     :errors: BAD_RESPONSE 
     """
-    product = await gm.board_manager.create()
+    product = gm.board_manager.create()
 
     if not is_error(product):
       try:

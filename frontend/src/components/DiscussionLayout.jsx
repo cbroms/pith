@@ -24,6 +24,10 @@ const StyledContent = styled.div`
     flex: 1 1 auto;
 
     z-index: 1;
+
+    a {
+        color: ${(props) => props.theme.shade3};
+    }
 `;
 
 const StyledHeaderLogo = styled.div`

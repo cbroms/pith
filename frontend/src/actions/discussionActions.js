@@ -1,4 +1,4 @@
-import { socket } from "./socket";
+import { discussionSocket as socket } from "./socket";
 import { getValue, setValue } from "../api/local";
 import { createRequestWrapper } from "./queue";
 

@@ -10,8 +10,8 @@ const StyledToggleBox = styled.div`
     box-sizing: border-box;
     display: inline-block;
     cursor: pointer;
-    width: 25px;
-    height: 25px;
+    width: 20px;
+    height: 20px;
     margin-right: ${(props) => (props.dark ? 5 : 0)}px;
     background-color: ${(props) =>
         props.theme.type === "dark"

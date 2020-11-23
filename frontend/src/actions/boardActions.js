@@ -1,16 +1,9 @@
-import { socket } from "./socket";
+import { boardSocket as socket } from "./socket";
 import { cleanUpRequest, createRequestWrapper } from "./queue";
 import { getValue, setValue } from "../api/local";
-import {
-  getStatus,
-} from "./utils";
-import {
-  CREATE_DISCUSSION,
-} from "./types";
-import {
-  POPULATE_DISCUSSIONS,
-  ADD_DISCUSSION,
-} from "../reducer/types";
+import { getStatus } from "./utils";
+import { CREATE_DISCUSSION } from "./types";
+import { POPULATE_DISCUSSIONS, ADD_DISCUSSION } from "../reducers/types";
 
 const discKey = "pithDiscussions";
 
@@ -20,11 +13,11 @@ const getLocalDiscussions = (requestId) => {
     dispatch({
       type: POPULATE_DISCUSSIONS,
       payload: {
-        arr: discArray
-      }
+        arr: discArray || [],
+      },
     });
-  }
-}
+  };
+};
 
 const createDiscussion = (requestId) => {
   return (dispatch) => {
@@ -43,32 +36,31 @@ const createDiscussion = (requestId) => {
         const statusCode = getStatus(response, dispatch, {});
         if (statusCode === null) {
           const saved = {
-            id: discussionId,
+            id: response.discussion_id,
             createdAt: new Date(),
-          }
+          };
 
           // save locally
           const discArray = getValue(discKey);
+
           if (discArray === null) {
             setValue(discKey, [saved]);
           } else {
-            setValue(discKey, discArray.push(saved));
+            discArray.push(saved);
+            setValue(discKey, discArray);
           }
 
           dispatch({
             type: ADD_DISCUSSION,
             payload: {
-              add: saved
-            }
+              add: saved,
+            },
           });
         }
         endRequest(statusCode);
-      }
-    }
-  }
-}
-
-export {
-  getLocalDiscussions,
-  createDiscussion,
+      })
+    );
+  };
 };
+
+export { getLocalDiscussions, createDiscussion };

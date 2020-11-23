@@ -9,7 +9,7 @@ const LargeHeading = styled.h2`
 `;
 
 const MediumHeading = styled.h2`
-    font-family: ${(props) => props.theme.sans};
+    font-family: ${(props) => props.theme.serif};
     font-size: ${(props) => props.theme.largeFont};
     font-weight: 600;
 
