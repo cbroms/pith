@@ -53,6 +53,9 @@ class DiscussionNamespace(AsyncNamespace):
         async def helper(self, sid, request):
           result = None
           product = await func(self, sid, request)
+          logger.info("func_name: {}\nproduct: {}\nrequest: {}\n".format(
+            name, product, request
+          ))
 
           if is_error(product):
             result = make_error(product, info={
@@ -355,7 +358,6 @@ class DiscussionNamespace(AsyncNamespace):
           discussion_id=discussion_id, 
           query=query
         )
-        logger.info("search result {}".format(result))
         return result
 
     @_process_responses("send_to_doc", emits=["sent_to_doc", "doc_meta", "chat_meta"])

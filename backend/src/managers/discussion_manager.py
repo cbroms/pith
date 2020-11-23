@@ -124,7 +124,9 @@ class DiscussionManager:
         #### MONGO
 
     def _retrieve_links(self, pith):
-      return constants.LINK_PATTERN.findall(pith)
+      links = constants.LINK_PATTERN.findall(pith)
+      links = [l for l in links if l != ""] # non-empty
+      return links
 
     def _contains_chat_link(self, links):
       for unit_id in links:
