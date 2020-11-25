@@ -85,7 +85,6 @@ class TextEditor extends React.Component {
         // if this unit has a parent that controls its content, change the content
         // via the parent
         if (this.props.unitEdit) {
-          console.log("unit edit ");
           // since we're adding this content programatically, ensure that we first
           // call on focus to re-aquire the edit lock.
           this.onFocus();
@@ -98,7 +97,6 @@ class TextEditor extends React.Component {
             });
           });
         } else {
-          console.log("else ");
           this.setState(
             {
               html: newContent,
@@ -179,34 +177,41 @@ class TextEditor extends React.Component {
 
   handleChange(e) {
     this.setState({ html: e.target.value, editedSinceChange: true }, () => {
-      // periodically emit edit updates so the server can sync changes as they happen
-      if (this.keyPressTimer === null) {
-        this.keyPressTimer = setTimeout(() => {
-          // emit the most recent state of the editor
-          if (this.props.unitEdit)
-            this.props.unitEdit(
-              standardizeContent(this.sanitize(this.state.html))
-            );
+      if (this.props.temporary) {
+        // if this is a temporary unit, update the parent element every update so it has a
+        // perfect store of what's been edited. This is because when it is time to switch
+        // the temporary unit out for the real unit, we want to know what was typed into it
+        this.props.unitEdit(standardizeContent(this.sanitize(this.state.html)));
+      } else {
+        // periodically emit edit updates so the server can sync changes as they happen
+        if (this.keyPressTimer === null) {
+          this.keyPressTimer = setTimeout(() => {
+            // emit the most recent state of the editor
+            if (this.props.unitEdit)
+              this.props.unitEdit(
+                standardizeContent(this.sanitize(this.state.html))
+              );
 
-          // keep track of the fact we're now expecting props.content to change with this
-          // most recent state. We don't want to update the content on this update, or it
-          // will wipe out everything *after* the typed content
-          // (taken care of by setting editedSinceChange to true)
+            // keep track of the fact we're now expecting props.content to change with this
+            // most recent state. We don't want to update the content on this update, or it
+            // will wipe out everything *after* the typed content
+            // (taken care of by setting editedSinceChange to true)
 
-          clearTimeout(this.keyPressTimer);
-          this.keyPressTimer = null;
-        }, 3000); // emit every three seconds
-      }
+            clearTimeout(this.keyPressTimer);
+            this.keyPressTimer = null;
+          }, 3000); // emit every three seconds
+        }
 
-      // TODO: add a color difference around text that is not yet updated on
-      // the server (make it grey) like https://stackoverflow.com/a/38037538
+        // TODO: add a color difference around text that is not yet updated on
+        // the server (make it grey) like https://stackoverflow.com/a/38037538
 
-      // if the state is empty, ensure the search is closed
-      if (
-        this.state.html.length === 0 ||
-        (this.state.html.length === 4 && this.state.html === "<br>")
-      ) {
-        if (this.props.closeSearch) this.props.closeSearch();
+        // if the state is empty, ensure the search is closed
+        if (
+          this.state.html.length === 0 ||
+          (this.state.html.length === 4 && this.state.html === "<br>")
+        ) {
+          if (this.props.closeSearch) this.props.closeSearch();
+        }
       }
 
       // if we're in search mode, send the query
@@ -241,6 +246,8 @@ class TextEditor extends React.Component {
     // only allow newlines with shift + enter
     if (e.keyCode === 13 && !e.shiftKey) {
       e.preventDefault();
+      // remove focus so the user can't keep typing in this text box
+      document.activeElement.blur();
       // TODO: submit
       if (this.props.unitEnter) {
         // we expect unitEnter to return true if we should reset the editor content

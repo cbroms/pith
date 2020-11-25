@@ -22,6 +22,7 @@ class Document extends React.Component {
         super(props);
         this.state = {
             tempUnitCopy: this.props.docMap, // a temporary copy of the unit store while we're editing
+            tempContent: "",
             dragged: null,
             dragTarget: null,
             focused: null,
@@ -55,10 +56,35 @@ class Document extends React.Component {
             this.props.newUnitId !== undefined
         ) {
             console.log("update after waiting for new");
-            this.setState({
-                waitingForNew: null,
-                focused: this.props.newUnitId,
-            });
+            // the user could have entered text into the temporary unit, so copy it over to
+            // the new unit
+
+            //TODO rather than calling the onUnitEdit function, we could change the local
+            // store to have the new content, and then the actual state is updated when the
+            // user clicks away or three seconds elapse...
+
+            // const store = this.getStoreCopy();
+            // const newStore = handleEdit(
+            //     store,
+            //     this.state.tempContent,
+            //     this.props.newUnitId
+            // );
+
+            this.props.onUnitFocus(this.props.newUnitId);
+
+            this.onUnitEdit(
+                this.state.tempContent,
+                this.props.newUnitId,
+                () => {
+                    this.setState({
+                        waitingForNew: null,
+                        focused: this.props.newUnitId,
+                        focusedPosition: getDecodedLengthOfPith(
+                            this.state.tempContent
+                        ),
+                    });
+                }
+            );
         }
     }
 
@@ -104,7 +130,7 @@ class Document extends React.Component {
                 },
                 () => {
                     this.props.onUnitFocus(focused);
-                    if (newContent !== null)
+                    if (newContent !== null && newContent !== "")
                         this.props.onUnitEdit(focused, newContent);
                 }
             );
@@ -141,40 +167,50 @@ class Document extends React.Component {
             pid
         );
 
-        // if the use hit enter on the top level unit, make a child rather than sibling
-        if (pid === null) this.props.onUnitCreate(newUnitPith, id, -1);
-        else this.props.onUnitCreate(newUnitPith, pid, pos);
-
         if (newStore !== null) {
             this.setState({
                 waitingForNew: focused,
                 focused: focused,
                 focusedPosition: 0,
+                tempContent: "",
                 tempUnitCopy: newStore,
             });
         }
+
+        // if the use hit enter on the top level unit, make a child rather than sibling
+        if (pid === null) this.props.onUnitCreate(newUnitPith, id, -1);
+        else this.props.onUnitCreate(newUnitPith, pid, pos);
         //
         return newContent;
     }
 
-    onUnitEdit(content, id, pid, callback) {
-        this.props.onUnitEdit(id, content);
-        const store = this.getStoreCopy();
-        const newStore = handleEdit(store, content, id, pid);
-        if (newStore !== null) {
-            this.setState(
-                {
-                    tempUnitCopy: newStore,
-                },
-                () => {
-                    if (callback) callback();
-                }
-            );
+    onUnitEdit(content, id, callback) {
+        if (id.substring(0, 4) === "temp") {
+            // this is a temporary unit, so copy its content to state so we can copy it
+            // over to its replacement later
+            this.setState({ tempContent: content });
+        } else if (content !== "") {
+            this.props.onUnitEdit(id, content);
+            const store = this.getStoreCopy();
+            const newStore = handleEdit(store, content, id);
+            if (newStore !== null) {
+                this.setState(
+                    {
+                        tempUnitCopy: newStore,
+                    },
+                    () => {
+                        if (callback) callback();
+                    }
+                );
+            }
         }
     }
 
     onUnitFocus(id, pith) {
-        this.props.onUnitFocus(id);
+        if (id.substring(0, 4) !== "temp") {
+            this.props.onUnitFocus(id);
+        }
+
         this.setState({
             focused: id,
             focusedPosition: getDecodedLengthOfPith(pith),
@@ -183,7 +219,7 @@ class Document extends React.Component {
 
     onUnitBlur(id) {
         this.props.onUnitBlur(id);
-        this.setState({ focused: null });
+        if (this.state.focused === id) this.setState({ focused: null });
     }
 
     handleDragEnd(e) {
@@ -250,9 +286,11 @@ class Document extends React.Component {
         const createUnit = (unit, id, pid, ppid) => {
             const editable =
                 unit.editLock === null || unit.editLock === this.props.userId;
+
             return (
                 <Unit
                     editable={editable}
+                    temporary={unit.temporary}
                     lockedBy={
                         unit.editLock !== this.props.userId
                             ? this.props.icons[unit.editLock]?.nickname
@@ -266,7 +304,7 @@ class Document extends React.Component {
                         this.onUnitDelete(isEmpty, content, id, pid)
                     }
                     unitEdit={(content, callback) => {
-                        this.onUnitEdit(content, id, pid, callback);
+                        this.onUnitEdit(content, id, callback);
                     }}
                     unitTab={(shifted) =>
                         this.onUnitTab(shifted, id, pid, ppid)

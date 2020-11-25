@@ -114,11 +114,13 @@ const handleEnter = (store, caretPos, content, id, pid) => {
     // generate a new random id.
     // TODO: record this id and reconcile it with the new id received through
     // props for each new unit
-    let newUnitId = uuidv4();
+    let newUnitId = "temp-" + uuidv4();
     const newUnit = {
         unit_id: newUnitId,
         pith: newUnitPith,
         children: [],
+        editLock: null,
+        temporary: true,
     };
 
     let pos;
@@ -179,7 +181,7 @@ const handleDelete = (store, isEmpty, content, id, pid) => {
 };
 
 // edit the pith of a unit
-const handleEdit = (store, content, id, pid) => {
+const handleEdit = (store, content, id) => {
     store[id].pith = content;
     return store;
 };

@@ -101,6 +101,7 @@ const Unit = (props) => {
                     unitDelete={props.unitDelete}
                     unitTab={props.unitTab}
                     showButton={props.showButton}
+                    temporary={props.temporary}
                     contentToAdd={props.contentToAdd}
                     renderedContent={content} // pass the rendered version of the unit (with link icons)
                     content={pith}
