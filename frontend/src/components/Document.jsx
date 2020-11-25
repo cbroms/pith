@@ -22,7 +22,8 @@ class Document extends React.Component {
         super(props);
         this.state = {
             tempUnitCopy: this.props.docMap, // a temporary copy of the unit store while we're editing
-            tempContent: "",
+            tempIdMap: {},
+            tempContent: {},
             dragged: null,
             dragTarget: null,
             focused: null,
@@ -44,6 +45,8 @@ class Document extends React.Component {
         this.onUnitFocus = this.onUnitFocus.bind(this);
         this.onUnitBlur = this.onUnitBlur.bind(this);
 
+        this.getUnitRealId = this.getUnitRealId.bind(this);
+        this.getUnitTempId = this.getUnitTempId.bind(this);
         this.getDragInfo = this.getDragInfo.bind(this);
     }
 
@@ -56,35 +59,40 @@ class Document extends React.Component {
             this.props.newUnitId !== undefined
         ) {
             console.log("update after waiting for new");
-            // the user could have entered text into the temporary unit, so copy it over to
-            // the new unit
 
-            //TODO rather than calling the onUnitEdit function, we could change the local
-            // store to have the new content, and then the actual state is updated when the
-            // user clicks away or three seconds elapse...
-
-            // const store = this.getStoreCopy();
-            // const newStore = handleEdit(
-            //     store,
-            //     this.state.tempContent,
-            //     this.props.newUnitId
-            // );
-
+            // aquire focus
             this.props.onUnitFocus(this.props.newUnitId);
+            // add the temporary id into the map of temporary ids to real ids
+            const tempIdMap = this.state.tempIdMap;
+            tempIdMap[this.state.waitingForNew] = this.props.newUnitId;
+            tempIdMap[this.props.newUnitId] = this.state.waitingForNew;
 
-            this.onUnitEdit(
-                this.state.tempContent,
-                this.props.newUnitId,
-                () => {
-                    this.setState({
-                        waitingForNew: null,
-                        focused: this.props.newUnitId,
-                        focusedPosition: getDecodedLengthOfPith(
-                            this.state.tempContent
-                        ),
-                    });
-                }
-            );
+            const tempContentCopy = this.state.tempContent;
+            tempContentCopy[this.state.waitingForNew].temporary = false;
+            this.setState({
+                tempIdMap: tempIdMap,
+                tempContent: tempContentCopy,
+                waitingForNew: null,
+                focusedPosition: null,
+            });
+        }
+    }
+
+    // get a unit's real id (not the temporary one assigned by the client if it exists)
+    getUnitRealId(id) {
+        if (id.substring(0, 4) === "temp") {
+            if (this.state.tempIdMap[id]) return this.state.tempIdMap[id];
+            else return null;
+        }
+        return id;
+    }
+
+    getUnitTempId(id) {
+        if (id.substring(0, 4) === "temp") {
+            return id;
+        } else {
+            if (this.state.tempIdMap[id]) return this.state.tempIdMap[id];
+            return id;
         }
     }
 
@@ -94,10 +102,10 @@ class Document extends React.Component {
             // use the copy since some request is pending and the state is not up to date
             // with the local version we have stored
             //console.log("returning local copy");
-            return this.state.tempUnitCopy;
+            return { ...this.state.tempContent, ...this.state.tempUnitCopy };
         } else {
             //console.log("returning live");
-            return this.props.docMap;
+            return { ...this.state.tempContent, ...this.props.docMap };
         }
     }
 
@@ -108,9 +116,10 @@ class Document extends React.Component {
     }
 
     onUnitDelete(isEmpty, content, id, pid) {
+        const realId = this.getUnitRealId(id);
         // release the edit lock, then delete
-        this.props.onUnitBlur(id);
-        this.props.onUnitDelete(id);
+        this.props.onUnitBlur(realId);
+        this.props.onUnitDelete(realId);
 
         const store = this.getStoreCopy();
         const [focused, focusedPosition, newContent, newStore] = handleDelete(
@@ -147,8 +156,10 @@ class Document extends React.Component {
             ppid
         );
 
-        if (newParent !== null)
-            this.props.onUnitMove(id, newParent, newPosition);
+        if (newParent !== null) {
+            const realId = this.getUnitRealId(id);
+            this.props.onUnitMove(realId, newParent, newPosition);
+        }
 
         if (newStore !== null) {
             this.setState({
@@ -158,39 +169,49 @@ class Document extends React.Component {
     }
 
     onUnitEnter(caretPos, content, id, pid) {
+        const realId = this.getUnitRealId(id);
+        const realParentId = this.getUnitRealId(pid);
+
         const store = this.getStoreCopy();
         const [newContent, newUnitPith, focused, pos, newStore] = handleEnter(
             store,
             caretPos,
             content,
-            id,
-            pid
+            realId,
+            realParentId
         );
 
         if (newStore !== null) {
             this.setState({
+                tempContent: {
+                    ...this.state.tempContent,
+                    [focused]: { ...newStore[focused] },
+                },
                 waitingForNew: focused,
                 focused: focused,
                 focusedPosition: 0,
-                tempContent: "",
                 tempUnitCopy: newStore,
             });
         }
 
         // if the use hit enter on the top level unit, make a child rather than sibling
-        if (pid === null) this.props.onUnitCreate(newUnitPith, id, -1);
-        else this.props.onUnitCreate(newUnitPith, pid, pos);
+
+        if (pid === null) this.props.onUnitCreate(newUnitPith, realId, -1);
+        else this.props.onUnitCreate(newUnitPith, realParentId, pos);
         //
         return newContent;
     }
 
     onUnitEdit(content, id, callback) {
-        if (id.substring(0, 4) === "temp") {
-            // this is a temporary unit, so copy its content to state so we can copy it
-            // over to its replacement later
-            this.setState({ tempContent: content });
-        } else if (content !== "") {
-            this.props.onUnitEdit(id, content);
+        if (content !== "") {
+            const realId = this.getUnitRealId(id);
+            if (realId !== null) this.props.onUnitEdit(realId, content);
+            else {
+                const tempContentCopy = this.state.tempContent;
+                tempContentCopy[id].pith = content;
+                this.setState({ tempContent: tempContentCopy });
+            }
+
             const store = this.getStoreCopy();
             const newStore = handleEdit(store, content, id);
             if (newStore !== null) {
@@ -207,10 +228,8 @@ class Document extends React.Component {
     }
 
     onUnitFocus(id, pith) {
-        if (id.substring(0, 4) !== "temp") {
-            this.props.onUnitFocus(id);
-        }
-
+        const realId = this.getUnitRealId(id);
+        if (realId !== null) this.props.onUnitFocus(realId);
         this.setState({
             focused: id,
             focusedPosition: getDecodedLengthOfPith(pith),
@@ -218,7 +237,8 @@ class Document extends React.Component {
     }
 
     onUnitBlur(id) {
-        this.props.onUnitBlur(id);
+        const realId = this.getUnitRealId(id);
+        if (realId !== null) this.props.onUnitBlur(realId);
         if (this.state.focused === id) this.setState({ focused: null });
     }
 
@@ -373,22 +393,31 @@ class Document extends React.Component {
         // create the sections in the doc with children + grandchildren
         const sections = store[this.props.currentUnit]?.children?.map(
             (childId, childIndex) => {
-                const child = store[childId];
+                // don't render units that have temp units already
+                const workingChildId = this.getUnitTempId(childId);
+
+                let child = store[workingChildId];
+
+                if (workingChildId !== childId) child.temporary = false;
 
                 // create the grandchild sections for each child
-                const grandchildren = store[childId]?.children?.map(
+                const grandchildren = store[workingChildId]?.children?.map(
                     (grandchildId, grandchildIndex) => {
-                        const grandchild = store[grandchildId];
+                        const workingGrandchildId = this.getUnitTempId(
+                            grandchildId
+                        );
+
+                        const grandchild = store[workingGrandchildId];
                         return createSection(
                             grandchild,
                             null,
-                            grandchildId,
-                            childId,
+                            workingGrandchildId,
+                            workingChildId,
                             grandchildIndex === child.children.length - 1,
                             createUnit(
                                 grandchild,
-                                grandchildId,
-                                childId,
+                                workingGrandchildId,
+                                workingChildId,
                                 this.props.currentUnit
                             ),
                             3
@@ -400,11 +429,16 @@ class Document extends React.Component {
                 return createSection(
                     child,
                     grandchildren,
-                    childId,
+                    workingChildId,
                     this.props.currentUnit,
                     childIndex ===
                         store[this.props.currentUnit].children.length - 1,
-                    createUnit(child, childId, this.props.currentUnit, null),
+                    createUnit(
+                        child,
+                        workingChildId,
+                        this.props.currentUnit,
+                        null
+                    ),
                     2
                 );
             }

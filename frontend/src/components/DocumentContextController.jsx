@@ -50,12 +50,12 @@ const DocumentContextController = (props) => {
 		//console.log("UNIT EDIT CALLED");
 		// TODO this wasn't working when called from inserting a unit id into the document
 		// investigate why pending is still true even after editing for some reason.
-		//if (!editStatus.pending) {
-		console.log(`editing unit: ${unitId} with content ${pith}`);
-		makeEdit((requestId) => {
-			props.dispatch(editUnit(unitId, pith, requestId));
-		});
-		//}
+		if (!editStatus.pending) {
+			console.log(`editing unit: ${unitId} with content ${pith}`);
+			makeEdit((requestId) => {
+				props.dispatch(editUnit(unitId, pith, requestId));
+			});
+		}
 	};
 
 	const onUnitCreate = (pith, parentUnit, position) => {
