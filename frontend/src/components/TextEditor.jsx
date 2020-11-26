@@ -61,11 +61,7 @@ class TextEditor extends React.Component {
         this.props.contentToAdd
       )
     ) {
-      // console.log(
-      //   "content To add",
-      //   this.props.contentToAdd,
-      //   this.state.queryStartPos
-      // );
+      // console.log("content To add", this.props.contentToAdd);
 
       // if we have a query started, add this content where the query was
       if (this.state.queryStartPos !== null) {
@@ -79,8 +75,6 @@ class TextEditor extends React.Component {
         newAddedTransclusions[
           this.props.contentToAdd
         ] = this.state.queryStartPos;
-
-        console.log(newContent);
 
         // if this unit has a parent that controls its content, change the content
         // via the parent
@@ -109,6 +103,24 @@ class TextEditor extends React.Component {
             }
           );
         }
+      } else {
+        // otherwise, insert the content at the end
+
+        const newAddedTransclusions = { ...this.state.addedTransclusions };
+        newAddedTransclusions[this.props.contentToAdd] = 0;
+
+        const newContent = addContent(this.state.html, this.props.contentToAdd);
+
+        this.setState(
+          {
+            html: newContent,
+            addedTransclusions: newAddedTransclusions,
+            focusedPosition: getDecodedLengthOfPith(newContent),
+          },
+          () => {
+            this.checkFocus(true);
+          }
+        );
       }
     } else {
       this.checkFocus();
@@ -315,24 +327,6 @@ class TextEditor extends React.Component {
 
         newContent = standardizeContent(newContent);
 
-        // if (this.props.unitEdit) {
-        //   // if this text editor has a parent controlling its content, call it rather than
-        //   // directly changing the state
-        //   this.props.unitEdit(newContent, () => {
-        //     // once the master has changed the content, adjust the focus position and
-        //     // re-check the focus
-        //     this.setState(
-        //       {
-        //         html: newContent,
-        //         queryStartPos: queryPos,
-        //         focusedPosition: focusPos,
-        //       },
-        //       () => {
-        //         this.checkFocus(true);
-        //       }
-        //     );
-        //   });
-        // } else {
         this.setState(
           {
             html: newContent,
@@ -343,8 +337,6 @@ class TextEditor extends React.Component {
             this.checkFocus(true);
           }
         );
-        // }
-        // set the start position of the query and add the closing "<"
 
         this.props.openSearch();
       }

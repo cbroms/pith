@@ -1,6 +1,7 @@
 const dark = {
     type: "dark",
     animation: ".3s ease-out",
+    fastAnimation: ".15s ease-out",
     shade1: "#0f0f0f",
     shade2: "#6d6d6d",
     shade3: "#c6c6c6",

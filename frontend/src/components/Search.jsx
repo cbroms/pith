@@ -21,6 +21,7 @@ const Search = (props) => {
 			? props.chatUnits[res.unit_id]
 			: props.docUnits[res.unit_id];
 
+		console.log(unitContent.pith);
 		if (unitContent.hidden) {
 			// don't show hidden units
 			return null;
@@ -43,6 +44,8 @@ const Search = (props) => {
 				>
 					<PostUnitLayout
 						down
+						actionsVisible
+						moveActionTitle="Use reference"
 						onMove={() => props.selectUnit(res.unit_id)}
 						unit={unit}
 					/>
@@ -51,6 +54,8 @@ const Search = (props) => {
 		} else {
 			return (
 				<PostUnitLayout
+					actionsVisible
+					moveActionTitle="Use reference"
 					key={`${res.unit_id}-searchRes`}
 					onMove={() => props.selectUnit(res.unit_id)}
 					unit={unit}

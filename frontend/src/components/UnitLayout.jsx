@@ -12,20 +12,13 @@ const StyledUnit = styled.div`
     width: ${(props) => (props.inline ? "auto" : "100%")};
     //position: absolute;
     padding: 5px 10px;
+    padding-left: ${(props) => (props.inline ? 10 : 0)}px;
     width: 100%;
-    padding-left: ${(props) => (props.transcluded || props.inline ? 10 : 0)}px;
 
-    border-left: ${(props) =>
-        props.transcluded ? "2px solid " + props.theme.shade2 : "none"};
     color: ${(props) =>
         props.transcluded || props.lockedBy !== undefined
-            ? !props.transcludeHoverActive
-                ? props.theme.shade2
-                : props.theme.shade1
+            ? props.theme.shade2
             : "inherit"};
-
-    background-color: ${(props) =>
-        props.transcludeHoverActive ? props.theme.shade3 : "inherit"};
 
     mark {
         padding: 0 2px;

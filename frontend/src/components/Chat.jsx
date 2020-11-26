@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { parseTime } from "../utils/parseTime";
 import { parseLinks } from "../utils/parseLinks";
+import { createCitation } from "../utils/pithModifiers";
 
 import ChatScroller from "./ChatScroller";
 
@@ -23,6 +24,9 @@ const Chat = (props) => {
         posts: props.posts,
         content: props.content,
     });
+
+    // storing the id of the unit that is being replied t
+    const [transclusionToAdd, setTransclusionToAdd] = useState(null);
 
     let { content, posts } = postContent;
 
@@ -118,12 +122,6 @@ const Chat = (props) => {
                     transcludeNum={post.transcludeNum}
                     transclusionStartingRef={post.startingRef}
                     transcluded={post.transcluded}
-                    transcludeHoverActive={
-                        post.transcluded
-                            ? post.id.includes(currentlyActive.id) &&
-                              currentlyActive.num === post.transcludeNum
-                            : false
-                    }
                     linkHovered={(num) => {
                         setCurrentlyActive({
                             id: post.id,
@@ -145,6 +143,13 @@ const Chat = (props) => {
                         post?.totalTranscluded === post?.transcludeNum
                     }
                     transcluded={post.transcluded}
+                    transcludeHoverActive={
+                        post.transcluded
+                            ? post.id.includes(currentlyActive.id) &&
+                              currentlyActive.num === post.transcludeNum
+                            : false
+                    }
+                    moveActionTitle="Record"
                     onMove={() => {
                         if (post.transcluded) {
                             props.sendPostToDoc(
@@ -156,6 +161,10 @@ const Chat = (props) => {
                         } else {
                             props.sendPostToDoc(post.id);
                         }
+                    }}
+                    onReply={() => {
+                        console.log("on reply");
+                        setTransclusionToAdd(createCitation(post.id));
                     }}
                     unit={unit}
                     key={`${post.id}-${
@@ -183,7 +192,7 @@ const Chat = (props) => {
             openSearch={props.openSearch}
             closeSearch={props.closeSearch}
             setQuery={props.setQuery}
-            contentToAdd={props.transclusionToAdd}
+            contentToAdd={props.transclusionToAdd || transclusionToAdd}
             unitEnter={(pos, content) => {
                 setLastPosted({
                     pith: content,

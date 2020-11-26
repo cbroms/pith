@@ -9,16 +9,41 @@ const getDecodedLengthOfPith = (pith) => {
 };
 
 const addHighlight = (pith, highlight) => {
-	const ind = pith.toLowerCase().indexOf(highlight.toLowerCase());
-	if (ind > -1) {
-		return [
-			pith.slice(0, ind),
-			"<mark>",
-			pith.slice(ind, ind + highlight.length),
-			"</mark>",
-			pith.slice(ind + highlight.length),
-		].join("");
+	let newPith = pith;
+
+	// find all matches of the highlight string and add mark tags around them
+	const addHighlightToSubstring = (pith, highlight) => {
+		const regex = new RegExp(highlight, "gi");
+		const matches = pith.matchAll(regex);
+
+		let addedChars = 0;
+		for (const match of matches) {
+			let start = match.index + addedChars;
+			pith = [
+				pith.slice(0, start),
+				"<mark>",
+				pith.slice(start, start + match[0].length),
+				"</mark>",
+				pith.slice(start + match[0].length),
+			].join("");
+			addedChars += 13;
+		}
+		return pith;
+	};
+
+	// first, highlight the full matches
+	newPith = addHighlightToSubstring(pith, highlight);
+
+	if (pith === newPith) {
+		// try breaking apart the search pieces
+		const pieces = highlight.split(" ");
+
+		for (const piece of pieces) {
+			newPith = addHighlightToSubstring(newPith, piece);
+		}
 	}
+
+	return newPith;
 };
 
 const createCitation = (id) => {

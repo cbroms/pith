@@ -179,17 +179,32 @@ const standardizeContent = (content) => {
 };
 
 // add some content to the pith at the position where the search query started with ">"
-const addContent = (content, contentToAdd, position) => {
-  // get the end position of the search
-  const end = content.substring(position, content.length);
+const addContent = (content, contentToAdd, position = null) => {
+  if (position !== null) {
+    // get the end position of the search
+    const end = content.substring(position, content.length);
 
-  // add the citation where the search was
-  let newContent = [
-    content.slice(0, position - 4), // subtracting 4 to account for the &gt;
-    contentToAdd,
-    content.slice(position + end.indexOf("&lt;") + 4),
-  ].join("");
+    // add the citation where the search was
+    let newContent = [
+      content.slice(0, position - 4), // subtracting 4 to account for the &gt;
+      contentToAdd,
+      content.slice(position + end.indexOf("&lt;") + 4),
+    ].join("");
 
-  return standardizeContent(newContent);
+    return standardizeContent(newContent);
+  } else {
+    // insert the content at the end if no position is specified
+    let position = content.length;
+    if (content.substring(content.length - 4, content.length) === "<br>") {
+      position = content.length - 4;
+    }
+    let newContent = [
+      content.slice(0, position),
+      contentToAdd,
+      content.slice(position),
+    ].join("");
+
+    return standardizeContent(newContent);
+  }
 };
 export { getCaretPosition, setFocus, addContent, standardizeContent };

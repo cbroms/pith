@@ -1,6 +1,7 @@
 const light = {
     type: "light",
     animation: ".3s ease-out",
+    fastAnimation: ".15s ease-out",
     shade1: "#e2e2e2",
     shade2: "#7c7c7c",
     shade3: "#0f0f0f",
