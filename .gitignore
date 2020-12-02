@@ -11,6 +11,9 @@ node_modules/
 # redis stuff
 *.rdb 
 
+# private keys 
+*.pem
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
