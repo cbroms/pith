@@ -80,7 +80,8 @@ class Document extends React.Component {
 
     // get a unit's real id (not the temporary one assigned by the client if it exists)
     getUnitRealId(id) {
-        if (id.substring(0, 4) === "temp") {
+        if (id === null) return null;
+        else if (id.substring(0, 4) === "temp") {
             if (this.state.tempIdMap[id]) return this.state.tempIdMap[id];
             else return null;
         }
@@ -88,7 +89,8 @@ class Document extends React.Component {
     }
 
     getUnitTempId(id) {
-        if (id.substring(0, 4) === "temp") {
+        if (id === null) return null;
+        else if (id.substring(0, 4) === "temp") {
             return id;
         } else {
             if (this.state.tempIdMap[id]) return this.state.tempIdMap[id];
@@ -117,6 +119,8 @@ class Document extends React.Component {
 
     onUnitDelete(isEmpty, content, id, pid) {
         const realId = this.getUnitRealId(id);
+        const realParentId = this.getUnitRealId(pid);
+
         // release the edit lock, then delete
         this.props.onUnitBlur(realId);
         this.props.onUnitDelete(realId);
@@ -126,14 +130,16 @@ class Document extends React.Component {
             store,
             isEmpty,
             content,
-            id,
-            pid
+            realId,
+            realParentId,
+            id
         );
         //
+        const toFocus = this.getUnitTempId(focused);
         if (newStore !== null) {
             this.setState(
                 {
-                    focused: focused,
+                    focused: toFocus,
                     focusedPosition: focusedPosition,
                     tempUnitCopy: newStore,
                 },
@@ -180,6 +186,14 @@ class Document extends React.Component {
             realId,
             realParentId
         );
+
+        if (newContent !== content) {
+            // if the new content is different than the old,
+            // reaquire the edit lock and edit the unit to have the new content
+            this.props.onUnitFocus(realId);
+            this.props.onUnitEdit(realId, newContent);
+            this.props.onUnitBlur(realId);
+        }
 
         if (newStore !== null) {
             this.setState({
@@ -394,11 +408,29 @@ class Document extends React.Component {
         const sections = store[this.props.currentUnit]?.children?.map(
             (childId, childIndex) => {
                 // don't render units that have temp units already
+
+                // TODO when the real unit is added it seems to remount the fake one
+                // which causes the cursor postion to reset, breaking the text input.
+                // Somehow prevent this case by perhaps checking if the unit is
+                // temporary and has a real id in the store, in which case render the
+                // real one not the temp one...
+
+                const realChildId = this.getUnitRealId(childId);
+
+                if (
+                    realChildId !== childId &&
+                    store[realChildId] !== undefined
+                ) {
+                    console.log(realChildId, childId);
+                }
+
                 const workingChildId = this.getUnitTempId(childId);
 
                 let child = store[workingChildId];
 
-                if (workingChildId !== childId) child.temporary = false;
+                if (workingChildId !== childId) {
+                    child.temporary = false;
+                }
 
                 // create the grandchild sections for each child
                 const grandchildren = store[workingChildId]?.children?.map(

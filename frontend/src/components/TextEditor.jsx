@@ -42,10 +42,11 @@ class TextEditor extends React.Component {
   ref = React.createRef();
 
   componentDidMount() {
+    console.log("mounted new", this.state.html);
     this.checkFocus();
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
     if (
       this.props.content !== undefined &&
       this.props.content !== this.state.html &&
@@ -61,7 +62,7 @@ class TextEditor extends React.Component {
         this.props.contentToAdd
       )
     ) {
-      // console.log("content To add", this.props.contentToAdd);
+      //  console.log("content To add", this.props.contentToAdd);
 
       // if we have a query started, add this content where the query was
       if (this.state.queryStartPos !== null) {
@@ -123,7 +124,12 @@ class TextEditor extends React.Component {
         );
       }
     } else {
-      this.checkFocus();
+      if (
+        prevState.html !== this.state.html ||
+        (this.props.focused && !prevProps.focused)
+      ) {
+        this.checkFocus();
+      }
     }
 
     //TODO check for renderedContent update too
@@ -268,6 +274,7 @@ class TextEditor extends React.Component {
           this.state.html,
           DOMPurify.sanitize(this.state.html, this.sanitizeCompleteConf)
         );
+        console.log("EDITING WITH", res);
         if (res) {
           this.setState({
             html: standardizeContent(res),

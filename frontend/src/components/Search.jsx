@@ -21,7 +21,6 @@ const Search = (props) => {
 			? props.chatUnits[res.unit_id]
 			: props.docUnits[res.unit_id];
 
-		console.log(unitContent.pith);
 		if (unitContent.hidden) {
 			// don't show hidden units
 			return null;

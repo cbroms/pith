@@ -5,7 +5,6 @@ import { getDecodedLengthOfPith } from "./pithModifiers";
 const getNextVisibleSibling = (siblingList, thisSibling, store) => {
     // get the index of the sibling
     const ind = siblingList.indexOf(thisSibling);
-    console.log(ind);
     // iterate up from the sibling towards the start of the list
     for (let i = ind - 1; i >= 0; i--) {
         const thisSibling = store[siblingList[i]];
@@ -138,13 +137,17 @@ const handleEnter = (store, caretPos, content, id, pid) => {
     // add the new unit to the store
     store[newUnitId] = newUnit;
 
+    if (oldUnitPith !== content) {
+        store[id].pith = oldUnitPith;
+    }
+
     // console.log(caretPos);
     // console.log("new:", newUnitPith));
 
     return [oldUnitPith, newUnitPith, newUnitId, pos, store];
 };
 
-const handleDelete = (store, isEmpty, content, id, pid) => {
+const handleDelete = (store, isEmpty, content, id, pid, tempId) => {
     if (pid !== null) {
         // get the deleted units position
         const pos = store[pid].children.indexOf(id);
@@ -173,7 +176,7 @@ const handleDelete = (store, isEmpty, content, id, pid) => {
         }
 
         // hide the unit so we don't have to wait for the server update to see it hidden
-        store[id].hidden = true;
+        store[tempId].hidden = true;
 
         return [newFocus, newPosition, newContent, store];
     }
