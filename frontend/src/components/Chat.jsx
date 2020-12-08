@@ -151,20 +151,24 @@ const Chat = (props) => {
                     }
                     moveActionTitle="Record"
                     onMove={() => {
-                        if (post.transcluded) {
-                            props.sendPostToDoc(
-                                post.id.substring(
-                                    post.id.indexOf("-") + 1,
-                                    post.id.length
-                                )
-                            );
-                        } else {
-                            props.sendPostToDoc(post.id);
-                        }
+                        const id = post.transcluded
+                            ? post.id.substring(
+                                  post.id.indexOf("-") + 1,
+                                  post.id.length
+                              )
+                            : post.id;
+                        props.sendPostToDoc(id);
                     }}
                     onReply={() => {
                         console.log("on reply");
-                        setTransclusionToAdd(createCitation(post.id));
+                        const id = post.transcluded
+                            ? post.id.substring(
+                                  post.id.indexOf("-") + 1,
+                                  post.id.length
+                              )
+                            : post.id;
+                        console.log(id);
+                        setTransclusionToAdd(createCitation(id));
                     }}
                     unit={unit}
                     key={`${post.id}-${

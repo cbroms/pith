@@ -159,14 +159,18 @@ const Discussion = (props) => {
                 console.log("moved:", id);
                 props.dispatch(sendToDoc(id, uuidv4()));
             }}
-            transclusionToAdd={transclusion?.content}
+            transclusionToAdd={
+                searchOpen.side === "doc" ? transclusion?.content : null
+            }
         />
     );
 
     const doc = (
         <DocumentContextController
             {...props}
-            transclusionToAdd={transclusion?.content}
+            transclusionToAdd={
+                searchOpen.side === "chat" ? transclusion?.content : null
+            }
             transclusionUnitId={transclusion?.unitId}
             loading={loading}
             openUnit={(id) => {

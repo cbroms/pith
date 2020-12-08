@@ -62,8 +62,6 @@ class TextEditor extends React.Component {
         this.props.contentToAdd
       )
     ) {
-      //  console.log("content To add", this.props.contentToAdd);
-
       // if we have a query started, add this content where the query was
       if (this.state.queryStartPos !== null) {
         const newContent = addContent(
