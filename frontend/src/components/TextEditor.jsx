@@ -86,6 +86,7 @@ class TextEditor extends React.Component {
           this.props.unitEdit(newContent, () => {
             this.setState({
               html: newContent,
+              editedSinceChange: true,
               addedTransclusions: newAddedTransclusions,
               queryStartPos: null,
               focusedPosition: getDecodedLengthOfPith(newContent),
@@ -97,6 +98,7 @@ class TextEditor extends React.Component {
               html: newContent,
               addedTransclusions: newAddedTransclusions,
               queryStartPos: null,
+              editedSinceChange: true,
               focusedPosition: getDecodedLengthOfPith(newContent),
             },
             () => {
@@ -111,10 +113,10 @@ class TextEditor extends React.Component {
         newAddedTransclusions[this.props.contentToAdd] = 0;
 
         const newContent = addContent(this.state.html, this.props.contentToAdd);
-
         this.setState(
           {
             html: newContent,
+            editedSinceChange: true,
             addedTransclusions: newAddedTransclusions,
             focusedPosition: getDecodedLengthOfPith(newContent),
           },
@@ -151,7 +153,6 @@ class TextEditor extends React.Component {
           : this.props.focusedPosition !== null
           ? this.props.focusedPosition
           : getDecodedLengthOfPith(this.state.html);
-
       setFocus(this.ref.current, focusedPosition, force);
     }
   }
@@ -268,7 +269,7 @@ class TextEditor extends React.Component {
       document.activeElement.blur();
       // TODO: submit
       if (this.props.unitEnter) {
-        // we expect unitEnter to return true if we should reset the editor content
+        // we expect unitEnter to return new content if we should reset the editor content
         const res = this.props.unitEnter(
           this.getCaretPosition()[1],
           this.state.html,
@@ -314,19 +315,19 @@ class TextEditor extends React.Component {
         if (
           this.state.html.substring(caretPos - 1, caretPos + 5) === "&nbsp;"
         ) {
-          // in the case that the caret is on a space, remove the space first, then add
-          // the content, then place the space back afterward
+          // in the case that the caret is on a space, add the space first, then add
+          // the search query start, then any content afterwards
           newContent =
             this.state.html.slice(0, caretPos - 1) +
-            "><" +
+            " ><" +
             this.state.html.slice(caretPos - 1);
-          queryPos = caretPos + 3;
-          focusPos = caretPos;
+          queryPos = caretPos + 4;
+          focusPos = caretPos + 1;
         } else {
           // otherwise just add in the search characters
           newContent =
             this.state.html.slice(0, caretPos) +
-            "><" +
+            ">&lt;" + // using &lt; here beacuse we don't want it to think that <blah is a broken tag
             this.state.html.slice(caretPos);
           queryPos = caretPos + 4;
           focusPos = caretPos + 1;
@@ -337,6 +338,7 @@ class TextEditor extends React.Component {
         this.setState(
           {
             html: newContent,
+            editedSinceChange: true,
             queryStartPos: queryPos,
             focusedPosition: focusPos,
           },
@@ -373,12 +375,18 @@ class TextEditor extends React.Component {
       // check if the query start character has been deleted
       // add 3 to the caret pos because > is represented as &gt;
       if (caretPos === this.state.queryStartPos) {
-        this.setState({
-          queryStartPos: null,
-          html:
-            this.state.html.slice(0, this.state.queryStartPos - 4) +
-            this.state.html.slice(this.state.queryStartPos + 4),
-        });
+        this.setState(
+          {
+            queryStartPos: null,
+            html:
+              this.state.html.slice(0, this.state.queryStartPos - 4) +
+              this.state.html.slice(this.state.queryStartPos + 4),
+            focusedPosition: this.state.queryStartPos - 4,
+          },
+          () => {
+            this.checkFocus(true);
+          }
+        );
         e.preventDefault();
         this.props.closeSearch();
       }
