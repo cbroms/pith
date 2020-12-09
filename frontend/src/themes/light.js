@@ -7,6 +7,7 @@ const light = {
     shade3: "#0f0f0f",
     errorShade: "#e85656",
     warningShade: "orange",
+    successShade: "#58914a",
     smallBorder: "1px solid #828282",
     smallBorderActive: "1px solid black",
     largeBorder: "2px solid black",

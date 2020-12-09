@@ -12,7 +12,7 @@ const StyledContainer = styled.div`
 
     display: grid;
     grid-template-columns: [content] 1fr [content-end];
-    grid-template-rows: [content] 1fr [content-end footer] 40px [footer-end];
+    grid-template-rows: [content] 1fr [content-end footer] 150px [footer-end];
 `;
 
 const StyledFooterItem = styled.span`
@@ -27,19 +27,33 @@ const StyledContent = styled.div`
     grid-row-start: content;
     grid-row-end: content-end;
 
-    // align-self: center;
-    // white-space: nowrap;
+    a {
+        margin: 25px 0;
+        font-size: ${(props) => props.theme.extraLargeFont};
+        display: block;
+    }
 
-    // display: flex;
-    // align-items: center;
+    a:visited {
+        color: ${(props) => props.theme.shade2};
+    }
 `;
 
+const StyledItemTitle = styled.div`
+    font-size: ${(props) => props.theme.mediumFont};
+    font-family: ${(props) => props.theme.sans};
+    color: ${(props) => props.theme.shade2};
+    margin-bottom: 10px;
+`;
 const StyledFooter = styled.div`
     height: 100%;
     grid-column-start: content;
     grid-column-end: content-end;
     grid-row-start: footer;
     grid-row-end: footer-end;
+`;
+
+const StyledFooterContent = styled.div`
+    margin-top: 40px;
     align-self: center;
     white-space: nowrap;
 
@@ -52,11 +66,17 @@ const MenuLayout = (props) => {
         <StyledContainer>
             <StyledContent>{props.content}</StyledContent>
             <StyledFooter>
-                <StyledFooterItem>
-                    Pith <em>&alpha;lpha</em>
-                </StyledFooterItem>
-                <StyledFooterItem>&bull;</StyledFooterItem>
-                <StyledFooterItem>{props.darkToggle}</StyledFooterItem>
+                <StyledItemTitle>
+                    Anyone with the link can join this discussion
+                </StyledItemTitle>
+                {props.copyUrl}
+                <StyledFooterContent>
+                    <StyledFooterItem>
+                        Pith <em>&alpha;lpha</em>
+                    </StyledFooterItem>
+                    <StyledFooterItem>&bull;</StyledFooterItem>
+                    <StyledFooterItem>{props.darkToggle}</StyledFooterItem>
+                </StyledFooterContent>
             </StyledFooter>
         </StyledContainer>
     );

@@ -7,6 +7,7 @@ const dark = {
     shade3: "#c6c6c6",
     errorShade: "#e85656",
     warningShade: "orange",
+    successShade: "#58914a",
     smallBorder: "1px solid #afafaf",
     smallBorderActive: "1px solid #dbdbdb",
     extraSmallFont: "0.6rem",

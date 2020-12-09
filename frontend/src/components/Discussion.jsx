@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
-    BrowserRouter as Router,
     Switch,
     Route,
     Redirect,
@@ -215,7 +214,7 @@ const Discussion = (props) => {
     const menu = <Menu setDarkMode={props.setDarkMode} />;
 
     return (
-        <Router>
+        <React.Fragment>
             <SystemError
                 error={props.systemError}
                 timeout={props.requestTimeout}
@@ -263,7 +262,7 @@ const Discussion = (props) => {
                     )}
                 </Route>
             </Switch>
-        </Router>
+        </React.Fragment>
     );
 };
 
