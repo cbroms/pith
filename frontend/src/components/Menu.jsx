@@ -13,9 +13,6 @@ const Menu = (props) => {
 	const content = (
 		<React.Fragment>
 			<Link to="/">Your discussions</Link>
-			<a href="https://pith.is">Pith home</a>
-			<a href="https://why.pith.is">Pith blog</a>
-			<a href="https://github.com/rainflame/pith">Get the code</a>
 		</React.Fragment>
 	);
 
