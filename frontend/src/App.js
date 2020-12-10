@@ -70,7 +70,7 @@ class App extends React.Component {
 										}
 									/>
 								</Route>
-								<Route path="/d/:discussionId" exact>
+								<Route path="/d/:discussionId" >
 									<Discussion
 										{...this.props.discussion}
 										dispatch={this.props.dispatch}
