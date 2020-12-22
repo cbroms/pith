@@ -2,11 +2,14 @@
 setup/
 *notes
 backend/src/*log
+log
 
 .DS_Store 
 
 # js stuff 
 node_modules/
+
+__sapper__
 
 # redis stuff
 *.rdb 
