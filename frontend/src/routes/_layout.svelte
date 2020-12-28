@@ -1,21 +1,19 @@
 <script>
-	import Nav from '../components/Nav.svelte';
+	import { onMount } from 'svelte';
+	import { stores } from '@sapper/app';
+  	const { session } = stores();
+  	const { BACKEND_HOST, BACKEND_PORT } = $session;
 
-	export let segment;
+  	import { connect } from "../stores/connect.js"
+
+  	onMount(async () => { 
+  		console.log("mounting")
+  		connect(BACKEND_HOST, BACKEND_PORT)
+	});
+
+
 </script>
 
-<style>
-	main {
-		position: relative;
-		max-width: 56em;
-		background-color: white;
-		padding: 2em;
-		margin: 0 auto;
-		box-sizing: border-box;
-	}
-</style>
-
-<Nav {segment}/>
 
 <main>
 	<slot></slot>
