@@ -1,10 +1,5 @@
 <script>
 	import Document from "../components/document/Document.svelte"
-  	import { test } from "../stores/connect.js"
-
-  	function testConnect() {
-  		test();
-  	}
 
  </script>
 
@@ -17,7 +12,7 @@
 </svelte:head>
 
 
-<button on:click={testConnect}>test</button>
+<!-- <button on:click={testConnect}>test</button> -->
 
 
 <Document />

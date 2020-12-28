@@ -1,14 +1,15 @@
 <script>
 	import { onMount } from 'svelte';
-	import { stores } from '@sapper/app';
-  	const { session } = stores();
-  	const { BACKEND_HOST, BACKEND_PORT } = $session;
+	import { stores } from "@sapper/app";
+	import { socket } from "../stores/socket.js"
+	import { connectionStatus } from "../stores/connectionStatus"
 
-  	import { connect } from "../stores/connect.js"
+	const { session } = stores();
+	const { BACKEND_HOST, BACKEND_PORT } = $session;
+	
 
   	onMount(async () => { 
-  		console.log("mounting")
-  		connect(BACKEND_HOST, BACKEND_PORT)
+  		socket.initialize(BACKEND_HOST, BACKEND_PORT, "discussion")
 	});
 
 
@@ -16,5 +17,6 @@
 
 
 <main>
+	<div>{$connectionStatus}</div>
 	<slot></slot>
 </main>
