@@ -14,5 +14,4 @@
 
 <!-- <button on:click={testConnect}>test</button> -->
 
-
-<Document />
+<a href="/d">discussion</a>
