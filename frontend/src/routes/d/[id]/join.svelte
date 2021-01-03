@@ -1,7 +1,6 @@
 <script>
 	let name = ""
 
-
 	const onSubmit = () => {
 		submitNickname(name)
 		name = ""
