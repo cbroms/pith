@@ -17,8 +17,12 @@ export const hasUserAlreadyJoinedDiscussion = (discussionId) => {
 export const setUserJoinedDiscussion = (discussionId, userId) => {
 	const joinedDiscussions = getValue("joinedDiscussions");
 
-	if (joinedDiscussions === null) setValue({ discussionId: userId });
+	if (joinedDiscussions === null)
+		setValue("joinedDiscussions", { [discussionId]: userId });
 	else {
-		setValue({ ...joinedDiscussions, discussionId: userId });
+		setValue("joinedDiscussions", {
+			...joinedDiscussions,
+			[discussionId]: userId,
+		});
 	}
 };

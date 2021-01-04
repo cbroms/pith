@@ -14,10 +14,18 @@
 
 	onMount(async () => {
 		await discussionJoinStatus.initialize(id);
-		
-		// check if the user has already joined the discussion
-		if ($discussionJoinStatus.isValidDiscussion && $discussionJoinStatus.hasJoinedDiscussion === false) {
+
+		if (
+			$discussionJoinStatus.isValidDiscussion &&
+			$discussionJoinStatus.hasJoinedDiscussion === false &&
+			$discussionJoinStatus.userId === null
+		) {
+			// make a user ID first
 			await goto(`/d/${id}/join`);
+		}
+		else if ($discussionJoinStatus.isValidDiscussion && $discussionJoinStatus.userId !== null) {
+			// try joining the discussion with the user ID 
+			await discussionJoinStatus.joinDiscussion(id, $discussionJoinStatus.userId)
 		}
 
 		// console.log("load discusion")
@@ -26,14 +34,20 @@
 	});
 </script>
 
-<div>Discussion is valid: {$discussionJoinStatus.isValidDiscussion}</div>
+<!-- <div>Discussion is valid: {$discussionJoinStatus.isValidDiscussion}</div>
 <div>Discussion is joined: {$discussionJoinStatus.hasJoinedDiscussion}</div>
-<!-- {#if joined}
-<div >
-	Welcome to discussion {id}
+ -->
+{#if $discussionJoinStatus.isValidDiscussion === false}
+<div>
+	<h1>That discussion doesn't exist</h1>
+</div>
+{:else if $discussionJoinStatus.isValidDiscussion &&
+$discussionJoinStatus.hasJoinedDiscussion}
+<div>
+	<h1>Welcome to discussion {id}</h1>
 </div>
 {:else }
-<div >
+<div>
 	Loading...
 </div>
-{/if} -->
+{/if}

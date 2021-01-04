@@ -1,17 +1,11 @@
 <script>
-	import Document from "../components/document/Document.svelte"
+	import Document from "../components/document/Document.svelte";
+</script>
 
- </script>
-
-<style>
-
-</style>
+<style></style>
 
 <svelte:head>
 	<title>Pith</title>
 </svelte:head>
 
-
-<!-- <button on:click={testConnect}>test</button> -->
-
-<a href="/d">discussion</a>
+<a href="/d/124">discussion</a>
