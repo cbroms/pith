@@ -26,3 +26,12 @@ export const setUserJoinedDiscussion = (discussionId, userId) => {
 		});
 	}
 };
+
+export const getUserId = (discussionId) => {
+	const joinedDiscussions = getValue("joinedDiscussions");
+
+	if (joinedDiscussions === null) return null;
+	if (!Object.keys(joinedDiscussions).includes(discussionId)) return null;
+
+	return joinedDiscussions[discussionId];
+};

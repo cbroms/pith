@@ -8,6 +8,8 @@
 	import { goto } from "@sapper/app";
 	import { onMount } from "svelte";
 
+	import Chat from "../../../components/chat/Chat.svelte"
+
 	import { discussionJoinStatus } from "../../../stores/discussionJoinStatus";
 
 	export let id;
@@ -22,15 +24,17 @@
 		) {
 			// make a user ID first
 			await goto(`/d/${id}/join`);
-		}
-		else if ($discussionJoinStatus.isValidDiscussion && $discussionJoinStatus.userId !== null) {
-			// try joining the discussion with the user ID 
-			await discussionJoinStatus.joinDiscussion(id, $discussionJoinStatus.userId)
+		} else if (
+			$discussionJoinStatus.isValidDiscussion &&
+			$discussionJoinStatus.userId !== null
+		) {
+			// try joining the discussion with the user ID
+			await discussionJoinStatus.joinDiscussion(
+				id,
+				$discussionJoinStatus.userId
+			);
 		}
 
-		// console.log("load discusion")
-		// the user has joined the discussion, so load in the data
-		// loadDiscussionData()
 	});
 </script>
 
@@ -45,9 +49,8 @@
 $discussionJoinStatus.hasJoinedDiscussion}
 <div>
 	<h1>Welcome to discussion {id}</h1>
+	<Chat />
 </div>
 {:else }
-<div>
-	Loading...
-</div>
+<div>Loading...</div>
 {/if}

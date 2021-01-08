@@ -1,7 +1,9 @@
 import { createDerivedSocketStore } from "./createDerivedSocketStore";
+import { chat } from "./chat";
 import {
 	hasUserAlreadyJoinedDiscussion,
 	setUserJoinedDiscussion,
+	getUserId,
 } from "../api/utils";
 
 const defaultState = {
@@ -9,6 +11,7 @@ const defaultState = {
 	hasJoinedDiscussion: null,
 	joinDiscussionError: null,
 	userId: null,
+	discussionId: null,
 	nickname: null,
 };
 
@@ -40,6 +43,7 @@ export const discussionJoinStatus = createDerivedSocketStore(
 						hasJoinedDiscussion: hasUserAlreadyJoinedDiscussion(
 							discussionId
 						),
+						userId: getUserId(discussionId),
 					};
 				});
 			};
@@ -84,13 +88,20 @@ export const discussionJoinStatus = createDerivedSocketStore(
 							});
 						} else {
 							// all is good, we've joined
-							console.log(json);
 							update((state) => {
-								return { ...state, hasJoinedDiscussion: true };
+								return {
+									...state,
+									nickname: json.nickname,
+									hasJoinedDiscussion: true,
+									discussionId: discussionId,
+								};
 							});
 							// update the local store to include the userId for this discussion
 							// so we can rejoin seamlessly if we reload the page
 							setUserJoinedDiscussion(discussionId, userId);
+
+							// initialize the chat store with the chat history
+							chat.initialize(json.chat_history, json.chat_meta);
 						}
 					}
 				);

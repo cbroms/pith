@@ -1,6 +1,5 @@
 function setValue(val, data) {
 	localStorage.setItem(val, JSON.stringify(data));
-	console.log(localStorage.getItem(val));
 }
 
 function getValue(val) {
