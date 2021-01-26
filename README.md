@@ -84,7 +84,7 @@ A barebones install will require:
 
 First, you'll probably want a Linux server running Ubuntu. The most basic \$5 tier virtual machine offerings from [Linode](https://www.linode.com/products/shared/) or [Digital Ocean](https://www.digitalocean.com/products/droplets/) should work fine in most cases.
 
-Ensure you've [installed Docker](https://docs.docker.com/engine/install/ubuntu/) on the machine and [set up a Docker group](https://docs.docker.com/engine/install/linux-postinstall/).
+Ensure you've [installed Docker and Docker Engine](https://docs.docker.com/engine/install/ubuntu/) and [installed Docker Compose](https://docs.docker.com/compose/install/) on the machine and [set up a Docker group](https://docs.docker.com/engine/install/linux-postinstall/).
 
 Next, you'll likely want to obtain a domain (or create a sub-domain), otherwise you can access the server directly albeit _without_ SSL. If you're using a domain, we recommend that you also obtain a free SSL certificate from a CA such as [Cloudflare](https://www.cloudflare.com/ssl/) or [Let's Encrypt](https://letsencrypt.org/getting-started/).
 
