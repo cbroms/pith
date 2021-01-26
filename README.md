@@ -175,3 +175,6 @@ Then, start the services, specifying how many `app` instances to run:
 ```
 $ docker-compose -f docker-compose.prod.yml --env-file .env up --build --scale app=2
 ```
+
+### Helpful Links
+[AWS Open Ports](https://aws.amazon.com/premiumsupport/knowledge-center/connect-http-https-ec2/)
