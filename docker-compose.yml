@@ -49,12 +49,14 @@ services:
     working_dir: /static
     ports:
       - "3000:3000"
+      - "10000:10000"
     stdin_open: true
     environment:
-      REACT_APP_BACKEND_HOST: ${HOST_NAME}
-      REACT_APP_BACKEND_PORT: ${HOST_PORT}
+      BACKEND_HOST: ${HOST_NAME}
+      BACKEND_PORT: ${HOST_PORT}
     volumes:
       - ./frontend/src:/static/src:cached
+      - ./frontend/static:/static/static:cached
   redis:
     image: "redis:alpine"
   mongo:
