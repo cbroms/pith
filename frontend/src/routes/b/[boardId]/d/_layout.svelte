@@ -6,6 +6,7 @@
 	const { session } = stores();
 	const { BACKEND_HOST, BACKEND_PORT } = $session;
 
+	// initialize discussion
 	onMount(async () => {
 		socket.initialize(BACKEND_HOST, BACKEND_PORT, "discussion");
 	});

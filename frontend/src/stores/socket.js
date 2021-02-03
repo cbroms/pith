@@ -30,6 +30,4 @@ const createSocket = () => {
 };
 
 export const discussionSocket = createSocket();
-
-// can create stores with connections to other namespaces here too
-// export const boardSocket = createSocket();
+export const boardSocket = createSocket();

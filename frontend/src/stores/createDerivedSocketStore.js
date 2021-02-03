@@ -1,5 +1,4 @@
 import { derived } from "svelte/store";
-import { discussionSocket as socket } from "./socket";
 
 // create a store that derives from the socket store and keeps a custom state that's updated
 // using emit/on functions from the socket object.
@@ -51,6 +50,7 @@ import { discussionSocket as socket } from "./socket";
 */
 
 export const createDerivedSocketStore = (
+	socket,
 	functions = {},
 	defaultState = null
 ) => {

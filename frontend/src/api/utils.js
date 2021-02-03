@@ -1,37 +1,37 @@
 import { getValue, setValue } from "./storageApi";
 
-// if the user has joined the discussion already, the discussionId will be kept in localstorage
-// in the joinedDiscussions object as a key.
-export const hasUserAlreadyJoinedDiscussion = (discussionId) => {
-	const joinedDiscussions = getValue("joinedDiscussions");
+// If the user has joined the board already, the boardId will be kept in localstorage
+// in the joinedBoards object as a key.
+export const hasUserAlreadyJoinedBoard = (boardId) => {
+	const joinedBoards = getValue("joinedBoards");
 
-	if (joinedDiscussions === null) return false;
-	if (!Object.keys(joinedDiscussions).includes(discussionId)) return false;
+	if (joinedBoards === null) return false;
+	if (!Object.keys(joinedBoards).includes(boardId)) return false;
 
 	return true;
 };
 
-// add the userId to the object in localstorage containing all the discussions the user has
-// joined. joinedDiscussions is an object with keys of discussionIds mapping to the user's
-// userId for that discussion.
-export const setUserJoinedDiscussion = (discussionId, userId) => {
-	const joinedDiscussions = getValue("joinedDiscussions");
+// Add the userId to the object in localstorage containing all the boards the user has
+// joined. joinedBoards is an object with keys of boardIds mapping to the user's
+// userId for that board.
+export const setUserJoinedBoard = (boardId, userId) => {
+	const joinedBoards = getValue("joinedBoards");
 
-	if (joinedDiscussions === null)
-		setValue("joinedDiscussions", { [discussionId]: userId });
+	if (joinedBoards === null)
+		setValue("joinedBoards", { [boardId]: userId });
 	else {
-		setValue("joinedDiscussions", {
-			...joinedDiscussions,
-			[discussionId]: userId,
+		setValue("joinedBoards", {
+			...joinedBoards,
+			[boardId]: userId,
 		});
 	}
 };
 
-export const getUserId = (discussionId) => {
-	const joinedDiscussions = getValue("joinedDiscussions");
+export const getUserId = (boardId) => {
+	const joinedBoards = getValue("joinedBoards");
 
-	if (joinedDiscussions === null) return null;
-	if (!Object.keys(joinedDiscussions).includes(discussionId)) return null;
+	if (joinedBoards === null) return null;
+	if (!Object.keys(joinedBoards).includes(boardId)) return null;
 
-	return joinedDiscussions[discussionId];
+	return joinedBoards[boardId];
 };

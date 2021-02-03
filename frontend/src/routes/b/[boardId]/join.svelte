@@ -1,6 +1,6 @@
 <script context="module">
 	export async function preload({ params }) {
-		return { id: params.id };
+		return { id: params.boardId };
 	}
 </script>
 
@@ -8,7 +8,7 @@
 	import { goto } from "@sapper/app";
 	import { onMount } from "svelte";
 
-	import { discussionJoinStatus } from "../../../stores/discussionJoinStatus";
+	import { boardStore } from "../../../stores/boardStore";
 
 	export let id;
 
@@ -16,17 +16,17 @@
 	let error = false;
 
 	onMount(async () => {
-		if ($discussionJoinStatus.isValidDiscussion === null) {
+		if ($boardStore.isValidBoard === null) {
 			// if we have arrived at this route directly, go back to the index
-			await goto(`/d/${id}/`);
+			await goto(`/b/${id}/`);
 		}
 	});
 
 	const submitNickname = (name) => {
-		discussionJoinStatus.createUser(id, name).then(
+		boardStore.createUser(id, name).then(
 			async () => {
 				// we created the user sucessfully
-				await goto(`/d/${id}/`);
+				await goto(`/b/${id}/`);
 			},
 			(msg) => {
 				// the nickname was taken, try again
@@ -47,25 +47,25 @@
 	};
 </script>
 
-{#if $discussionJoinStatus.isValidDiscussion}
+{#if $boardStore.isValidBoard}
 <div>
 	<h1>Create a nickname</h1>
 	<p>
 		Your nickname will be used to identify your contributions in the
-		discussion.
+		board.
 	</p>
 	<input
 		placeholder="type a nickname..."
 		bind:value="{name}"
 		on:keydown="{onKeydown}"
 	/>
-	<button on:click="{onSubmit}">Join Discussion</button>
+	<button on:click="{onSubmit}">Join Board</button>
 
 	{#if error}
-	<div>{$discussionJoinStatus.nickname} is already taken</div>
-	{:else if $discussionJoinStatus.nickname !== null &&
-	$discussionJoinStatus.userId === null}
-	<div>Joining as {$discussionJoinStatus.nickname}...</div>
+	<div>{$boardStore.nickname} is already taken</div>
+	{:else if $boardStore.nickname !== null &&
+	$boardStore.userId === null}
+	<div>Joining as {$boardStore.nickname}...</div>
 	{/if}
 </div>
 {/if}
