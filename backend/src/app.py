@@ -143,6 +143,7 @@ class DiscussionNamespace(AsyncNamespace):
       return outer
 
     async def on_connect(self, sid, environ):
+      print("client connected")
       # does not do anything
       pass
 
@@ -157,6 +158,7 @@ class DiscussionNamespace(AsyncNamespace):
         :event: :ref:`dreq_create_user-label`
         :errors: BAD_REQUEST, BAD_DISCUSSION_ID
         """
+        print("got request")
         discussion_id = request["discussion_id"]
         result = gm.discussion_manager.test_connect(
           discussion_id=discussion_id,
