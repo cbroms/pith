@@ -1,4 +1,4 @@
-<script>
+<!--<script>
 	import { chat } from "../../stores/chat";
 	import { discussionJoinStatus } from "../../stores/discussionJoinStatus";
 
@@ -16,9 +16,7 @@
 	const onKeydown = (e) => {
 		if (e.key === "Enter") onSubmit();
 	};
-</script>
-
-<div>
+</script><div>
 	{#each $chat.messages as message}
 	<ChatMessage {...$chat.messagesContent[message]} />
 	{/each} {#each $chat.pendingMessages as message}
@@ -29,4 +27,4 @@
 		bind:value="{content}"
 		on:keydown="{onKeydown}"
 	/>
-</div>
+</div> -->

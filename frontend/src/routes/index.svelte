@@ -1,11 +1,17 @@
 <script>
-	import Document from "../components/document/Document.svelte";
+    import BoardUnit from "../components/unit/BoardUnit.svelte";
 </script>
 
-<style></style>
-
 <svelte:head>
-	<title>Pith</title>
+    <title>Pith</title>
 </svelte:head>
 
-<a href="/d/124">discussion</a>
+<div>
+    <BoardUnit focus edit links />
+</div>
+
+<style>
+    div {
+        max-width: 400px;
+    }
+</style>
