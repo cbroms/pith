@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "compression": "^1.7.1",
-    "dayjs": "^1.10.2",
     "polka": "next",
     "sirv": "^1.0.0",
     "socket.io-client": "^3.0.4",
@@ -27,6 +26,7 @@
     "@rollup/plugin-node-resolve": "^8.0.0",
     "@rollup/plugin-replace": "^2.2.0",
     "@rollup/plugin-url": "^5.0.0",
+    "dayjs": "^1.10.4",
     "dotenv": "^8.2.0",
     "rollup": "^2.3.4",
     "rollup-plugin-svelte": "^7.0.0",

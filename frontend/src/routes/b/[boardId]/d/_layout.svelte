@@ -12,7 +12,4 @@
     });
 </script>
 
-<div>
-    <div>Connected to server: {$socket.connected}</div>
-    <slot />
-</div>
+<slot />
