@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "properties": {
+    "nickname": {"type": "string"},
+    "units": {
+      "type": "array",
+      "item": {"$ref": "../../unit.json#/board"}
+    }
+  },
+  "required": ["nickname", "units"]
+}

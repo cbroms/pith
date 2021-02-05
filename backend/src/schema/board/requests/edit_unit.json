@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "board_id": {"type": "string"},
+    "unit_id": {"type": "string"},
+    "text": {"type": "string"}
+  },
+  "required": ["board_id", "unit_id", "text"]
+}
+

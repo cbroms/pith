@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "properties": {
+    "unit_id": {"type": "string"}
+    }
+  },
+  "required": ["unit_id"]
+}

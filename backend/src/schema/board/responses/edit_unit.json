@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "pith": {"type": "string"},
+    "transclusions": {
+      "type": "object"
+    }
+  },
+  "required": ["pith", "tranclusions"]
+}

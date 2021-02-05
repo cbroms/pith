@@ -4,23 +4,15 @@ import os
 
 path = os.path.dirname(os.path.realpath(__file__))
 schema = {}
-
 schema_names = [
-  "created_user",
-  "joined_user",
-  "left_user",
-  "loaded_unit_page",
-  "get_ancestors",
-  "get_unit_content",
-  "get_unit_context",
-  "created_post",
-  "search",
-  "set_cursor",
-  "added_unit",
-  "sent_to_doc",
-  "merged_units",
-  "doc_meta",
-  "chat_meta"
+    "join_disc",
+    "leave_disc",
+    "load_disc",
+    "post",
+    "add_pinned",
+    "remove_pinned",
+    "add_focused",
+    "remove_focused",
 ]
 
 for schema_name in schema_names:

@@ -1,8 +1,3 @@
-"""
-Here, we put unit functions in the discussion namespace.
-Many of the unit functions have no need of the discussion information.
-"""
-
 from datetime import datetime
 import logging
 from mongoengine import DoesNotExist
@@ -1054,3 +1049,19 @@ class DiscussionManager:
 #       doc = self.export_unit_tree(root)
 #       # process doc according to method
 #       # call function to upload
+
+    def join_disc(self, ):
+
+    def load_disc(self, ):
+
+    def leave_disc(self, );
+
+    def post(self, ):
+
+    def add_pinned(self, ):
+
+    def remove_pinned(self, ):
+
+    def add_focused(self, ):
+
+    def remove_focused(self, ):

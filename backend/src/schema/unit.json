@@ -1,0 +1,45 @@
+{
+  "chat": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "pith": {"type": "string"},
+        "created": {"type": "string"},
+        "author_id": {"type": "string"},
+        "author_name": {"type": "string"}, 
+        "transclusions": {
+          "type": "object"
+        }
+      },
+      "required": ["id", "pith", "created", "author_id", "author_name", "transclusions"]
+  },
+  "board": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "pith": {"type": "string"},
+        "transclusions": {
+          "type": "object"
+        },
+        "links_to": {
+          "type": "array",
+          "items": {"$ref": "link.json/#link"}
+        },
+        "links_from": {
+          "type": "array",
+          "items": {"$ref": "link.json/#link"}
+        },
+        "discussions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "discussion_id": {"type": "string"}
+            },
+            "required": ["discussion_id"]
+          }
+        }
+      },
+      "required": ["id", "pith", "transclusions"]
+  }
+}

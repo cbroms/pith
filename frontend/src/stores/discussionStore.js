@@ -33,6 +33,19 @@ export const discussionStore = createDerivedSocketStore(
                         const json = JSON.parse(res);
 
                         if (!json.error) {
+			    // not done
+                        } else {
+                            errorHandler(reject, json.error, json.error_meta);
+                        }
+                    }
+                );
+		socket.emit(
+                    "load_disc",
+                    { board_id: boardId, discussion_id: discussionId },
+                    (res) => {
+                        const json = JSON.parse(res);
+
+                        if (!json.error) {
                             update((state) => {
                                 return {
                                     ...state,
@@ -43,12 +56,12 @@ export const discussionStore = createDerivedSocketStore(
                                     participants: json.participants,
                                 };
                             });
-                            resolve();
+                            resolve(); // done
                         } else {
                             errorHandler(reject, json.error, json.error_meta);
                         }
                     }
-                );
+		);
                 */
                 // TODO fake input
                 update((state) => { return { ...state, discussionId: "testDiscussion" } });

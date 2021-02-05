@@ -1,5 +1,5 @@
 """
-Discussion document.
+Link document.
 """
 from mongoengine import (
   Document,
@@ -20,12 +20,12 @@ from datetime import datetime
 import uuid
 
 
-class Discussion(Document):
+class Link(Document):
     """
-    Discussion representation.
+    Link representation.
     """
 
-    meta = {'collection': 'discussions'}
+    meta = {'collection': 'links'}
 
     id = StringField(default=utils.gen_key(), primary_key=True)
     """
@@ -48,30 +48,16 @@ class Discussion(Document):
     :default: None
     """
 
-    chat = ListField(StringField(), default=[]) # unit ids
+    source = StringField()
     """
-    :type: *List[str]*
-    :required: False
-    :default: []
-    """
-
-    pinned = ListField(StringField(), default=[]) # unit ids
-    """
-    :type: *List[str]*
-    :required: False
-    :default: []
+    :type: *str*
+    :required: True
+    :default: None
     """
 
-    focused = ListField(StringField(), default=[]) # unit ids
+    target = StringField()
     """
-    :type: *List[str]*
-    :required: False
-    :default: []
-    """
-
-    participants = ListField(StringField(), default=[]) 
-    """
-    :type: *List[str]*
-    :required: False
-    :default: []
+    :type: *str*
+    :required: True
+    :default: None
     """

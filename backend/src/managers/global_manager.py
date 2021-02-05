@@ -28,14 +28,26 @@ class GlobalManager:
         self.sio.attach(self.aio_app)
 
     def start(self):
+
+        # mongo
         self.client = MongoClient(constants.MONGODB_CONN)
         mongoengine.connect(constants.MONGODB_NAME, host=constants.MONGODB_CONN)
 
+        # collections
+        self.board = db["board"]
+        self.discussions = db["discussions"]
+        self.users = db["users"]
+        self.units = db["units"]
+        self.links = db["links"]
+        self.transclusions = db["transclusions"]
+        self.unit_updates = db["unit_updates"]
+
+        # set up index for search
+        Unit.create_index([('pith', 'text')])
+
+        # redis
         loop = asyncio.get_event_loop()
         self.redis_queue = loop.run_until_complete(create_pool(constants.ARQ_REDIS))
-
-        # set up index
-        Unit.create_index([('pith', 'text')])
 
         # these get all the other variables
         self.discussion_manager = DiscussionManager(self)

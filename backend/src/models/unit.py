@@ -1,5 +1,5 @@
 """
-Discussion document.
+Unit document.
 """
 from mongoengine import (
   Document,
@@ -18,14 +18,16 @@ from mongoengine.fields import (
 )
 from datetime import datetime
 import uuid
+import utils
 
 
-class Discussion(Document):
+class Unit(Document):
     """
-    Discussion representation.
+    Unit representation.
+    Text-searchable over `pith`.
     """
 
-    meta = {'collection': 'discussions'}
+    meta = {'collection': 'units'}
 
     id = StringField(default=utils.gen_key(), primary_key=True)
     """
@@ -48,30 +50,23 @@ class Discussion(Document):
     :default: None
     """
 
-    chat = ListField(StringField(), default=[]) # unit ids
+    pith = StringField(required=True)
     """
-    :type: *List[str]*
-    :required: False
-    :default: []
-    """
-
-    pinned = ListField(StringField(), default=[]) # unit ids
-    """
-    :type: *List[str]*
-    :required: False
-    :default: []
+    :type: *str*
+    :required: True
+    :default: None
     """
 
-    focused = ListField(StringField(), default=[]) # unit ids
+    chat = BooleanField(default=False) # versus in document
     """
-    :type: *List[str]*
+    :type: *bool*
     :required: False
-    :default: []
+    :default: False
     """
 
-    participants = ListField(StringField(), default=[]) 
+    author = StringField()
     """
-    :type: *List[str]*
+    :type: *str*
     :required: False
-    :default: []
+    :default: None
     """

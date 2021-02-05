@@ -1,9 +1,0 @@
-{
-  "type": "object",
-  "properties": {
-    "discussion_id": {"type": "string"},
-    "user_id": {"type": "string"}
-  },
-  "required": ["discussion_id", "user_id"]
-}
-

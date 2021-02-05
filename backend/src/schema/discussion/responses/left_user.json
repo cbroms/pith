@@ -1,9 +1,0 @@
-{
-  "type": "object",
-  "properties": {
-    "user_id": {"type": "string"},
-    "nickname": {"type": "string"}
-  },
-  "required": []
-}
-

@@ -1,0 +1,11 @@
+{
+  "link": {
+    "type": "object",
+    "properties": {
+      "id": {"type": "string"},
+      "source": {"type": "string"},
+      "target": {"type": "string"}
+    },
+    "required": ["id", "source", "target"]
+  }
+}

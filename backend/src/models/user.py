@@ -1,5 +1,5 @@
 """
-Discussion document.
+User document.
 """
 from mongoengine import (
   Document,
@@ -20,19 +20,14 @@ from datetime import datetime
 import uuid
 
 
-class Discussion(Document):
+class User(EmbeddedDocument):
     """
-    Discussion representation.
+    User representation.
     """
 
-    meta = {'collection': 'discussions'}
+    meta = {'collection': 'users'}
 
     id = StringField(default=utils.gen_key(), primary_key=True)
-    """
-    :type: *str*
-    :required: False
-    :default: Automatically generated.
-    """
 
     created = DateTimeField(default=datetime.utcnow())
     """
@@ -48,30 +43,26 @@ class Discussion(Document):
     :default: None
     """
 
-    chat = ListField(StringField(), default=[]) # unit ids
+    discussion = StringField()
     """
-    :type: *List[str]*
+    :type: *str*
     :required: False
-    :default: []
+    :default: None
     """
 
-    pinned = ListField(StringField(), default=[]) # unit ids
+    nickname = StringField(required=True)
     """
-    :type: *List[str]*
-    :required: False
-    :default: []
-    """
-
-    focused = ListField(StringField(), default=[]) # unit ids
-    """
-    :type: *List[str]*
-    :required: False
-    :default: []
+    :type: *str*
+    :required: True
+    :default: None
     """
 
-    participants = ListField(StringField(), default=[]) 
+    unit_update_cursor = DateTimeField(default=datetime.utcnow())
     """
-    :type: *List[str]*
+    :type: *datetime*
     :required: False
-    :default: []
+    :default: Automatically generated.
     """
+
+
+

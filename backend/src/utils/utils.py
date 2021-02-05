@@ -22,6 +22,9 @@ from error import Errors
 from uuid import UUID, uuid4
 
 
+def gen_key():
+	return uuid4().hex[:12] # hack
+
 class DictEncoder(JSONEncoder):
     def default(self, obj):
         #if isinstance(obj, UUID):

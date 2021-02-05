@@ -169,7 +169,7 @@ export const boardStore = createDerivedSocketStore(
                             update((state) => {
                                 return {
                                     ...state,
-                                    units: [...state.units, json.unit],
+                                    units: units,
                                 }
                             });
                             resolve();
@@ -201,7 +201,7 @@ export const boardStore = createDerivedSocketStore(
                             update((state) => {
                                 return {
                                     ...state,
-                                    units: [...state.units, json.unit],
+                                    units: units,
                                 }
                             });
                             resolve();
@@ -225,17 +225,17 @@ export const boardStore = createDerivedSocketStore(
                             // TODO, map returns new array
                             units = units.map((e) => {
                                 if (e.id === source) {
-                                    e.links_to.push(json.links);
+                                    e.links_to.push(json.link);
                                 }
                                 else if (e.id === target) {
-                                    e.links_from.push(json.links);
+                                    e.links_from.push(json.link);
                                 }
                                 return e;
                             });
                             update((state) => {
                                 return {
                                     ...state,
-                                    units: [...state.units, json.unit],
+                                    units: units,
                                 }
                             });
                             resolve();
@@ -247,11 +247,11 @@ export const boardStore = createDerivedSocketStore(
                 );
             }
         },
-        removeLink: (boardId, link, resolve, reject) => {
+        removeLink: (boardId, linkId, resolve, reject) => {
             return (socket, update) => {
                 socket.emit(
                     "remove_link",
-                    { board_id: boardId, link: link },
+                    { board_id: boardId, link_id: linkId },
                     (res) => {
                         const json = JSON.parse(res);
                         if (!json.error) {
@@ -273,7 +273,7 @@ export const boardStore = createDerivedSocketStore(
                             update((state) => {
                                 return {
                                     ...state,
-                                    units: [...state.units, json.unit],
+                                    units: units,
                                 }
                             });
                             resolve();
@@ -306,7 +306,7 @@ export const boardStore = createDerivedSocketStore(
                             update((state) => {
                                 return {
                                     ...state,
-                                    units: [...state.units, json.unit],
+                                    units: units,
                                 }
                             });
                             resolve();
@@ -330,14 +330,14 @@ export const boardStore = createDerivedSocketStore(
                             // TODO, map returns new array
                             units = units.map((e) => {
                                 if (e.id === unitId) {
-                                    e.discussions.push(json.discussion);
+                                    e.discussions.push(json.discussion_id);
                                 }
                                 return e;
                             });
                             update((state) => {
                                 return {
                                     ...state,
-                                    units: [...state.units, json.unit],
+                                    units: units,
                                 }
                             });
                             resolve();

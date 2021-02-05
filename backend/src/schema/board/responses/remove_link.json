@@ -1,0 +1,7 @@
+{
+  "type": "object",
+  "properties": {
+    "link_id": {"type": "string"}
+  },
+  "required": ["link_id"]
+}
