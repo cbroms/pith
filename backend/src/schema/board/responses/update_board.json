@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "updated_units": {
+      "type": "array",
+      "item": {"$ref": "../../unit.json#/board"}
+    }
+  },
+  "required": ["updated_units"]
+}

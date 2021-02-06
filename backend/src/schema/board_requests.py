@@ -6,6 +6,7 @@ path = os.path.dirname(os.path.realpath(__file__))
 schema = {}
 schema_names = [
     "join_board",
+    "update_board",
     "create_user",
     "load_board",
     "add_unit",

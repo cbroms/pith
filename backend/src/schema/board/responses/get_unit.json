@@ -1,0 +1,7 @@
+{
+  "type": "object",
+  "properties": {
+    "unit": {"$ref": "../../unit.json#/board"}
+  },
+  "required": ["unit"]
+}

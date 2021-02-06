@@ -17,7 +17,7 @@ from mongoengine.fields import (
   StringField,
 )
 from datetime import datetime
-import uuid
+import utils
 
 
 class User(EmbeddedDocument):
@@ -36,14 +36,14 @@ class User(EmbeddedDocument):
     :default: Automatically generated.
     """
 
-    board = StringField()
+    board_id = StringField()
     """
     :type: *str*
     :required: True
     :default: None
     """
 
-    discussion = StringField()
+    discussion_id = StringField()
     """
     :type: *str*
     :required: False
@@ -57,12 +57,9 @@ class User(EmbeddedDocument):
     :default: None
     """
 
-    unit_update_cursor = DateTimeField(default=datetime.utcnow())
+    unit_update_cursor = DateTimeField(default=utils.get_time())
     """
     :type: *datetime*
     :required: False
     :default: Automatically generated.
     """
-
-
-

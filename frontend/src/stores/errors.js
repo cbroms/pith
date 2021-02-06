@@ -20,28 +20,28 @@ export const errorHandler = ( reject, error, meta ) => {
 			reject("Malformed request.");
 		}
 		case errors.DNE_BOARD : {
-			reject(`Board ${meta.board} does not exist.`);
+			reject(`Board ${meta.board_id} does not exist.`);
 		}
 		case errors.DNE_DISC : {
-			reject(`Discussion ${meta.discussion} does not exist.`);
+			reject(`Discussion ${meta.discussion_id} does not exist.`);
 		}
 		case errors.DNE_UNIT : {
-			reject(`Unit ${meta.unit} does not exist.`);
+			reject(`Unit ${meta.unit_id} does not exist.`);
 		}
 		case errors.DNE_LINK : {
-			reject(`Link ${meta.link} does not exist.`);
+			reject(`Link ${meta.link_id} does not exist.`);
 		}
 		case errors.DNE_USER : {
-			reject(`User ${meta.user} does not exist.`);
+			reject(`User ${meta.user_id} does not exist.`);
 		}
 		case errors.EXISTS_NAME : {
 			reject(`Nickname ${meta.nickname} unavailable.`);
 		}
 		case errors.NOT_CHAT : {
-			reject(`Unit ${meta.unit} is not of type chat.`);
+			reject(`Unit ${meta.unit_id} is not of type chat.`);
 		}
 		case errors.NOT_BOARD : {
-			reject(`Unit ${meta.unit} is not of type board.`);
+			reject(`Unit ${meta.unit_id} is not of type board.`);
 		}
 	}
 }

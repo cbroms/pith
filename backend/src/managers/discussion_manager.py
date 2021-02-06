@@ -1019,49 +1019,18 @@ class DiscussionManager:
 
         return None, [doc_meta, chat_meta]
 
-    def test(self, a):
-      return a
+    def join_disc(self, board_id, discussion_id, user_id):
 
-    async def call_test(self):
-      print("1")
-      job = await self.redis_queue.enqueue_job("test", 4)
-      print("2")
-      print("result", await job.result(timeout=3))
+    def load_disc(self, board_id, discussion_id):
 
-#     def export_unit_tree(self, unit_id):
-# 
-#     def export_units(self, units, method):
-#       """
-#       method = doc, pdf, raw, html
-#       """
-#       doc = []
-#       for unit_id in units:
-#         doc.append(self.export_unit_tree(unit_id))
-#       # process doc according to method
-#       # call function to upload
-# 
-#     def export_document(self, discussion_id, method):
-#       """
-#       method = doc, pdf, raw, html
-#       """
-#       discussion = self._get(discussion_id).get()
-#       root = discussion.document
-#       doc = self.export_unit_tree(root)
-#       # process doc according to method
-#       # call function to upload
+    def leave_disc(self, board_id, discussion_id, user_id);
 
-    def join_disc(self, ):
+    def post(self, board_id, discussion_id, user_id, text):
 
-    def load_disc(self, ):
+    def add_pinned(self, board_id, discussion_id, unit_id):
 
-    def leave_disc(self, );
+    def remove_pinned(self, board_id, discussion_id, unit_id):
 
-    def post(self, ):
+    def add_focused(self, board_id, discussion_id, unit_id):
 
-    def add_pinned(self, ):
-
-    def remove_pinned(self, ):
-
-    def add_focused(self, ):
-
-    def remove_focused(self, ):
+    def remove_focused(self, board_id, discussion_id, unit_id):

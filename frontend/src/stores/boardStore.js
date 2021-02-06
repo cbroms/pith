@@ -101,13 +101,13 @@ export const boardStore = createDerivedSocketStore(
                 setUserJoinedBoard(boardId, userId);
             };
         },
-        joinBoard: (boardId, userId, nickname, resolve) => { // load board
+        loadBoard: (boardId, userId, nickname, resolve) => {
             return (socket, update) => {
                 // try to join the board with the userId
                 /* TODO real input
                 socket.emit(
                     "load_board",
-                    { board_id: boardId },
+                    { board_id: boardId, user_id: userId },
                     (res) => {
                         const json = JSON.parse(res);
                         if (!json.error) { // success
@@ -120,6 +120,33 @@ export const boardStore = createDerivedSocketStore(
                                     userId: userId,
                                     nickname: json.nickname,
                                     units: json.units,	
+                                };
+                            });
+                        }
+                        else {
+                            errorHandler(json.error, json.error_meta);
+                        }
+                    }
+                );
+                */
+                // TODO fake input
+            };
+        },
+        updateBoard: (boardId, userId, nickname, resolve) => {
+            return (socket, update) => {
+                /* TODO real input
+                socket.emit(
+                    "update_board",
+                    { board_id: boardId, user_id: userId },
+                    (res) => {
+                        const json = JSON.parse(res);
+                        if (!json.error) { // success
+                            update((state) => {
+                                // might be putting userId in again
+                                return {
+                                    ...state,
+                                    boardId: boardId,
+                                    units: json.units, // TODO	
                                 };
                             });
                         }

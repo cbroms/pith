@@ -21,6 +21,8 @@ import constants
 from error import Errors
 from uuid import UUID, uuid4
 
+def get_time():
+  datetime.utcnow()
 
 def gen_key():
 	return uuid4().hex[:12] # hack
@@ -58,11 +60,11 @@ def is_error(src):
     return False
   return isinstance(src, Errors) 
 
-def make_error(err, info={}):
+def make_error(err, error_meta={}):
   exp = {
     "_id": uuid4().hex,
     "error": err,
-    "info": info
+    "error_meta": error_meta
   }
   logger.exception(exp)
   return dumps(exp, cls=ErrorEncoder)

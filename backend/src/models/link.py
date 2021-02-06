@@ -17,7 +17,7 @@ from mongoengine.fields import (
   StringField,
 )
 from datetime import datetime
-import uuid
+import utils
 
 
 class Link(Document):
@@ -34,14 +34,14 @@ class Link(Document):
     :default: Automatically generated.
     """
 
-    created = DateTimeField(default=datetime.utcnow())
+    created = DateTimeField(default=utils.get_time())
     """
     :type: *datetime*
     :required: False
     :default: Automatically generated.
     """
 
-    board = StringField()
+    board_id = StringField()
     """
     :type: *str*
     :required: True

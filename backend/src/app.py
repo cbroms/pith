@@ -40,11 +40,7 @@ class BoardNamespace(AsyncNamespace):
               name, product, request
             ))
 
-            if is_error(product):
-              result = make_error(product, info={
-                "func_name": name, "result": result, "request": request
-              })
-            else:
+            if not is_error(product):
               try:
                 validate(instance=product, schema=bres.schema[name])
                 result = dumps(products, cls=DictEncoder)
@@ -80,6 +76,7 @@ class BoardNamespace(AsyncNamespace):
     async def on_join_board(self, sid, request):
         return gm.board_manager.join_board(
           board_id=request["board_id"],
+          user_id=request["user_id"],
         )
 
     @_process_responses("create_user")
@@ -95,6 +92,15 @@ class BoardNamespace(AsyncNamespace):
     async def on_load_board(self, sid, request):
         return gm.board_manager.load_board(
           board_id=request["board_id"],
+          user_id=request["user_id"],
+        )
+
+    @_process_responses("update_board")
+    @_validate_request("update_board")
+    async def on_update_board(self, sid, request):
+        return gm.board_manager.update_board(
+          board_id=request["board_id"],
+          user_id=request["user_id"],
         )
 
     @_process_responses("add_unit")
@@ -173,11 +179,7 @@ class DiscussionNamespace(AsyncNamespace):
               name, product, request
             ))
 
-            if is_error(product):
-              result = make_error(product, info={
-                "func_name": name, "result": result, "request": request
-              })
-            else:
+            if not is_error(product):
               try:
                 validate(instance=product, schema=dres.schema[name])
                 result = dumps(products, cls=DictEncoder)
@@ -231,6 +233,14 @@ class DiscussionNamespace(AsyncNamespace):
           self.enter_room(sid, discussion_id)
 
         return result
+
+    @_process_responses("load_disc")
+    @_validate_request("load_disc")
+    async def on_load_disc(self, sid, request):
+        return gm.discussion_manager.load_disc(
+          board_id=request["board_id"],
+          discussion_id=request["discussion_id"],
+        )
 
     @_process_responses("leave_disc")
     @_validate_request("leave_disc")

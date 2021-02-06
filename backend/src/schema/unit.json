@@ -31,13 +31,7 @@
         },
         "discussions": {
           "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "discussion_id": {"type": "string"}
-            },
-            "required": ["discussion_id"]
-          }
+          "items": {"type": "string"}
         }
       },
       "required": ["id", "pith", "transclusions"]

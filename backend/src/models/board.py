@@ -17,7 +17,7 @@ from mongoengine.fields import (
   StringField,
 )
 from datetime import datetime
-import uuid
+import utils
 
 
 class Board(Document):
@@ -34,9 +34,16 @@ class Board(Document):
     :default: Automatically generated.
     """
 
-    created = DateTimeField(default=datetime.utcnow())
+    created = DateTimeField(default=utils.get_time())
     """
     :type: *datetime*
     :required: False
     :default: Automatically generated.
+    """
+
+    units = ListField(StringField(), default=[]) # unit ids
+    """
+    :type: *List[str]*
+    :required: False
+    :default: []
     """
