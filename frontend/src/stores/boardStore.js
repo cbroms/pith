@@ -122,6 +122,7 @@ export const boardStore = createDerivedSocketStore(
                                     units: json.units,	
                                 };
                             });
+                            resolve();
                         }
                         else {
                             errorHandler(json.error, json.error_meta);
@@ -141,14 +142,20 @@ export const boardStore = createDerivedSocketStore(
                     (res) => {
                         const json = JSON.parse(res);
                         if (!json.error) { // success
+                            let units = [...state.units];
+                            // remove changed elements
+                            units = units.filter(
+                              json.updated_unit_ids.some((id) === e.id)
+                            );
+                            // add changed elements
+                            units = units.concat(json.updated_units);
                             update((state) => {
-                                // might be putting userId in again
                                 return {
                                     ...state,
-                                    boardId: boardId,
-                                    units: json.units, // TODO	
-                                };
+                                    units: units,
+                                }
                             });
+                            resolve();
                         }
                         else {
                             errorHandler(json.error, json.error_meta);
@@ -220,8 +227,7 @@ export const boardStore = createDerivedSocketStore(
                             // TODO, map returns new array
                             units = units.map((e) => {
                                 if (e.id === unitId) {
-                                    e.pith = json.pith;
-                                    e.transclusions = json.transclusions;
+                                    return json.unit;
                                 }
                                 return e;
                             });

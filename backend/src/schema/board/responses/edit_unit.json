@@ -1,10 +1,7 @@
 {
   "type": "object",
   "properties": {
-    "pith": {"type": "string"},
-    "transclusions": {
-      "type": "object"
-    }
+    "unit": {"$ref": "../../unit.json#/board"}
   },
-  "required": ["pith", "tranclusions"]
+  "required": ["unit"]
 }

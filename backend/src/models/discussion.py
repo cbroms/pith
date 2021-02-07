@@ -68,10 +68,3 @@ class Discussion(Document):
     :required: False
     :default: []
     """
-
-    participants = ListField(StringField(), default=[]) 
-    """
-    :type: *List[str]*
-    :required: False
-    :default: []
-    """

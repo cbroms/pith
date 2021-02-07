@@ -1,10 +1,14 @@
 {
   "type": "object",
   "properties": {
+    "updated_unit_ids": {
+      "type": "array",
+      "item": {"type": "string"}
+    },
     "updated_units": {
       "type": "array",
       "item": {"$ref": "../../unit.json#/board"}
     }
   },
-  "required": ["updated_units"]
+  "required": ["updated_unit_ids", "updated_units"]
 }
