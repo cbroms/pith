@@ -1,16 +1,12 @@
-import logging
-
-import constants
 from utils import utils
 
 from models.discussion import Discussion
 from models.user import User
 from models.unit import Unit
 from models.link import Link
-from models.transclusion import Transclusion
 from models.unit_update import UnitUpdate
 
-import Checker from checker
+from checker import Checker
 
 
 class BoardManager:
@@ -116,8 +112,8 @@ class BoardManager:
     @Checker._check_unit_id
     @Checker._record_unit_update
     def add_link(self, board_id, source, target):
-      Link(board_id=board_id, source=source, target=target)
-      self.gm.transclusions.insertMany(transclusions_list)
+      link = Link(board_id=board_id, source=source, target=target)
+      self.gm.links.insert_one(link)
 
     @Checker._check_board_id
     @Checker._check_link_id

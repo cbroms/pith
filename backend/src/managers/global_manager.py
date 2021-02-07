@@ -6,6 +6,10 @@ import mongoengine
 import socketio
 
 import constants
+
+from models.unit import Unit
+from models.transclusion import Transclusion
+
 from managers.board_manager import BoardManager
 from managers.discussion_manager import DiscussionManager
 
@@ -28,15 +32,16 @@ class GlobalManager:
         # mongo
         self.client = MongoClient(constants.MONGODB_CONN)
         mongoengine.connect(constants.MONGODB_NAME, host=constants.MONGODB_CONN)
+        self.db = self.client["pith"]
 
         # collections
-        self.board = db["board"]
-        self.discussions = db["discussions"]
-        self.users = db["users"]
-        self.units = db["units"]
-        self.links = db["links"]
-        self.transclusions = db["transclusions"]
-        self.unit_updates = db["unit_updates"]
+        self.board = self.db["board"]
+        self.discussions = self.db["discussions"]
+        self.users = self.db["users"]
+        self.units = self.db["units"]
+        self.links = self.db["links"]
+        self.transclusions = self.db["transclusions"]
+        self.unit_updates = self.db["unit_updates"]
 
         # set up index for search
         Unit.create_index([('pith', 'text')])
@@ -55,7 +60,7 @@ class GlobalManager:
       )
       target_ids = [t["target"] for t in transclusions]
       targets = self.gm.units.find({}, {"_id": {"$in": target_ids}})
-      map_id_pith = [t["_id"]:t["pith"] for t in targets]
+      map_id_pith = {t["_id"]:t["pith"] for t in targets}
       return map_id_pith
 
     def _get_links_to(self, board_id, unit_id):
@@ -85,7 +90,7 @@ class GlobalManager:
       discussions = self.gm.discussions.find(
         {}, {"focused": unit_id, "board_id": board_id}
       )
-      discussions_list [d["_id"] for d in discussions]
+      discussions_list = [d["_id"] for d in discussions]
       return discussions_list
 
     def _get_pith(self, board_id, text):
@@ -100,7 +105,7 @@ class GlobalManager:
       # should have unique transclusions
       transclusions_list = []
       for t in transclusions:
-        transclusion_list.append(
+        transclusions_list.append(
           Transclusion(board_id=board_id, source=unit_id, target=t)
         )
       # TODO may result in duplicate error
@@ -110,8 +115,8 @@ class GlobalManager:
       self.gm.transclusions.remove({"source": unit_id, "board_id": board_id})
 
     def _remove_links(self, board_id, unit_id):
-      self.gm.links
-        .remove({"source": unit_id, "board_id": board_id})
+      self.gm.links \
+        .remove({"source": unit_id, "board_id": board_id}) \
         .remove({"target": unit_id, "board_id": board_id})
 
     def _get_user(self, board_id, user_id):
@@ -122,24 +127,26 @@ class GlobalManager:
       }
 
     def _get_chat_unit(self, board_id, unit_id):
+      unit = self.gm.units.find_one({"_id": unit_id, "board_id": board_id})
+      user = self.gm.users.find_one({"_id": unit["author"], "board_id": board_id})
       return {
         "id": unit_id,
-        "pith": self.gm.units.find_one({"_id": unit_id, "board_id"})["pith"],
-        "created":
-        "author_id":
-        "author_name":
+        "pith": unit["pith"],
+        "created": str(unit["created"]), # TODO
+        "author_id": user["_id"],
+        "author_name": user["nickname"],
         "transclusions": self._get_transclusion_map(board_id, unit_id)
       }      
 
     def _get_basic_unit(self, board_id, unit_id):
       return {
         "id": unit_id,
-        "pith": self.gm.units.find_one({"_id": unit_id, "board_id"})["pith"],
+        "pith": self.gm.units.find_one({"_id": unit_id, "board_id": board_id})["pith"],
         "transclusions": self._get_transclusion_map(board_id, unit_id)
       }      
 
     def _get_extended_unit(self, board_id, unit_id):
-      unit = self.gm.units.find_one({"_id": unit_id, "board_id"})
+      unit = self.gm.units.find_one({"_id": unit_id, "board_id": board_id})
       return {
         "id": unit_id,
         "pith": unit["pith"],

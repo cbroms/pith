@@ -2,10 +2,6 @@ from collections import Counter, defaultdict
 import datetime
 from functools import reduce
 from json import JSONEncoder, dumps
-from mongoengine import (
-  Document,
-  EmbeddedDocument,
-)
 from nltk.stem import PorterStemmer
 from operator import or_
 import string
@@ -19,7 +15,10 @@ import logging
 
 import constants
 from error import Errors
-from uuid import UUID, uuid4
+from uuid import uuid4
+
+def get_room(board_id, discussion_id):
+  return "{}:{}".format(board_id, discussion_id)
 
 def get_time():
   datetime.utcnow()
@@ -28,21 +27,15 @@ def gen_key():
 	return uuid4().hex[:12] # hack
 
 class DictEncoder(JSONEncoder):
-    def default(self, obj):
-        #if isinstance(obj, UUID):
-        #    return obj.hex
-        #if isinstance(obj, (datetime.date, datetime.datetime)):
-        #    return obj.strftime(constants.DATE_TIME_FMT)
-        #if isinstance(obj, (Document, EmbeddedDocument)):
-        #    return obj.to_mongo() # dict
-        return JSONEncoder.default(self, obj)
+  def default(self, obj):
+    return JSONEncoder.default(self, obj)
 
 class ErrorEncoder(JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Errors):
-            return obj.value
-        res = JSONEncoder.default(self, obj)
-        return res
+  def default(self, obj):
+    if isinstance(obj, Errors):
+      return obj.value
+    res = JSONEncoder.default(self, obj)
+    return res
 
 # log uncaught exceptions to file in backend/src/{constants.LOG_FILENAME}
 logger = logging.getLogger("app_logger")

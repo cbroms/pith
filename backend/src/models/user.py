@@ -3,24 +3,15 @@ User document.
 """
 from mongoengine import (
   Document,
-  PULL,
 )
 from mongoengine.fields import (
-  BooleanField,
   DateTimeField,
-  DictField,
-  EmbeddedDocumentField,
-  EmbeddedDocumentListField,
-  IntField,
-  ListField,
-  ReferenceField,
   StringField,
 )
-from datetime import datetime
 import utils
 
 
-class User(EmbeddedDocument):
+class User(Document):
     """
     User representation.
     """
@@ -29,7 +20,7 @@ class User(EmbeddedDocument):
 
     id = StringField(default=utils.gen_key(), primary_key=True)
 
-    created = DateTimeField(default=datetime.utcnow())
+    created = DateTimeField(default=utils.get_time())
     """
     :type: *datetime*
     :required: False

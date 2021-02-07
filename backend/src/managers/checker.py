@@ -50,7 +50,7 @@ class Checker:
   def _check_unit_id(func):
     def helper(self, **kwargs):
       board_id = kwargs["board_id"]
-      for p in unit_input:
+      for p in Checker.unit_input:
         if p in kwargs:
           unit_id = kwargs[p]
           if self.gm.units.find_one({"_id" : unit_id, "board_id": board_id}):

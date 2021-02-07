@@ -1,22 +1,11 @@
-from datetime import datetime
-import logging
-from mongoengine import DoesNotExist
-
-import constants
 from error import Errors
 from utils.utils import (
   make_error,
 )
 
-from models.discussion import (
-  Cursor,
-  TimeInterval,
-  Discussion,
-  Unit,
-  User,
-)
+from models.unit import Unit
 
-import Checker from checker
+from checker import Checker
 
 
 class DiscussionManager:
@@ -48,7 +37,7 @@ class DiscussionManager:
     @Checker._check_board_id
     @Checker._check_discussion_id
     @Checker._check_user_id
-    def leave_disc(self, board_id, discussion_id, user_id);
+    def leave_disc(self, board_id, discussion_id, user_id):
       self.gm.users.update_one(
         {"_id" : user_id, "board_id": board_id},
         {"$set": {"discussion_id": None}}
@@ -67,7 +56,7 @@ class DiscussionManager:
       self.gm.discussions.update_one(
         {"_id" : discussion_id, "board_id": board_id},
         {"$push": {"chat": unit_id}}
-      }
+      )
       return self.gm._get_chat_unit(board_id, unit_id)
 
     @Checker._check_board_id
@@ -82,7 +71,7 @@ class DiscussionManager:
       self.gm.discussions.update_one(
         {"_id" : discussion_id, "board_id": board_id},
         {"$push": {"pinned": unit_id}}
-      }
+      )
       return self.gm._get_chat_unit(board_id, unit_id)
 
     @Checker._check_board_id
@@ -92,7 +81,7 @@ class DiscussionManager:
       self.gm.discussions.update_one(
         {"_id" : discussion_id, "board_id": board_id},
         {"$pull": {"pinned": unit_id}}
-      }
+      )
       return {"unit_id": unit_id}
 
     @Checker._check_board_id
@@ -107,7 +96,7 @@ class DiscussionManager:
       self.gm.discussions.update_one(
         {"_id" : discussion_id, "board_id": board_id},
         {"$push": {"focused": unit_id}}
-      }
+      )
       return self.gm._get_board_unit(board_id, unit_id)
 
     @Checker._check_board_id
@@ -117,5 +106,5 @@ class DiscussionManager:
       self.gm.discussions.update_one(
         {"_id" : discussion_id, "board_id": board_id},
         {"$pull": {"focused": unit_id}}
-      }
+      )
       return {"unit_id": unit_id}

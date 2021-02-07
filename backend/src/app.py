@@ -13,6 +13,7 @@ import schema.board_responses as bres
 import schema.discussion_requests as dreq
 import schema.discussion_responses as dres
 from utils.utils import (
+  get_room,
   logger,
   is_error, 
   make_error,
@@ -43,7 +44,7 @@ class BoardNamespace(AsyncNamespace):
             if not is_error(product):
               try:
                 validate(instance=product, schema=bres.schema[name])
-                result = dumps(products, cls=DictEncoder)
+                result = dumps(product, cls=DictEncoder)
               except ValidationError:
                 logger.info("Return response: {}\nReturn schema: {}".format(
                   product, name
@@ -74,92 +75,98 @@ class BoardNamespace(AsyncNamespace):
     @_process_responses("join_board")
     @_validate_request("join_board")
     async def on_join_board(self, sid, request):
-        return gm.board_manager.join_board(
-          board_id=request["board_id"],
-          user_id=request["user_id"],
-        )
+      board_id = request["board_id"]
+      result = gm.board_manager.join_board(
+        board_id=board_id,
+        user_id=request["user_id"],
+      )
+      if not is_error(result):
+        await self.save_session(sid, {
+          "board_id": board_id, 
+        })
+      return result
 
     @_process_responses("create_user")
     @_validate_request("create_user")
     async def on_create_user(self, sid, request):
-        return gm.board_manager.create_user(
-          board_id=request["board_id"],
-          nickname=request["nickname"],
-        )
+      return gm.board_manager.create_user(
+        board_id=request["board_id"],
+        nickname=request["nickname"],
+      )
 
     @_process_responses("load_board")
     @_validate_request("load_board")
     async def on_load_board(self, sid, request):
-        return gm.board_manager.load_board(
-          board_id=request["board_id"],
-          user_id=request["user_id"],
-        )
+      return gm.board_manager.load_board(
+        board_id=request["board_id"],
+        user_id=request["user_id"],
+      )
 
     @_process_responses("update_board")
     @_validate_request("update_board")
     async def on_update_board(self, sid, request):
-        return gm.board_manager.update_board(
-          board_id=request["board_id"],
-          user_id=request["user_id"],
-        )
+      return gm.board_manager.update_board(
+        board_id=request["board_id"],
+        user_id=request["user_id"],
+      )
 
     @_process_responses("add_unit")
     @_validate_request("add_unit")
     async def on_add_unit(self, sid, request):
-        return gm.board_manager.add_unit(
-          board_id=request["board_id"],
-          text=request["text"],
-        )
+      return gm.board_manager.add_unit(
+        board_id=request["board_id"],
+        text=request["text"],
+      )
 
     @_process_responses("remove_unit")
     @_validate_request("remove_unit")
     async def on_remove_unit(self, sid, request):
-        return gm.board_manager.remove_unit(
-          board_id=request["board_id"],
-          unit_id=request["unit_id"],
-        )
+      return gm.board_manager.remove_unit(
+        board_id=request["board_id"],
+        unit_id=request["unit_id"],
+      )
 
     @_process_responses("edit_unit")
     @_validate_request("edit_unit")
     async def on_edit_unit(self, sid, request):
-        return gm.board_manager.edit_unit(
-          board_id=request["board_id"],
-          unit_id=request["unit_id"],
-          text=request["text"],
-        )
+      return gm.board_manager.edit_unit(
+        board_id=request["board_id"],
+        unit_id=request["unit_id"],
+        text=request["text"],
+      )
 
     @_process_responses("add_link")
     @_validate_request("add_link")
     async def on_add_link(self, sid, request):
-        return gm.board_manager.add_link(
-          board_id=request["board_id"],
-          source=request["source"],
-          target=request["target"],
-        )
+      return gm.board_manager.add_link(
+        board_id=request["board_id"],
+        source=request["source"],
+        target=request["target"],
+      )
 
     @_process_responses("remove_link")
     @_validate_request("remove_link")
     async def on_remove_link(self, sid, request):
-        return gm.board_manager.remove_link(
-          board_id=request["board_id"],
-          link_id=request["link_id"],
-        )
+      return gm.board_manager.remove_link(
+        board_id=request["board_id"],
+        link_id=request["link_id"],
+      )
 
     @_process_responses("get_unit")
     @_validate_request("get_unit")
     async def on_get_unit(self, sid, request):
-        return gm.board_manager.get_unit(
-          board_id=request["board_id"],
-          unit_id=request["unit_id"],
-        )
+      return gm.board_manager.get_unit(
+        board_id=request["board_id"],
+        unit_id=request["unit_id"],
+      )
 
     @_process_responses("create_disc")
     @_validate_request("create_disc")
     async def on_create_disc(self, sid, request):
-        return gm.board_manager.create_disc(
-          board_id=request["board_id"],
-          unit_id=request["unit_id"],
-        )
+      return gm.board_manager.create_disc(
+        board_id=request["board_id"],
+        unit_id=request["unit_id"],
+      )
 
 sio.register_namespace(BoardNamespace('/board'))
 
@@ -182,13 +189,17 @@ class DiscussionNamespace(AsyncNamespace):
             if not is_error(product):
               try:
                 validate(instance=product, schema=dres.schema[name])
-                result = dumps(products, cls=DictEncoder)
+                result = dumps(product, cls=DictEncoder)
                 if emit: # send result to others in room
                   session = await self.get_session(sid)
-                  if "discussion_id" in session:
+                  if "board_id" in session and "discussion_id" in session:
+                    board_id = session["board_id"]
                     discussion_id = session["discussion_id"]
                     await self.emit(
-                      name, result, room=discussion_id, skip_sid=sid
+                      name, 
+                      result, 
+                      room=get_room(board_id, discussion_id), 
+                      skip_sid=sid
                     )
               except ValidationError:
                 logger.info("Return response: {}\nReturn schema: {}".format(
@@ -220,90 +231,94 @@ class DiscussionNamespace(AsyncNamespace):
     @_process_responses("join_disc")
     @_validate_request("join_disc")
     async def on_join_disc(self, sid, request):
-        result = gm.discussion_manager.join_disc(
-          board_id=request["board_id"],
-          discussion_id=request["discussion_id"],
-          user_id=request["user_id"],
-        )
+      board_id = request["board_id"]
+      discussion_id = request["discussion_id"]
+      result = gm.discussion_manager.join_disc(
+        board_id=board_id,
+        discussion_id=discussion_id,
+        user_id=request["user_id"],
+      )
 
-        if not is_error(result):
-          await self.save_session(sid, {
-            "discussion_id": discussion_id, 
-          })
-          self.enter_room(sid, discussion_id)
+      if not is_error(result):
+        await self.save_session(sid, {
+          "discussion_id": discussion_id, 
+        })
+        self.enter_room(sid, get_room(board_id, discussion_id))
 
-        return result
+      return result
 
     @_process_responses("load_disc")
     @_validate_request("load_disc")
     async def on_load_disc(self, sid, request):
-        return gm.discussion_manager.load_disc(
-          board_id=request["board_id"],
-          discussion_id=request["discussion_id"],
-        )
+      return gm.discussion_manager.load_disc(
+        board_id=request["board_id"],
+        discussion_id=request["discussion_id"],
+      )
 
     @_process_responses("leave_disc")
     @_validate_request("leave_disc")
     async def on_leave_disc(self, sid, request):
-        result = gm.discussion_manager.leave_disc(
-          board_id=request["board_id"],
-          discussion_id=request["discussion_id"],
-          user_id=request["user_id"],
-        )
+      board_id = request["board_id"]
+      discussion_id = request["discussion_id"]
+      result = gm.discussion_manager.leave_disc(
+        board_id=board_id,
+        discussion_id=discussion_id,
+        user_id=request["user_id"],
+      )
 
-        if not is_error(result):
-          await self.save_session(sid, {
-            "discussion_id": None, 
-          })
-          self.leave_room(sid, discussion_id)
+      if not is_error(result):
+        await self.save_session(sid, {
+          "discussion_id": None, 
+        })
+        self.leave_room(sid, get_room(board_id, discussion_id))
 
-        return result
+      return result
 
     @_process_responses("post")
     @_validate_request("post")
     async def on_post(self, sid, request):
-        return gm.discussion_manager.post(
-          board_id=request["board_id"],
-          discussion_id=request["discussion_id"],
-          user_id=request["user_id"],
-          text=request["text"],
-        )
+      return gm.discussion_manager.post(
+        board_id=request["board_id"],
+        discussion_id=request["discussion_id"],
+        user_id=request["user_id"],
+        text=request["text"],
+      )
 
     @_process_responses("add_pinned")
     @_validate_request("add_pinned")
     async def on_add_pinned(self, sid, request):
-        return gm.discussion_manager.add_pinned(
-          board_id=request["board_id"],
-          discussion_id=request["discussion_id"],
-          unit_id=request["unit_id"],
-        )
+      return gm.discussion_manager.add_pinned(
+        board_id=request["board_id"],
+        discussion_id=request["discussion_id"],
+        unit_id=request["unit_id"],
+      )
 
     @_process_responses("remove_pinned")
     @_validate_request("remove_pinned")
     async def on_remove_pinned(self, sid, request):
-        return gm.discussion_manager.remove_pinned(
-          board_id=request["board_id"],
-          discussion_id=request["discussion_id"],
-          unit_id=request["unit_id"],
-        )
+      return gm.discussion_manager.remove_pinned(
+        board_id=request["board_id"],
+        discussion_id=request["discussion_id"],
+        unit_id=request["unit_id"],
+      )
 
     @_process_responses("add_focused")
     @_validate_request("add_focused")
     async def on_add_focused(self, sid, request):
-        return gm.discussion_manager.add_focused(
-          board_id=request["board_id"],
-          discussion_id=request["discussion_id"],
-          unit_id=request["unit_id"],
-        )
+      return gm.discussion_manager.add_focused(
+        board_id=request["board_id"],
+        discussion_id=request["discussion_id"],
+        unit_id=request["unit_id"],
+      )
 
     @_process_responses("remove_focused")
     @_validate_request("remove_focused")
     async def on_remove_focused(self, sid, request):
-        return gm.discussion_manager.remove_focused(
-          board_id=request["board_id"],
-          discussion_id=request["discussion_id"],
-          unit_id=request["unit_id"],
-        )
+      return gm.discussion_manager.remove_focused(
+        board_id=request["board_id"],
+        discussion_id=request["discussion_id"],
+        unit_id=request["unit_id"],
+      )
 
 sio.register_namespace(DiscussionNamespace('/discussion'))
 
