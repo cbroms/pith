@@ -103,7 +103,7 @@ export const createDerivedSocketStore = (
 		socket,
 		($socket, set) => {
 			// when the socket connection status changes, update the local socket object
-			if ($socket.connected) {
+			if ($socket !== null && $socket.connected) {
 				// get the latest socket object
 				localSocket = $socket;
 				localSet = (val) => {
