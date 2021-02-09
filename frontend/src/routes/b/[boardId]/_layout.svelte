@@ -1,11 +1,13 @@
 <script>
   import ServerConnection from "../../../components/banners/ServerConnection.svelte";
+  import ServerError from "../../../components/banners/ServerError.svelte";
   import BoardWindowLayout from "../../../components/layouts/BoardWindowLayout.svelte";
 </script>
 
 <div class="wrapper">
   <div class="alert-wrapper">
     <ServerConnection />
+    <ServerError />
   </div>
 
   <div class="content-wrapper">

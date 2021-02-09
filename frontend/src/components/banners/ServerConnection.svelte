@@ -1,16 +1,10 @@
 <script>
   import TopBanner from "./TopBanner.svelte";
-  import { discussionSocket, boardSocket } from "../../stores/socket";
-
-  let active = true;
-
-  setTimeout(() => {
-    active = false;
-  }, 3200);
+  import { boardSocket } from "../../stores/socket";
 </script>
 
-{#if ($discussionSocket === null || $boardSocket === null) && active}
+{#if $boardSocket === null}
   <TopBanner message="You are offline. Connecting to server..." />
-{:else if (!$discussionSocket.connected || !$boardSocket.connected) && active}
+{:else if !$boardSocket.connected}
   <TopBanner message="You are offline. Reconnecting to server..." />
 {/if}

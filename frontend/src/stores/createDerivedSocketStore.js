@@ -83,7 +83,7 @@ export const createDerivedSocketStore = (
 			// try running the functions
 			for (const func of queueCopy) {
 				try {
-					func(localSocket, localUpdate, localSet);
+                    func(localSocket, localUpdate, localSet);
 				} catch (e) {
 					console.error("Function failed to execute: ", func);
 					console.error(e);
@@ -129,9 +129,13 @@ export const createDerivedSocketStore = (
 		const wrappedFunc = (...args) => {
 			return new Promise((resolve, reject) => {
 				// call the function with the arguments the wrapper receives
-				// expect that this will return a new function we can pass the socket obj to
-				const modifierFunc = func(...args, resolve, reject);
-				addToQueue(modifierFunc);
+                // expect that this will return a new function we can pass the socket obj to
+                try {
+                    const modifierFunc = func(...args, resolve, reject);
+                    addToQueue(modifierFunc);
+                } catch(e) {
+                    console.error(e)
+                }
 			});
 		};
 		// add the wrapped function to the methods object
