@@ -8,7 +8,7 @@ from mongoengine.fields import (
   DateTimeField,
   StringField,
 )
-import utils
+from utils import utils
 
 
 class UnitUpdate(Document):

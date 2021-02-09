@@ -7,11 +7,6 @@ from functools import wraps
 
 import constants
 from error import Errors
-from managers.global_manager import GlobalManager
-import schema.board_requests as breq
-import schema.board_responses as bres
-import schema.discussion_requests as dreq
-import schema.discussion_responses as dres
 from utils.utils import (
   get_room,
   logger,
@@ -19,7 +14,11 @@ from utils.utils import (
   make_error,
   DictEncoder, 
 )
-
+from managers.global_manager import GlobalManager
+import schema.board_requests as breq
+import schema.board_responses as bres
+import schema.discussion_requests as dreq
+import schema.discussion_responses as dres
 
 gm = GlobalManager()
 sio = gm.sio

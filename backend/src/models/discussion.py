@@ -9,7 +9,7 @@ from mongoengine.fields import (
   ListField,
   StringField,
 )
-import utils
+from utils import utils
 
 
 class Discussion(Document):

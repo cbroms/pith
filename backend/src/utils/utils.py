@@ -21,10 +21,10 @@ def get_room(board_id, discussion_id):
   return "{}:{}".format(board_id, discussion_id)
 
 def get_time():
-  datetime.utcnow()
+  return datetime.datetime.utcnow()
 
 def gen_key():
-	return uuid4().hex[:12] # hack
+  return uuid4().hex[:12] # hack
 
 class DictEncoder(JSONEncoder):
   def default(self, obj):

@@ -5,7 +5,7 @@ from utils.utils import (
 
 from models.unit import Unit
 
-from checker import Checker
+from managers.checker import Checker
 
 
 class DiscussionManager:

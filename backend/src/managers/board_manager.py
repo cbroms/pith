@@ -6,8 +6,7 @@ from models.unit import Unit
 from models.link import Link
 from models.unit_update import UnitUpdate
 
-from checker import Checker
-
+from managers.checker import Checker
 
 class BoardManager:
 
@@ -73,7 +72,7 @@ class BoardManager:
       }
 
     @Checker._check_board_id
-    @Checker._record_unit_update
+    @_record_unit_update
     def add_unit(self, board_id, text):
       pith, transclusions = self.gm._get_pith(board_id, text)
       unit = Unit(board_id=board_id, pith=pith)
@@ -84,7 +83,7 @@ class BoardManager:
 
     @Checker._check_board_id
     @Checker._check_unit_id
-    @Checker._record_unit_update
+    @_record_unit_update
     def remove_unit(self, board_id, unit_id):
       self.gm.units.remove({"_id": unit_id, "board_id": board_id})
       self.gm._remove_transclusions(board_id, unit_id)
@@ -95,7 +94,7 @@ class BoardManager:
 
     @Checker._check_board_id
     @Checker._check_unit_id
-    @Checker._record_unit_update
+    @_record_unit_update
     def edit_unit(self, board_id, unit_id, text):
       unit = self.gm.units.find_one({"_id": unit_id, "board_id": board_id})
       pith, transclusions = self.gm._get_pith(board_id, text)
@@ -110,14 +109,14 @@ class BoardManager:
 
     @Checker._check_board_id
     @Checker._check_unit_id
-    @Checker._record_unit_update
+    @_record_unit_update
     def add_link(self, board_id, source, target):
       link = Link(board_id=board_id, source=source, target=target)
       self.gm.links.insert_one(link)
 
     @Checker._check_board_id
     @Checker._check_link_id
-    @Checker._record_unit_update
+    @_record_unit_update
     def remove_link(self, board_id, link_id):
       self.gm.links.remove({"_id": link_id, "board_id": board_id})
 
@@ -128,7 +127,7 @@ class BoardManager:
 
     @Checker._check_board_id
     @Checker._check_unit_id
-    @Checker._record_unit_update
+    @_record_unit_update
     def create_disc(self, board_id, unit_id):
       discussion = Discussion(board_id=board_id, focused=[unit_id])
       self.gm.discussions.insert_one(discussion)

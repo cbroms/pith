@@ -5,15 +5,15 @@
       "type": "array",
       "item": {"$ref": "../../unit.json#/chat"}
     },
-    "pinned" {
+    "pinned": {
       "type": "array",
       "item": {"$ref": "../../unit.json#/chat"}
     },
-    "focused" {
+    "focused": {
       "type": "array",
       "item": {"$ref": "../../unit.json#/board"}
     },
-    "participants" {
+    "participants": {
       "type": "array",
       "item": {"$ref": "../../user.json#/user"}
     }
