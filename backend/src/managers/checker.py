@@ -1,6 +1,7 @@
 """
 For managers associated with global manager.
 """
+from json import dumps
 
 from error import Errors
 from utils.utils import (

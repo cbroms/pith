@@ -29,9 +29,8 @@ export const boardStore = createDerivedSocketStore(
                 socket.emit(
                     "join_board",
                     { board_id: boardId },
-                    (res) => {
-                        const json = JSON.parse(res);
-                        console.log(json)
+                    (res) => {          
+                        const json = JSON.parse(res); 
                         if (!json.error) {
                             update((state) => {
                                 return {

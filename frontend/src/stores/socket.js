@@ -10,7 +10,7 @@ const createSocket = () => {
 	const initialize = (host, port, namespace) => {
 
         if (!triedSetup) {
-            const socket = io.connect(`ws://${host}:${port}/${namespace}`, {
+            const socket = io.connect(`http://${host}:${port}/${namespace}`, {
                 reconnect: true,
             });
     

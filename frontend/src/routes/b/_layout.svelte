@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount, afterUpdate } from "svelte";
   import { stores } from "@sapper/app";
   import { boardSocket as socket } from "../../stores/socket.js";
 
@@ -8,7 +8,12 @@
 
   // initialize board socket
   onMount(async () => {
+    console.log("mount");
     socket.initialize(BACKEND_HOST, BACKEND_PORT, "board");
+  });
+
+  afterUpdate(() => {
+    console.log("update");
   });
 </script>
 

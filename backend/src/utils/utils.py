@@ -49,9 +49,7 @@ def exception_handler(type, value, tb):
 sys.excepthook = exception_handler
 
 def is_error(src):
-  if src is None:
-    return False
-  return isinstance(src, Errors) 
+  return "error" in src
 
 def make_error(err, error_meta={}):
   exp = {

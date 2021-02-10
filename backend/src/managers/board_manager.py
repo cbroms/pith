@@ -1,4 +1,5 @@
 from utils import utils
+from json import dumps
 
 from models.discussion import Discussion
 from models.user import User
