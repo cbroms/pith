@@ -1,6 +1,7 @@
 import { createDerivedSocketStore } from "./createDerivedSocketStore";
 import { discussionSocket } from "./socket";
 import { errors, errorHandler } from "./errors";
+import {v4 as uuid } from "uuid"
 
 // snake-case
 const defaultState = {
@@ -9,6 +10,8 @@ const defaultState = {
     // array of unit objects in rendering order with
     // id, pith, created, author, and a map of transclusion ids to piths
     chat: [],
+    // array of temporary unit objects, which we render while a request to add a unit is pending
+    temporaryChat: [],
     // array of unit objects in rendering order with
     // id, pith, created, author, and a map of transclusion ids to piths
     pinned: [],
@@ -95,7 +98,36 @@ export const discussionStore = createDerivedSocketStore(
             }
         },
         post: (boardId, discussionId, userId, text, resolve, reject) => {
+
+           
             return (socket, update) => {
+                console.log("posted")
+
+                const tempId = uuid();
+
+                // add the post temporarily 
+                const newPost = {
+                    id: tempId,
+                    pith: text,
+                    author: "me",
+                    time: (new Date()).toISOString(),
+                }
+                update(state => {
+                    return {...state, temporaryChat: [...state.temporaryChat, newPost]}
+                })
+
+                // simulate server response time 
+                setTimeout(() => {
+                    update((state) => {
+                        // now we have the real post, so we remove the temporary chat unit 
+                        const newTemporaryChat = [...state.temporaryChat].filter(post => post.id !== tempId);
+                        return {
+                            ...state,
+                            temporaryChat: newTemporaryChat,
+                        }
+                    });
+                }, 1500)
+
                 socket.emit(
                     "post",
                     { board_id: boardId, discussion_id: discussionId, user_id: userId, text: text },
@@ -103,9 +135,14 @@ export const discussionStore = createDerivedSocketStore(
                         const json = JSON.parse(res);
                         if (!json.error) {
                             update((state) => {
+
+                                // now we have the real post, so we remove the temporary chat unit 
+                                const newTemporaryChat = [...state.temporaryChat].filter(post => post.id !== tempId);
+
                                 return {
                                     ...state,
                                     chat: [...state.chat, json.unit],
+                                    temporaryChat: newTemporaryChat,
                                 }
                             });
                             resolve();

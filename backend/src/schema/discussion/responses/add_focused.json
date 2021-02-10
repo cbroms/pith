@@ -2,7 +2,6 @@
   "type": "object",
   "properties": {
     "unit": {"$ref": "file:unit.json#/board"}
-    }
   },
   "required": ["unit"]
 }

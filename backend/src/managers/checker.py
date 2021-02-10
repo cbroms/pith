@@ -1,6 +1,7 @@
 """
 For managers associated with global manager.
 """
+from json import dumps
 
 from error import Errors
 from utils.utils import (
@@ -61,15 +62,15 @@ class Checker:
             )
     return helper
 
-    def _check_link_id(func):
-      def helper(self, **kwargs):
-        board_id = kwargs["board_id"]
-        link_id = kwargs["link_id"]
-        if self.gm.links.find_one({"_id" : link_id, "board_id": board_id}):
-          return func(self, **kwargs)
-        else:
-          return make_error(Errors.DNE_LINK, 
-            error_meta={"link_id": link_id}
-          )
-      return helper
+  def _check_link_id(func):
+    def helper(self, **kwargs):
+      board_id = kwargs["board_id"]
+      link_id = kwargs["link_id"]
+      if self.gm.links.find_one({"_id" : link_id, "board_id": board_id}):
+        return func(self, **kwargs)
+      else:
+        return make_error(Errors.DNE_LINK, 
+          error_meta={"link_id": link_id}
+        )
+    return helper
 

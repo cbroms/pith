@@ -7,19 +7,18 @@ from functools import wraps
 
 import constants
 from error import Errors
-from managers.global_manager import GlobalManager
-import schema.board_requests as breq
-import schema.board_responses as bres
-import schema.discussion_requests as dreq
-import schema.discussion_responses as dres
 from utils.utils import (
   get_room,
   logger,
   is_error, 
   make_error,
-  DictEncoder, 
+  DictEncoder,
 )
-
+from managers.global_manager import GlobalManager
+import schema.board_requests as breq
+import schema.board_responses as bres
+import schema.discussion_requests as dreq
+import schema.discussion_responses as dres
 
 gm = GlobalManager()
 sio = gm.sio
@@ -36,27 +35,35 @@ class BoardNamespace(AsyncNamespace):
         async def helper(self, sid, request):
           try:
             result = None
+            logger.info("REQUEST\nfunc_name: {}\nrequest: {}\n".format(
+              name, request
+            ))
             product = await func(self, sid, request)
-            logger.info("func_name: {}\nproduct: {}\nrequest: {}\n".format(
+            logger.info("REQUEST\nfunc_name: {}\nproduct: {}\nrequest: {}\n".format(
               name, product, request
             ))
-
             if not is_error(product):
               try:
                 validate(instance=product, schema=bres.schema[name])
                 result = dumps(product, cls=DictEncoder)
               except ValidationError:
-                logger.info("Return response: {}\nReturn schema: {}".format(
-                  product, name
+                logger.info("VALIDATION ERROR\nfunc_name: {}\nReturn response: {}\nReturn schema: {}\n".format(
+                  name, product, name
                 ))
                 result = make_error(Errors.SERVER_ERR)
-
-            return result
-
+            else:
+              logger.info("INPUT ERROR\nfunc_name: {}\nReturn response: {}".format(
+                name, product
+              ))
+              result = product
           except Exception as e: # catch generic exceptions
-            logger.info("func_name: {}\nrequest: {}\nexception: {}\n".format(
+            logger.info("GENERIC ERROR\nfunc_name: {}\nrequest: {}\nexception: {}\n".format(
               name, request, e
             ))
+            result = make_error(Errors.SERVER_ERR)
+          
+          logger.info("RESULT\n{}\n", result)
+          return result
         return helper
       return outer
 
@@ -78,7 +85,6 @@ class BoardNamespace(AsyncNamespace):
       board_id = request["board_id"]
       result = gm.board_manager.join_board(
         board_id=board_id,
-        user_id=request["user_id"],
       )
       if not is_error(result):
         await self.save_session(sid, {
@@ -181,11 +187,13 @@ class DiscussionNamespace(AsyncNamespace):
         async def helper(self, sid, request):
           try:
             result = None
+            logger.info("REQUEST\nfunc_name: {}\nrequest: {}\n".format(
+              name, request
+            ))
             product = await func(self, sid, request)
             logger.info("func_name: {}\nproduct: {}\nrequest: {}\n".format(
               name, product, request
             ))
-
             if not is_error(product):
               try:
                 validate(instance=product, schema=dres.schema[name])
@@ -206,13 +214,18 @@ class DiscussionNamespace(AsyncNamespace):
                   product, name
                 ))
                 result = make_error(Errors.SERVER_ERR)
-
-            return result
-
+            else:
+              logger.info("INPUT ERROR\nfunc_name: {}\nReturn response: {}".format(
+                name, product
+              ))
+              result = product
           except Exception as e: # catch generic exceptions
             logger.info("func_name: {}\nrequest: {}\nexception: {}\n".format(
               name, request, e
             ))
+            result = make_error(Errors.SERVER_ERR)
+
+          return result
         return helper
       return outer
 

@@ -9,7 +9,7 @@ from mongoengine.fields import (
   ListField,
   StringField,
 )
-import utils
+from utils import utils
 
 
 class Board(Document):
@@ -17,7 +17,7 @@ class Board(Document):
     Board representation.
     """
 
-    meta = {'collection': 'board'}
+    meta = {'collection': 'boards'}
 
     id = StringField(default=utils.gen_key(), primary_key=True)
     """

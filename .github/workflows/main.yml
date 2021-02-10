@@ -1,0 +1,26 @@
+
+name: CI
+
+on: [push]
+
+jobs:
+  publish-to-fl-job:
+    runs-on: ubuntu-latest
+    name: Publish the latest commit message to Futureland
+    steps:
+      - name: Get commit stats
+        id: get-commit-stats
+        uses: octokit/request-action@v2.x
+        with:
+          route: GET /repos/rainflame/pith/commits/${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish to Futureland
+        id: fl-publish
+        if: ${{ fromJson(steps.get-commit-stats.outputs.data).commit.author.email == 'cb@christianbroms.com' }}
+        uses: cbroms/futureland-publish-workflow@v0.0.2
+        with:
+          publish-to: ${{ secrets.FL_JOURNAL }}
+          publish-message: ⬆️ Pushed commit "[${{ github.event.head_commit.message }}](${{ github.event.head_commit.url }})" (+${{fromJson(steps.get-commit-stats.outputs.data).stats.additions}} insertions, -${{fromJson(steps.get-commit-stats.outputs.data).stats.deletions}} deletions)
+          fl-credential: ${{ secrets.FL_TOKEN_CB }}
+

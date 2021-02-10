@@ -35,7 +35,7 @@ class GlobalManager:
         self.db = self.client["pith"]
 
         # collections
-        self.board = self.db["board"]
+        self.boards = self.db["boards"]
         self.discussions = self.db["discussions"]
         self.users = self.db["users"]
         self.units = self.db["units"]
@@ -55,16 +55,19 @@ class GlobalManager:
         self.board_manager = BoardManager(self)
 
     def _get_transclusion_map(self, board_id, unit_id):
-      transclusions = self.gm.transclusions.find(
+      transclusions = self.transclusions.find(
         {}, {"source": unit_id, "board_id": board_id}
       )
       target_ids = [t["target"] for t in transclusions]
-      targets = self.gm.units.find({}, {"_id": {"$in": target_ids}})
-      map_id_pith = {t["_id"]:t["pith"] for t in targets}
+      if len(target_ids) > 0:
+        targets = self.units.find({}, {"_id": {"$in": target_ids}})
+        map_id_pith = {t["_id"]:t["pith"] for t in targets}
+      else:
+        map_id_pith = {}
       return map_id_pith
 
     def _get_links_to(self, board_id, unit_id):
-      links = self.gm.links.find(
+      links = self.links.find(
         {}, {"target": unit_id, "board_id": board_id}
       )
       link_list = [{
@@ -75,7 +78,7 @@ class GlobalManager:
       return link_list
 
     def _get_links_from(self, board_id, unit_id):
-      links = self.gm.links.find(
+      links = self.links.find(
         {}, {"source": unit_id, "board_id": board_id}
       )
       link_list = [{
@@ -87,7 +90,7 @@ class GlobalManager:
 
     def _get_discussions(self, board_id, unit_id):
       # focused includes unit
-      discussions = self.gm.discussions.find(
+      discussions = self.discussions.find(
         {}, {"focused": unit_id, "board_id": board_id}
       )
       discussions_list = [d["_id"] for d in discussions]
@@ -106,29 +109,38 @@ class GlobalManager:
       transclusions_list = []
       for t in transclusions:
         transclusions_list.append(
-          Transclusion(board_id=board_id, source=unit_id, target=t)
+          Transclusion(board_id=board_id, source=unit_id, target=t).to_mongo()
         )
       # TODO may result in duplicate error
-      self.gm.transclusions.insertMany(transclusions_list)
+      if len(transclusions_list) > 0:
+        self.transclusions.insert_many(transclusions_list)
 
     def _remove_transclusions(self, board_id, unit_id):
-      self.gm.transclusions.remove({"source": unit_id, "board_id": board_id})
+      self.transclusions.remove({"source": unit_id, "board_id": board_id})
 
     def _remove_links(self, board_id, unit_id):
-      self.gm.links \
+      self.links \
         .remove({"source": unit_id, "board_id": board_id}) \
         .remove({"target": unit_id, "board_id": board_id})
 
     def _get_user(self, board_id, user_id):
-      user = self.gm.users.find_one({"_id": user_id, "board_id": board_id})
+      user = self.users.find_one({"_id": user_id, "board_id": board_id})
       return {
         "id": user_id,
         "nickname": user["nickname"]
       }
 
+    def _get_link(self, board_id, link_id):
+      link = self.links.find_one({"_id": link_id, "board_id": board_id})
+      return {
+        "id": link_id,
+        "source": link["source"],
+        "target": link["target"],
+      }
+
     def _get_chat_unit(self, board_id, unit_id):
-      unit = self.gm.units.find_one({"_id": unit_id, "board_id": board_id})
-      user = self.gm.users.find_one({"_id": unit["author"], "board_id": board_id})
+      unit = self.units.find_one({"_id": unit_id, "board_id": board_id})
+      user = self.users.find_one({"_id": unit["author"], "board_id": board_id})
       return {
         "id": unit_id,
         "pith": unit["pith"],
@@ -141,12 +153,12 @@ class GlobalManager:
     def _get_basic_unit(self, board_id, unit_id):
       return {
         "id": unit_id,
-        "pith": self.gm.units.find_one({"_id": unit_id, "board_id": board_id})["pith"],
+        "pith": self.units.find_one({"_id": unit_id, "board_id": board_id})["pith"],
         "transclusions": self._get_transclusion_map(board_id, unit_id)
       }      
 
     def _get_extended_unit(self, board_id, unit_id):
-      unit = self.gm.units.find_one({"_id": unit_id, "board_id": board_id})
+      unit = self.units.find_one({"_id": unit_id, "board_id": board_id})
       return {
         "id": unit_id,
         "pith": unit["pith"],
@@ -157,7 +169,7 @@ class GlobalManager:
       }
 
     def _get_participants(self, board_id, discussion_id):
-      participants = self.gm.users.find(
+      participants = self.users.find(
         {}, {"discussion_id": discussion_id, "board_id": board_id}
       )
       return [self._get_user(p) for p in participants]

@@ -30,10 +30,10 @@ def get_room(board_id, discussion_id):
   return "{}:{}".format(board_id, discussion_id)
 
 def get_time():
-  datetime.utcnow()
+  return datetime.datetime.utcnow()
 
 def gen_key():
-	return uuid4().hex[:12] # hack
+  return uuid4().hex[-12:] # hack
 
 class DictEncoder(JSONEncoder):
   def default(self, obj):
@@ -58,9 +58,7 @@ def exception_handler(type, value, tb):
 sys.excepthook = exception_handler
 
 def is_error(src):
-  if src is None:
-    return False
-  return isinstance(src, Errors) 
+  return "error" in src
 
 def make_error(err, error_meta={}):
   exp = {

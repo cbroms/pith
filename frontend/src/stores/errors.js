@@ -11,37 +11,40 @@ export const errors = {
 	NOT_BOARD : -10,
 }
 
-export const errorHandler = ( reject, error, meta ) => {
+export const errorHandler = (error, meta, update) => {
 	switch (error) {
 		case errors.SERVER_ERR : {
-			reject("Server error.");
+            update((state) => {
+                return {...state, serverError: true}
+            })
+			return "Server error.";
 		}
 		case errors.BAD_REQUEST : {
-			reject("Malformed request.");
+			return "Malformed request.";
 		}
 		case errors.DNE_BOARD : {
-			reject(`Board ${meta.board_id} does not exist.`);
+			return `Board ${meta.board_id} does not exist.`;
 		}
 		case errors.DNE_DISC : {
-			reject(`Discussion ${meta.discussion_id} does not exist.`);
+			return `Discussion ${meta.discussion_id} does not exist.`;
 		}
 		case errors.DNE_UNIT : {
-			reject(`Unit ${meta.unit_id} does not exist.`);
+			return `Unit ${meta.unit_id} does not exist.`;
 		}
 		case errors.DNE_LINK : {
-			reject(`Link ${meta.link_id} does not exist.`);
+			return `Link ${meta.link_id} does not exist.`;
 		}
 		case errors.DNE_USER : {
-			reject(`User ${meta.user_id} does not exist.`);
+			return `User ${meta.user_id} does not exist.`;
 		}
 		case errors.EXISTS_NAME : {
-			reject(`Nickname ${meta.nickname} unavailable.`);
+			return `Nickname ${meta.nickname} unavailable.`;
 		}
 		case errors.NOT_CHAT : {
-			reject(`Unit ${meta.unit_id} is not of type chat.`);
+			return `Unit ${meta.unit_id} is not of type chat.`;
 		}
 		case errors.NOT_BOARD : {
-			reject(`Unit ${meta.unit_id} is not of type board.`);
+			return `Unit ${meta.unit_id} is not of type board.`;
 		}
 	}
 }

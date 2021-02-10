@@ -26,12 +26,11 @@ export const boardStore = createDerivedSocketStore(
         initialize: (boardId, resolve, reject) => {
             return (socket, update, set) => {
                 // determine if board connection is valid
-                /* TODO real input
                 socket.emit(
                     "join_board",
                     { board_id: boardId },
-                    (res) => {
-                        const json = JSON.parse(res);
+                    (res) => {          
+                        const json = JSON.parse(res); 
                         if (!json.error) {
                             update((state) => {
                                 return {
@@ -42,21 +41,23 @@ export const boardStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            if (json.error == error.DNE_BOARD) {
+                            if (json.error == errors.DNE_BOARD) {
                                 update((state) => {
                                     return {
                                         ...state,
                                         isValidBoard: false,
                                     };
                                 });
+                            } else {
+                                errorHandler(json.error, json.error_meta, update);
                             }
-                            errorHandler(reject, json.error, json.error_meta);
+                            resolve()
                         }
                     }
                 );
-                */
+               
                 // TODO fake input
-                update((state) => { return { ...state, isValidBoard: true } });
+                // update((state) => { return { ...state, isValidBoard: true } });
 
                 update((state) => {
                     return {
@@ -76,39 +77,44 @@ export const boardStore = createDerivedSocketStore(
                     return { ...state, nickname: nickname };
                 });
                 // try to create the new user
-                /* TODO real input
+              
                 socket.emit(
                     "create_user",
                     { board_id: boardId, nickname: nickname },
                     (res) => {
+                        console.log(res);
                         const json = JSON.parse(res);
                         if (!json.error) {
                             update((state) => {
                                 return { ...state, userId: json.user_id };
                             });
+                            setUserJoinedBoard(boardId, json.user_id);
                             resolve();
                         }
                         else {
-                            errorHandler(reject, json.error, json.error_meta);
+                            errorHandler(json.error, json.error_meta, update);
                         }
                     }
                 );
-                */
+                
                 // TODO fake input
-                update((state) => { return { ...state, userId: testUser } });
+               // update((state) => { return { ...state, userId: testUser } });
 
                 // update the local store to include the userId for this board
-                setUserJoinedBoard(boardId, userId);
+                
             };
         },
-        loadBoard: (boardId, userId, nickname, resolve) => {
+        loadBoard: (boardId, userId, resolve, reject) => {
             return (socket, update) => {
+
+                console.log(socket, update)
+
                 // try to join the board with the userId
-                /* TODO real input
                 socket.emit(
                     "load_board",
                     { board_id: boardId, user_id: userId },
                     (res) => {
+                        
                         const json = JSON.parse(res);
                         if (!json.error) { // success
                             update((state) => {
@@ -129,13 +135,13 @@ export const boardStore = createDerivedSocketStore(
                         }
                     }
                 );
-                */
+                
                 // TODO fake input
             };
         },
         updateBoard: (boardId, userId, nickname, resolve) => {
             return (socket, update) => {
-                /* TODO real input
+              
                 socket.emit(
                     "update_board",
                     { board_id: boardId, user_id: userId },
@@ -162,8 +168,7 @@ export const boardStore = createDerivedSocketStore(
                         }
                     }
                 );
-                */
-                // TODO fake input
+               
             };
         },
         addUnit: (boardId, text, resolve, reject) => {
@@ -183,7 +188,7 @@ export const boardStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler(reject, json.error, json.error_meta);
+                            errorHandler( json.error, json.error_meta, update);
                         }
                     }
                 );
@@ -209,7 +214,7 @@ export const boardStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler(reject, json.error, json.error_meta);
+                            errorHandler( json.error, json.error_meta);
                         }
                     }
                 );
@@ -240,7 +245,7 @@ export const boardStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler(reject, json.error, json.error_meta);
+                            errorHandler( json.error, json.error_meta);
                         }
                     }
                 );
@@ -274,7 +279,7 @@ export const boardStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler(reject, json.error, json.error_meta);
+                            errorHandler( json.error, json.error_meta);
                         }
                     }
                 );
@@ -312,7 +317,7 @@ export const boardStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler(reject, json.error, json.error_meta);
+                            errorHandler( json.error, json.error_meta);
                         }
                     }
                 );
@@ -345,7 +350,7 @@ export const boardStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler(reject, json.error, json.error_meta);
+                            errorHandler( json.error, json.error_meta);
                         }
                     }
                 );
@@ -376,7 +381,7 @@ export const boardStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler(reject, json.error, json.error_meta);
+                            errorHandler( json.error, json.error_meta);
                         }
                     }
                 );
