@@ -1,6 +1,7 @@
 from utils import utils
 from json import dumps
 
+from models.board import Board
 from models.discussion import Discussion
 from models.user import User
 from models.unit import Unit
@@ -20,8 +21,14 @@ class BoardManager:
         for p in Checker.unit_input:
           unit_id = kwargs[p]
           unit_update = UnitUpdate(board_id=board_id, unit_id=unit_id)
-          self.gm.unit_updates.insert_one(unit_update)
+          self.gm.unit_updates.insert_one(unit_update.to_mongo())
       return helper
+
+    def create(self):
+        board = Board()
+        self.gm.boards.insert_one(board.to_mongo())
+        print(board.to_mongo())
+        return {"board_id": board.id}
 
     @Checker._check_board_id
     def join_board(self, board_id):
@@ -31,8 +38,8 @@ class BoardManager:
     @Checker._check_user_id
     def create_user(self, board_id, nickname):
       user = User(board_id=board_id, nickname=nickname)
-      self.gm.users.insert_one(user)
-      return {"board_id": board_id, "user_id": user._id}
+      self.gm.users.insert_one(user.to_mongo())
+      return {"board_id": board_id, "user_id": user.id}
 
     @Checker._check_board_id
     @Checker._check_user_id
@@ -77,7 +84,7 @@ class BoardManager:
     def add_unit(self, board_id, text):
       pith, transclusions = self.gm._get_pith(board_id, text)
       unit = Unit(board_id=board_id, pith=pith)
-      self.gm.units.insert_one(unit)
+      self.gm.units.insert_one(unit.to_mongo())
       unit_id = unit["_id"]
       self.gm._insert_transclusions(board_id, unit_id, transclusions)
       return self.gm._get_basic_unit(board_id, unit_id)
@@ -113,7 +120,7 @@ class BoardManager:
     @_record_unit_update
     def add_link(self, board_id, source, target):
       link = Link(board_id=board_id, source=source, target=target)
-      self.gm.links.insert_one(link)
+      self.gm.links.insert_one(link.to_mongo())
 
     @Checker._check_board_id
     @Checker._check_link_id
@@ -131,5 +138,5 @@ class BoardManager:
     @_record_unit_update
     def create_disc(self, board_id, unit_id):
       discussion = Discussion(board_id=board_id, focused=[unit_id])
-      self.gm.discussions.insert_one(discussion)
+      self.gm.discussions.insert_one(discussion.to_mongo())
       return {"discussion_id": discussion["_id"]}

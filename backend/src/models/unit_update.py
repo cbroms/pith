@@ -16,7 +16,7 @@ class UnitUpdate(Document):
     Unit-update representation.
     """
 
-    meta = {'collection': 'unit_update'}
+    meta = {'collection': 'unit_updates'}
 
     id = StringField(default=utils.gen_key(), primary_key=True)
     """

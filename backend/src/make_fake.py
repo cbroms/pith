@@ -2,17 +2,12 @@
 Create a fake discussion with a user to begin frontend development.
 """
 from managers.global_manager import GlobalManager
-from models.discussion import (
-  Discussion,
-	Unit
-)
+from utils import utils
 
 gm = GlobalManager()
 gm.start()
 
-Discussion.objects().delete()
-Unit.objects().delete()
+board = gm.board_manager.create()
+board_id = board["board_id"]
 
-discussion_id = gm.board_manager.create()["discussion_id"]
-
-print("made id {}".format(discussion_id))
+print("made board id {}".format(board_id))

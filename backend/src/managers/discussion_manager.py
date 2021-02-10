@@ -50,7 +50,7 @@ class DiscussionManager:
     def post(self, board_id, discussion_id, user_id, text):
       pith, transclusions = self.gm._get_pith(board_id, text)
       unit = Unit(board_id=board_id, pith=pith, chat=True, author=user_id)
-      self.gm.units.insert_one(unit)
+      self.gm.units.insert_one(unit.to_mongo())
       unit_id = unit["_id"]
       self.gm._insert_transclusions(board_id, unit_id, transclusions)
       self.gm.discussions.update_one(

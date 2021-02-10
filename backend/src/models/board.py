@@ -17,7 +17,7 @@ class Board(Document):
     Board representation.
     """
 
-    meta = {'collection': 'board'}
+    meta = {'collection': 'boards'}
 
     id = StringField(default=utils.gen_key(), primary_key=True)
     """
