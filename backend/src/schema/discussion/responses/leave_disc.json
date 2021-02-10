@@ -1,7 +1,7 @@
 {
   "type": "object",
   "properties": {
-    "user": {"$ref": "../../user.json#/user"}
+    "user": {"$ref": "file:user.json#/user"}
   },
   "required": ["user"]
 }

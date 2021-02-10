@@ -4,7 +4,7 @@
     "nickname": {"type": "string"},
     "units": {
       "type": "array",
-      "item": {"$ref": "../../unit.json#/board"}
+      "item": {"$ref": "file:unit.json#/board"}
     }
   },
   "required": ["nickname", "units"]

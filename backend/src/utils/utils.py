@@ -17,6 +17,15 @@ import constants
 from error import Errors
 from uuid import uuid4
 
+
+def absolute_file(schema):
+    for key in schema:
+        if key == "$ref":
+            schema[key] = schema[key].replace("file:", "file:" + path + "/")
+        elif isinstance(schema[key], dict):
+            schema[key] = absolute(schema[key])
+    return schema
+
 def get_room(board_id, discussion_id):
   return "{}:{}".format(board_id, discussion_id)
 

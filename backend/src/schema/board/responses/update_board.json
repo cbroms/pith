@@ -7,7 +7,7 @@
     },
     "updated_units": {
       "type": "array",
-      "item": {"$ref": "../../unit.json#/board"}
+      "item": {"$ref": "file:unit.json#/board"}
     }
   },
   "required": ["updated_unit_ids", "updated_units"]

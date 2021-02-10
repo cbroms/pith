@@ -1,7 +1,7 @@
 {
   "type": "object",
   "properties": {
-    "link": {"$ref": "../../link.json#/link"}
+    "link": {"$ref": "file:link.json#/link"}
   },
   "required": ["link"]
 }

@@ -3,19 +3,19 @@
   "properties": {
     "chat": {
       "type": "array",
-      "item": {"$ref": "../../unit.json#/chat"}
+      "item": {"$ref": "file:unit.json#/chat"}
     },
     "pinned" {
       "type": "array",
-      "item": {"$ref": "../../unit.json#/chat"}
+      "item": {"$ref": "file:unit.json#/chat"}
     },
     "focused" {
       "type": "array",
-      "item": {"$ref": "../../unit.json#/board"}
+      "item": {"$ref": "file:unit.json#/board"}
     },
     "participants" {
       "type": "array",
-      "item": {"$ref": "../../user.json#/user"}
+      "item": {"$ref": "file:user.json#/user"}
     }
   },
   "required": ["chat", "pinned", "focused", "participants"]
