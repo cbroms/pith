@@ -24,7 +24,7 @@ def get_time():
   return datetime.datetime.utcnow()
 
 def gen_key():
-  return uuid4().hex[:12] # hack
+  return uuid4().hex[-12:] # hack
 
 class DictEncoder(JSONEncoder):
   def default(self, obj):

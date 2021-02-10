@@ -82,15 +82,17 @@ export const boardStore = createDerivedSocketStore(
                     "create_user",
                     { board_id: boardId, nickname: nickname },
                     (res) => {
+                        console.log(res);
                         const json = JSON.parse(res);
                         if (!json.error) {
                             update((state) => {
                                 return { ...state, userId: json.user_id };
                             });
+                            setUserJoinedBoard(boardId, json.user_id);
                             resolve();
                         }
                         else {
-                            errorHandler(json.error, json.error_meta);
+                            errorHandler(json.error, json.error_meta, update);
                         }
                     }
                 );
@@ -99,7 +101,7 @@ export const boardStore = createDerivedSocketStore(
                // update((state) => { return { ...state, userId: testUser } });
 
                 // update the local store to include the userId for this board
-                setUserJoinedBoard(boardId, userId);
+                
             };
         },
         loadBoard: (boardId, userId, resolve, reject) => {
@@ -186,7 +188,7 @@ export const boardStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler( json.error, json.error_meta);
+                            errorHandler( json.error, json.error_meta, update);
                         }
                     }
                 );

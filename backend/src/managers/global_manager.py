@@ -55,12 +55,15 @@ class GlobalManager:
         self.board_manager = BoardManager(self)
 
     def _get_transclusion_map(self, board_id, unit_id):
-      transclusions = self.gm.transclusions.find(
+      transclusions = self.transclusions.find(
         {}, {"source": unit_id, "board_id": board_id}
       )
       target_ids = [t["target"] for t in transclusions]
-      targets = self.units.find({}, {"_id": {"$in": target_ids}})
-      map_id_pith = {t["_id"]:t["pith"] for t in targets}
+      if len(target_ids) > 0:
+        targets = self.units.find({}, {"_id": {"$in": target_ids}})
+        map_id_pith = {t["_id"]:t["pith"] for t in targets}
+      else:
+        map_id_pith = {}
       return map_id_pith
 
     def _get_links_to(self, board_id, unit_id):
@@ -106,10 +109,11 @@ class GlobalManager:
       transclusions_list = []
       for t in transclusions:
         transclusions_list.append(
-          Transclusion(board_id=board_id, source=unit_id, target=t)
+          Transclusion(board_id=board_id, source=unit_id, target=t).to_mongo()
         )
       # TODO may result in duplicate error
-      self.transclusions.insertMany(transclusions_list)
+      if len(transclusions_list) > 0:
+        self.transclusions.insert_many(transclusions_list)
 
     def _remove_transclusions(self, board_id, unit_id):
       self.transclusions.remove({"source": unit_id, "board_id": board_id})
@@ -124,6 +128,14 @@ class GlobalManager:
       return {
         "id": user_id,
         "nickname": user["nickname"]
+      }
+
+    def _get_link(self, board_id, link_id):
+      link = self.links.find_one({"_id": link_id, "board_id": board_id})
+      return {
+        "id": link_id,
+        "source": link["source"],
+        "target": link["target"],
       }
 
     def _get_chat_unit(self, board_id, unit_id):

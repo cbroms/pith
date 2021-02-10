@@ -35,6 +35,9 @@ class BoardNamespace(AsyncNamespace):
         async def helper(self, sid, request):
           try:
             result = None
+            logger.info("REQUEST\nfunc_name: {}\nrequest: {}\n".format(
+              name, request
+            ))
             product = await func(self, sid, request)
             logger.info("REQUEST\nfunc_name: {}\nproduct: {}\nrequest: {}\n".format(
               name, product, request
@@ -184,11 +187,13 @@ class DiscussionNamespace(AsyncNamespace):
         async def helper(self, sid, request):
           try:
             result = None
+            logger.info("REQUEST\nfunc_name: {}\nrequest: {}\n".format(
+              name, request
+            ))
             product = await func(self, sid, request)
             logger.info("func_name: {}\nproduct: {}\nrequest: {}\n".format(
               name, product, request
             ))
-
             if not is_error(product):
               try:
                 validate(instance=product, schema=dres.schema[name])

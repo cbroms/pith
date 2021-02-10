@@ -57,7 +57,7 @@ class DiscussionManager:
         {"_id" : discussion_id, "board_id": board_id},
         {"$push": {"chat": unit_id}}
       )
-      return self.gm._get_chat_unit(board_id, unit_id)
+      return {"unit": self.gm._get_chat_unit(board_id, unit_id)}
 
     @Checker._check_board_id
     @Checker._check_discussion_id
@@ -72,7 +72,7 @@ class DiscussionManager:
         {"_id" : discussion_id, "board_id": board_id},
         {"$push": {"pinned": unit_id}}
       )
-      return self.gm._get_chat_unit(board_id, unit_id)
+      return {"unit": self.gm._get_chat_unit(board_id, unit_id)}
 
     @Checker._check_board_id
     @Checker._check_discussion_id
@@ -97,7 +97,7 @@ class DiscussionManager:
         {"_id" : discussion_id, "board_id": board_id},
         {"$push": {"focused": unit_id}}
       )
-      return self.gm._get_board_unit(board_id, unit_id)
+      return {"unit": self.gm._get_board_unit(board_id, unit_id)}
 
     @Checker._check_board_id
     @Checker._check_discussion_id

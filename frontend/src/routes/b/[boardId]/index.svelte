@@ -12,7 +12,7 @@
 
   import BoardLayout from "../../../components/layouts/BoardLayout.svelte";
   import DiscussionLayout from "../../../components/layouts/DiscussionLayout.svelte";
-  import ChatLayout from "../../../components/layouts/ChatLayout.svelte";
+  import Board from "../../../components/sections/Board.svelte";
 
   export let id;
 
@@ -49,7 +49,9 @@ $boardStore.hasJoinedBoard}
 <div>Loading...</div>
 {/if} -->
 
-<BoardLayout />
+<BoardLayout>
+  <Board {id} />
+</BoardLayout>
 <DiscussionLayout>
   <div class="board-info">
     {#if $boardStore.isValidBoard}
