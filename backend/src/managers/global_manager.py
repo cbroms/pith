@@ -1,7 +1,7 @@
 import asyncio
 from aiohttp import web
 from arq import create_pool
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 import mongoengine
 import socketio
 
@@ -44,7 +44,7 @@ class GlobalManager:
         self.unit_updates = self.db["unit_updates"]
 
         # set up index for search
-        Unit.create_index([('pith', 'text')])
+        self.units.create_index([("pith", ASCENDING)])
 
         # redis
         loop = asyncio.get_event_loop()
@@ -53,6 +53,7 @@ class GlobalManager:
         # these get all the other variables
         self.discussion_manager = DiscussionManager(self)
         self.board_manager = BoardManager(self)
+
 
     def _get_transclusion_map(self, board_id, unit_id):
       transclusions = self.transclusions.find(
