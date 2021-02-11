@@ -6,6 +6,7 @@ import mongoengine
 import socketio
 
 import constants
+from utils import utils
 
 from models.unit import Unit
 from models.transclusion import Transclusion
@@ -89,12 +90,26 @@ class GlobalManager:
       } for l in links]
       return link_list
 
+    def _get_disc(self, board_id, discussion_id):
+      discussion = self.discussions.find_one({"_id": discussion_id, "board_id": board_id})
+      return {
+        "id": discussion_id,
+        "created": str(discussion["created"])
+      }
+
     def _get_discussions(self, board_id, unit_id):
       # focused includes unit
       discussions = self.discussions.find(
         {}, {"focused": unit_id, "board_id": board_id}
       )
-      discussions_list = [d["_id"] for d in discussions]
+      try:
+        utils.logger.info("D: {}".format([d for d in discussions]))
+        discussions_list = [{ \
+          "id": d["_id"], \
+          "created": str(d["created"]) \
+        } for d in discussions]
+      except Exception as e:
+        utils.logger.info(e)
       return discussions_list
 
     def _get_pith(self, board_id, text):
@@ -152,9 +167,10 @@ class GlobalManager:
       }      
 
     def _get_basic_unit(self, board_id, unit_id):
+      unit = self.units.find_one({"_id": unit_id, "board_id": board_id})
       return {
         "id": unit_id,
-        "pith": self.units.find_one({"_id": unit_id, "board_id": board_id})["pith"],
+        "pith": unit["pith"],
         "transclusions": self._get_transclusion_map(board_id, unit_id)
       }      
 

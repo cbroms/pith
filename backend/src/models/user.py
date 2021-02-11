@@ -18,9 +18,9 @@ class User(Document):
 
     meta = {'collection': 'users'}
 
-    id = StringField(default=utils.gen_key(), primary_key=True)
+    id = StringField(default=lambda: utils.gen_key(), primary_key=True)
 
-    created = DateTimeField(default=utils.get_time())
+    created = DateTimeField(default=lambda: utils.get_time())
     """
     :type: *datetime*
     :required: False

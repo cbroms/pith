@@ -1,0 +1,10 @@
+{
+    "disc": {
+        "type": "object",
+        "properties": {
+            "id": {"type": "string"}, 
+            "created": {"type": "string"}
+        },
+        "required": ["id", "created"]
+    }
+}

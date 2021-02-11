@@ -107,8 +107,6 @@ export const boardStore = createDerivedSocketStore(
         loadBoard: (boardId, userId, resolve, reject) => {
             return (socket, update) => {
 
-                console.log(socket, update)
-
                 // try to join the board with the userId
                 socket.emit(
                     "load_board",
@@ -117,6 +115,7 @@ export const boardStore = createDerivedSocketStore(
                         
                         const json = JSON.parse(res);
                         if (!json.error) { // success
+                            console.log(json)
                             update((state) => {
                                 // might be putting userId in again
                                 return {
@@ -131,7 +130,7 @@ export const boardStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler(json.error, json.error_meta);
+                            errorHandler(json.error, json.error_meta, update);
                         }
                     }
                 );
@@ -164,7 +163,7 @@ export const boardStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler(json.error, json.error_meta);
+                            errorHandler(json.error, json.error_meta, update);
                         }
                     }
                 );
@@ -214,7 +213,7 @@ export const boardStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler( json.error, json.error_meta);
+                            errorHandler( json.error, json.error_meta, update);
                         }
                     }
                 );
@@ -245,7 +244,7 @@ export const boardStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler( json.error, json.error_meta);
+                            errorHandler( json.error, json.error_meta, update);
                         }
                     }
                 );
@@ -259,18 +258,24 @@ export const boardStore = createDerivedSocketStore(
                     (res) => {
                         const json = JSON.parse(res);
                         if (!json.error) {
-                            let units = [...state.units];
-                            // TODO, map returns new array
-                            units = units.map((e) => {
-                                if (e.id === source) {
-                                    e.links_to.push(json.link);
-                                }
-                                else if (e.id === target) {
-                                    e.links_from.push(json.link);
-                                }
-                                return e;
-                            });
                             update((state) => {
+                                let units = [...state.units];
+                                // TODO, map returns new array
+                                units = units.map((e) => {
+                                    if (e.id === source) {
+                                        if (e.links_to)
+                                            e.links_to.push(json.link);
+                                        else 
+                                            e.links_to = [json.link];
+                                    }
+                                    else if (e.id === target) {
+                                        if (e.links_from)
+                                            e.links_from.push(json.link);
+                                        else 
+                                            e.links_from = [json.link];
+                                    }
+                                    return e;
+                                });
                                 return {
                                     ...state,
                                     units: units,
@@ -279,7 +284,7 @@ export const boardStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler( json.error, json.error_meta);
+                            errorHandler( json.error, json.error_meta, update);
                         }
                     }
                 );
@@ -293,22 +298,24 @@ export const boardStore = createDerivedSocketStore(
                     (res) => {
                         const json = JSON.parse(res);
                         if (!json.error) {
-                            let units = [...state.units];
-                            // TODO, map returns new array
-                            units = units.map((e) => {
-                                if (e.id === link.source) {
-                                    e.links_to = e.links_to.filter(
-                                        (l) => { l.id === json.link.id }
-                                    );
-                                }
-                                else if (e.id === link.target) {
-                                    e.links_from = e.links_from.filter(
-                                        (l) => { l.id === json.link.id }
-                                    );
-                                }
-                                return e;
-                            });
                             update((state) => {
+                                let units = [...state.units];
+                                // TODO, map returns new array
+                                units = units.map((e) => {
+                                    if (e.id === link.source) {
+                                        if (e.links_to) // only matter if list exists
+                                            e.links_to = e.links_to.filter(
+                                                (l) => { l.id === json.link.id }
+                                            );
+                                    }
+                                    else if (e.id === link.target) {
+                                        if (e.links_from)
+                                            e.links_from = e.links_from.filter(
+                                                (l) => { l.id === json.link.id }
+                                            );
+                                    }
+                                    return e;
+                                });
                                 return {
                                     ...state,
                                     units: units,
@@ -317,7 +324,7 @@ export const boardStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler( json.error, json.error_meta);
+                            errorHandler( json.error, json.error_meta, update);
                         }
                     }
                 );
@@ -331,17 +338,18 @@ export const boardStore = createDerivedSocketStore(
                     (res) => {
                         const json = JSON.parse(res);
                         if (!json.error) {
-                            let units = [...state.units];
-                            // TODO, map returns new array
-                            units = units.map((e) => {
-                                if (e.id === unitId) {
-                                    return json.unit;
-                                }
-                                else {
-                                    return e;
-                                }
-                            });
+                            
                             update((state) => {
+                                let units = [...state.units];
+                            // TODO, map returns new array
+                                units = units.map((e) => {
+                                    if (e.id === unitId) {
+                                        return json.unit;
+                                    }
+                                    else {
+                                        return e;
+                                    }
+                                });
                                 return {
                                     ...state,
                                     units: units,
@@ -350,7 +358,7 @@ export const boardStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler( json.error, json.error_meta);
+                            errorHandler( json.error, json.error_meta, update);
                         }
                     }
                 );
@@ -364,15 +372,18 @@ export const boardStore = createDerivedSocketStore(
                     (res) => {
                         const json = JSON.parse(res);
                         if (!json.error) {
-                            let units = [...state.units];
-                            // TODO, map returns new array
-                            units = units.map((e) => {
-                                if (e.id === unitId) {
-                                    e.discussions.push(json.discussion_id);
-                                }
-                                return e;
-                            });
                             update((state) => {
+                                let units = [...state.units];
+                                // TODO, map returns new array
+                                units = units.map((e) => {
+                                    if (e.id === unitId) {
+                                        if (e.discussions)
+                                            e.discussions.push(json.discussion);
+                                        else 
+                                            e.discussions = [json.discussion];
+                                    }
+                                    return e;
+                                });
                                 return {
                                     ...state,
                                     units: units,
@@ -381,7 +392,7 @@ export const boardStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler( json.error, json.error_meta);
+                            errorHandler( json.error, json.error_meta, update);
                         }
                     }
                 );

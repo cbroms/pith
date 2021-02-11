@@ -5,6 +5,7 @@ from json import JSONEncoder, dumps
 from nltk.stem import PorterStemmer
 from operator import or_
 import string
+import secrets
 from typing import (
   Any,
   Dict,
@@ -18,13 +19,15 @@ from error import Errors
 from uuid import uuid4
 
 
-def absolute_file(schema):
-    for key in schema:
-        if key == "$ref":
-            schema[key] = schema[key].replace("file:", "file:" + path + "/")
-        elif isinstance(schema[key], dict):
-            schema[key] = absolute(schema[key])
-    return schema
+def absolute_file(schema, path):
+    def helper(S):
+      for key in S:
+          if key == "$ref":
+              S[key] = S[key].replace("file:", "file:" + path + "/")
+          elif isinstance(S[key], dict):
+              S[key] = helper(S[key])
+      return S
+    return helper(schema)
 
 def get_room(board_id, discussion_id):
   return "{}:{}".format(board_id, discussion_id)
@@ -33,7 +36,8 @@ def get_time():
   return datetime.datetime.utcnow()
 
 def gen_key():
-  return uuid4().hex[-12:] # hack
+  return ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(12))
+  #return uuid4().hex
 
 class DictEncoder(JSONEncoder):
   def default(self, obj):

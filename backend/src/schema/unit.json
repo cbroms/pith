@@ -31,7 +31,7 @@
         },
         "discussions": {
           "type": "array",
-          "items": {"type": "string"}
+          "items": {"$ref": "file:disc.json#/disc"}
         }
       },
       "required": ["id", "pith", "transclusions"]

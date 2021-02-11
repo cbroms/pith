@@ -23,4 +23,4 @@ schema_names = [
 
 for schema_name in schema_names:
   with open(path + "/board/requests/{}.json".format(schema_name)) as file:
-    schema[schema_name] = absolute_file(load(file))
+    schema[schema_name] = utils.absolute_file(load(file), path)

@@ -38,7 +38,7 @@ export const discussionStore = createDerivedSocketStore(
                         if (!json.error) {
 			    // not done
                         } else {
-                            errorHandler(reject, json.error, json.error_meta);
+                            errorHandler(json.error, json.error_meta, update);
                         }
                     }
                 );
@@ -61,7 +61,7 @@ export const discussionStore = createDerivedSocketStore(
                             });
                             resolve(); // done
                         } else {
-                            errorHandler(reject, json.error, json.error_meta);
+                            errorHandler(json.error, json.error_meta, update);
                         }
                     }
 		);
@@ -91,7 +91,7 @@ export const discussionStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler(reject, json.error, json.error_meta);
+                            errorHandler(json.error, json.error_meta, update);
                         }
                     }
                 );
@@ -148,7 +148,7 @@ export const discussionStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler(reject, json.error, json.error_meta);
+                            errorHandler(json.error, json.error_meta, update);
                         }
                     }
                 );
@@ -171,7 +171,7 @@ export const discussionStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler(reject, json.error, json.error_meta);
+                            errorHandler(json.error, json.error_meta, update);
                         }
                     }
                 );
@@ -197,7 +197,7 @@ export const discussionStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler(reject, json.error, json.error_meta);
+                            errorHandler(json.error, json.error_meta, update);
                         }
                     }
                 );
@@ -220,7 +220,7 @@ export const discussionStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler(reject, json.error, json.error_meta);
+                            errorHandler(json.error, json.error_meta, update);
                         }
                     }
                 );
@@ -246,7 +246,7 @@ export const discussionStore = createDerivedSocketStore(
                             resolve();
                         }
                         else {
-                            errorHandler(reject, json.error, json.error_meta);
+                            errorHandler(json.error, json.error_meta, update);
                         }
                     }
                 );

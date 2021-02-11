@@ -1,7 +1,7 @@
 {
   "type": "object",
   "properties": {
-    "discussion_id": {"type": "string"}
+    "discussion": {"$ref": "file:disc.json#/disc"}
   },
-  "required": ["discussion_id"]
+  "required": ["discussion"]
 }

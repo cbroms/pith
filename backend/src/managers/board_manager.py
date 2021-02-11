@@ -44,9 +44,9 @@ class BoardManager:
       )
       user = self.gm.users.find_one({"_id": user_id, "board_id": board_id})
 
-      unit_ids = self.gm.boards.find_one({"_id": board_id})["units"]
-      units_output = [self.gm._get_basic_units(board_id, unit_id) \
-        for unit_id in unit_ids]
+      units = self.gm.units.find({}, {"board_id": board_id})
+      units_output = [self.gm._get_basic_unit(board_id, unit["_id"]) \
+        for unit in units]
 
       return {"nickname": user["nickname"], "units": units_output}
         
@@ -137,6 +137,7 @@ class BoardManager:
     @Checker._check_unit_id
     def create_disc(self, board_id, unit_id):
       discussion = Discussion(board_id=board_id, focused=[unit_id])
+      utils.logger.info("create_disc: {}".format(discussion.to_mongo()))
       self.gm.discussions.insert_one(discussion.to_mongo())
       self._record_unit_update(board_id, unit_id)
-      return {"discussion_id": discussion["_id"]}
+      return {"discussion": self.gm._get_disc(board_id, discussion.id)}
