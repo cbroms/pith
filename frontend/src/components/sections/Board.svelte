@@ -5,6 +5,8 @@
 
   export let id;
 
+  console.log($boardStore);
+
   let content = "";
 
   const onSubmit = () => {

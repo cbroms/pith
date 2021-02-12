@@ -28,7 +28,7 @@ export const discussionStore = createDerivedSocketStore(
     {
         joinDiscussion: (boardId, discussionId, userId, resolve, reject) => {
             return (socket, update) => {
-                /* TODO real input
+                
                 socket.emit(
                     "join_disc",
                     { board_id: boardId, discussion_id: discussionId, user_id: userId },
@@ -64,10 +64,11 @@ export const discussionStore = createDerivedSocketStore(
                             errorHandler(json.error, json.error_meta, update);
                         }
                     }
+                    
 		);
-                */
+                
                 // TODO fake input
-                update((state) => { return { ...state, discussionId: "testDiscussion" } });
+                // update((state) => { return { ...state, discussionId: "testDiscussion" } });
             };
         },
         leaveDiscussion: (boardId, discussionId, userId, resolve, reject) => {

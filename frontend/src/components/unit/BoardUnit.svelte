@@ -33,7 +33,7 @@
 </script>
 
 <div class="board-unit">
-  <div class="unit-content">{unit.pith}</div>
+  <div class="unit-content">{unit?.pith || ""}</div>
   {#if focus || unfocus || edit || links}
     <div class="unit-controls">
       <span class="controls-left">
