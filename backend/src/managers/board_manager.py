@@ -44,7 +44,7 @@ class BoardManager:
       )
       user = self.gm.users.find_one({"_id": user_id, "board_id": board_id})
 
-      units = self.gm.units.find({}, {"board_id": board_id})
+      units = self.gm.units.find({"board_id": board_id})
       units_output = [self.gm._get_basic_unit(board_id, unit["_id"]) \
         for unit in units]
 
@@ -60,7 +60,7 @@ class BoardManager:
         {"_id" : user_id, "board_id": board_id},
         {"$set": {"user_update_cursor": utils.get_time()}}
       )
-      unit_updates = self.gm.unit_updates.find({}, 
+      unit_updates = self.gm.unit_updates.find( 
         {"created": {"$gt": unit_update_cursor}, "board_id": board_id}
       )
       unit_ids = [u["unit_id"] for u in unit_updates]
