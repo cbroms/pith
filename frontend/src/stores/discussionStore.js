@@ -29,6 +29,7 @@ export const discussionStore = createDerivedSocketStore(
         joinDiscussion: (boardId, discussionId, userId, resolve, reject) => {
             return (socket, update) => {
                 
+                console.log("join_discussion", user_id);
                 socket.emit(
                     "join_disc",
                     { board_id: boardId, discussion_id: discussionId, user_id: userId },

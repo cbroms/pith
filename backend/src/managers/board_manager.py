@@ -16,6 +16,9 @@ class BoardManager:
         self.gm = gm
 
     def _record_unit_update(self, board_id, unit_id):
+        """
+        Should only be applied to board units.
+        """
         unit_update = UnitUpdate(board_id=board_id, unit_id=unit_id)
         self.gm.unit_updates.insert_one(unit_update.to_mongo())
 
@@ -44,7 +47,7 @@ class BoardManager:
       )
       user = self.gm.users.find_one({"_id": user_id, "board_id": board_id})
 
-      units = self.gm.units.find({"board_id": board_id})
+      units = self.gm.units.find({"chat": False, "board_id": board_id})
       units_output = [self.gm._get_basic_unit(board_id, unit["_id"]) \
         for unit in units]
 
