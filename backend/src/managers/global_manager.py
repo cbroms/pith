@@ -187,4 +187,4 @@ class GlobalManager:
       participants = self.users.find(
         {"discussion_id": discussion_id, "board_id": board_id}
       )
-      return [self._get_user(p) for p in participants]
+      return [self._get_user(board_id, p["_id"]) for p in participants]
