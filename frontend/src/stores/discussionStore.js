@@ -64,7 +64,7 @@ export const discussionStore = createDerivedSocketStore(
                             errorHandler(json.error, json.error_meta, update);
                         }
                     }
-                    
+
 		);
                 
                 // TODO fake input
@@ -117,23 +117,24 @@ export const discussionStore = createDerivedSocketStore(
                     return {...state, temporaryChat: [...state.temporaryChat, newPost]}
                 })
 
-                // simulate server response time 
-                setTimeout(() => {
-                    update((state) => {
-                        // now we have the real post, so we remove the temporary chat unit 
-                        const newTemporaryChat = [...state.temporaryChat].filter(post => post.id !== tempId);
-                        return {
-                            ...state,
-                            temporaryChat: newTemporaryChat,
-                        }
-                    });
-                }, 1500)
+                // // simulate server response time 
+                // setTimeout(() => {
+                //     update((state) => {
+                //         // now we have the real post, so we remove the temporary chat unit 
+                //         const newTemporaryChat = [...state.temporaryChat].filter(post => post.id !== tempId);
+                //         return {
+                //             ...state,
+                //             temporaryChat: newTemporaryChat,
+                //         }
+                //     });
+                // }, 1500)
 
                 socket.emit(
                     "post",
                     { board_id: boardId, discussion_id: discussionId, user_id: userId, text: text },
                     (res) => {
                         const json = JSON.parse(res);
+                        console.log("received post" , json)
                         if (!json.error) {
                             update((state) => {
 

@@ -1,6 +1,7 @@
 <script context="module">
-  export async function preload({ params }) {
-    return { id: params.boardId };
+  export async function preload({ params, query }) {
+    console.log(query);
+    return { id: params.boardId, dId: query.d };
   }
 </script>
 
@@ -15,6 +16,7 @@
   import Board from "../../../components/sections/Board.svelte";
 
   export let id;
+  export let dId;
 
   onMount(async () => {
     await boardStore.initialize(id);
@@ -25,10 +27,14 @@
       $boardStore.userId === null
     ) {
       // make a user ID first
-      await goto(`/b/${id}/join`);
+      await goto(`/b/${id}/join/${dId ? "?d=" + dId : ""}`);
     } else if ($boardStore.isValidBoard && $boardStore.userId !== null) {
       // try joining the board with the user ID
       await boardStore.loadBoard(id, $boardStore.userId);
+      // now that we've loaded the board, we can redirect to a particular discussion if requested
+      if (dId) {
+        await goto(`/b/${id}/d/${dId}/`);
+      }
     }
   });
 </script>

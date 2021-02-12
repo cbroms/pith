@@ -26,16 +26,20 @@
   export let id;
   export let bId;
 
-  console.log(id);
-
   onMount(async () => {
-    await discussionStore.joinDiscussion(bId, id, $boardStore.userId);
+    if ($boardStore.userId === null) {
+      // if the user hasn't joined or loaded the board yet, redirect them up to do that
+      goto(`/b/${bId}/?d=${id}`);
+    } else {
+      await discussionStore.joinDiscussion(bId, id, $boardStore.userId);
+      discussionStore.subscribePosts();
+    }
   });
 </script>
 
 <DiscussionLayout>
   <ChatLayout>
-    <Chat />
+    <Chat {id} />
   </ChatLayout>
   <FocusLayout>
     <!-- {#each focusUnits as unit (unit.id)}

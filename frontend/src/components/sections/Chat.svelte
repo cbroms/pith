@@ -2,30 +2,18 @@
   import { beforeUpdate, afterUpdate, onMount } from "svelte";
 
   import { discussionStore } from "../../stores/discussionStore";
+  import { boardStore } from "../../stores/boardStore";
+  import BoardLayout from "../layouts/BoardLayout.svelte";
 
   import ChatUnit from "../unit/ChatUnit.svelte";
+  import Board from "./Board.svelte";
+
+  export let id;
 
   let div;
   let autoscroll;
 
-  let messages = [
-    {
-      pith:
-        "Libero repellat molestias et soluta nihil. Repudiandae illum officiis sunt veniam est",
-      author: "Christian",
-      time: "2021-02-05T02:57:01.206Z",
-    },
-    {
-      pith: "Possimus nemo voluptatem ut beatae cumque cumque ea voluptas.",
-    },
-    {
-      pith:
-        "Asperiores temporibus adipisci est occaecati perspiciatis quis quibusdam",
-      author: "Sydney",
-      time: "2021-02-05T03:01:01.206Z",
-    },
-  ];
-  let prevNumMessages = messages.length;
+  let prevNumMessages = $discussionStore.chat.length;
   let missedMessages = 0;
 
   beforeUpdate(() => {
@@ -35,7 +23,7 @@
 
   afterUpdate(() => {
     if (autoscroll) div.scrollTo(0, div.scrollHeight);
-    else if (prevNumMessages < messages.length) {
+    else if (prevNumMessages < $discussionStore.chat.length) {
       // add an indication that a message was missed
       missedMessages += 1;
       prevNumMessages = messages.length;
@@ -62,7 +50,12 @@
 
   const onSubmit = () => {
     if (content !== "") {
-      discussionStore.post("boardId", "discussionId", "userId", content);
+      discussionStore.post(
+        $boardStore.boardId,
+        id,
+        $boardStore.userId,
+        content
+      );
       content = "";
     }
   };
@@ -75,19 +68,11 @@
 <div class="chat-wrapper">
   <div class="chat-overflow" bind:this={div} on:scroll={handleScroll}>
     <div class="chat">
-      {#each messages as message}
-        <ChatUnit
-          pith={message.pith}
-          author={message.author}
-          time={message.time}
-        />
+      {#each $discussionStore.chat as message}
+        <ChatUnit {...message} />
       {/each}
       {#each $discussionStore.temporaryChat as message}
-        <ChatUnit
-          pith={message.pith}
-          author={message.author}
-          time={message.time}
-        />
+        <ChatUnit {...message} />
       {/each}
     </div>
   </div>
@@ -107,7 +92,7 @@
   </div>
 </div>
 
-<!--<script ✂prettier:content✂="CglpbXBvcnQgeyBjaGF0IH0gZnJvbSAiLi4vLi4vc3RvcmVzL2NoYXQiOwoJaW1wb3J0IHsgZGlzY3Vzc2lvbkpvaW5TdGF0dXMgfSBmcm9tICIuLi8uLi9zdG9yZXMvZGlzY3Vzc2lvbkpvaW5TdGF0dXMiOwoKCWltcG9ydCBDaGF0TWVzc2FnZSBmcm9tICIuL0NoYXRNZXNzYWdlLnN2ZWx0ZSI7CgoJbGV0IGNvbnRlbnQgPSAiIjsKCgljb25zdCBvblN1Ym1pdCA9ICgpID0+IHsKCQlpZiAoY29udGVudCAhPT0gIiIpIHsKCQkJY2hhdC5tYWtlUG9zdChjb250ZW50LCAkZGlzY3Vzc2lvbkpvaW5TdGF0dXMubmlja25hbWUpOwoJCQljb250ZW50ID0gIiI7CgkJfQoJfTsKCgljb25zdCBvbktleWRvd24gPSAoZSkgPT4gewoJCWlmIChlLmtleSA9PT0gIkVudGVyIikgb25TdWJtaXQoKTsKCX07Cg==" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=">{}</script><div>
+<!--<script ✂prettier:content✂="CglpbXBvcnQgeyBjaGF0IH0gZnJvbSAiLi4vLi4vc3RvcmVzL2NoYXQiOwoJaW1wb3J0IHsgZGlzY3Vzc2lvbkpvaW5TdGF0dXMgfSBmcm9tICIuLi8uLi9zdG9yZXMvZGlzY3Vzc2lvbkpvaW5TdGF0dXMiOwoKCWltcG9ydCBDaGF0TWVzc2FnZSBmcm9tICIuL0NoYXRNZXNzYWdlLnN2ZWx0ZSI7CgoJbGV0IGNvbnRlbnQgPSAiIjsKCgljb25zdCBvblN1Ym1pdCA9ICgpID0+IHsKCQlpZiAoY29udGVudCAhPT0gIiIpIHsKCQkJY2hhdC5tYWtlUG9zdChjb250ZW50LCAkZGlzY3Vzc2lvbkpvaW5TdGF0dXMubmlja25hbWUpOwoJCQljb250ZW50ID0gIiI7CgkJfQoJfTsKCgljb25zdCBvbktleWRvd24gPSAoZSkgPT4gewoJCWlmIChlLmtleSA9PT0gIkVudGVyIikgb25TdWJtaXQoKTsKCX07Cg==" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=">{}</script><div>
 	{#each $chat.messages as message}
 	<ChatMessage {...$chat.messagesContent[message]} />
 	{/each} {#each $chat.pendingMessages as message}
