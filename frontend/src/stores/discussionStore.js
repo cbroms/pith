@@ -17,7 +17,7 @@ const defaultState = {
     pinned: [],
     // array of unit objects in rendering order with
     // id, pith, and a map of transclusion ids to piths
-    focus: [],
+    focused: [],
     // array of user objects in rendering order with
     // id, nickname
     participants: [],
@@ -29,7 +29,7 @@ export const discussionStore = createDerivedSocketStore(
         joinDiscussion: (boardId, discussionId, userId, resolve, reject) => {
             return (socket, update) => {
                 
-                console.log("join_discussion", user_id);
+                console.log("join_discussion", userId);
                 socket.emit(
                     "join_disc",
                     { board_id: boardId, discussion_id: discussionId, user_id: userId },
@@ -99,7 +99,7 @@ export const discussionStore = createDerivedSocketStore(
                 );
             }
         },
-        post: (boardId, discussionId, userId, text, resolve, reject) => {
+        post: (boardId, discussionId, userId, nickname, text, resolve, reject) => {
 
            
             return (socket, update) => {
@@ -111,8 +111,8 @@ export const discussionStore = createDerivedSocketStore(
                 const newPost = {
                     id: tempId,
                     pith: text,
-                    author: "me",
-                    time: (new Date()).toISOString(),
+                    author_name: nickname,
+                    created: (new Date()).toISOString(),
                 }
                 update(state => {
                     return {...state, temporaryChat: [...state.temporaryChat, newPost]}
@@ -307,8 +307,10 @@ export const discussionStore = createDerivedSocketStore(
                 );
             }
         },
-        subscribeAddPinned: () => {
+     
+        subscribePin: () => {
             return (socket, update) => {
+
                 socket.on(
                     "add_pinned",
                     (res) => {
@@ -321,10 +323,7 @@ export const discussionStore = createDerivedSocketStore(
                         });
                     }
                 );
-            }
-        },
-        subscribeRemovePinned: () => {
-            return (socket, update) => {
+
                 socket.on(
                     "remove_pinned",
                     (res) => {
@@ -342,7 +341,7 @@ export const discussionStore = createDerivedSocketStore(
                 );
             }
         },
-        subscribeAddFocused: () => {
+        subscribeFocus: () => {
             return (socket, update) => {
                 socket.on(
                     "add_focused",
@@ -356,10 +355,7 @@ export const discussionStore = createDerivedSocketStore(
                         });
                     }
                 );
-            }
-        },
-        subscribeRemoveFocused: () => {
-            return (socket, update) => {
+
                 socket.on(
                     "remove_focused",
                     (res) => {
@@ -376,7 +372,8 @@ export const discussionStore = createDerivedSocketStore(
                     }
                 );
             }
-        }
+        },
+      
     },
     defaultState
 );

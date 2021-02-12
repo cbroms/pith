@@ -4,8 +4,7 @@
   import BoardUnit from "../unit/BoardUnit.svelte";
 
   export let id;
-
-  console.log($boardStore);
+  export let focus = false;
 
   let content = "";
 
@@ -23,7 +22,7 @@
 
 <div>
   {#each $boardStore.units as unit (unit.id)}
-    <BoardUnit {unit} focus edit links />
+    <BoardUnit {unit} {focus} edit links />
   {/each}
   <input
     placeholder="type a unit..."

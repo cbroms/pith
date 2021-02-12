@@ -1,6 +1,8 @@
 <script>
   import { boardStore } from "../../stores/boardStore";
+  import { discussionStore } from "../../stores/discussionStore";
   import { discussionSocket } from "../../stores/socket";
+
   export let unit;
   export let focus = false;
   export let edit = false;
@@ -13,10 +15,18 @@
     console.log("on edit");
   };
   const onFocus = () => {
-    console.log("on focus");
+    discussionStore.addFocused(
+      $boardStore.boardId,
+      $discussionStore.discussionId,
+      unit.id
+    );
   };
   const onUnfocus = () => {
-    console.log("on unfocus");
+    discussionStore.removeFocused(
+      $boardStore.boardId,
+      $discussionStore.discussionId,
+      unit.id
+    );
   };
   const onLinks = async () => {
     linksOpen = !linksOpen;

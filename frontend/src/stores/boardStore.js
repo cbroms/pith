@@ -55,9 +55,7 @@ export const boardStore = createDerivedSocketStore(
                         }
                     }
                 );
-               
-                // TODO fake input
-                // update((state) => { return { ...state, isValidBoard: true } });
+            
 
                 update((state) => {
                     return {
@@ -77,7 +75,6 @@ export const boardStore = createDerivedSocketStore(
                     return { ...state, nickname: nickname };
                 });
                 // try to create the new user
-              
                 socket.emit(
                     "create_user",
                     { board_id: boardId, nickname: nickname },
@@ -96,11 +93,6 @@ export const boardStore = createDerivedSocketStore(
                         }
                     }
                 );
-                
-                // TODO fake input
-               // update((state) => { return { ...state, userId: testUser } });
-
-                // update the local store to include the userId for this board
                 
             };
         },

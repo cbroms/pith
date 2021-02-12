@@ -51,7 +51,7 @@ class DiscussionManager:
       pith, transclusions = self.gm._get_pith(board_id, text)
       unit = Unit(board_id=board_id, pith=pith, chat=True, author=user_id)
       self.gm.units.insert_one(unit.to_mongo())
-      unit_id = unit["_id"]
+      unit_id = unit.id
       self.gm._insert_transclusions(board_id, unit_id, transclusions)
       self.gm.discussions.update_one(
         {"_id" : discussion_id, "board_id": board_id},
@@ -97,7 +97,7 @@ class DiscussionManager:
         {"_id" : discussion_id, "board_id": board_id},
         {"$push": {"focused": unit_id}}
       )
-      return {"unit": self.gm._get_board_unit(board_id, unit_id)}
+      return {"unit": self.gm._get_basic_unit(board_id, unit_id)}
 
     @Checker._check_board_id
     @Checker._check_discussion_id

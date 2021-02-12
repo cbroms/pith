@@ -54,6 +54,7 @@
         $boardStore.boardId,
         id,
         $boardStore.userId,
+        $boardStore.nickname,
         content
       );
       content = "";
@@ -92,7 +93,7 @@
   </div>
 </div>
 
-<!--<script ✂prettier:content✂="CglpbXBvcnQgeyBjaGF0IH0gZnJvbSAiLi4vLi4vc3RvcmVzL2NoYXQiOwoJaW1wb3J0IHsgZGlzY3Vzc2lvbkpvaW5TdGF0dXMgfSBmcm9tICIuLi8uLi9zdG9yZXMvZGlzY3Vzc2lvbkpvaW5TdGF0dXMiOwoKCWltcG9ydCBDaGF0TWVzc2FnZSBmcm9tICIuL0NoYXRNZXNzYWdlLnN2ZWx0ZSI7CgoJbGV0IGNvbnRlbnQgPSAiIjsKCgljb25zdCBvblN1Ym1pdCA9ICgpID0+IHsKCQlpZiAoY29udGVudCAhPT0gIiIpIHsKCQkJY2hhdC5tYWtlUG9zdChjb250ZW50LCAkZGlzY3Vzc2lvbkpvaW5TdGF0dXMubmlja25hbWUpOwoJCQljb250ZW50ID0gIiI7CgkJfQoJfTsKCgljb25zdCBvbktleWRvd24gPSAoZSkgPT4gewoJCWlmIChlLmtleSA9PT0gIkVudGVyIikgb25TdWJtaXQoKTsKCX07Cg==" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=">{}</script><div>
+<!--<script ✂prettier:content✂="CglpbXBvcnQgeyBjaGF0IH0gZnJvbSAiLi4vLi4vc3RvcmVzL2NoYXQiOwoJaW1wb3J0IHsgZGlzY3Vzc2lvbkpvaW5TdGF0dXMgfSBmcm9tICIuLi8uLi9zdG9yZXMvZGlzY3Vzc2lvbkpvaW5TdGF0dXMiOwoKCWltcG9ydCBDaGF0TWVzc2FnZSBmcm9tICIuL0NoYXRNZXNzYWdlLnN2ZWx0ZSI7CgoJbGV0IGNvbnRlbnQgPSAiIjsKCgljb25zdCBvblN1Ym1pdCA9ICgpID0+IHsKCQlpZiAoY29udGVudCAhPT0gIiIpIHsKCQkJY2hhdC5tYWtlUG9zdChjb250ZW50LCAkZGlzY3Vzc2lvbkpvaW5TdGF0dXMubmlja25hbWUpOwoJCQljb250ZW50ID0gIiI7CgkJfQoJfTsKCgljb25zdCBvbktleWRvd24gPSAoZSkgPT4gewoJCWlmIChlLmtleSA9PT0gIkVudGVyIikgb25TdWJtaXQoKTsKCX07Cg==" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=">{}</script><div>
 	{#each $chat.messages as message}
 	<ChatMessage {...$chat.messagesContent[message]} />
 	{/each} {#each $chat.pendingMessages as message}
