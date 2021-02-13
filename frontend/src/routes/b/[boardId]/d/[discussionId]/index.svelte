@@ -23,6 +23,8 @@
   import Chat from "../../../../../components/sections/Chat.svelte";
 
   import BoardUnit from "../../../../../components/unit/BoardUnit.svelte";
+  import ChatUnit from "../../../../../components/unit/ChatUnit.svelte";
+  import BoardWindowLayout from "../../../../../components/layouts/BoardWindowLayout.svelte";
 
   export let id;
   export let bId;
@@ -51,7 +53,11 @@
       <BoardUnit {unit} unfocus />
     {/each}
   </FocusLayout>
-  <PinnedLayout />
+  <PinnedLayout>
+    {#each $discussionStore.pinned as message (message.id)}
+      <ChatUnit {...message} />
+    {/each}
+  </PinnedLayout>
 </DiscussionLayout>
 
 <BoardLayout>

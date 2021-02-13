@@ -18,6 +18,8 @@ import constants
 from error import Errors
 from uuid import uuid4
 
+def date_string(date):
+    return date.strftime(constants.DATE_TIME_FMT)
 
 def absolute_file(schema, path):
     def helper(S):
@@ -33,10 +35,10 @@ def get_room(board_id, discussion_id):
   return "{}:{}".format(board_id, discussion_id)
 
 def get_time():
-  return datetime.datetime.utcnow()
+  return datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
 
 def gen_key():
-  return ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(12))
+  return ''.join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(12))
   #return uuid4().hex
 
 class DictEncoder(JSONEncoder):

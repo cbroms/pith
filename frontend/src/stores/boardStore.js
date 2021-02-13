@@ -142,7 +142,7 @@ export const boardStore = createDerivedSocketStore(
                             let units = [...state.units];
                             // remove changed elements
                             units = units.filter(
-                              json.updated_unit_ids.some((id) === e.id)
+                              (e) => { return !json.updated_unit_ids.some((id) === e.id) }
                             );
                             // add changed elements
                             units = units.concat(json.updated_units);
@@ -195,7 +195,7 @@ export const boardStore = createDerivedSocketStore(
                         if (!json.error) {
                             let units = [...state.units];
                             // TODO
-                            units = units.filter((e) => { e.id === unitId });
+                            units = units.filter((e) => { return e.id !== unitId });
                             update((state) => {
                                 return {
                                     ...state,
@@ -297,13 +297,13 @@ export const boardStore = createDerivedSocketStore(
                                     if (e.id === link.source) {
                                         if (e.links_to) // only matter if list exists
                                             e.links_to = e.links_to.filter(
-                                                (l) => { l.id === json.link.id }
+                                                (l) => { return l.id !== json.link.id }
                                             );
                                     }
                                     else if (e.id === link.target) {
                                         if (e.links_from)
                                             e.links_from = e.links_from.filter(
-                                                (l) => { l.id === json.link.id }
+                                                (l) => { return l.id !== json.link.id }
                                             );
                                     }
                                     return e;

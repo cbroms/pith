@@ -5,6 +5,7 @@
 
   export let id;
   export let focus = false;
+  export let newDiscussion = false;
 
   let content = "";
 
@@ -22,7 +23,7 @@
 
 <div>
   {#each $boardStore.units as unit (unit.id)}
-    <BoardUnit {unit} {focus} edit links />
+    <BoardUnit {unit} {focus} {newDiscussion} edit links />
   {/each}
   <input
     placeholder="type a unit..."

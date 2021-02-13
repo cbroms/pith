@@ -56,7 +56,7 @@ $boardStore.hasJoinedBoard}
 {/if} -->
 
 <BoardLayout>
-  <Board {id} />
+  <Board {id} newDiscussion />
 </BoardLayout>
 <DiscussionLayout>
   <div class="board-info">

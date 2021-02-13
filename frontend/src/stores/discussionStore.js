@@ -112,6 +112,7 @@ export const discussionStore = createDerivedSocketStore(
                     id: tempId,
                     pith: text,
                     author_name: nickname,
+                    author_id: userId,
                     created: (new Date()).toISOString(),
                 }
                 update(state => {
@@ -122,7 +123,7 @@ export const discussionStore = createDerivedSocketStore(
                 // setTimeout(() => {
                 //     update((state) => {
                 //         // now we have the real post, so we remove the temporary chat unit 
-                //         const newTemporaryChat = [...state.temporaryChat].filter(post => post.id !== tempId);
+                //         const newTemporaryChat = [...state.temporaryChat].filter(post => return post.id !== tempId);
                 //         return {
                 //             ...state,
                 //             temporaryChat: newTemporaryChat,
@@ -140,7 +141,7 @@ export const discussionStore = createDerivedSocketStore(
                             update((state) => {
 
                                 // now we have the real post, so we remove the temporary chat unit 
-                                const newTemporaryChat = [...state.temporaryChat].filter(post => post.id !== tempId);
+                                const newTemporaryChat = [...state.temporaryChat].filter((post) => { return post.id !== tempId });
 
                                 return {
                                     ...state,
@@ -158,12 +159,15 @@ export const discussionStore = createDerivedSocketStore(
             }
         },
         addPinned: (boardId, discussionId, unitId, resolve, reject) => {
+           
             return (socket, update) => {
+                console.log(boardId, discussionId, unitId)
                 socket.emit(
                     "add_pinned",
                     { board_id: boardId, discussion_id: discussionId, unit_id: unitId },
                     (res) => {
                         const json = JSON.parse(res);
+                        console.log(json)
                         if (!json.error) {
                             update((state) => {
                                 return {
@@ -191,7 +195,7 @@ export const discussionStore = createDerivedSocketStore(
                             update((state) => {
                                 let pinned = [...state.pinned];
                                 // TODO
-                                pinned = pinned.filter((e) => { e.id === unitId });
+                                pinned = pinned.filter((e) => { return e.id !== unitId });
                                 return {
                                     ...state,
                                     pinned: pinned
@@ -240,7 +244,7 @@ export const discussionStore = createDerivedSocketStore(
                             update((state) => {
                                 let focused = [...state.focused];
                                 // TODO
-                                focused = focused.filter((e) => { e.id === unitId });
+                                focused = focused.filter((e) => { return e.id !== unitId });
                                 return {
                                     ...state,
                                     focused: focused
@@ -281,7 +285,7 @@ export const discussionStore = createDerivedSocketStore(
                         update((state) => {
                             let participants = [...state.participants];
                             // TODO
-                            participants = participants.filter((e) => { e.id === json.user_id });
+                            participants = participants.filter((e) => { return e.id !== json.user_id });
                             return {
                                 ...state,
                                 participants: participants
@@ -331,7 +335,7 @@ export const discussionStore = createDerivedSocketStore(
                         update((state) => {
                             let pinned = [...state.pinned];
                             // TODO
-                            pinned = pinned.filter((e) => { e.id === json.unit_id });
+                            pinned = pinned.filter((e) => { return e.id !== json.unit_id });
                             return {
                                 ...state,
                                 pinned: pinned
@@ -363,7 +367,7 @@ export const discussionStore = createDerivedSocketStore(
                         update((state) => {
                             let focused = [...state.focused];
                             // TODO
-                            focused = focused.filter((e) => { e.id === json.unit_id });
+                            focused = focused.filter((e) => { return e.id !== json.unit_id });
                             return {
                                 ...state,
                                 focused: focused

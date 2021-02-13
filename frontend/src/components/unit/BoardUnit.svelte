@@ -1,13 +1,14 @@
 <script>
+  import { parseTime } from "../../utils/parseTime";
   import { boardStore } from "../../stores/boardStore";
   import { discussionStore } from "../../stores/discussionStore";
-  import { discussionSocket } from "../../stores/socket";
 
   export let unit;
   export let focus = false;
   export let edit = false;
   export let unfocus = false;
   export let links = false;
+  export let newDiscussion = false;
 
   let linksOpen = false;
 
@@ -44,7 +45,7 @@
 
 <div class="board-unit">
   <div class="unit-content">{unit?.pith || ""}</div>
-  {#if focus || unfocus || edit || links}
+  {#if focus || unfocus || edit || links || newDiscussion}
     <div class="unit-controls">
       <span class="controls-left">
         {#if links}
@@ -52,7 +53,9 @@
         {/if}
       </span>
       <span class="controls-right">
-        <button on:click={onNewDiscussion}>New Discussion</button>
+        {#if newDiscussion}
+          <button on:click={onNewDiscussion}>New Discussion</button>
+        {/if}
         {#if focus}
           <button on:click={onFocus}>Focus</button>
         {:else if unfocus}
@@ -73,7 +76,7 @@
           {#each unit.discussions as discussion}
             <p>
               <a href="/b/{$boardStore.boardId}/d/{discussion.id}"
-                >{discussion}</a
+                >{parseTime(discussion.created)}</a
               >
             </p>
           {/each}
