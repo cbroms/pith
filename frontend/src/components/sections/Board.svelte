@@ -1,4 +1,5 @@
 <script>
+  import { unix } from "dayjs";
   import { boardStore } from "../../stores/boardStore";
 
   import BoardUnit from "../unit/BoardUnit.svelte";
@@ -22,6 +23,9 @@
 </script>
 
 <div>
+  {#if $boardStore.units.length === 0}
+    <p>No units yet!</p>
+  {/if}
   {#each $boardStore.units as unit (unit.id)}
     <BoardUnit {unit} {focus} {newDiscussion} edit links />
   {/each}

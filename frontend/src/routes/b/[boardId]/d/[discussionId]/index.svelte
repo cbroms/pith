@@ -49,13 +49,16 @@
     <Chat {id} />
   </ChatLayout>
   <FocusLayout>
+    {#if $discussionStore.focused.length === 0}
+      <p>Select a unit from the board to focus your discussion.</p>
+    {/if}
     {#each $discussionStore.focused as unit (unit.id)}
       <BoardUnit {unit} unfocus />
     {/each}
   </FocusLayout>
   <PinnedLayout>
     {#each $discussionStore.pinned as message (message.id)}
-      <ChatUnit {...message} />
+      <ChatUnit {...message} unpin />
     {/each}
   </PinnedLayout>
 </DiscussionLayout>

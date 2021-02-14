@@ -10,9 +10,19 @@
   export let created = null;
   export let prev = null;
 
+  export let pin = true;
+  export let unpin = false;
+
   const onPin = () => {
-    console.log("pinning");
     discussionStore.addPinned(
+      $boardStore.boardId,
+      $discussionStore.discussionId,
+      id
+    );
+  };
+
+  const onUnpin = () => {
+    discussionStore.removePinned(
       $boardStore.boardId,
       $discussionStore.discussionId,
       id
@@ -29,7 +39,11 @@
   {/if}
   <div class="message-content">
     <div>{pith}</div>
-    <div class="message-pin" on:click={onPin}>Pin &rarr;</div>
+    {#if pin && !unpin}
+      <div class="message-pin" on:click={onPin}>Pin &rarr;</div>
+    {:else if unpin}
+      <div class="message-pin" on:click={onUnpin}>Unpin</div>
+    {/if}
   </div>
 </div>
 
@@ -53,12 +67,12 @@
   }
 
   .message:hover .message-pin {
-    display: inline-block;
+    visibility: visible;
   }
 
   .message-pin {
     cursor: pointer;
     width: 50px;
-    display: none;
+    visibility: hidden;
   }
 </style>
