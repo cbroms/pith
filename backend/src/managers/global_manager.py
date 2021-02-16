@@ -61,6 +61,7 @@ class GlobalManager:
         {"source": unit_id, "board_id": board_id}
       )
       target_ids = [t["target"] for t in transclusions]
+
       if len(target_ids) > 0:
         targets = self.units.find({"_id": {"$in": target_ids}})
         map_id_pith = {t["_id"]:t["pith"] for t in targets}
