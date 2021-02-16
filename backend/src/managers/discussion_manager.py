@@ -70,7 +70,7 @@ class DiscussionManager:
         )
       self.gm.discussions.update_one(
         {"_id" : discussion_id, "board_id": board_id},
-        {"$push": {"pinned": unit_id}}
+        {"$addToSet": {"pinned": unit_id}}
       )
       return {"unit": self.gm._get_chat_unit(board_id, unit_id)}
 
@@ -95,7 +95,7 @@ class DiscussionManager:
         )
       self.gm.discussions.update_one(
         {"_id" : discussion_id, "board_id": board_id},
-        {"$push": {"focused": unit_id}}
+        {"$addToSet": {"focused": unit_id}}
       )
       return {"unit": self.gm._get_basic_unit(board_id, unit_id)}
 
