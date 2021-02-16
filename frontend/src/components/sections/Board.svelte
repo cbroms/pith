@@ -1,5 +1,4 @@
 <script>
-  import { unix } from "dayjs";
   import { boardStore } from "../../stores/boardStore";
 
   import BoardUnit from "../unit/BoardUnit.svelte";

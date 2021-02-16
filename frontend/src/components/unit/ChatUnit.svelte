@@ -2,16 +2,48 @@
   import { discussionStore } from "../../stores/discussionStore";
   import { boardStore } from "../../stores/boardStore";
   import { parseTime } from "../../utils/parseTime";
+  import { afterUpdate } from "svelte";
 
   export let pith = "";
-  export let id;
+  export let id = null;
   export let author_name = null;
   export let author_id = null;
   export let created = null;
+  export let transclusions = null;
+
+  // we use the previous unit to determine if we should display the author and time
   export let prev = null;
 
   export let pin = true;
   export let unpin = false;
+
+  let orderedTransclusions = [];
+
+  const parseTransclusions = () => {
+    if (transclusions) {
+      orderedTransclusions = [];
+      let numMatched = 0;
+      const linkRegex = /\[\[\s*(.*?)\s*\]\]/g;
+
+      for (const id in transclusions) {
+        transclusions[id] = transclusions[id].replaceAll(linkRegex, "");
+      }
+      transclusions = transclusions;
+      // parse out the unit's tansclusions
+      pith = pith.replaceAll(linkRegex, (match) => {
+        numMatched++;
+        orderedTransclusions.push(
+          transclusions[match.replaceAll("[", "").replaceAll("]", "")]
+        );
+        return `[${numMatched}]`; // TODO put link here
+      });
+      orderedTransclusions = orderedTransclusions;
+    }
+  };
+
+  afterUpdate(() => {
+    parseTransclusions();
+  });
 
   const onPin = () => {
     discussionStore.addPinned(
@@ -38,12 +70,22 @@
     </div>
   {/if}
   <div class="message-content">
-    <div>{pith}</div>
-    {#if pin && !unpin}
-      <div class="message-pin" on:click={onPin}>Pin &rarr;</div>
-    {:else if unpin}
-      <div class="message-pin" on:click={onUnpin}>Unpin</div>
-    {/if}
+    <div class="message-transclusions">
+      {#each orderedTransclusions as transclusion}
+        <div>
+          <div class="transclusion-line" />
+          <div class="transclusion-text">{transclusion}</div>
+        </div>
+      {/each}
+    </div>
+    <div class="message-text">
+      <div>{pith}</div>
+      {#if pin && !unpin}
+        <div class="message-pin" on:click={onPin}>Pin &rarr;</div>
+      {:else if unpin}
+        <div class="message-pin" on:click={onUnpin}>Unpin</div>
+      {/if}
+    </div>
   </div>
 </div>
 
@@ -60,10 +102,18 @@
     margin-right: 10px;
   }
 
-  .message-content {
+  .message-time {
+    font-size: 12px;
+  }
+
+  .message-text {
     display: flex;
     justify-content: space-between;
     width: 100%;
+  }
+
+  .message:hover .message-content {
+    background-color: rgb(240, 240, 240);
   }
 
   .message:hover .message-pin {
@@ -74,5 +124,25 @@
     cursor: pointer;
     width: 50px;
     visibility: hidden;
+  }
+
+  .transclusion-text {
+    display: inline-block;
+    font-size: 12px;
+  }
+
+  .transclusion-line {
+    border-top: 1px solid;
+    width: 20px;
+    display: inline-block;
+    height: 6px;
+  }
+
+  .message-transclusions {
+    background: linear-gradient(#000, #000), linear-gradient(#000, #000),
+      linear-gradient(#000, #000);
+    background-size: 1px calc(100% - 10px);
+    background-position: bottom left;
+    background-repeat: no-repeat;
   }
 </style>
