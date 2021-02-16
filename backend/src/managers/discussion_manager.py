@@ -1,6 +1,7 @@
 from error import Errors
 from utils.utils import (
   make_error,
+  logger,
 )
 
 from models.unit import Unit
@@ -64,6 +65,7 @@ class DiscussionManager:
     @Checker._check_unit_id
     def add_pinned(self, board_id, discussion_id, unit_id):
       unit = self.gm.units.find_one({"_id": unit_id, "board_id": board_id})
+
       if unit["chat"] is False:
         return make_error(Errors.NOT_CHAT, 
           error_meta={"unit_id": unit_id}

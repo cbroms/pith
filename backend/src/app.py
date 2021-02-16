@@ -243,6 +243,17 @@ class DiscussionNamespace(AsyncNamespace):
         return helper
       return outer
 
+    async def on_disconnect(self, sid):
+      # leave discussion if we have joined one 
+      session = await self.get_session(sid)
+      if "board_id" in session and "discussion_id" in session:
+        board_id = session["board_id"]
+        discussion_id = session["discussion_id"]
+        await self.on_leave(sid, {
+          "board_id": board_id, 
+          "discussion_id": discussion_id
+        })
+
     @_process_responses("join_disc")
     @_validate_request("join_disc")
     async def on_join_disc(self, sid, request):
