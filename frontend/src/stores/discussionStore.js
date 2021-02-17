@@ -220,13 +220,15 @@ export const discussionStore = createDerivedSocketStore(
                     (res) => {
                         const json = JSON.parse(res);
                         if (!json.error) {
+                            // TODO fix this so the backend doesn't return a value if it shouldn't be added 
                             update((state) => {
                                 if (!state.focused.some((e) => e.id === unitId)) {
                                   return {
                                       ...state,
                                       focused: [...state.focused, json.unit],
                                   }
-                                }
+                                } 
+                                return state;
                             });
                             resolve();
                         }

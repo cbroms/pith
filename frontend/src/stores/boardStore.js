@@ -334,6 +334,7 @@ export const boardStore = createDerivedSocketStore(
                             update((state) => {
                                 let units = [...state.units];
                             // TODO, map returns new array
+                                console.log(units);
                                 units = units.map((e) => {
                                     if (e.id === unitId) {
                                         return json.unit;
@@ -342,6 +343,7 @@ export const boardStore = createDerivedSocketStore(
                                         return e;
                                     }
                                 });
+                                console.log(units);
                                 return {
                                     ...state,
                                     units: units,

@@ -71,7 +71,7 @@ class GlobalManager:
 
     def _get_links_to(self, board_id, unit_id):
       links = self.links.find(
-        {"target": unit_id, "board_id": board_id}
+        {"source": unit_id, "board_id": board_id}
       )
       link_list = [{
         "id": l["_id"],
@@ -82,7 +82,7 @@ class GlobalManager:
 
     def _get_links_from(self, board_id, unit_id):
       links = self.links.find(
-        {"source": unit_id, "board_id": board_id}
+        {"target": unit_id, "board_id": board_id}
       )
       link_list = [{
         "id": l["_id"],

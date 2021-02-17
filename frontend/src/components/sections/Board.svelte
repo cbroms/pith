@@ -1,4 +1,5 @@
 <script>
+  import { unix } from "dayjs";
   import { boardStore } from "../../stores/boardStore";
 
   import BoardUnit from "../unit/BoardUnit.svelte";
@@ -6,6 +7,10 @@
   export let id;
   export let focus = false;
   export let newDiscussion = false;
+  export let onDiscussions;
+
+  let linkSourceId = null;
+  let linkTargetId = null;
 
   let content = "";
 
@@ -19,6 +24,18 @@
   const onKeydown = (e) => {
     if (e.key === "Enter") onSubmit();
   };
+
+  const onAddLinkSource = (id) => {
+    linkSourceId = id;
+  };
+
+  const onAddLinkTarget = (id) => {
+    linkTargetId = id;
+    boardStore.addLink($boardStore.boardId, linkSourceId, linkTargetId);
+    // reset
+    linkSourceId = null;
+    linkTargetId = null;
+  };
 </script>
 
 <div>
@@ -26,7 +43,20 @@
     <p>No units yet!</p>
   {/if}
   {#each $boardStore.units as unit (unit.id)}
-    <BoardUnit {unit} {focus} {newDiscussion} edit links />
+    <BoardUnit
+      {unit}
+      {focus}
+      {newDiscussion}
+      edit
+      links
+      discussions
+      {onAddLinkSource}
+      {onAddLinkTarget}
+      addLinkSource={(!linkSourceId && !linkTargetId) ||
+        (linkSourceId && unit.id === linkSourceId)}
+      addLinkTarget={linkSourceId && unit.id !== linkSourceId}
+      {onDiscussions}
+    />
   {/each}
   <input
     placeholder="type a unit..."

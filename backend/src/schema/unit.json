@@ -23,11 +23,11 @@
         },
         "links_to": {
           "type": "array",
-          "items": {"$ref": "link.json/#link"}
+          "items": {"$ref": "file:link.json#/link"}
         },
         "links_from": {
           "type": "array",
-          "items": {"$ref": "link.json/#link"}
+          "items": {"$ref": "file:link.json#/link"}
         },
         "discussions": {
           "type": "array",

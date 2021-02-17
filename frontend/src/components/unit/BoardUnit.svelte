@@ -8,7 +8,13 @@
   export let edit = false;
   export let unfocus = false;
   export let links = false;
+  export let discussions = false;
   export let newDiscussion = false;
+  export let addLinkSource = false;
+  export let addLinkTarget = false;
+  export let onAddLinkSource; // function from parent
+  export let onAddLinkTarget;
+  export let onDiscussions;
 
   let linksOpen = false;
 
@@ -29,7 +35,7 @@
       unit.id
     );
   };
-  const onLinks = async () => {
+  const onLinks = () => {
     linksOpen = !linksOpen;
 
     if (linksOpen) {
@@ -41,18 +47,39 @@
     boardStore.createDiscussion($boardStore.boardId, unit.id);
     // console.log("new discussion");
   };
+
+  // TODO make more efficient
+  const onGetPith = (id) => {
+    const temp_units = $boardStore.units.filter((e) => {
+      return e.id === id;
+    });
+    return temp_units[0].pith;
+  };
+
+  const onUnitDiscussions = async () => {
+    await boardStore.getUnitFull($boardStore.boardId, unit.id);
+    onDiscussions(unit);
+  };
 </script>
 
 <div class="board-unit">
   <div class="unit-content">{unit?.pith || ""}</div>
-  {#if focus || unfocus || edit || links || newDiscussion}
+  {#if focus || unfocus || edit || links || newDiscussion || addLinkSource || addLinkTarget}
     <div class="unit-controls">
       <span class="controls-left">
         {#if links}
           <button on:click={onLinks}>Links</button>
         {/if}
+        {#if discussions}
+          <button on:click={onUnitDiscussions}>Discussions</button>
+        {/if}
       </span>
       <span class="controls-right">
+        {#if addLinkSource}
+          <button on:click={() => onAddLinkSource(unit.id)}>Add Link</button>
+        {:else if addLinkTarget}
+          <button on:click={() => onAddLinkTarget(unit.id)}>Finish Link</button>
+        {/if}
         {#if newDiscussion}
           <button on:click={onNewDiscussion}>New Discussion</button>
         {/if}
@@ -67,18 +94,27 @@
       </span>
     </div>
     {#if linksOpen}
-      <div>
-        {#if !unit.discussions}
-          <p>Loading...</p>
-        {:else if unit.discussions.length === 0}
-          <p>No discussions yet!</p>
+      <div class="links">
+        <div class="links-header">Links To</div>
+        {#if !unit.links_to}
+          <div>Loading...</div>
+        {:else if unit.links_to.length == 0}
+          <div>No links where this unit is the source yet.</div>
         {:else}
-          {#each unit.discussions as discussion}
-            <p>
-              <a href="/b/{$boardStore.boardId}/d/{discussion.id}"
-                >{parseTime(discussion.created)}</a
-              >
-            </p>
+          {#each unit.links_to as link (link.id)}
+            <div>{link.target}: <i>{onGetPith(link.target)}</i></div>
+          {/each}
+        {/if}
+      </div>
+      <div class="links">
+        <div class="links-header">Links From</div>
+        {#if !unit.links_from}
+          <div>Loading...</div>
+        {:else if unit.links_from.length == 0}
+          <div>No links where this unit is the target yet.</div>
+        {:else}
+          {#each unit.links_from as link (link.id)}
+            <div>{link.source}: <i>{onGetPith(link.source)}</i></div>
           {/each}
         {/if}
       </div>
@@ -99,5 +135,13 @@
   .unit-controls {
     display: flex;
     justify-content: space-between;
+  }
+
+  .links {
+    padding: 10px;
+  }
+
+  .links-header {
+    font-weight: bold;
   }
 </style>

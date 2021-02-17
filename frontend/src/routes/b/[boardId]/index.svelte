@@ -18,6 +18,9 @@
   export let id;
   export let dId;
 
+  let discussionUnit;
+  let discussions;
+
   onMount(async () => {
     await boardStore.initialize(id);
 
@@ -37,6 +40,13 @@
       }
     }
   });
+
+  const onDiscussions = (unit) => {
+    // requires unit called getUnit
+    console.log(unit.discussions);
+    discussions = unit.discussions;
+    discussionUnit = unit;
+  };
 </script>
 
 <!-- <div>Board is valid: {$boardStore.isValidBoard}</div>
@@ -56,17 +66,30 @@ $boardStore.hasJoinedBoard}
 {/if} -->
 
 <BoardLayout>
-  <Board {id} newDiscussion />
+  <Board {id} newDiscussion {onDiscussions} />
 </BoardLayout>
 <DiscussionLayout>
   <div class="board-info">
     {#if $boardStore.isValidBoard}
-      <h1>Welcome to board {id}</h1>
+      <!-- <h1>Welcome to board {id}</h1>
       <p>Select a discussion to get started...</p>
       <ul>
         <li>
           <a href="/b/{id}/d/12412/">A sample discussion</a>
         </li>
+      </ul> -->
+      <ul>
+        {#if !discussions}
+          <div />
+        {:else if discussions.length == 0}
+          <h1>Discussions for {discussionUnit.id}</h1>
+          <div>No discussions.</div>
+        {:else}
+          <h1>Discussions for {discussionUnit.id}</h1>
+          {#each discussions as discussion (discussion.id)}
+            <li><a href="/b/{id}/d/{discussion.id}/">{discussion.id}</a></li>
+          {/each}
+        {/if}
       </ul>
     {:else if $boardStore.isValidBoard === false}
       <h1>404</h1>
