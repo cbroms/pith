@@ -170,9 +170,11 @@ export const discussionStore = createDerivedSocketStore(
                         console.log(json)
                         if (!json.error) {
                             update((state) => {
-                                return {
-                                    ...state,
-                                    pinned: [...state.pinned, json.unit],
+                                if (!state.pinned.some((e) => e.id === unitId)) {
+                                  return {
+                                      ...state,
+                                      pinned: [...state.pinned, json.unit],
+                                  }
                                 }
                             });
                             resolve();
@@ -219,9 +221,11 @@ export const discussionStore = createDerivedSocketStore(
                         const json = JSON.parse(res);
                         if (!json.error) {
                             update((state) => {
-                                return {
-                                    ...state,
-                                    focused: [...state.focused, json.unit],
+                                if (!state.focused.some((e) => e.id === unitId)) {
+                                  return {
+                                      ...state,
+                                      focused: [...state.focused, json.unit],
+                                  }
                                 }
                             });
                             resolve();
