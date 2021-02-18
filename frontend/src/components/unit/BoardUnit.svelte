@@ -71,6 +71,10 @@
   //   const onUnitClick = () =>  {
   //     if (addLinkSource)
   //   }
+
+  const onRemoveLink = (linkId) => {
+    boardStore.removeLink($boardStore.boardId, linkId);
+  }
 </script>
 
 <div class="board-unit">
@@ -127,7 +131,8 @@
             {#each unit.links_from as link (link.id)}
               <LinkedContentItemLayout>
                 <div class="link-text">
-                  {onGetPith(link.source)}
+                  {onGetPith(link.source)} 
+                  <button on:click={() => onRemoveLink(link.id)}>X</button>
                 </div>
               </LinkedContentItemLayout>
             {/each}
