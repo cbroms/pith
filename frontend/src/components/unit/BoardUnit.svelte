@@ -9,9 +9,9 @@
   export let unit;
   export let focus = false;
   export let edit = false;
+  export let remove = false;
   export let unfocus = false;
   export let links = false;
-  export let discussions = false;
   export let newDiscussion = false;
   export let addLinkSource = false;
   export let addLinkTarget = false;
@@ -20,9 +20,29 @@
   export let onDiscussions;
 
   let linksOpen = false;
+  let editing = false;
+
+  let content = "";
+
+  const onSubmit = () => {
+    if (content !== "") {
+      boardStore.editUnit($boardStore.boardId, unit.id, content);
+      content = "";
+      editing = false;
+    }
+  };
+
+  const onKeydown = (e) => {
+    if (e.key === "Enter") onSubmit();
+  };
 
   const onEdit = () => {
     console.log("on edit");
+    editing = true;
+    content = unit.pith;
+  };
+  const onRemove = () => {
+    boardStore.removeUnit($boardStore.boardId, unit.id);
   };
   const onFocus = () => {
     discussionStore.addFocused(
@@ -45,7 +65,7 @@
       await boardStore.getUnitFull($boardStore.boardId, unit.id);
 
       if (onDiscussions) {
-        onDiscussions(unit);
+        onDiscussions(unit.id);
       }
     }
   };
@@ -57,10 +77,7 @@
 
   // TODO make more efficient
   const onGetPith = (id) => {
-    const temp_units = $boardStore.units.filter((e) => {
-      return e.id === id;
-    });
-    return temp_units[0].pith;
+    return $boardStore.units[id].pith;
   };
 
   //   const onUnitDiscussions = async () => {
@@ -74,11 +91,21 @@
 
   const onRemoveLink = (linkId) => {
     boardStore.removeLink($boardStore.boardId, linkId);
-  }
+  };
 </script>
 
 <div class="board-unit">
-  <div class="unit-content" on:click={onLinks}>{unit?.pith || ""}</div>
+  <div class="unit-content" on:click={onLinks}>
+    {#if editing}
+      <input
+        placeholder="type a pith..."
+        bind:value={content}
+        on:keydown={onKeydown}
+      />
+    {:else}
+      {unit.pith}
+    {/if}
+  </div>
   {#if focus || unfocus || edit || links || newDiscussion || addLinkSource || addLinkTarget}
     <div class="unit-controls">
       <span class="controls-left" />
@@ -99,6 +126,9 @@
         {#if edit}
           <button on:click={onEdit}>Edit</button>
         {/if}
+        {#if remove}
+          <button on:click={onRemove}>Remove</button>
+        {/if}
       </span>
     </div>
     {#if linksOpen}
@@ -114,6 +144,7 @@
               <LinkedContentItemLayout>
                 <div class="link-text">
                   {onGetPith(link.target)}
+                  <button on:click={() => onRemoveLink(link.id)}>X</button>
                 </div>
               </LinkedContentItemLayout>
             {/each}
@@ -131,13 +162,12 @@
             {#each unit.links_from as link (link.id)}
               <LinkedContentItemLayout>
                 <div class="link-text">
-                  {onGetPith(link.source)} 
+                  {onGetPith(link.source)}
                   <button on:click={() => onRemoveLink(link.id)}>X</button>
                 </div>
               </LinkedContentItemLayout>
             {/each}
           </LinkedContentLayout>
-
         {/if}
       </div>
     {/if}
@@ -155,6 +185,7 @@
   }
 
   .unit-content {
+    cursor: pointer;
     padding: 10px;
   }
 

@@ -25,6 +25,7 @@
   import BoardUnit from "../../../../../components/unit/BoardUnit.svelte";
   import ChatUnit from "../../../../../components/unit/ChatUnit.svelte";
   import BoardWindowLayout from "../../../../../components/layouts/BoardWindowLayout.svelte";
+  import Index from "../../index.svelte";
 
   export let id;
   export let bId;
@@ -42,23 +43,28 @@
       console.log($discussionStore);
     }
   });
+
+  const onLeave = () => {
+    discussionStore.leaveDiscussion(bId, id);
+    goto(`/b/${bId}/`);
+  };
 </script>
 
 <DiscussionLayout>
-  <ChatLayout>
+  <ChatLayout {onLeave}>
     <Chat {id} />
   </ChatLayout>
   <FocusLayout>
     {#if $discussionStore.focused.length === 0}
       <p>Select a unit from the board to focus your discussion.</p>
     {/if}
-    {#each $discussionStore.focused as unit (unit.id)}
-      <BoardUnit {unit} unfocus />
+    {#each $discussionStore.focused as unitId}
+      <BoardUnit unit={$boardStore.units[unitId]} unfocus />
     {/each}
   </FocusLayout>
   <PinnedLayout>
-    {#each $discussionStore.pinned as message (message.id)}
-      <ChatUnit {...message} unpin />
+    {#each $discussionStore.pinned as unitId}
+      <ChatUnit {...$discussionStore.units[unitId]} unpin />
     {/each}
   </PinnedLayout>
 </DiscussionLayout>

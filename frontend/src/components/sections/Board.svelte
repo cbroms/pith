@@ -42,24 +42,25 @@
   {#if $boardStore.units.length === 0}
     <p>No units yet!</p>
   {/if}
-  {#each $boardStore.units as unit (unit.id)}
+  {#each $boardStore.unitIds as unitId}
     <BoardUnit
-      {unit}
+      unit={$boardStore.units[unitId]}
       {focus}
       {newDiscussion}
       edit
+      remove
       links
       discussions
       {onAddLinkSource}
       {onAddLinkTarget}
       addLinkSource={(!linkSourceId && !linkTargetId) ||
-        (linkSourceId && unit.id === linkSourceId)}
-      addLinkTarget={linkSourceId && unit.id !== linkSourceId}
+        (linkSourceId && $boardStore.units[unitId] === linkSourceId)}
+      addLinkTarget={linkSourceId && $boardStore.units[unitId] !== linkSourceId}
       {onDiscussions}
     />
   {/each}
   <input
-    placeholder="type a unit..."
+    placeholder="type a pith..."
     bind:value={content}
     on:keydown={onKeydown}
   />

@@ -134,9 +134,11 @@ class GlobalManager:
       self.transclusions.remove({"source": unit_id, "board_id": board_id})
 
     def _remove_links(self, board_id, unit_id):
-      self.links \
-        .remove({"source": unit_id, "board_id": board_id}) \
-        .remove({"target": unit_id, "board_id": board_id})
+      utils.logger.info(self.links)
+      self.links.remove(
+        {"source": unit_id, "board_id": board_id}, 
+        {"target": unit_id, "board_id": board_id}
+      )
 
     def _get_user(self, board_id, user_id):
       user = self.users.find_one({"_id": user_id, "board_id": board_id})

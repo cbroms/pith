@@ -7,7 +7,7 @@
 
 <script>
   import { goto } from "@sapper/app";
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
 
   import { boardStore } from "../../../stores/boardStore";
 
@@ -18,8 +18,7 @@
   export let id;
   export let dId;
 
-  let discussionUnit;
-  let discussions;
+  let discussionUnitId;
 
   onMount(async () => {
     await boardStore.initialize(id);
@@ -41,29 +40,10 @@
     }
   });
 
-  const onDiscussions = (unit) => {
-    // requires unit called getUnit
-    console.log(unit.discussions);
-    discussions = unit.discussions;
-    discussionUnit = unit;
+  const onDiscussions = (unitId) => {
+    discussionUnitId = unitId;
   };
 </script>
-
-<!-- <div>Board is valid: {$boardStore.isValidBoard}</div>
-<div>Board is joined: {$boardStore.hasJoinedBoard}</div>
- -->
-<!-- {#if $boardStore.isValidBoard === false}
-<div>
-	<h1>That board doesn't exist</h1>
-</div>
-{:else if $boardStore.isValidBoard &&
-$boardStore.hasJoinedBoard}
-<div>
-	<h1>Welcome to board {id}</h1>
-</div>
-{:else }
-<div>Loading...</div>
-{/if} -->
 
 <BoardLayout>
   <Board {id} newDiscussion {onDiscussions} />
@@ -71,26 +51,19 @@ $boardStore.hasJoinedBoard}
 <DiscussionLayout>
   <div class="board-info">
     {#if $boardStore.isValidBoard}
-      <!-- <h1>Welcome to board {id}</h1>
-      <p>Select a discussion to get started...</p>
-      <ul>
-        <li>
-          <a href="/b/{id}/d/12412/">A sample discussion</a>
-        </li>
-      </ul> -->
-      <ul>
-        {#if !discussions}
-          <div />
-        {:else if discussions.length == 0}
-          <h1>Discussions for {discussionUnit.id}</h1>
-          <div>No discussions.</div>
-        {:else}
-          <h1>Discussions for {discussionUnit.id}</h1>
-          {#each discussions as discussion (discussion.id)}
-            <li><a href="/b/{id}/d/{discussion.id}/">{discussion.id}</a></li>
-          {/each}
-        {/if}
-      </ul>
+      <h1>Welcome to board {id}</h1>
+      <p>Select a unit from the board to find a discussion...</p>
+      {#if !discussionUnitId}
+        <div />
+      {:else if $boardStore.units[discussionUnitId].discussions.length == 0}
+        <h2>Discussions for {discussionUnitId}</h2>
+        <div>No discussions.</div>
+      {:else}
+        <h2>Discussions for {discussionUnitId}</h2>
+        {#each $boardStore.units[discussionUnitId].discussions as discussion (discussion.id)}
+          <div><a href="/b/{id}/d/{discussion.id}/">{discussion.id}</a></div>
+        {/each}
+      {/if}
     {:else if $boardStore.isValidBoard === false}
       <h1>404</h1>
       <p>That board doesn't exist!</p>

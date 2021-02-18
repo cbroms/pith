@@ -6,7 +6,7 @@
       "item": {"type": "string"}
     },
     "updated_units": {
-      "type": "array",
+      "type": "object",
       "item": {"$ref": "file:unit.json#/board"}
     }
   },

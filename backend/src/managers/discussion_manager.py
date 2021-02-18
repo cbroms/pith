@@ -70,11 +70,16 @@ class DiscussionManager:
         return make_error(Errors.NOT_CHAT, 
           error_meta={"unit_id": unit_id}
         )
-      self.gm.discussions.update_one(
-        {"_id" : discussion_id, "board_id": board_id},
-        {"$addToSet": {"pinned": unit_id}}
-      )
-      return {"unit": self.gm._get_chat_unit(board_id, unit_id)}
+
+      discussion = self.gm.discussions.find_one({"_id": discussion_id, "board_id": board_id})
+      if unit["_id"] not in discussion["pinned"]:
+        self.gm.discussions.update_one(
+            {"_id" : discussion_id, "board_id": board_id},
+            {"$addToSet": {"pinned": unit_id}}
+        )
+        return {"unit": self.gm._get_chat_unit(board_id, unit_id)}
+      else:
+        return {}
 
     @Checker._check_board_id
     @Checker._check_discussion_id
@@ -95,11 +100,16 @@ class DiscussionManager:
         return make_error(Errors.NOT_BOARD, 
           error_meta={"unit_id": unit_id}
         )
-      self.gm.discussions.update_one(
-        {"_id" : discussion_id, "board_id": board_id},
-        {"$addToSet": {"focused": unit_id}}
-      )
-      return {"unit": self.gm._get_basic_unit(board_id, unit_id)}
+
+      discussion = self.gm.discussions.find_one({"_id": discussion_id, "board_id": board_id})
+      if unit["_id"] not in discussion["focused"]:
+        self.gm.discussions.update_one(
+            {"_id" : discussion_id, "board_id": board_id},
+            {"$addToSet": {"focused": unit_id}}
+        )
+        return {"unit": self.gm._get_basic_unit(board_id, unit_id)}
+      else:
+        return {}
 
     @Checker._check_board_id
     @Checker._check_discussion_id

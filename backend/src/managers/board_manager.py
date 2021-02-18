@@ -126,10 +126,11 @@ class BoardManager:
     @Checker._check_link_id
     def remove_link(self, board_id, link_id):
       link = self.gm.links.find_one({"_id": link_id, "board_id": board_id})
+      result = {"link": self.gm._get_link(board_id, link["_id"])}
       self.gm.links.remove({"_id": link_id, "board_id": board_id})
-      self._record_unit_update(board_id, link.source)
-      self._record_unit_update(board_id, link.target)
-      return {"link_id": link_id}
+      self._record_unit_update(board_id, link["source"])
+      self._record_unit_update(board_id, link["target"])
+      return result
 
     @Checker._check_board_id
     @Checker._check_unit_id
