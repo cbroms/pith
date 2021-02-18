@@ -4,6 +4,9 @@
   import { parseTime } from "../../utils/parseTime";
   import { afterUpdate } from "svelte";
 
+  import LinkedContentLayout from "../layouts/LinkedContentLayout.svelte";
+  import LinkedContentItemLayout from "../layouts/LinkedContentItemLayout.svelte";
+
   export let pith = "";
   export let id = null;
   export let author_name = null;
@@ -70,14 +73,15 @@
     </div>
   {/if}
   <div class="message-content">
-    <div class="message-transclusions">
+    <LinkedContentLayout>
       {#each orderedTransclusions as transclusion}
-        <div>
-          <div class="transclusion-line" />
-          <div class="transclusion-text">{transclusion}</div>
-        </div>
+        <LinkedContentItemLayout>
+          <div class="transclusion-text">
+            {transclusion}
+          </div>
+        </LinkedContentItemLayout>
       {/each}
-    </div>
+    </LinkedContentLayout>
     <div class="message-text">
       <div>{pith}</div>
       {#if pin && !unpin}
@@ -128,21 +132,5 @@
 
   .transclusion-text {
     display: inline-block;
-    font-size: 12px;
-  }
-
-  .transclusion-line {
-    border-top: 1px solid;
-    width: 20px;
-    display: inline-block;
-    height: 6px;
-  }
-
-  .message-transclusions {
-    background: linear-gradient(#000, #000), linear-gradient(#000, #000),
-      linear-gradient(#000, #000);
-    background-size: 1px calc(100% - 10px);
-    background-position: bottom left;
-    background-repeat: no-repeat;
   }
 </style>

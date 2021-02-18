@@ -3,6 +3,9 @@
   import { boardStore } from "../../stores/boardStore";
   import { discussionStore } from "../../stores/discussionStore";
 
+  import LinkedContentLayout from "../layouts/LinkedContentLayout.svelte";
+  import LinkedContentItemLayout from "../layouts/LinkedContentItemLayout.svelte";
+
   export let unit;
   export let focus = false;
   export let edit = false;
@@ -35,11 +38,15 @@
       unit.id
     );
   };
-  const onLinks = () => {
+  const onLinks = async () => {
     linksOpen = !linksOpen;
 
     if (linksOpen) {
-      boardStore.getUnitFull($boardStore.boardId, unit.id);
+      await boardStore.getUnitFull($boardStore.boardId, unit.id);
+
+      if (onDiscussions) {
+        onDiscussions(unit);
+      }
     }
   };
 
@@ -56,24 +63,21 @@
     return temp_units[0].pith;
   };
 
-  const onUnitDiscussions = async () => {
-    await boardStore.getUnitFull($boardStore.boardId, unit.id);
-    onDiscussions(unit);
-  };
+  //   const onUnitDiscussions = async () => {
+  //     await boardStore.getUnitFull($boardStore.boardId, unit.id);
+  //     onDiscussions(unit);
+  //   };
+
+  //   const onUnitClick = () =>  {
+  //     if (addLinkSource)
+  //   }
 </script>
 
 <div class="board-unit">
-  <div class="unit-content">{unit?.pith || ""}</div>
+  <div class="unit-content" on:click={onLinks}>{unit?.pith || ""}</div>
   {#if focus || unfocus || edit || links || newDiscussion || addLinkSource || addLinkTarget}
     <div class="unit-controls">
-      <span class="controls-left">
-        {#if links}
-          <button on:click={onLinks}>Links</button>
-        {/if}
-        {#if discussions}
-          <button on:click={onUnitDiscussions}>Discussions</button>
-        {/if}
-      </span>
+      <span class="controls-left" />
       <span class="controls-right">
         {#if addLinkSource}
           <button on:click={() => onAddLinkSource(unit.id)}>Add Link</button>
@@ -101,9 +105,15 @@
         {:else if unit.links_to.length == 0}
           <div>No links where this unit is the source yet.</div>
         {:else}
-          {#each unit.links_to as link (link.id)}
-            <div>{link.target}: <i>{onGetPith(link.target)}</i></div>
-          {/each}
+          <LinkedContentLayout top>
+            {#each unit.links_to as link (link.id)}
+              <LinkedContentItemLayout>
+                <div class="link-text">
+                  {onGetPith(link.target)}
+                </div>
+              </LinkedContentItemLayout>
+            {/each}
+          </LinkedContentLayout>
         {/if}
       </div>
       <div class="links">
@@ -113,9 +123,16 @@
         {:else if unit.links_from.length == 0}
           <div>No links where this unit is the target yet.</div>
         {:else}
-          {#each unit.links_from as link (link.id)}
-            <div>{link.source}: <i>{onGetPith(link.source)}</i></div>
-          {/each}
+          <LinkedContentLayout top>
+            {#each unit.links_from as link (link.id)}
+              <LinkedContentItemLayout>
+                <div class="link-text">
+                  {onGetPith(link.source)}
+                </div>
+              </LinkedContentItemLayout>
+            {/each}
+          </LinkedContentLayout>
+
         {/if}
       </div>
     {/if}
@@ -126,6 +143,10 @@
   .board-unit {
     border: 1px solid black;
     margin: 10px 0;
+  }
+
+  .board-unit:hover {
+    background-color: rgb(240, 240, 240);
   }
 
   .unit-content {
@@ -143,5 +164,9 @@
 
   .links-header {
     font-weight: bold;
+  }
+
+  .link-text {
+    display: inline-block;
   }
 </style>
