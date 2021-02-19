@@ -6,6 +6,8 @@
 
   import LinkedContentLayout from "../layouts/LinkedContentLayout.svelte";
   import LinkedContentItemLayout from "../layouts/LinkedContentItemLayout.svelte";
+  import CopyContent from "../buttons/CopyContent.svelte";
+  import TruncateText from "./TruncateText.svelte";
 
   export let pith = "";
   export let id = null;
@@ -14,11 +16,15 @@
   export let created = null;
   export let transclusions = null;
 
+  export let truncate = false;
+
   // we use the previous unit to determine if we should display the author and time
   export let prev = null;
 
   export let pin = true;
   export let unpin = false;
+
+  let open = false;
 
   let orderedTransclusions = [];
 
@@ -63,9 +69,13 @@
       id
     );
   };
+
+  const onClick = () => {
+    open = !open;
+  };
 </script>
 
-<div class="message">
+<div class="message" on:click={onClick}>
   {#if prev === null || !(prev.author_id === author_id && Math.floor((Date.parse(created) - Date.parse(prev.created)) / 1000 / 60) < 30)}
     <div class="message-title">
       <span class="message-author">{author_name}</span>
@@ -82,13 +92,18 @@
         </LinkedContentItemLayout>
       {/each}
     </LinkedContentLayout>
-    <div class="message-text">
-      <div>{pith}</div>
-      {#if pin && !unpin}
-        <div class="message-pin" on:click={onPin}>Pin &rarr;</div>
-      {:else if unpin}
-        <div class="message-pin" on:click={onUnpin}>Unpin</div>
-      {/if}
+    <div class="message-line">
+      <TruncateText active={truncate && !open}>
+        {pith}
+      </TruncateText>
+      <div class="message-pin">
+        <CopyContent {id} />
+        {#if pin && !unpin}
+          <button on:click={onPin}>Pin &rarr;</button>
+        {:else if unpin}
+          <button on:click={onUnpin}>Unpin</button>
+        {/if}
+      </div>
     </div>
   </div>
 </div>
@@ -110,7 +125,7 @@
     font-size: 12px;
   }
 
-  .message-text {
+  .message-line {
     display: flex;
     justify-content: space-between;
     width: 100%;
@@ -125,8 +140,7 @@
   }
 
   .message-pin {
-    cursor: pointer;
-    width: 50px;
+    min-width: 85px;
     visibility: hidden;
   }
 

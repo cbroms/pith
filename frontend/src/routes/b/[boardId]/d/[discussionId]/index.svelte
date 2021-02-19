@@ -59,12 +59,12 @@
       <p>Select a unit from the board to focus your discussion.</p>
     {/if}
     {#each $discussionStore.focused as unitId}
-      <BoardUnit unit={$boardStore.units[unitId]} unfocus />
+      <BoardUnit truncate unit={$boardStore.units[unitId]} unfocus />
     {/each}
   </FocusLayout>
   <PinnedLayout>
     {#each $discussionStore.pinned as unitId}
-      <ChatUnit {...$discussionStore.units[unitId]} unpin />
+      <ChatUnit truncate {...$discussionStore.units[unitId]} unpin />
     {/each}
   </PinnedLayout>
 </DiscussionLayout>

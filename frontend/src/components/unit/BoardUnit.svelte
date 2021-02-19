@@ -6,6 +6,8 @@
   import LinkedContentLayout from "../layouts/LinkedContentLayout.svelte";
   import LinkedContentItemLayout from "../layouts/LinkedContentItemLayout.svelte";
   import { boardDisplayContextStore } from "../../stores/boardDisplayContextStore";
+  import CopyContent from "../buttons/CopyContent.svelte";
+  import TruncateText from "./TruncateText.svelte";
 
   export let unit;
   export let focus = false;
@@ -13,10 +15,10 @@
   export let remove = false;
   export let unfocus = false;
   export let links = false;
+  export let truncate = false;
 
   export let noControls = false;
 
-  export let newDiscussion = false;
   export let addLinkSource = false;
   export let addLinkTarget = false;
   export let onAddLinkSource; // function from parent
@@ -40,8 +42,7 @@
   };
 
   const onEdit = () => {
-    console.log("on edit");
-    editing = true;
+    editing = !editing;
     content = unit.pith;
   };
   const onRemove = () => {
@@ -75,11 +76,6 @@
     boardDisplayContextStore.set({ id: unit.id });
   };
 
-  const onNewDiscussion = () => {
-    boardStore.createDiscussion($boardStore.boardId, unit.id);
-    // console.log("new discussion");
-  };
-
   //   const onUnitDiscussions = async () => {
   //     await boardStore.getUnitFull($boardStore.boardId, unit.id);
   //     onDiscussions(unit);
@@ -103,20 +99,19 @@
         on:keydown={onKeydown}
       />
     {:else}
-      {unit.pith}
+      <TruncateText active={truncate && !linksOpen}>{unit.pith}</TruncateText>
     {/if}
   </div>
-  {#if !noControls && (focus || unfocus || edit || links || newDiscussion || addLinkSource || addLinkTarget)}
+  {#if !noControls && (focus || unfocus || edit || links || addLinkSource || addLinkTarget)}
     <div class="unit-controls">
-      <span class="controls-left" />
+      <span class="controls-left">
+        <CopyContent id={unit.id} />
+      </span>
       <span class="controls-right">
         {#if addLinkSource}
           <button on:click={() => onAddLinkSource(unit.id)}>Add Link</button>
         {:else if addLinkTarget}
           <button on:click={() => onAddLinkTarget(unit.id)}>Finish Link</button>
-        {/if}
-        {#if newDiscussion}
-          <button on:click={onNewDiscussion}>New Discussion</button>
         {/if}
         {#if focus}
           <button on:click={onFocus}>Focus</button>
@@ -124,7 +119,7 @@
           <button on:click={onUnfocus}>Unfocus</button>
         {/if}
         {#if edit}
-          <button on:click={onEdit}>Edit</button>
+          <button on:click={onEdit}>{editing ? "Cancel edit" : "Edit"}</button>
         {/if}
         {#if remove}
           <button on:click={onRemove}>Remove</button>
@@ -133,7 +128,7 @@
     </div>
     {#if linksOpen}
       <div class="links">
-        <div class="links-header">Links To</div>
+        <div class="links-header">Links</div>
         {#if !unit.links_to}
           <div>Loading...</div>
         {:else if unit.links_to.length == 0}
@@ -150,9 +145,9 @@
             {#each unit.links_to as link (link.id)}
               <LinkedContentItemLayout>
                 <div class="link-text">
-                  {$boardStore.units[link.target].pith}
+                  <div>{$boardStore.units[link.target].pith}</div>
                   <button
-                    class="button-inline"
+                    class="button-inline solid-width"
                     on:click={() => onRemoveLink(link.id)}>Remove link</button
                   >
                 </div>
@@ -163,14 +158,14 @@
       </div>
       {#if unit.links_from && unit.links_from.length > 0}
         <div class="links">
-          <div class="links-header">Links From</div>
+          <div class="links-header">Backlinks</div>
           <LinkedContentLayout top>
             {#each unit.links_from as link (link.id)}
               <LinkedContentItemLayout>
                 <div class="link-text">
-                  {$boardStore.units[link.source].pith}
+                  <div>{$boardStore.units[link.source].pith}</div>
                   <button
-                    class="button-inline"
+                    class="button-inline solid-width"
                     on:click={() => onRemoveLink(link.id)}
                     >Remove backlink</button
                   >
@@ -212,7 +207,13 @@
     font-weight: bold;
   }
 
+  .solid-width {
+    text-align: right;
+    min-width: 90px;
+  }
+
   .link-text {
-    display: inline-block;
+    display: flex;
+    justify-content: space-between;
   }
 </style>
