@@ -1,7 +1,7 @@
 {
   "type": "object",
   "properties": {
-    "link_id": {"type": "string"}
+    "link": {"$ref": "file:link.json#/link"}
   },
-  "required": ["link_id"]
+  "required": ["link"]
 }

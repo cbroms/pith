@@ -17,7 +17,8 @@ const defaultState = {
     // array of unit objects in order of rendering with 
     // id, pith, a map of transclusion ids to piths, 
     // [opt] linksTo, [opt] linksFrom, [opt] discussions
-    units: [],
+    unitIds: [],
+    units: {},
 };
 
 export const boardStore = createDerivedSocketStore(
@@ -107,16 +108,20 @@ export const boardStore = createDerivedSocketStore(
                         
                         const json = JSON.parse(res);
                         if (!json.error) { // success
-                            console.log(json)
                             update((state) => {
                                 // might be putting userId in again
+                                let units = {}; 
+                                for (const unit of json.units) {
+                                    units[unit.id] = unit;
+                                }
                                 return {
                                     ...state,
                                     boardId: boardId,
                                     hasJoinedBoard: true,
                                     userId: userId,
                                     nickname: json.nickname,
-                                    units: json.units,	
+                                    unitIds: json.units.map((e) => { return e.id; }), // get ids
+                                    units: units,	
                                 };
                             });
                             resolve();
@@ -138,17 +143,24 @@ export const boardStore = createDerivedSocketStore(
                     { board_id: boardId, user_id: userId },
                     (res) => {
                         const json = JSON.parse(res);
+                        console.log(json)
                         if (!json.error) { // success
-                            let units = [...state.units];
-                            // remove changed elements
-                            units = units.filter(
-                              (e) => { return !json.updated_unit_ids.some((id) === e.id) }
-                            );
-                            // add changed elements
-                            units = units.concat(json.updated_units);
                             update((state) => {
+                                let units = [...state.units];
+                                // remove changed elements, slow, can use inverse id to index map maybe
+                                const unitIds = unitIds.filter(
+                                  (e) => { return !json.updated_unit_ids.some((u) => u === e) }
+                                );
+                                
+                                let updatedUnits = {}; 
+                                for (const unit of updated_units) {
+                                    updatedUnits[unit.id] = unit;
+                                }
+                                // add changed elements, right overrides left if same key
+                                units = {...units, ...updatedUnits};
                                 return {
                                     ...state,
+                                    unitIds: unitIds,
                                     units: units,
                                 }
                             });
@@ -173,7 +185,8 @@ export const boardStore = createDerivedSocketStore(
                             update((state) => {
                                 return {
                                     ...state,
-                                    units: [...state.units, json.unit],
+                                    unitIds: [...state.unitIds, json.unit.id],
+                                    units: {...state.units, [json.unit.id]: json.unit},
                                 }
                             });
                             resolve();
@@ -193,13 +206,13 @@ export const boardStore = createDerivedSocketStore(
                     (res) => {
                         const json = JSON.parse(res);
                         if (!json.error) {
-                            let units = [...state.units];
-                            // TODO
-                            units = units.filter((e) => { return e.id !== unitId });
                             update((state) => {
+                                let unitIds = [...state.unitIds];
+                                // TODO
+                                unitIds = unitIds.filter((e) => { return e !== unitId });
                                 return {
                                     ...state,
-                                    units: units,
+                                    unitIds: unitIds,
                                 }
                             });
                             resolve();
@@ -219,18 +232,10 @@ export const boardStore = createDerivedSocketStore(
                     (res) => {
                         const json = JSON.parse(res);
                         if (!json.error) {
-                            let units = [...state.units];
-                            // TODO, map returns new array
-                            units = units.map((e) => {
-                                if (e.id === unitId) {
-                                    return json.unit;
-                                }
-                                return e;
-                            });
                             update((state) => {
                                 return {
                                     ...state,
-                                    units: units,
+                                    units: {...state.units, [json.unit.id]: json.unit}, // update
                                 }
                             });
                             resolve();
@@ -251,23 +256,16 @@ export const boardStore = createDerivedSocketStore(
                         const json = JSON.parse(res);
                         if (!json.error) {
                             update((state) => {
-                                let units = [...state.units];
+                                let units = {...state.units};
                                 // TODO, map returns new array
-                                units = units.map((e) => {
-                                    if (e.id === source) {
-                                        if (e.links_to)
-                                            e.links_to.push(json.link);
-                                        else 
-                                            e.links_to = [json.link];
-                                    }
-                                    else if (e.id === target) {
-                                        if (e.links_from)
-                                            e.links_from.push(json.link);
-                                        else 
-                                            e.links_from = [json.link];
-                                    }
-                                    return e;
-                                });
+                                if (source in units) {
+                                    if (units[source].links_to)
+                                        units[source].links_to.push(json.link);
+                                }
+                                if (target in units) {
+                                    if (units[target].links_from)
+                                        units[target].links_from.push(json.link);
+                                }
                                 return {
                                     ...state,
                                     units: units,
@@ -291,23 +289,21 @@ export const boardStore = createDerivedSocketStore(
                         const json = JSON.parse(res);
                         if (!json.error) {
                             update((state) => {
-                                let units = [...state.units];
-                                // TODO, map returns new array
-                                units = units.map((e) => {
-                                    if (e.id === link.source) {
-                                        if (e.links_to) // only matter if list exists
-                                            e.links_to = e.links_to.filter(
-                                                (l) => { return l.id !== json.link.id }
-                                            );
+                                let units = {...state.units};
+                                if (json.link.source in units) {
+                                    if (units[json.link.source].links_to) {
+                                        units[json.link.source].links_to = units[json.link.source].links_to.filter(
+                                            (l) => { return l.id !== json.link.id }
+                                        );
                                     }
-                                    else if (e.id === link.target) {
-                                        if (e.links_from)
-                                            e.links_from = e.links_from.filter(
-                                                (l) => { return l.id !== json.link.id }
-                                            );
+                                }
+                                if (json.link.target in units) {
+                                    if (units[json.link.target].links_from) {
+                                        units[json.link.target].links_from = units[json.link.target].links_from.filter(
+                                            (l) => { return l.id !== json.link.id }
+                                        );
                                     }
-                                    return e;
-                                });
+                                }
                                 return {
                                     ...state,
                                     units: units,
@@ -332,21 +328,9 @@ export const boardStore = createDerivedSocketStore(
                         if (!json.error) {
                             
                             update((state) => {
-                                let units = [...state.units];
-                            // TODO, map returns new array
-                                console.log(units);
-                                units = units.map((e) => {
-                                    if (e.id === unitId) {
-                                        return json.unit;
-                                    }
-                                    else {
-                                        return e;
-                                    }
-                                });
-                                console.log(units);
                                 return {
                                     ...state,
-                                    units: units,
+                                    units: {...state.units, [json.unit.id]: json.unit}, // update
                                 }
                             });
                             resolve();
@@ -367,17 +351,13 @@ export const boardStore = createDerivedSocketStore(
                         const json = JSON.parse(res);
                         if (!json.error) {
                             update((state) => {
-                                let units = [...state.units];
-                                // TODO, map returns new array
-                                units = units.map((e) => {
-                                    if (e.id === unitId) {
-                                        if (e.discussions)
-                                            e.discussions.push(json.discussion);
-                                        else 
-                                            e.discussions = [json.discussion];
-                                    }
-                                    return e;
-                                });
+                                let units = {...state.units};
+                                if (unitId in units) {
+                                    if (units[unitId].discussions)
+                                        units[unitId].discussions.push(json.discussion);
+                                    else 
+                                        units[unitId].discussions = [json.discussion];
+                                }
                                 return {
                                     ...state,
                                     units: units,

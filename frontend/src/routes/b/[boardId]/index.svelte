@@ -7,19 +7,23 @@
 
 <script>
   import { goto } from "@sapper/app";
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
+
+  import { parseTime } from "../../../utils/parseTime";
 
   import { boardStore } from "../../../stores/boardStore";
+  import { boardDisplayContextStore } from "../../../stores/boardDisplayContextStore";
 
   import BoardLayout from "../../../components/layouts/BoardLayout.svelte";
   import DiscussionLayout from "../../../components/layouts/DiscussionLayout.svelte";
+  import LinkedContentItemLayout from "../../../components/layouts/LinkedContentItemLayout.svelte";
+  import LinkedContentLayout from "../../../components/layouts/LinkedContentLayout.svelte";
   import Board from "../../../components/sections/Board.svelte";
+
+  import BoardUnit from "../../../components/unit/BoardUnit.svelte";
 
   export let id;
   export let dId;
-
-  let discussionUnit;
-  let discussions;
 
   onMount(async () => {
     await boardStore.initialize(id);
@@ -41,56 +45,48 @@
     }
   });
 
-  const onDiscussions = (unit) => {
-    // requires unit called getUnit
-    console.log(unit.discussions);
-    discussions = unit.discussions;
-    discussionUnit = unit;
+  const onNewDiscussion = () => {
+    boardStore.createDiscussion(
+      $boardStore.boardId,
+      $boardDisplayContextStore.id
+    );
   };
 </script>
 
-<!-- <div>Board is valid: {$boardStore.isValidBoard}</div>
-<div>Board is joined: {$boardStore.hasJoinedBoard}</div>
- -->
-<!-- {#if $boardStore.isValidBoard === false}
-<div>
-	<h1>That board doesn't exist</h1>
-</div>
-{:else if $boardStore.isValidBoard &&
-$boardStore.hasJoinedBoard}
-<div>
-	<h1>Welcome to board {id}</h1>
-</div>
-{:else }
-<div>Loading...</div>
-{/if} -->
-
 <BoardLayout>
-  <Board {id} newDiscussion {onDiscussions} />
+  <Board {id} noControls />
 </BoardLayout>
 <DiscussionLayout>
   <div class="board-info">
     {#if $boardStore.isValidBoard}
-      <!-- <h1>Welcome to board {id}</h1>
-      <p>Select a discussion to get started...</p>
-      <ul>
-        <li>
-          <a href="/b/{id}/d/12412/">A sample discussion</a>
-        </li>
-      </ul> -->
-      <ul>
-        {#if !discussions}
-          <div />
-        {:else if discussions.length == 0}
-          <h1>Discussions for {discussionUnit.id}</h1>
-          <div>No discussions.</div>
-        {:else}
-          <h1>Discussions for {discussionUnit.id}</h1>
-          {#each discussions as discussion (discussion.id)}
-            <li><a href="/b/{id}/d/{discussion.id}/">{discussion.id}</a></li>
-          {/each}
-        {/if}
-      </ul>
+      <h1>Welcome!</h1>
+      {#if !$boardDisplayContextStore.id}
+        <p>Select a unit from the board to find a discussion...</p>
+      {:else}
+        <div class="selected-discussion">
+          <h2>Discussions about:</h2>
+          <BoardUnit unit={$boardStore.units[$boardDisplayContextStore.id]} />
+
+          <LinkedContentLayout top>
+            {#each $boardStore.units[$boardDisplayContextStore.id].discussions as discussion (discussion.id)}
+              <LinkedContentItemLayout>
+                <div class="discussion-listing">
+                  <a href="/b/{id}/d/{discussion.id}/"
+                    >Join discussion created {parseTime(
+                      discussion.created
+                    ).toLowerCase()}</a
+                  >
+                </div>
+              </LinkedContentItemLayout>
+            {/each}
+            <LinkedContentItemLayout>
+              <button class="button-inline" on:click={onNewDiscussion}
+                >Create new discussion</button
+              ></LinkedContentItemLayout
+            >
+          </LinkedContentLayout>
+        </div>
+      {/if}
     {:else if $boardStore.isValidBoard === false}
       <h1>404</h1>
       <p>That board doesn't exist!</p>
@@ -98,23 +94,20 @@ $boardStore.hasJoinedBoard}
   </div>
 </DiscussionLayout>
 
-<!-- {#if $boardStore.isValidBoard === false}
-<div>
-	<h1>That board doesn't exist</h1>
-</div>
-{:else if $boardStore.isValidBoard &&
-$boardStore.hasJoinedBoard}
-<div>
-	<h1>Welcome to board {id}</h1>
-</div>
-{:else }
-<div>Loading...</div>
-{/if} -->
 <style>
   .board-info {
     grid-column: 1 / 2;
     grid-row: 1 / 3;
 
     padding: 10px;
+  }
+
+  .discussion-listing {
+    margin: 10px 0;
+    display: inline-block;
+  }
+
+  .selected-discussion {
+    margin: 20px 0;
   }
 </style>

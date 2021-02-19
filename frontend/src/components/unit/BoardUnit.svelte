@@ -5,25 +5,50 @@
 
   import LinkedContentLayout from "../layouts/LinkedContentLayout.svelte";
   import LinkedContentItemLayout from "../layouts/LinkedContentItemLayout.svelte";
+  import { boardDisplayContextStore } from "../../stores/boardDisplayContextStore";
 
   export let unit;
   export let focus = false;
   export let edit = false;
+  export let remove = false;
   export let unfocus = false;
   export let links = false;
-  export let discussions = false;
+
+  export let noControls = false;
+
   export let newDiscussion = false;
   export let addLinkSource = false;
   export let addLinkTarget = false;
   export let onAddLinkSource; // function from parent
   export let onAddLinkTarget;
-  export let onDiscussions;
 
   let linksOpen = false;
+  let editing = false;
+
+  let content = "";
+
+  const onSubmit = () => {
+    if (content !== "") {
+      boardStore.editUnit($boardStore.boardId, unit.id, content);
+      content = "";
+      editing = false;
+    }
+  };
+
+  const onKeydown = (e) => {
+    if (e.key === "Enter") onSubmit();
+  };
 
   const onEdit = () => {
     console.log("on edit");
+    editing = true;
+    content = unit.pith;
   };
+  const onRemove = () => {
+    boardStore.removeUnit($boardStore.boardId, unit.id);
+    boardDisplayContextStore.set({ id: null });
+  };
+
   const onFocus = () => {
     discussionStore.addFocused(
       $boardStore.boardId,
@@ -31,6 +56,7 @@
       unit.id
     );
   };
+
   const onUnfocus = () => {
     discussionStore.removeFocused(
       $boardStore.boardId,
@@ -43,24 +69,15 @@
 
     if (linksOpen) {
       await boardStore.getUnitFull($boardStore.boardId, unit.id);
-
-      if (onDiscussions) {
-        onDiscussions(unit);
-      }
     }
+
+    // set the display context so we can render board info on the board
+    boardDisplayContextStore.set({ id: unit.id });
   };
 
   const onNewDiscussion = () => {
     boardStore.createDiscussion($boardStore.boardId, unit.id);
     // console.log("new discussion");
-  };
-
-  // TODO make more efficient
-  const onGetPith = (id) => {
-    const temp_units = $boardStore.units.filter((e) => {
-      return e.id === id;
-    });
-    return temp_units[0].pith;
   };
 
   //   const onUnitDiscussions = async () => {
@@ -71,11 +88,25 @@
   //   const onUnitClick = () =>  {
   //     if (addLinkSource)
   //   }
+
+  const onRemoveLink = (linkId) => {
+    boardStore.removeLink($boardStore.boardId, linkId);
+  };
 </script>
 
 <div class="board-unit">
-  <div class="unit-content" on:click={onLinks}>{unit?.pith || ""}</div>
-  {#if focus || unfocus || edit || links || newDiscussion || addLinkSource || addLinkTarget}
+  <div class="unit-content" on:click={onLinks}>
+    {#if editing}
+      <input
+        placeholder="type a pith..."
+        bind:value={content}
+        on:keydown={onKeydown}
+      />
+    {:else}
+      {unit.pith}
+    {/if}
+  </div>
+  {#if !noControls && (focus || unfocus || edit || links || newDiscussion || addLinkSource || addLinkTarget)}
     <div class="unit-controls">
       <span class="controls-left" />
       <span class="controls-right">
@@ -95,6 +126,9 @@
         {#if edit}
           <button on:click={onEdit}>Edit</button>
         {/if}
+        {#if remove}
+          <button on:click={onRemove}>Remove</button>
+        {/if}
       </span>
     </div>
     {#if linksOpen}
@@ -103,38 +137,49 @@
         {#if !unit.links_to}
           <div>Loading...</div>
         {:else if unit.links_to.length == 0}
-          <div>No links where this unit is the source yet.</div>
+          <LinkedContentLayout top>
+            <LinkedContentItemLayout>
+              <button
+                class="button-inline"
+                on:click={() => onAddLinkSource(unit.id)}>Add a Link</button
+              >
+            </LinkedContentItemLayout>
+          </LinkedContentLayout>
         {:else}
           <LinkedContentLayout top>
             {#each unit.links_to as link (link.id)}
               <LinkedContentItemLayout>
                 <div class="link-text">
-                  {onGetPith(link.target)}
+                  {$boardStore.units[link.target].pith}
+                  <button
+                    class="button-inline"
+                    on:click={() => onRemoveLink(link.id)}>Remove link</button
+                  >
                 </div>
               </LinkedContentItemLayout>
             {/each}
           </LinkedContentLayout>
         {/if}
       </div>
-      <div class="links">
-        <div class="links-header">Links From</div>
-        {#if !unit.links_from}
-          <div>Loading...</div>
-        {:else if unit.links_from.length == 0}
-          <div>No links where this unit is the target yet.</div>
-        {:else}
+      {#if unit.links_from && unit.links_from.length > 0}
+        <div class="links">
+          <div class="links-header">Links From</div>
           <LinkedContentLayout top>
             {#each unit.links_from as link (link.id)}
               <LinkedContentItemLayout>
                 <div class="link-text">
-                  {onGetPith(link.source)}
+                  {$boardStore.units[link.source].pith}
+                  <button
+                    class="button-inline"
+                    on:click={() => onRemoveLink(link.id)}
+                    >Remove backlink</button
+                  >
                 </div>
               </LinkedContentItemLayout>
             {/each}
           </LinkedContentLayout>
-
-        {/if}
-      </div>
+        </div>
+      {/if}
     {/if}
   {/if}
 </div>
@@ -150,6 +195,7 @@
   }
 
   .unit-content {
+    cursor: pointer;
     padding: 10px;
   }
 

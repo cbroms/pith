@@ -3,5 +3,5 @@
   "properties": {
     "unit": {"$ref": "file:unit.json#/chat"}
   },
-  "required": ["unit"]
+  "required": []
 }
