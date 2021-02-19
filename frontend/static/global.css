@@ -1,48 +1,56 @@
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 body {
-	margin: 0;
-	font-family: Roboto, -apple-system, BlinkMacSystemFont, Segoe UI, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-	font-size: 14px;
-	line-height: 1.5;
-    color: #333;
-    
+  margin: 0;
+  font-family: Roboto, -apple-system, BlinkMacSystemFont, Segoe UI, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
 }
 
 button {
-    padding: 5px 10px;
-    background-color: inherit;
-    outline: none;
-    border: none;
-    border-radius: 0;
-    cursor: pointer;
+  padding: 5px 10px;
+  background-color: inherit;
+  outline: none;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+button:hover {
+  text-decoration: underline;
+}
+
+.button-inline {
+  padding: 0;
 }
 
 .layout {
-    padding: 15px;
-    display: grid;
-    grid-template-rows: auto 1fr;
+  padding: 15px;
+  display: grid;
+  grid-template-rows: auto 1fr;
 }
 
 .layout-overflow-container {
-    height: 100%;
+  height: 100%;
 }
 
 .layout-overflow {
-    grid-row: 2/3;
-    overflow-y: scroll;
+  grid-row: 2/3;
+  overflow-y: scroll;
 }
 
 .layout-header {
-    width: 100%;
-    border-bottom: 1px solid;
+  width: 100%;
+  border-bottom: 1px solid;
 }
 
 input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid;
-    outline: none;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid;
+  outline: none;
 }

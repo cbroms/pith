@@ -7,7 +7,7 @@
   export let id;
   export let focus = false;
   export let newDiscussion = false;
-  export let onDiscussions;
+  export let noControls = false;
 
   let linkSourceId = null;
   let linkTargetId = null;
@@ -47,6 +47,7 @@
       unit={$boardStore.units[unitId]}
       {focus}
       {newDiscussion}
+      {noControls}
       edit
       remove
       links
@@ -56,12 +57,13 @@
       addLinkSource={(!linkSourceId && !linkTargetId) ||
         (linkSourceId && $boardStore.units[unitId] === linkSourceId)}
       addLinkTarget={linkSourceId && $boardStore.units[unitId] !== linkSourceId}
-      {onDiscussions}
     />
   {/each}
-  <input
-    placeholder="type a pith..."
-    bind:value={content}
-    on:keydown={onKeydown}
-  />
+  {#if !noControls}
+    <input
+      placeholder="type a pith..."
+      bind:value={content}
+      on:keydown={onKeydown}
+    />
+  {/if}
 </div>

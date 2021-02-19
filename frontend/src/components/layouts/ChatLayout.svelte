@@ -5,7 +5,7 @@
 <div class="layout chat-layout">
   <div class="layout-header">
     <h2>Discussion</h2>
-    <button on:click={onLeave}>Leave</button>
+    <button on:click={onLeave}>Leave discussion</button>
   </div>
   <div class="layout-overflow">
     <slot />

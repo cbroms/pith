@@ -290,16 +290,16 @@ export const boardStore = createDerivedSocketStore(
                         if (!json.error) {
                             update((state) => {
                                 let units = {...state.units};
-                                if (source in units) {
-                                    if (units[source].links_to) {
-                                        units[source].links_to = units[source].links_to.filter(
+                                if (json.link.source in units) {
+                                    if (units[json.link.source].links_to) {
+                                        units[json.link.source].links_to = units[json.link.source].links_to.filter(
                                             (l) => { return l.id !== json.link.id }
                                         );
                                     }
                                 }
-                                if (target in units) {
-                                    if (units[target].links_from) {
-                                        units[target].links_from = units[target].links_from.filter(
+                                if (json.link.target in units) {
+                                    if (units[json.link.target].links_from) {
+                                        units[json.link.target].links_from = units[json.link.target].links_from.filter(
                                             (l) => { return l.id !== json.link.id }
                                         );
                                     }
