@@ -31,7 +31,7 @@ export const discussionStore = createDerivedSocketStore(
         joinDiscussion: (boardId, discussionId, userId, resolve, reject) => {
             return (socket, update) => {
                 
-                console.log("join_discussion", userId);
+                console.log("join_discussion", socket.id);
                 socket.emit(
                     "join_disc",
                     { board_id: boardId, discussion_id: discussionId, user_id: userId },
@@ -45,7 +45,7 @@ export const discussionStore = createDerivedSocketStore(
                         }
                     }
                 );
-		socket.emit(
+		        socket.emit(
                     "load_disc",
                     { board_id: boardId, discussion_id: discussionId },
                     (res) => {
@@ -111,7 +111,7 @@ export const discussionStore = createDerivedSocketStore(
 
            
             return (socket, update) => {
-                console.log("posted")
+                console.log("posted", socket.id)
 
                 const tempId = uuid();
 
@@ -279,11 +279,13 @@ export const discussionStore = createDerivedSocketStore(
             }
         },
         // TODO do below need some ids for the board/room?
-        subscribeJoin: () => {
+        subscribeDiscussion: () => {
             return (socket, update) => {
+                console.log("subscribe called")
                 socket.on(
                     "join_disc",
                     (res) => {
+                        console.log("joined")
                         const json = JSON.parse(res);
                         update((state) => {
                             return {
@@ -293,13 +295,11 @@ export const discussionStore = createDerivedSocketStore(
                         });
                     }
                 );
-            }
-        },
-        subscribeLeave: () => {
-            return (socket, update) => {
                 socket.on(
                     "leave_disc",
                     (res) => {
+                        console.log("left")
+
                         const json = JSON.parse(res);
                         update((state) => {
                             let participants = [...state.participants];
@@ -312,14 +312,14 @@ export const discussionStore = createDerivedSocketStore(
                         });
                     }
                 );
-            }
-        },
-        subscribePosts: () => {
-            return (socket, update) => {
+
                 socket.on(
                     "post",
                     (res) => {
+                        console.log("posted")
+
                         const json = JSON.parse(res);
+                        console.log("post", json);
                         update((state) => {
                             return {
                                 ...state,
@@ -329,14 +329,12 @@ export const discussionStore = createDerivedSocketStore(
                         });
                     }
                 );
-            }
-        },
-     
-        subscribePin: () => {
-            return (socket, update) => {
+
                 socket.on(
                     "add_pinned",
                     (res) => {
+                        console.log("pinned")
+
                         const json = JSON.parse(res);
                         update((state) => {
                             if (json.unit) {
@@ -354,6 +352,8 @@ export const discussionStore = createDerivedSocketStore(
                 socket.on(
                     "remove_pinned",
                     (res) => {
+                        console.log("unpinned")
+
                         const json = JSON.parse(res);
                         update((state) => {
                             let pinned = [...state.pinned];
@@ -366,13 +366,12 @@ export const discussionStore = createDerivedSocketStore(
                         });
                     }
                 );
-            }
-        },
-        subscribeFocus: () => {
-            return (socket, update) => {
+
                 socket.on(
                     "add_focused",
                     (res) => {
+                        console.log("focused")
+
                         const json = JSON.parse(res);
                         update((state) => {
                             if (json.unit) {
@@ -387,10 +386,11 @@ export const discussionStore = createDerivedSocketStore(
                         });
                     }
                 );
-
                 socket.on(
                     "remove_focused",
                     (res) => {
+                        console.log("unfocused")
+
                         const json = JSON.parse(res);
                         update((state) => {
                             let focused = [...state.focused];
@@ -403,9 +403,9 @@ export const discussionStore = createDerivedSocketStore(
                         });
                     }
                 );
+
             }
         },
-      
     },
     defaultState
 );

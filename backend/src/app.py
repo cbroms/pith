@@ -189,8 +189,8 @@ class DiscussionNamespace(AsyncNamespace):
         async def helper(self, sid, request):
           try:
             result = None
-            logger.info("REQUEST\nfunc_name: {}\nrequest: {}\n".format(
-              name, request
+            logger.info("REQUEST (sid: {})\nfunc_name: {}\nrequest: {}\n".format(
+              sid, name, request
             ))
             product = await func(self, sid, request)
             logger.info("func_name: {}\nproduct: {}\nrequest: {}\n".format(
@@ -202,9 +202,11 @@ class DiscussionNamespace(AsyncNamespace):
                 result = dumps(product, cls=DictEncoder)
                 if emit: # send result to others in room
                   session = await self.get_session(sid)
+                  logger.info("Emitting (sid: {}) with {}".format(sid, session))
                   if "board_id" in session and "discussion_id" in session:
                     board_id = session["board_id"]
                     discussion_id = session["discussion_id"]
+                    logger.info("Emitting to {}/{}.".format(board_id, discussion_id))
                     await self.emit(
                       name, 
                       result, 
@@ -254,7 +256,7 @@ class DiscussionNamespace(AsyncNamespace):
           "discussion_id": discussion_id
         })
 
-    @_process_responses("join_disc")
+    @_process_responses("join_disc", True)
     @_validate_request("join_disc")
     async def on_join_disc(self, sid, request):
       board_id = request["board_id"]
@@ -267,6 +269,7 @@ class DiscussionNamespace(AsyncNamespace):
 
       if not is_error(result):
         await self.save_session(sid, {
+          "board_id": board_id,
           "discussion_id": discussion_id, 
         })
         self.enter_room(sid, get_room(board_id, discussion_id))
@@ -281,7 +284,7 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id=request["discussion_id"],
       )
 
-    @_process_responses("leave_disc")
+    @_process_responses("leave_disc", True)
     @_validate_request("leave_disc")
     async def on_leave_disc(self, sid, request):
       board_id = request["board_id"]
@@ -293,6 +296,7 @@ class DiscussionNamespace(AsyncNamespace):
       )
 
       if not is_error(result):
+        # may still be in same board
         await self.save_session(sid, {
           "discussion_id": None, 
         })
@@ -300,7 +304,7 @@ class DiscussionNamespace(AsyncNamespace):
 
       return result
 
-    @_process_responses("post")
+    @_process_responses("post", True)
     @_validate_request("post")
     async def on_post(self, sid, request):
       return gm.discussion_manager.post(
@@ -310,7 +314,7 @@ class DiscussionNamespace(AsyncNamespace):
         text=request["text"],
       )
 
-    @_process_responses("add_pinned")
+    @_process_responses("add_pinned", True)
     @_validate_request("add_pinned")
     async def on_add_pinned(self, sid, request):
       return gm.discussion_manager.add_pinned(
@@ -319,7 +323,7 @@ class DiscussionNamespace(AsyncNamespace):
         unit_id=request["unit_id"],
       )
 
-    @_process_responses("remove_pinned")
+    @_process_responses("remove_pinned", True)
     @_validate_request("remove_pinned")
     async def on_remove_pinned(self, sid, request):
       return gm.discussion_manager.remove_pinned(
@@ -328,7 +332,7 @@ class DiscussionNamespace(AsyncNamespace):
         unit_id=request["unit_id"],
       )
 
-    @_process_responses("add_focused")
+    @_process_responses("add_focused", True)
     @_validate_request("add_focused")
     async def on_add_focused(self, sid, request):
       return gm.discussion_manager.add_focused(
@@ -337,7 +341,7 @@ class DiscussionNamespace(AsyncNamespace):
         unit_id=request["unit_id"],
       )
 
-    @_process_responses("remove_focused")
+    @_process_responses("remove_focused", True)
     @_validate_request("remove_focused")
     async def on_remove_focused(self, sid, request):
       return gm.discussion_manager.remove_focused(

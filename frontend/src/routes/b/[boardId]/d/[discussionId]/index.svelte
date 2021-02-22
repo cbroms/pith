@@ -36,9 +36,9 @@
       goto(`/b/${bId}/?d=${id}`);
     } else {
       await discussionStore.joinDiscussion(bId, id, $boardStore.userId);
-      discussionStore.subscribePosts();
-      discussionStore.subscribeFocus();
-      discussionStore.subscribePin();
+      console.log("subscribing to disc");
+      discussionStore.subscribeDiscussion();
+      console.log("subscribed to disc");
 
       console.log($discussionStore);
     }
