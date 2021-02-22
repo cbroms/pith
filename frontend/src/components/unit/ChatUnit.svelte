@@ -8,6 +8,7 @@
   import LinkedContentItemLayout from "../layouts/LinkedContentItemLayout.svelte";
   import CopyContent from "../buttons/CopyContent.svelte";
   import TruncateText from "./TruncateText.svelte";
+  import Transclusion from "./Transclusion.svelte";
 
   export let pith = "";
   export let id = null;
@@ -24,6 +25,8 @@
   export let pin = true;
   export let unpin = false;
 
+  let ogPith = null;
+
   let open = false;
 
   let orderedTransclusions = [];
@@ -38,8 +41,11 @@
         transclusions[id] = transclusions[id].replaceAll(linkRegex, "");
       }
       transclusions = transclusions;
+      // this is stupidly inefficient but will work until the transclusion shape is changed
+      ogPith = ogPith === null ? pith : ogPith;
+
       // parse out the unit's tansclusions
-      pith = pith.replaceAll(linkRegex, (match) => {
+      pith = ogPith.replaceAll(linkRegex, (match) => {
         numMatched++;
         orderedTransclusions.push(
           transclusions[match.replaceAll("[", "").replaceAll("]", "")]
@@ -83,15 +89,15 @@
     </div>
   {/if}
   <div class="message-content">
-    <LinkedContentLayout>
-      {#each orderedTransclusions as transclusion}
-        <LinkedContentItemLayout>
-          <div class="transclusion-text">
-            {transclusion}
-          </div>
-        </LinkedContentItemLayout>
-      {/each}
-    </LinkedContentLayout>
+    {#if orderedTransclusions.length > 0}
+      <LinkedContentLayout>
+        {#each orderedTransclusions as transclusion}
+          <LinkedContentItemLayout>
+            <Transclusion {transclusion} truncate />
+          </LinkedContentItemLayout>
+        {/each}
+      </LinkedContentLayout>
+    {/if}
     <div class="message-line">
       <TruncateText active={truncate && !open}>
         {pith}
@@ -113,7 +119,7 @@
     width: 100%;
   }
   .message-title {
-    margin-top: 20px;
+    padding-top: 10px;
   }
 
   .message-author {
@@ -129,22 +135,19 @@
     display: flex;
     justify-content: space-between;
     width: 100%;
+    padding: 2px 0;
   }
 
-  .message:hover .message-content {
+  .message-content:hover {
     background-color: rgb(240, 240, 240);
   }
 
-  .message:hover .message-pin {
+  .message-content:hover .message-pin {
     visibility: visible;
   }
 
   .message-pin {
     min-width: 85px;
     visibility: hidden;
-  }
-
-  .transclusion-text {
-    display: inline-block;
   }
 </style>

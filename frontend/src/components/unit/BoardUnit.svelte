@@ -8,6 +8,7 @@
   import { boardDisplayContextStore } from "../../stores/boardDisplayContextStore";
   import CopyContent from "../buttons/CopyContent.svelte";
   import TruncateText from "./TruncateText.svelte";
+  import Transclusion from "./Transclusion.svelte";
 
   export let unit;
   export let focus = false;
@@ -145,7 +146,9 @@
             {#each unit.links_to as link (link.id)}
               <LinkedContentItemLayout>
                 <div class="link-text">
-                  <div>{$boardStore.units[link.target].pith}</div>
+                  <Transclusion
+                    transclusion={$boardStore.units[link.target].pith}
+                  />
                   <button
                     class="button-inline solid-width"
                     on:click={() => onRemoveLink(link.id)}>Remove link</button
@@ -163,7 +166,9 @@
             {#each unit.links_from as link (link.id)}
               <LinkedContentItemLayout>
                 <div class="link-text">
-                  <div>{$boardStore.units[link.source].pith}</div>
+                  <Transclusion
+                    transclusion={$boardStore.units[link.source].pith}
+                  />
                   <button
                     class="button-inline solid-width"
                     on:click={() => onRemoveLink(link.id)}
@@ -204,7 +209,7 @@
   }
 
   .links-header {
-    font-weight: bold;
+    /* font-weight: bold; */
   }
 
   .solid-width {

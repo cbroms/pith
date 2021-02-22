@@ -72,9 +72,7 @@
               <LinkedContentItemLayout>
                 <div class="discussion-listing">
                   <a href="/b/{id}/d/{discussion.id}/"
-                    >Join discussion created {parseTime(
-                      discussion.created
-                    ).toLowerCase()}</a
+                    >Join discussion created {parseTime(discussion.created)}</a
                   >
                 </div>
               </LinkedContentItemLayout>
