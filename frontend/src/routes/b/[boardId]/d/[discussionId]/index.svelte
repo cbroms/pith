@@ -40,7 +40,7 @@
       discussionStore.subscribeDiscussion();
       console.log("subscribed to disc");
 
-      console.log($discussionStore);
+      console.log($boardStore);
     }
   });
 
@@ -51,7 +51,7 @@
 </script>
 
 <DiscussionLayout>
-  <ChatLayout {onLeave}>
+  <ChatLayout {onLeave} numParticipants={$discussionStore.participants.length}>
     <Chat {id} />
   </ChatLayout>
   <FocusLayout>

@@ -112,7 +112,9 @@
         {#if addLinkSource}
           <button on:click={() => onAddLinkSource(unit.id)}>Add Link</button>
         {:else if addLinkTarget}
-          <button on:click={() => onAddLinkTarget(unit.id)}>Finish Link</button>
+          <button on:click={() => onAddLinkTarget(unit.id)}
+            >+ Finish Link</button
+          >
         {/if}
         {#if focus}
           <button on:click={onFocus}>Focus</button>

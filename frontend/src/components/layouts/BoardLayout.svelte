@@ -1,17 +1,30 @@
+<script>
+  import { boardStore } from "../../stores/boardStore";
+</script>
+
 <div class="layout board-layout">
-    <div class="layout-header">
-        <h2>Board</h2>
-    </div>
-    <div class="layout-overflow">
-        <slot />
-    </div>
+  <div class="layout-header">
+    <h2>Board</h2>
+    <button
+      class="button-inline"
+      on:click={() =>
+        boardStore.updateBoard($boardStore.boardId, $boardStore.userId)}
+      >Refresh Board</button
+    >
+  </div>
+  <div class="layout-overflow">
+    <slot />
+  </div>
 </div>
 
 <style>
-    .board-layout {
-        grid-column: 2 / 3;
-        grid-row: 1 / 2;
+  .board-layout {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+  }
 
-        /* border-left: 1px solid; */
-    }
+  .layout-header {
+    display: flex;
+    justify-content: space-between;
+  }
 </style>

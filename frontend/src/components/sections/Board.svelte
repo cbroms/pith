@@ -55,8 +55,8 @@
       {onAddLinkSource}
       {onAddLinkTarget}
       addLinkSource={(!linkSourceId && !linkTargetId) ||
-        (linkSourceId && $boardStore.units[unitId] === linkSourceId)}
-      addLinkTarget={linkSourceId && $boardStore.units[unitId] !== linkSourceId}
+        (linkSourceId && unitId === linkSourceId)}
+      addLinkTarget={linkSourceId && unitId !== linkSourceId}
     />
   {/each}
   {#if !noControls}
