@@ -41,11 +41,13 @@ class BoardManager:
     @Checker._check_board_id
     @Checker._check_user_id
     def load_board(self, board_id, user_id):
+      current = utils.get_time()
       self.gm.users.update_one(
         {"_id" : user_id, "board_id": board_id},
-        {"$set": {"user_update_cursor": utils.get_time()}}
+        {"$set": {"user_update_cursor": current}}
       )
       user = self.gm.users.find_one({"_id": user_id, "board_id": board_id})
+      utils.logger.info("load_board/unit_update_cursor: {}/{}\n".format(user["unit_update_cursor"], current))
 
       units = self.gm.units.find({"chat": False, "board_id": board_id})
       units_output = [self.gm._get_basic_unit(board_id, unit["_id"]) \
@@ -58,23 +60,35 @@ class BoardManager:
     def update_board(self, board_id, user_id):
       user = self.gm.users.find_one({"_id": user_id, "board_id": board_id})
       unit_update_cursor = user["unit_update_cursor"]
+      utils.logger.info("update_board/unit_update_cursor: {}\n".format(unit_update_cursor))
       # update cursor before query for new results as overlap is better than break
+      current = utils.get_time()
       self.gm.users.update_one(
         {"_id" : user_id, "board_id": board_id},
-        {"$set": {"user_update_cursor": utils.get_time()}}
+        {"$set": {"user_update_cursor": current}}
       )
       unit_updates = self.gm.unit_updates.find( 
         {"created": {"$gt": unit_update_cursor}, "board_id": board_id}
       )
       unit_ids = [u["unit_id"] for u in unit_updates]
+
+      unit_updates = self.gm.unit_updates.find( 
+        {"created": {"$gt": unit_update_cursor}, "board_id": board_id}
+      )
+      utils.logger.info("unit_updates: {}\n".format([uu for uu in self.gm.unit_updates.find({"board_id": board_id})]))
+      utils.logger.info("time/unit: {}\n".format([(u["created"], u["unit_id"]) for u in unit_updates]))
+
       updated_units = []
+      removed_ids = []
       for unit_id in unit_ids:
         if self.gm.units.find_one({"_id" : unit_id, "board_id": board_id}):
           updated_units.append(self.gm._get_extended_unit(board_id, unit_id))
+        else:
+          removed_ids.append(unit_id)
 
       return {
-        "updated_unit_ids": unit_ids, # deleted, added, edited
-        "updated_units": updated_units # only added, edited
+        "removed_ids": removed_ids, # deleted
+        "updated_units": updated_units # added, edited
       }
 
     @Checker._check_board_id

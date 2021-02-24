@@ -131,8 +131,6 @@ export const boardStore = createDerivedSocketStore(
                         }
                     }
                 );
-                
-                // TODO fake input
             };
         },
         updateBoard: (boardId, userId, nickname, resolve) => {
@@ -146,24 +144,33 @@ export const boardStore = createDerivedSocketStore(
                         console.log(json)
                         if (!json.error) { // success
                             update((state) => {
-                                let units = [...state.units];
-                                // remove changed elements, slow, can use inverse id to index map maybe
-                                const unitIds = unitIds.filter(
-                                  (e) => { return !json.updated_unit_ids.some((u) => u === e) }
+                                console.log("removed_ids", json.removed_ids);
+                                console.log("updated_units", json.updated_units);
+
+                                let unitIds = [...state.unitIds];
+                                console.log("unitIds", unitIds);
+                                unitIds = unitIds.filter(
+                                  (e) => { return !json.removed_ids.includes(e)} 
                                 );
-                                
+                                console.log("unitIds", unitIds);
                                 let updatedUnits = {}; 
-                                for (const unit of updated_units) {
+                                for (const unit of json.updated_units) {
                                     updatedUnits[unit.id] = unit;
                                 }
+                                // only remove deleted
+                                console.log("updatedUnits", updatedUnits);
                                 // add changed elements, right overrides left if same key
+                                let units = {...state.units};
+                                console.log("units", units);
                                 units = {...units, ...updatedUnits};
+                                console.log("units", units);
                                 return {
                                     ...state,
                                     unitIds: unitIds,
                                     units: units,
                                 }
                             });
+                            console.log("about to resolve");
                             resolve();
                         }
                         else {

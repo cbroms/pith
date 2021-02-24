@@ -107,8 +107,6 @@ class GlobalManager:
         "id": d["_id"], \
         "created": utils.date_string(d["created"]) \
       } for d in discussions]
-      utils.logger.info("D: {}".format([d for d in discussions]))
-      utils.logger.info("discussions_list: {}".format(discussions_list))
       return discussions_list
 
     def _get_pith(self, board_id, text):

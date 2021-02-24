@@ -48,7 +48,7 @@ class User(Document):
     :default: None
     """
 
-    unit_update_cursor = DateTimeField(default=utils.get_time())
+    unit_update_cursor = DateTimeField(default=lambda: utils.get_time())
     """
     :type: *datetime*
     :required: False

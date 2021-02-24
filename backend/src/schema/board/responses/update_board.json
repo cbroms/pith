@@ -1,14 +1,14 @@
 {
   "type": "object",
   "properties": {
-    "updated_unit_ids": {
+    "removed_ids": {
       "type": "array",
       "item": {"type": "string"}
     },
     "updated_units": {
-      "type": "object",
+      "type": "array",
       "item": {"$ref": "file:unit.json#/board"}
     }
   },
-  "required": ["updated_unit_ids", "updated_units"]
+  "required": ["removed_ids", "updated_units"]
 }
