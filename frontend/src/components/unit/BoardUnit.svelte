@@ -100,13 +100,13 @@
         on:keydown={onKeydown}
       />
     {:else}
-      <TruncateText active={truncate && !linksOpen}>{unit.pith}</TruncateText>
+      <TruncateText active={truncate && !linksOpen}>{unit?.pith}</TruncateText>
     {/if}
   </div>
   {#if !noControls && (focus || unfocus || edit || links || addLinkSource || addLinkTarget)}
     <div class="unit-controls">
       <span class="controls-left">
-        <CopyContent id={unit.id} />
+        <CopyContent id={unit?.id} />
       </span>
       <span class="controls-right">
         {#if addLinkSource}
