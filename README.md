@@ -10,7 +10,7 @@ There are two primary components to this project:
 
 ### Frontend
 
-The client-side portion is a [React](https://reactjs.org/) project using [Redux](https://redux.js.org/) for state management and the [socket.io client library](https://socket.io/docs/client-api/) for interfacing with the backend. You can find the client code in the `/frontend` directory.
+The client-side portion is a [Svelte](https://svelte.dev/) project using the [Sapper](https://sapper.svelte.dev/) application framework and the [socket.io client library](https://socket.io/docs/client-api/) for interfacing with the backend. You can find the client code in the `/frontend` directory.
 
 ### Backend
 
@@ -20,12 +20,12 @@ The server-side portion of Pith. It uses [python-socketio](https://github.com/mi
 
 We use Docker containers to facilitate development and testing. All of the services needed to run the project are defined in `docker-compose.yml`. These are:
 
--   `static`: serves the React client
--   `app`: the socketio interface that's used by the React client.
--   `worker`: a worker script using the [arq task queue](https://github.com/samuelcolvin/arq) for executing assorted long-term tasks such as archiving discussions when they're complete.
--   `redis`: a Redis database used by the task queue (`worker`) and as a message queue by socketio (`app`).
--   `mongo`: the MongoDB database used to store the discussion content.
--   `tests`: a container that runs the unit tests and connects to `app` to test the interface.
+- `static`: serves the Sapper client
+- `app`: the socketio interface that's used by the client.
+- `worker`: a worker script using the [arq task queue](https://github.com/samuelcolvin/arq) for executing assorted long-term tasks such as archiving discussions when they're complete.
+- `redis`: a Redis database used by the task queue (`worker`) and as a message queue by socketio (`app`).
+- `mongo`: the MongoDB database used to store the discussion content.
+- `tests`: a container that runs the unit tests and connects to `app` to test the interface.
 
 The containers use volumes to easily facilitate development. You can edit any code in `/backend/src` and `/frontend/src` and containers that rely on that code will automatically reload.
 
@@ -63,22 +63,44 @@ Then, run the tests:
 $ ./test.sh
 ```
 
+#### Creating new boards from the command line
+
+From the tests container, you can create new boards by running:
+
+```
+$ python3.8 make_fake.py
+```
+
+This should give output including a new board ID:
+
+```
+made board id 5yo96fq8xr1m
+```
+
+Now you can join the board from the client by visiting in the browser:
+
+```
+http://localhost:3000/b/5yo96fq8xr1m/
+```
+
 ## Deployment
+
+Don't run Pith in production! It's early in development and things **will** break. Consider these instructions as inspiration for how one might run the server after a few more versions...
 
 ### Quickstart
 
 The best way to set up a Pith server will require having:
 
--   A computer running Linux (ideally an Ubuntu VM)
--   Docker
--   A web domain
--   An SSL certificate for the domain
--   An S3 bucket
+- A computer running Linux (ideally an Ubuntu VM)
+- Docker
+- A web domain
+- An SSL certificate for the domain
+- An S3 bucket
 
 A barebones install will require:
 
--   A computer running Linux
--   Docker
+- A computer running Linux
+- Docker
 
 #### Prerequisites
 
@@ -165,9 +187,9 @@ In `docker-compose.prod.yml`, adjust the port range of the `app` to accommodate 
 
 ```yml
 services:
-    app:
-        ports:
-            - "5000-5001:8080"
+  app:
+    ports:
+      - "5000-5001:8080"
 ```
 
 Then, start the services, specifying how many `app` instances to run:
@@ -177,4 +199,5 @@ $ docker-compose -f docker-compose.prod.yml --env-file .env up --build --scale a
 ```
 
 ### Helpful Links
+
 [AWS Open Ports](https://aws.amazon.com/premiumsupport/knowledge-center/connect-http-https-ec2/)

@@ -59,11 +59,11 @@
       addLinkTarget={linkSourceId && unitId !== linkSourceId}
     />
   {/each}
-  {#if !noControls}
-    <input
-      placeholder="type a pith..."
-      bind:value={content}
-      on:keydown={onKeydown}
-    />
-  {/if}
+  <!-- {#if !noControls} -->
+  <input
+    placeholder="type a pith..."
+    bind:value={content}
+    on:keydown={onKeydown}
+  />
+  <!-- {/if} -->
 </div>
