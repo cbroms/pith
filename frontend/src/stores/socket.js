@@ -2,34 +2,32 @@ import io from "socket.io-client";
 import { writable } from "svelte/store";
 
 const createSocket = () => {
+  let triedSetup = false;
 
-    let triedSetup = false;
+  const { subscribe, set, update } = writable(null);
 
-	const { subscribe, set, update } = writable(null);
+  const initialize = (host, port, namespace) => {
+    if (!triedSetup) {
+      const socket = io.connect(`https://${host}:${port}/${namespace}`, {
+        reconnect: true,
+      });
 
-	const initialize = (host, port, namespace) => {
+      socket.on("connect", () => {
+        set(socket);
+      });
 
-        if (!triedSetup) {
-            const socket = io.connect(`http://${host}:${port}/${namespace}`, {
-                reconnect: true,
-            });
-    
-            socket.on("connect", () => {
-                set(socket);
-            });
-    
-            socket.on("disconnect", () => {
-                set(socket);
-            });
-    
-            set(socket);
-        }
-	};
+      socket.on("disconnect", () => {
+        set(socket);
+      });
 
-	return {
-		subscribe,
-		initialize,
-	};
+      set(socket);
+    }
+  };
+
+  return {
+    subscribe,
+    initialize,
+  };
 };
 
 export const discussionSocket = createSocket();
