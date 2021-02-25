@@ -43,8 +43,8 @@ services:
       - "3000:3000"
     stdin_open: true
     environment:
-      REACT_APP_BACKEND_HOST: ${HOST_NAME}
-      REACT_APP_BACKEND_PORT: ${HOST_PORT}
+      BACKEND_HOST: ${HOST_NAME}
+      BACKEND_PORT: ${HOST_PORT}
   redis:
     image: "redis:alpine"
     restart: always
