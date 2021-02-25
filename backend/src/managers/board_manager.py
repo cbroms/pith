@@ -65,7 +65,7 @@ class BoardManager:
       current = utils.get_time()
       self.gm.users.update_one(
         {"_id" : user_id, "board_id": board_id},
-        {"$set": {"user_update_cursor": current}}
+        {"$set": {"unit_update_cursor": current}}
       )
       unit_updates = self.gm.unit_updates.find( 
         {"created": {"$gt": unit_update_cursor}, "board_id": board_id}
@@ -75,8 +75,6 @@ class BoardManager:
       unit_updates = self.gm.unit_updates.find( 
         {"created": {"$gt": unit_update_cursor}, "board_id": board_id}
       )
-      utils.logger.info("unit_updates: {}\n".format([uu for uu in self.gm.unit_updates.find({"board_id": board_id})]))
-      utils.logger.info("time/unit: {}\n".format([(u["created"], u["unit_id"]) for u in unit_updates]))
 
       updated_units = []
       removed_ids = []
