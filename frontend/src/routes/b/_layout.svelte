@@ -4,11 +4,11 @@
   import { boardSocket as socket } from "../../stores/socket.js";
 
   const { session } = stores();
-  const { BACKEND_HOST, BACKEND_PORT } = $session;
+  const { CONNECTION } = $session;
 
   // initialize board socket
   onMount(async () => {
-    socket.initialize(BACKEND_HOST, BACKEND_PORT, "board");
+    socket.initialize(CONNECTION, "board");
   });
 </script>
 

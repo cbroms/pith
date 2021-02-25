@@ -6,9 +6,9 @@ const createSocket = () => {
 
   const { subscribe, set, update } = writable(null);
 
-  const initialize = (host, port, namespace) => {
+  const initialize = (connection, namespace) => {
     if (!triedSetup) {
-      const socket = io.connect(`https://${host}:${port}/${namespace}`, {
+      const socket = io.connect(`${connection}/${namespace}`, {
         reconnect: true,
       });
 
