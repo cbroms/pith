@@ -17,7 +17,7 @@ class User(Document):
 
     meta = {'collection': 'users'}
 
-    id = StringField(default=lambda: utils.gen_key(), primary_key=True)
+    short_id = StringField(default=lambda: utils.gen_key())
 
     created = StringField(default=lambda: utils.get_time())
     """
@@ -53,3 +53,5 @@ class User(Document):
     :required: False
     :default: Automatically generated.
     """
+
+    id = StringField(default="", primary_key=True)

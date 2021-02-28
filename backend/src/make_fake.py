@@ -6,18 +6,16 @@ from utils import utils
 
 gm = GlobalManager()
 gm.start()
-print(5)
 
-gm.boards.remove({})
-gm.discussions.remove({})
-gm.units.remove({})
-gm.links.remove({})
-gm.transclusions.remove({})
-gm.unit_updates.remove({})
-gm.users.remove({})
+gm.boards.delete_many({})
+gm.discussions.delete_many({})
+gm.units.delete_many({})
+gm.links.delete_many({})
+gm.transclusions.delete_many({})
+gm.unit_updates.delete_many({})
+gm.users.delete_many({})
 
 board = gm.board_manager.create()
-print(6)
 board_id = board["board_id"]
 
 print("made board id {}".format(board_id))

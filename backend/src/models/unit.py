@@ -18,7 +18,7 @@ class Unit(Document):
 
     meta = {'collection': 'units'}
 
-    id = StringField(default=lambda: utils.gen_key(), primary_key=True)
+    short_id = StringField(default=lambda: utils.gen_key())
     """
     :type: *str*
     :required: False
@@ -59,3 +59,4 @@ class Unit(Document):
     :required: False
     :default: None
     """
+    id = StringField(default="", primary_key=True)

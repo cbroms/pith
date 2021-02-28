@@ -18,7 +18,7 @@ class Discussion(Document):
 
     meta = {'collection': 'discussions'}
 
-    id = StringField(default=lambda: utils.gen_key(), primary_key=True)
+    short_id = StringField(default=lambda: utils.gen_key())
     """
     :type: *str*
     :required: False
@@ -59,3 +59,5 @@ class Discussion(Document):
     :required: False
     :default: []
     """
+
+    id = StringField(default="", primary_key=True)

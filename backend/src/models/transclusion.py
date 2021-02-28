@@ -17,7 +17,7 @@ class Transclusion(Document):
 
     meta = {'collection': 'transclusions'}
 
-    id = StringField(default=lambda: utils.gen_key(), primary_key=True)
+    short_id = StringField(default=lambda: utils.gen_key())
     """
     :type: *str*
     :required: False
@@ -52,3 +52,4 @@ class Transclusion(Document):
     :default: None
     """
 
+    id = StringField(default="", primary_key=True)

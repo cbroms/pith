@@ -16,7 +16,7 @@ class Checker:
   def _check_board_id(func):
     def helper(self, **kwargs):
       board_id = kwargs["board_id"]
-      if self.gm.boards.find_one({"_id" : board_id}):
+      if self.gm.boards.find_one({"short_id" : board_id}):
         return func(self, **kwargs)
       else:
         return make_error(Errors.DNE_BOARD, 
@@ -28,7 +28,7 @@ class Checker:
     def helper(self, **kwargs):
       board_id = kwargs["board_id"]
       discussion_id = kwargs["discussion_id"]
-      if self.gm.discussions.find_one({"_id" : discussion_id, "board_id": board_id}):
+      if self.gm.discussions.find_one({"short_id" : discussion_id, "board_id": board_id}):
         return func(self, **kwargs)
       else:
         return make_error(Errors.DNE_DISCUSSION, 
@@ -40,7 +40,7 @@ class Checker:
     def helper(self, **kwargs):
       board_id = kwargs["board_id"]
       user_id = kwargs["user_id"]
-      if self.gm.users.find_one({"_id" : user_id, "board_id": board_id}):
+      if self.gm.users.find_one({"short_id" : user_id, "board_id": board_id}):
         return func(self, **kwargs)
       else:
         return make_error(Errors.DNE_USER, 
@@ -54,7 +54,7 @@ class Checker:
       for p in Checker.unit_input:
         if p in kwargs:
           unit_id = kwargs[p]
-          if self.gm.units.find_one({"_id" : unit_id, "board_id": board_id}):
+          if self.gm.units.find_one({"short_id" : unit_id, "board_id": board_id}):
             return func(self, **kwargs)
           else:
             return make_error(Errors.DNE_UNIT, 
@@ -66,7 +66,7 @@ class Checker:
     def helper(self, **kwargs):
       board_id = kwargs["board_id"]
       link_id = kwargs["link_id"]
-      if self.gm.links.find_one({"_id" : link_id, "board_id": board_id}):
+      if self.gm.links.find_one({"short_id" : link_id, "board_id": board_id}):
         return func(self, **kwargs)
       else:
         return make_error(Errors.DNE_LINK, 
