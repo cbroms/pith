@@ -81,6 +81,7 @@ export const discussionStore = createDerivedSocketStore(
         },
         leaveDiscussion: (boardId, discussionId, userId, resolve, reject) => {
             return (socket, update) => {
+                console.log("leaving discussion");
                 socket.emit(
                     "leave_disc",
                     { board_id: boardId, discussion_id: discussionId, user_id: userId },
@@ -303,8 +304,7 @@ export const discussionStore = createDerivedSocketStore(
                         const json = JSON.parse(res);
                         update((state) => {
                             let participants = [...state.participants];
-                            // TODO
-                            participants = participants.filter((e) => { return e.id !== json.user_id });
+                            participants = participants.filter((e) => { return e.id !== json.user.id });
                             return {
                                 ...state,
                                 participants: participants

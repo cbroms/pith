@@ -60,9 +60,11 @@ class BoardManager:
     def update_board(self, board_id, user_id):
       user = self.gm.users.find_one({"_id": user_id, "board_id": board_id})
       unit_update_cursor = user["unit_update_cursor"]
-      utils.logger.info("update_board/unit_update_cursor: {}\n".format(unit_update_cursor))
-      # update cursor before query for new results as overlap is better than break
       current = utils.get_time()
+
+      utils.logger.info("update_board/unit_update_cursor: {}/{}\n".format(unit_update_cursor, current))
+
+      # update cursor before query for new results as overlap is better than break
       self.gm.users.update_one(
         {"_id" : user_id, "board_id": board_id},
         {"$set": {"unit_update_cursor": current}}
@@ -71,10 +73,6 @@ class BoardManager:
         {"created": {"$gt": unit_update_cursor}, "board_id": board_id}
       )
       unit_ids = [u["unit_id"] for u in unit_updates]
-
-      unit_updates = self.gm.unit_updates.find( 
-        {"created": {"$gt": unit_update_cursor}, "board_id": board_id}
-      )
 
       updated_units = []
       removed_ids = []

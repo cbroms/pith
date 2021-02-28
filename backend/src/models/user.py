@@ -5,7 +5,6 @@ from mongoengine import (
   Document,
 )
 from mongoengine.fields import (
-  DateTimeField,
   StringField,
 )
 from utils import utils
@@ -20,9 +19,9 @@ class User(Document):
 
     id = StringField(default=lambda: utils.gen_key(), primary_key=True)
 
-    created = DateTimeField(default=lambda: utils.get_time())
+    created = StringField(default=lambda: utils.get_time())
     """
-    :type: *datetime*
+    :type: *str*
     :required: False
     :default: Automatically generated.
     """
@@ -48,9 +47,9 @@ class User(Document):
     :default: None
     """
 
-    unit_update_cursor = DateTimeField(default=lambda: utils.get_time())
+    unit_update_cursor = StringField(default=lambda: utils.get_time())
     """
-    :type: *datetime*
+    :type: *str*
     :required: False
     :default: Automatically generated.
     """

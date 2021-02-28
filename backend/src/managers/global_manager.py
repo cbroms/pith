@@ -95,7 +95,7 @@ class GlobalManager:
       discussion = self.discussions.find_one({"_id": discussion_id, "board_id": board_id})
       return {
         "id": discussion_id,
-        "created": utils.date_string(discussion["created"])
+        "created": discussion["created"]
       }
 
     def _get_discussions(self, board_id, unit_id):
@@ -105,7 +105,7 @@ class GlobalManager:
       )
       discussions_list = [{ \
         "id": d["_id"], \
-        "created": utils.date_string(d["created"]) \
+        "created": d["created"] \
       } for d in discussions]
       return discussions_list
 
@@ -159,7 +159,7 @@ class GlobalManager:
       return {
         "id": unit_id,
         "pith": unit["pith"],
-        "created": utils.date_string(unit["created"]), # TODO
+        "created": unit["created"],
         "author_id": user["_id"],
         "author_name": user["nickname"],
         "transclusions": self._get_transclusion_map(board_id, unit_id)

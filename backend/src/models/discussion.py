@@ -5,7 +5,6 @@ from mongoengine import (
   Document,
 )
 from mongoengine.fields import (
-  DateTimeField,
   ListField,
   StringField,
 )
@@ -26,9 +25,9 @@ class Discussion(Document):
     :default: Automatically generated.
     """
 
-    created = DateTimeField(default=lambda: utils.get_time())
+    created = StringField(default=lambda: utils.get_time())
     """
-    :type: *datetime*
+    :type: *str*
     :required: False
     :default: Automatically generated.
     """

@@ -18,9 +18,6 @@ import constants
 from error import Errors
 from uuid import uuid4
 
-def date_string(date):
-    return date.strftime(constants.DATE_TIME_FMT)
-
 def absolute_file(schema, path):
     def helper(S):
       for key in S:

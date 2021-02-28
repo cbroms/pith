@@ -5,7 +5,6 @@ from mongoengine import (
   Document,
 )
 from mongoengine.fields import (
-  DateTimeField,
   StringField,
 )
 from utils import utils
@@ -25,9 +24,9 @@ class Link(Document):
     :default: Automatically generated.
     """
 
-    created = DateTimeField(default=lambda: utils.get_time())
+    created = StringField(default=lambda: utils.get_time())
     """
-    :type: *datetime*
+    :type: *str*
     :required: False
     :default: Automatically generated.
     """

@@ -45,6 +45,7 @@
   });
 
   const onLeave = () => {
+    console.log("onLeave");
     discussionStore.leaveDiscussion(bId, id, $boardStore.userId);
     goto(`/b/${bId}/`);
   };

@@ -297,9 +297,10 @@ class DiscussionNamespace(AsyncNamespace):
 
       if not is_error(result):
         # may still be in same board
-        await self.save_session(sid, {
-          "discussion_id": None, 
-        })
+        #await self.save_session(sid, {
+        #  "discussion_id": None, 
+        #})
+        # use session to emit properly to room
         self.leave_room(sid, get_room(board_id, discussion_id))
 
       return result

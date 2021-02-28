@@ -6,7 +6,6 @@ from mongoengine import (
 )
 from mongoengine.fields import (
   BooleanField,
-  DateTimeField,
   StringField,
 )
 from utils import utils
@@ -26,9 +25,9 @@ class Unit(Document):
     :default: Automatically generated.
     """
 
-    created = DateTimeField(default=lambda: utils.get_time())
+    created = StringField(default=lambda: utils.get_time())
     """
-    :type: *datetime*
+    :type: *str*
     :required: False
     :default: Automatically generated.
     """
