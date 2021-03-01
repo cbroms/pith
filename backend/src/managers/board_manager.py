@@ -55,7 +55,7 @@ class BoardManager:
 
       units = self.gm.units.find({"chat": False, "board_id": board_id})
       units_output = [self.gm._get_basic_unit(board_id, unit["short_id"]) \
-        for unit in units]
+        for unit in units if unit["hidden"] is False]
 
       return {"nickname": user["nickname"], "units": units_output}
         
@@ -79,7 +79,8 @@ class BoardManager:
       updated_units = []
       removed_ids = []
       for unit_id in unit_ids:
-        if self.gm.units.find_one({"short_id" : unit_id, "board_id": board_id}):
+        unit = self.gm.units.find_one({"short_id" : unit_id, "board_id": board_id})
+        if unit["hidden"] is False:
           updated_units.append(self.gm._get_extended_unit(board_id, unit_id))
         else:
           removed_ids.append(unit_id)
@@ -104,11 +105,16 @@ class BoardManager:
     @Checker._check_board_id
     @Checker._check_unit_id
     def remove_unit(self, board_id, unit_id):
-      self.gm.units.remove({"short_id": unit_id, "board_id": board_id})
-      self.gm._remove_transclusions(board_id, unit_id)
-      # TODO remove transclusions where unit_id is target
-      # TODO also want to remove unit_id from piths
-      self.gm._remove_links(board_id, unit_id)
+      self.gm.units.update_one(
+        {"short_id" : unit_id, "board_id": board_id},
+        {"$set": {"hidden": True}}
+      )
+
+      #self.gm.units.remove({"short_id": unit_id, "board_id": board_id})
+      #self.gm._remove_transclusions(board_id, unit_id)
+      ## TODO remove transclusions where unit_id is target
+      ## TODO also want to remove unit_id from piths
+      #self.gm._remove_links(board_id, unit_id)
       self._record_unit_update(board_id, unit_id)
       return {"unit_id": unit_id}
 

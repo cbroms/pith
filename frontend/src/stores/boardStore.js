@@ -200,7 +200,6 @@ export const boardStore = createDerivedSocketStore(
             if (!json.error) {
               update((state) => {
                 let unitIds = [...state.unitIds];
-                // TODO
                 unitIds = unitIds.filter((e) => {
                   return e !== unitId;
                 });

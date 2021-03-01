@@ -59,4 +59,12 @@ class Unit(Document):
     :required: False
     :default: None
     """
+
+    hidden = BooleanField(default=False)
+    """
+    :type: *bool*
+    :required: False
+    :default: False
+    """
+
     id = StringField(default="", primary_key=True)
