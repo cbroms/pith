@@ -39,3 +39,5 @@ LOG_FILENAME = "app_log"
 #DEAD_LINK = "<cite></cite>"
 LINK_PATTERN = re.compile(r"\[\[\s*(.*?)\s*\]\]")
 LINK_WRAPPER = "[[{}]]"
+
+CHAT_PAGE_SIZE = 25

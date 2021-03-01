@@ -10,6 +10,8 @@ const defaultState = {
     // array of unit objects in rendering order with
     // id, pith, created, author, and a map of transclusion ids to piths
     chat: [],
+    // index of unit at the end of most recent received page
+    endIndex: -1,
     // array of temporary unit objects, which we render while a request to add a unit is pending
     temporaryChat: [],
     // array of unit objects in rendering order with
@@ -45,38 +47,36 @@ export const discussionStore = createDerivedSocketStore(
                         }
                     }
                 );
-		        socket.emit(
-                    "load_disc",
-                    { board_id: boardId, discussion_id: discussionId },
-                    (res) => {
-                        const json = JSON.parse(res);
-
-                        if (!json.error) {
-                            update((state) => {
-                                let units = {}; 
-                                for (const unit of json.chat) {
-                                    units[unit.id] = unit;
-                                }
-                                return {
-                                    ...state,
-                                    discussionId: discussionId,
-                                    chat: json.chat.map((e) => { return e.id; }),
-                                    units: units,
-                                    pinned: json.pinned.map((e) => { return e.id; }),
-                                    focused: json.focused.map((e) => { return e.id; }),
-                                    participants: json.participants,
-                                };
-                            });
-                            resolve(); // done
-                        } else {
-                            errorHandler(json.error, json.error_meta, update);
+                socket.emit(
+                        "load_disc",
+                        { board_id: boardId, discussion_id: discussionId },
+                        (res) => {
+                            const json = JSON.parse(res);
+                            if (!json.error) {
+                                update((state) => {
+                                    let units = {}; 
+                                    for (const unit of json.chat) {
+                                        units[unit.id] = unit;
+                                    }
+                                    const chat = json.chat.map((e) => { return e.id; });
+                                    console.log("first_chat_page", json.end_index, chat);
+                                    return {
+                                        ...state,
+                                        discussionId: discussionId,
+                                        chat: chat,
+                                        endIndex: json.end_index,
+                                        units: units,
+                                        pinned: json.pinned.map((e) => { return e.id; }),
+                                        focused: json.focused.map((e) => { return e.id; }),
+                                        participants: json.participants,
+                                    };
+                                });
+                                resolve(); // done
+                            } else {
+                                errorHandler(json.error, json.error_meta, update);
+                            }
                         }
-                    }
-
-		);
-                
-                // TODO fake input
-                // update((state) => { return { ...state, discussionId: "testDiscussion" } });
+                    ); 
             };
         },
         leaveDiscussion: (boardId, discussionId, userId, resolve, reject) => {
@@ -108,9 +108,46 @@ export const discussionStore = createDerivedSocketStore(
                 );
             }
         },
-        post: (boardId, discussionId, userId, nickname, text, resolve, reject) => {
+        getNextChatPage: (boardId, discussionId, endIndex, resolve, reject) => {
+            return (socket, update) => {
+              if (endIndex == 0) {
+                  resolve(); // nothing more
+              }
+              else {
+                socket.emit(
+                    "load_chat_page",
+                    { board_id: boardId, discussion_id: discussionId, end_index: endIndex },
+                    (res) => {
+                        const json = JSON.parse(res);
 
-           
+                        if (!json.error) {
+                            update((state) => {
+                                let units = {...state.units}; 
+                                let newPage = [];
+                                for (const unit of json.chat_page) {
+                                    newPage.push(unit.id);
+                                    units[unit.id] = unit;
+                                }
+                                console.log("new_page", json.end_index, newPage);
+                                const chat = newPage.concat(...state.chat);
+                                console.log("next_chat_page", chat);
+                                return {
+                                    ...state,
+                                    chat: chat,
+                                    endIndex: json.end_index,
+                                    units: units 
+                                };
+                            });
+                            resolve(); // done
+                        } else {
+                            errorHandler(json.error, json.error_meta, update);
+                        }
+                    }
+                );
+              }
+            }
+        },
+        post: (boardId, discussionId, userId, nickname, text, resolve, reject) => {
             return (socket, update) => {
                 console.log("posted", socket.id)
 

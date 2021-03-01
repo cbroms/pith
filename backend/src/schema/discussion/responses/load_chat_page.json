@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "properties": {
+    "end_index": {"type": "number"},
+    "chat_page": {
+      "type": "array",
+      "item": {"$ref": "file:unit.json#/chat"}
+    }
+  },
+  "required": ["end_index", "chat_page"]
+}

@@ -10,6 +10,7 @@ schema_names = [
     "join_disc",
     "leave_disc",
     "load_disc",
+    "load_chat_page",
     "post",
     "add_pinned",
     "remove_pinned",

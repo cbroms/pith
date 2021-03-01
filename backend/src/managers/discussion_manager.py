@@ -28,12 +28,23 @@ class DiscussionManager:
     @Checker._check_discussion_id
     def load_disc(self, board_id, discussion_id):
       discussion = self.gm.discussions.find_one({"short_id": discussion_id, "board_id": board_id})
+      (chat, end_index) = self.gm._chat_page(board_id, discussion_id)
       return {
-        "chat": [self.gm._get_chat_unit(board_id, u) for u in discussion["chat"]],
+        "end_index": end_index, # actually start index
+        "chat": chat,
         "pinned": [self.gm._get_chat_unit(board_id, u) for u in discussion["pinned"]],
         "focused": [self.gm._get_basic_unit(board_id, u) for u in discussion["focused"]],
         "participants": self.gm._get_participants(board_id, discussion_id)
       }
+
+    @Checker._check_board_id
+    @Checker._check_discussion_id
+    def load_chat_page(self, board_id, discussion_id, end_index):
+        (chat, end_index) = self.gm._chat_page(board_id, discussion_id, end_index)
+        return {
+          "end_index": end_index,
+          "chat_page": chat
+        }
 
     @Checker._check_board_id
     @Checker._check_discussion_id

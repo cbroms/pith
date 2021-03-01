@@ -1,6 +1,15 @@
 <script>
+  import { discussionStore } from "../../stores/discussionStore";
+  import { boardStore } from "../../stores/boardStore";
+
   export let numParticipants = 0;
   export let onLeave;
+
+  const onGetChatPage = () => {
+    discussionStore.getNextChatPage(
+      $boardStore.boardId, $discussionStore.discussionId, $discussionStore.endIndex
+    );
+  };
 </script>
 
 <div class="layout chat-layout">
@@ -9,6 +18,7 @@
       <h2 class="chat-title">Discussion</h2>
       <div class="chat-participants">{numParticipants} participants</div>
     </div>
+    <button class="button-inline" on:click={onGetChatPage}>Load chat page</button>
     <button class="button-inline" on:click={onLeave}>Leave discussion</button>
   </div>
   <div class="layout-overflow">

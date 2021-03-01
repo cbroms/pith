@@ -52,7 +52,6 @@ class BoardManager:
         {"$set": {"user_update_cursor": current}}
       )
       user = self.gm.users.find_one({"short_id": user_id, "board_id": board_id})
-      utils.logger.info("load_board/unit_update_cursor: {}/{}\n".format(user["unit_update_cursor"], current))
 
       units = self.gm.units.find({"chat": False, "board_id": board_id})
       units_output = [self.gm._get_basic_unit(board_id, unit["short_id"]) \
@@ -66,8 +65,6 @@ class BoardManager:
       user = self.gm.users.find_one({"short_id": user_id, "board_id": board_id})
       unit_update_cursor = user["unit_update_cursor"]
       current = utils.get_time()
-
-      utils.logger.info("update_board/unit_update_cursor: {}/{}\n".format(unit_update_cursor, current))
 
       # update cursor before query for new results as overlap is better than break
       self.gm.users.update_one(
@@ -162,7 +159,6 @@ class BoardManager:
       discussion = Discussion(board_id=board_id, focused=[unit_id])
       discussion.id = "{}:{}".format(discussion.board_id, discussion.short_id)
 
-      utils.logger.info("create_disc: {}".format(discussion.to_mongo()))
       self.gm.discussions.insert_one(discussion.to_mongo())
       self._record_unit_update(board_id, unit_id)
       return {"discussion": self.gm._get_disc(board_id, discussion.short_id)}

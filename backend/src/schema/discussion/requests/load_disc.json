@@ -6,4 +6,3 @@
   },
   "required": ["board_id", "discussion_id"]
 }
-

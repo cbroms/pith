@@ -135,7 +135,6 @@ class GlobalManager:
       self.transclusions.remove({"source": unit_id, "board_id": board_id})
 
     def _remove_links(self, board_id, unit_id):
-      utils.logger.info(self.links)
       self.links.remove(
         {"source": unit_id, "board_id": board_id}, 
         {"target": unit_id, "board_id": board_id}
@@ -192,3 +191,18 @@ class GlobalManager:
         {"discussion_id": discussion_id, "board_id": board_id}
       )
       return [self._get_user(board_id, p["short_id"]) for p in participants]
+
+    def _chat_page(self, board_id, discussion_id, end_index=None):
+      discussion = self.discussions.find_one(
+        {"short_id": discussion_id, "board_id": board_id}
+      )
+      if end_index is None: 
+        end_index = len(discussion["chat"])
+      if end_index < constants.CHAT_PAGE_SIZE: 
+        start_index = 0
+      else:
+        start_index = end_index - constants.CHAT_PAGE_SIZE
+      chat = []
+      for u in discussion["chat"][start_index:end_index]:
+        chat.append(self._get_chat_unit(board_id, u))
+      return (chat, start_index)

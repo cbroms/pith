@@ -245,17 +245,6 @@ class DiscussionNamespace(AsyncNamespace):
         return helper
       return outer
 
-    async def on_disconnect(self, sid):
-      # leave discussion if we have joined one 
-      session = await self.get_session(sid)
-      if "board_id" in session and "discussion_id" in session:
-        board_id = session["board_id"]
-        discussion_id = session["discussion_id"]
-        await self.on_leave(sid, {
-          "board_id": board_id, 
-          "discussion_id": discussion_id
-        })
-
     @_process_responses("join_disc", True)
     @_validate_request("join_disc")
     async def on_join_disc(self, sid, request):
@@ -284,6 +273,15 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id=request["discussion_id"],
       )
 
+    @_process_responses("load_chat_page")
+    @_validate_request("load_chat_page")
+    async def on_load_chat_page(self, sid, request):
+      return gm.discussion_manager.load_chat_page(
+        board_id=request["board_id"],
+        discussion_id=request["discussion_id"],
+        end_index=request["end_index"],
+      )
+
     @_process_responses("leave_disc", True)
     @_validate_request("leave_disc")
     async def on_leave_disc(self, sid, request):
@@ -304,6 +302,17 @@ class DiscussionNamespace(AsyncNamespace):
         self.leave_room(sid, get_room(board_id, discussion_id))
 
       return result
+
+    async def on_disconnect(self, sid):
+      # leave discussion if we have joined one 
+      session = await self.get_session(sid)
+      if "board_id" in session and "discussion_id" in session:
+        board_id = session["board_id"]
+        discussion_id = session["discussion_id"]
+        await self.on_leave(sid, {
+          "board_id": board_id, 
+          "discussion_id": discussion_id
+        })
 
     @_process_responses("post", True)
     @_validate_request("post")

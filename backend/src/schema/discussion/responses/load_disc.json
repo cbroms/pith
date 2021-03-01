@@ -1,6 +1,7 @@
 {
   "type": "object",
   "properties": {
+    "end_index": {"type": "number"},
     "chat": {
       "type": "array",
       "item": {"$ref": "file:unit.json#/chat"}
@@ -18,5 +19,5 @@
       "item": {"$ref": "file:user.json#/user"}
     }
   },
-  "required": ["chat", "pinned", "focused", "participants"]
+  "required": ["end_index", "chat", "pinned", "focused", "participants"]
 }

@@ -9,6 +9,7 @@ schema = {}
 schema_names = [
     "join_disc",
     "load_disc",
+    "load_chat_page",
     "leave_disc",
     "post",
     "add_pinned",
