@@ -8,10 +8,42 @@ import socketio
 import constants
 from utils import utils
 
+from models.board import Board
 from models.transclusion import Transclusion
 
 from managers.board_manager import BoardManager
 from managers.discussion_manager import DiscussionManager
+
+
+def update_board_job(ctx, board_id):
+
+  gm = ctx["manager"]
+
+  # start cursor
+  if board_id not in ctx:
+    ctx["cursor"] = utils.get_time()
+  else:
+    # get old cursor, last pulled
+    cursor = ctx["cursor"]
+    # use cursor to get update
+    utils.logger.info("update_board_job {} {}".format(board_id, cursor))
+    result = gm.board_manager.update_board(board_id, cursor)
+    # save new cursor
+    ctx["cursor"] = utils.get_time()
+    # emit to every user in board
+    await gm.sio.emit(
+      "update_board",
+      result, 
+      room=board_id,
+      namespace='/board'
+    )
+
+  # setup first, next round 
+  await gm.redis_queue.enqueue_job(
+    "update_board_job", board_id, 
+    _defer_by=constants.BOARD_UPDATE_DURATION
+  ) 
+
 
 
 class GlobalManager:
@@ -54,6 +86,20 @@ class GlobalManager:
         self.discussion_manager = DiscussionManager(self)
         self.board_manager = BoardManager(self)
 
+    def create(self):
+        board = Board()
+        board_id = board.short_id
+        board.id = board_id
+
+        self.boards.insert_one(board.to_mongo())
+
+        await self.redis_queue.enqueue_job(
+          "update_board_job", board_id
+        ) 
+
+        return {"board_id": board_id}
+
+    #### HELPER FUNCTIONS ####
 
     def _get_transclusion_map(self, board_id, unit_id):
       transclusions = self.transclusions.find(

@@ -41,3 +41,4 @@ LINK_PATTERN = re.compile(r"\[\[\s*(.*?)\s*\]\]")
 LINK_WRAPPER = "[[{}]]"
 
 CHAT_PAGE_SIZE = 25
+BOARD_UPDATE_DURATION = 10 # seconds

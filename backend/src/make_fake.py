@@ -15,7 +15,7 @@ gm.transclusions.delete_many({})
 gm.unit_updates.delete_many({})
 gm.users.delete_many({})
 
-board = gm.board_manager.create()
+board = gm.create()
 board_id = board["board_id"]
 
 print("made board id {}".format(board_id))

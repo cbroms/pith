@@ -1,7 +1,8 @@
+from arq import create_pool
+from arq.connections import RedisSettings
 from utils import utils
 from json import dumps
 
-from models.board import Board
 from models.discussion import Discussion
 from models.user import User
 from models.unit import Unit
@@ -10,10 +11,12 @@ from models.unit_update import UnitUpdate
 
 from managers.checker import Checker
 
+
 class BoardManager:
 
     def __init__(self, gm):
         self.gm = gm
+        self.cursor = None 
 
     def _record_unit_update(self, board_id, unit_id):
         """
@@ -23,13 +26,6 @@ class BoardManager:
         unit_update.id = "{}:{}".format(unit_update.board_id, unit_update.short_id)
 
         self.gm.unit_updates.insert_one(unit_update.to_mongo())
-
-    def create(self):
-        board = Board()
-        board.id = board.short_id
-
-        self.gm.boards.insert_one(board.to_mongo())
-        return {"board_id": board.short_id}
 
     @Checker._check_board_id
     def join_board(self, board_id):
@@ -46,11 +42,6 @@ class BoardManager:
     @Checker._check_board_id
     @Checker._check_user_id
     def load_board(self, board_id, user_id):
-      current = utils.get_time()
-      self.gm.users.update_one(
-        {"short_id" : user_id, "board_id": board_id},
-        {"$set": {"user_update_cursor": current}}
-      )
       user = self.gm.users.find_one({"short_id": user_id, "board_id": board_id})
 
       units = self.gm.units.find({"chat": False, "board_id": board_id})
@@ -58,23 +49,16 @@ class BoardManager:
         for unit in units if unit["hidden"] is False]
 
       return {"nickname": user["nickname"], "units": units_output}
-        
-    @Checker._check_board_id
-    @Checker._check_user_id
-    def update_board(self, board_id, user_id):
-      user = self.gm.users.find_one({"short_id": user_id, "board_id": board_id})
-      unit_update_cursor = user["unit_update_cursor"]
-      current = utils.get_time()
 
-      # update cursor before query for new results as overlap is better than break
-      self.gm.users.update_one(
-        {"short_id" : user_id, "board_id": board_id},
-        {"$set": {"unit_update_cursor": current}}
-      )
+    @Checker._check_board_id
+    def update_board(self, board_id, cursor):
       unit_updates = self.gm.unit_updates.find( 
-        {"created": {"$gt": unit_update_cursor}, "board_id": board_id}
+        {"created": {"$gt": cursor}, "board_id": board_id}
       )
       unit_ids = [u["unit_id"] for u in unit_updates]
+
+      # update timer
+      self.cursor = utils.get_time()
 
       updated_units = []
       removed_ids = []
@@ -89,7 +73,7 @@ class BoardManager:
         "removed_ids": removed_ids, # deleted
         "updated_units": updated_units # added, edited
       }
-
+        
     @Checker._check_board_id
     def add_unit(self, board_id, text):
       pith, transclusions = self.gm._get_pith(board_id, text)

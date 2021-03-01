@@ -26,6 +26,11 @@ gm = GlobalManager()
 sio = gm.sio
 
 
+@sio.on("create", namespace='/')
+async def on_create(sid, request):
+  return gm.create()
+
+
 class BoardNamespace(AsyncNamespace):
     """
     Namespace functions for the board abstraction.
@@ -116,22 +121,6 @@ class BoardNamespace(AsyncNamespace):
       return gm.board_manager.load_board(
         board_id=request["board_id"],
         user_id=request["user_id"],
-      )
-
-    @_process_responses("update_board")
-    @_validate_request("update_board")
-    async def on_update_board(self, sid, request):
-      result = gm.board_manager.update_board(
-        board_id=request["board_id"]
-      )
-      # emit to everyone in the board
-      session = await self.get_session(sid)
-      board_id = session["board_id"]
-      await self.emit(
-        "update_board"
-        name, 
-        result, 
-        room=board_id 
       )
 
     @_process_responses("add_unit")

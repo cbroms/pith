@@ -47,11 +47,4 @@ class User(Document):
     :default: None
     """
 
-    unit_update_cursor = StringField(default=lambda: utils.get_time())
-    """
-    :type: *str*
-    :required: False
-    :default: Automatically generated.
-    """
-
     id = StringField(default="", primary_key=True)

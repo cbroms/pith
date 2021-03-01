@@ -32,3 +32,4 @@ const createSocket = () => {
 
 export const discussionSocket = createSocket();
 export const boardSocket = createSocket();
+export const globalSocket = createSocket();

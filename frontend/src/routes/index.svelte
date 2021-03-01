@@ -1,6 +1,11 @@
 <script>
   import BoardWindowLayout from "../components/layouts/BoardWindowLayout.svelte";
   import DiscussionLayout from "../components/layouts/DiscussionLayout.svelte";
+  import { boardStore } from "../stores/globalStore";
+
+  const onNewBoard = () => {
+    globalStore.create();
+  };
 </script>
 
 <svelte:head>
@@ -18,9 +23,9 @@
         >.
       </p>
       <h2>Create a board</h2>
-      <p>To get started, create a board by running:</p>
-      <p><code>python3 make_fake.py</code></p>
-      <p>which will give you an ID like <code>5yo96fq8xr1m</code>.</p>
+      <button class="button-inline" on:click={onNewBoard}>Create new board</button>
+      <!--- Show created boards here...> 
+      <br>
       <p>Navigate to the board with the ID in your browser:</p>
       <p><code>http://localhost:3000/b/5yo96fq8xr1m</code></p>
     </div>
