@@ -12,6 +12,7 @@
 
   let div;
   let autoscroll;
+  let loadingNext = false;
   let checkTimeout = null;
 
   let prevNumMessages = $discussionStore.chat.length;
@@ -40,12 +41,24 @@
     prevNumMessages = $discussionStore.chat.length;
   });
 
-  const handleScroll = () => {
+  const handleScroll = async () => {
     if (
       missedMessages > 0 &&
       Math.abs(div.scrollHeight - div.scrollTop - div.clientHeight) <= 5
     ) {
       missedMessages = 0;
+    }
+
+    if (div.scrollTop === 0) {
+      loadingNext = true;
+
+      await discussionStore.getNextChatPage(
+        $boardStore.boardId,
+        $discussionStore.discussionId,
+        $discussionStore.endIndex
+      );
+
+      loadingNext = false;
     }
   };
 
@@ -72,10 +85,13 @@
 <div class="chat-wrapper">
   <div class="chat-overflow" bind:this={div} on:scroll={handleScroll}>
     <div class="chat">
+      {#if loadingNext}
+        Loading older messages...
+      {/if}
       {#if $discussionStore.chat.length === 0 && $discussionStore.temporaryChat.length === 0}
         <p>No messages yet!</p>
       {/if}
-      {#each $discussionStore.chat as unitId, i}
+      {#each $discussionStore.chat as unitId, i (unitId)}
         <ChatUnit
           {...$discussionStore.units[unitId]}
           prev={i > 0
@@ -111,18 +127,6 @@
   </div>
 </div>
 
-<!--<script ✂prettier:content✂="CglpbXBvcnQgeyBjaGF0IH0gZnJvbSAiLi4vLi4vc3RvcmVzL2NoYXQiOwoJaW1wb3J0IHsgZGlzY3Vzc2lvbkpvaW5TdGF0dXMgfSBmcm9tICIuLi8uLi9zdG9yZXMvZGlzY3Vzc2lvbkpvaW5TdGF0dXMiOwoKCWltcG9ydCBDaGF0TWVzc2FnZSBmcm9tICIuL0NoYXRNZXNzYWdlLnN2ZWx0ZSI7CgoJbGV0IGNvbnRlbnQgPSAiIjsKCgljb25zdCBvblN1Ym1pdCA9ICgpID0+IHsKCQlpZiAoY29udGVudCAhPT0gIiIpIHsKCQkJY2hhdC5tYWtlUG9zdChjb250ZW50LCAkZGlzY3Vzc2lvbkpvaW5TdGF0dXMubmlja25hbWUpOwoJCQljb250ZW50ID0gIiI7CgkJfQoJfTsKCgljb25zdCBvbktleWRvd24gPSAoZSkgPT4gewoJCWlmIChlLmtleSA9PT0gIkVudGVyIikgb25TdWJtaXQoKTsKCX07Cg==" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=" ✂prettier:content✂="e30=">{}</script><div>
-	{#each $chat.messages as message}
-	<ChatMessage {...$chat.messagesContent[message]} />
-	{/each} {#each $chat.pendingMessages as message}
-	<ChatMessage {...$chat.messagesContent[message]} />
-	{/each}
-	<input
-		placeholder="type a message..."
-		bind:value="{content}"
-		on:keydown="{onKeydown}"
-	/>
-</div> -->
 <style>
   .chat-overflow {
     height: 100%;
