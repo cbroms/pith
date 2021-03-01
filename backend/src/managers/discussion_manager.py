@@ -61,7 +61,9 @@ class DiscussionManager:
     @Checker._check_user_id
     def post(self, board_id, discussion_id, user_id, text):
       pith, transclusions = self.gm._get_pith(board_id, text)
-      unit = Unit(board_id=board_id, pith=pith, chat=True, author=user_id)
+      user = self.gm.users.find_one({"board_id": board_id, "short_id": user_id})
+      unit = Unit(board_id=board_id, pith=pith, chat=True, 
+        author=user_id, author_name=user["nickname"])
       unit.id = "{}:{}".format(unit.board_id, unit.short_id)
 
       self.gm.units.insert_one(unit.to_mongo())
@@ -133,3 +135,18 @@ class DiscussionManager:
         {"$pull": {"focused": unit_id}}
       )
       return {"unit_id": unit_id}
+
+    @Checker._check_board_id
+    @Checker._check_discussion_id
+    def search(self, board_id, discussion_id, query):
+      discussion = self.gm.discussions.find_one(
+        {"board_id": board_id, "short_id": discussion_id}
+      )
+      chat_ids = discussion["chat"]
+      # query is OR-based      
+      results = [u["short_id"] for u in self.gm.units.find({
+        "board_id": board_id,
+        "short_id": {"$in": chat_ids},
+        "$text": {"$search": query}
+      })]
+      return {"results": [self.gm._get_chat_unit(board_id, r) for r in results]}

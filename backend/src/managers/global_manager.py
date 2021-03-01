@@ -2,7 +2,7 @@ import asyncio
 from aiohttp import web
 from arq import create_pool
 from json import dumps
-from pymongo import MongoClient, ASCENDING
+from pymongo import MongoClient, TEXT
 import mongoengine
 import socketio
 
@@ -80,7 +80,7 @@ class GlobalManager:
 
         # set up index for search
         logger.info("Creating index...")
-        self.units.create_index([("pith", ASCENDING)])
+        self.units.create_index([("pith", TEXT), ("author_name", TEXT)])
 
         # redis
         if start_redis:

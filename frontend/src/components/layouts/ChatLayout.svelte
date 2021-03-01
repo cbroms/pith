@@ -1,6 +1,17 @@
 <script>
+  import { boardStore } from "../../stores/boardStore";
+  import { discussionStore } from "../../stores/discussionStore";
   export let numParticipants = 0;
   export let onLeave;
+
+  const onSearch = () => {
+    const query = "cat dog sydney";
+    discussionStore.search(
+      $boardStore.boardId,
+      $discussionStore.discussionId, 
+      query
+    );  
+  }
 </script>
 
 <div class="layout chat-layout">
@@ -9,6 +20,7 @@
       <h2 class="chat-title">Discussion</h2>
       <div class="chat-participants">{numParticipants} participants</div>
     </div>
+    <button class="button-inline" on:click={onSearch}>Search</button>
     <button class="button-inline" on:click={onLeave}>Leave discussion</button>
   </div>
   <div class="layout-overflow">

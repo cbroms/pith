@@ -371,6 +371,15 @@ class DiscussionNamespace(AsyncNamespace):
         unit_id=request["unit_id"],
       )
 
+    @_process_responses("search", False)
+    @_validate_request("search")
+    async def on_search(self, sid, request):
+      return gm.discussion_manager.search(
+        board_id=request["board_id"],
+        discussion_id=request["discussion_id"],
+        query=request["query"],
+      )
+
 sio.register_namespace(DiscussionNamespace('/discussion'))
 
 def main():

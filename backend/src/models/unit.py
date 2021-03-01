@@ -60,6 +60,13 @@ class Unit(Document):
     :default: None
     """
 
+    author_name = StringField()
+    """
+    :type: *str*
+    :required: False
+    :default: None
+    """
+
     hidden = BooleanField(default=False)
     """
     :type: *bool*

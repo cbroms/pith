@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "board_id": {"type": "string"},
+    "discussion_id": {"type": "string"},
+    "query": {"type": "string"}
+  },
+  "required": ["board_id", "discussion_id", "query"]
+}
+

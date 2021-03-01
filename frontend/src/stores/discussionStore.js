@@ -25,6 +25,7 @@ const defaultState = {
     units: {},
 
     participants: [],
+    searchResults: [],
 };
 
 export const discussionStore = createDerivedSocketStore(
@@ -315,6 +316,38 @@ export const discussionStore = createDerivedSocketStore(
                     }
                 );
             }
+        },
+        search: (boardId, discussionId, query, resolve, reject) => {
+            return (socket, update) => {
+                socket.emit(
+                    "search",
+                    { board_id: boardId, discussion_id: discussionId, query: query },
+                    (res) => {
+                        const json = JSON.parse(res);
+                        console.log("search", json.results);
+                        
+                        if (!json.error) {
+                            update((state) => {
+                                let units = {...state.units};
+                                let searchResults = [];
+                                for (const unit of json.results) {
+                                  searchResults.push(unit.id);
+                                  units[unit.id] = unit;
+                                }
+                        
+                                return {
+                                    ...state,
+                                    searchResults: searchResults,
+                                    units: units,
+                                }
+                            });
+                            resolve();
+                        } else {
+                            errorHandler(json.error, json.error_meta, update);
+                        }
+                    }
+                );
+          }
         },
         // TODO do below need some ids for the board/room?
         subscribeDiscussion: () => {

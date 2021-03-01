@@ -16,6 +16,7 @@ schema_names = [
     "remove_pinned",
     "add_focused",
     "remove_focused",
+    "search",
 ]
 
 for schema_name in schema_names:
