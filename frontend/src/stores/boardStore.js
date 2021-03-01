@@ -124,53 +124,6 @@ export const boardStore = createDerivedSocketStore(
         );
       };
     },
-    updateBoard: (boardId, userId, resolve, reject) => {
-      return (socket, update) => {
-        socket.emit(
-          "update_board",
-          { board_id: boardId, user_id: userId },
-          (res) => {
-            const json = JSON.parse(res);
-            if (!json.error) {
-              // success
-              update((state) => {
-                let unitIds = [...state.unitIds];
-
-                unitIds = unitIds.filter((e) => !json.removed_ids.includes(e));
-
-                let updatedUnits = {};
-                for (const unit of json.updated_units) {
-                  if (!unitIds.includes(unit.id)) {
-                    unitIds.push(unit.id); // TODO check order
-                  }
-                  updatedUnits[unit.id] = unit;
-                }
-                // only remove deleted
-
-                // add changed elements, right overrides left if same key
-                let units = { ...state.units };
-                units = { ...units, ...updatedUnits };
-
-                console.log({
-                  ...state,
-                  unitIds: unitIds,
-                  units: units,
-                });
-                return {
-                  ...state,
-                  unitIds: unitIds,
-                  units: units,
-                };
-              });
-
-              resolve();
-            } else {
-              errorHandler(json.error, json.error_meta, update);
-            }
-          }
-        );
-      };
-    },
     addUnit: (boardId, text, resolve, reject) => {
       return (socket, update) => {
         socket.emit("add_unit", { board_id: boardId, text: text }, (res) => {
@@ -353,6 +306,53 @@ export const boardStore = createDerivedSocketStore(
                   units: units,
                 };
               });
+              resolve();
+            } else {
+              errorHandler(json.error, json.error_meta, update);
+            }
+          }
+        );
+      };
+    },
+    updateBoard: (boardId, userId, resolve, reject) => {
+      return (socket, update) => {
+        socket.on(
+          "update_board",
+          (res) => {
+            const json = JSON.parse(res);
+            if (!json.error) {
+              // success
+              update((state) => {
+                let unitIds = [...state.unitIds];
+
+                unitIds = unitIds.filter((e) => !json.removed_ids.includes(e));
+
+                let updatedUnits = {};
+                for (const unit of json.updated_units) {
+                  if (!unitIds.includes(unit.id)) {
+                    unitIds.push(unit.id);
+                  }
+                  updatedUnits[unit.id] = unit;
+                }
+                // only remove deleted
+
+                // add changed elements, right overrides left if same key
+                let units = { ...state.units };
+                units = { ...units, ...updatedUnits };
+
+                console.log({
+                  ...state,
+                  unitIds: unitIds,
+                  units: units,
+                });
+
+                return {
+                  ...state,
+                  unitIds: unitIds,
+                  units: units,
+                };
+              });
+
               resolve();
             } else {
               errorHandler(json.error, json.error_meta, update);

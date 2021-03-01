@@ -81,6 +81,13 @@ class BoardNamespace(AsyncNamespace):
         return helper
       return outer
 
+    # automatic leave
+    async def on_disconnect(self, sid):
+      session = await self.get_session(sid)
+      if "board_id" in session:
+        board_id = session["board_id"]
+        self.leave_room(sid, board_id)
+
     @_process_responses("join_board")
     @_validate_request("join_board")
     async def on_join_board(self, sid, request):
@@ -92,6 +99,7 @@ class BoardNamespace(AsyncNamespace):
         await self.save_session(sid, {
           "board_id": board_id, 
         })
+        self.enter_room(sid, board_id)
       return result
 
     @_process_responses("create_user")
@@ -113,9 +121,17 @@ class BoardNamespace(AsyncNamespace):
     @_process_responses("update_board")
     @_validate_request("update_board")
     async def on_update_board(self, sid, request):
-      return gm.board_manager.update_board(
-        board_id=request["board_id"],
-        user_id=request["user_id"],
+      result = gm.board_manager.update_board(
+        board_id=request["board_id"]
+      )
+      # emit to everyone in the board
+      session = await self.get_session(sid)
+      board_id = session["board_id"]
+      await self.emit(
+        "update_board"
+        name, 
+        result, 
+        room=board_id 
       )
 
     @_process_responses("add_unit")
