@@ -1,22 +1,22 @@
 import arq
-import logging
-logging.basicConfig(level=logging.DEBUG)
 
 from managers.global_manager import (
   GlobalManager,
   update_board_job,
 )
 import constants
+from utils import utils
 
 
 async def startup(ctx):
-    logging.info("Starting new worker...")
+    utils.logging.info("Starting new worker...")
     # dedicate a manager for the worker
+    ctx["cursor"] = utils.get_time()
     ctx["manager"] = GlobalManager()
-    ctx["manager"].start()
+    ctx["manager"].start() # no Redis
 
 async def shutdown(ctx):
-    logging.info("Shutting down worker...")
+    utils.logging.info("Shutting down worker...")
 
 
 class WorkerSettings(arq.worker.Worker):
@@ -25,4 +25,6 @@ class WorkerSettings(arq.worker.Worker):
     max_tries = constants.MAX_QUEUED_JOB_RETRIES
     on_startup = startup
     on_shutdown = shutdown
-    functions = [update_board_job]
+    cron_jobs = [
+      arq.cron(update_board_job, second={0, 10, 20, 30, 40, 50})
+    ]

@@ -26,10 +26,16 @@ gm = GlobalManager()
 sio = gm.sio
 
 
-@sio.on("create", namespace='/')
-async def on_create(sid, request):
-  return gm.create()
+class GlobalNamespace(AsyncNamespace):
 
+    async def on_create_board(self, sid, request):
+        logger.info("Created board...")
+        product = gm.create()
+        result = dumps(product, cls=DictEncoder)
+        logger.info("Created board {}.".format(product["board_id"]))
+        return result
+
+sio.register_namespace(GlobalNamespace('/global'))
 
 class BoardNamespace(AsyncNamespace):
     """
@@ -69,7 +75,7 @@ class BoardNamespace(AsyncNamespace):
             ))
             result = make_error(Errors.SERVER_ERR)
           
-          logger.info("RESULT\n{}\n", result)
+          logger.info("RESULT\n{}\n".format(result))
           return result
         return helper
       return outer
@@ -368,7 +374,7 @@ class DiscussionNamespace(AsyncNamespace):
 sio.register_namespace(DiscussionNamespace('/discussion'))
 
 def main():
-    gm.start()
+    gm.start(start_redis=True)
     aio_app = gm.aio_app
     web.run_app(aio_app, port=constants.PORT)
  

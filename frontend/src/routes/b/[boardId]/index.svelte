@@ -39,6 +39,7 @@
       // try joining the board with the user ID
       await boardStore.loadBoard(id, $boardStore.userId);
       // now that we've loaded the board, we can redirect to a particular discussion if requested
+      boardStore.subscribeBoard();
       if (dId) {
         await goto(`/b/${id}/d/${dId}/`);
       }

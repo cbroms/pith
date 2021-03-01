@@ -1,9 +1,10 @@
 <script>
   import BoardWindowLayout from "../components/layouts/BoardWindowLayout.svelte";
   import DiscussionLayout from "../components/layouts/DiscussionLayout.svelte";
-  import { boardStore } from "../stores/globalStore";
+  import { globalStore } from "../stores/globalStore";
 
   const onNewBoard = () => {
+    console.log("onNewBoard");
     globalStore.create();
   };
 </script>
@@ -24,10 +25,9 @@
       </p>
       <h2>Create a board</h2>
       <button class="button-inline" on:click={onNewBoard}>Create new board</button>
-      <!--- Show created boards here...> 
-      <br>
-      <p>Navigate to the board with the ID in your browser:</p>
-      <p><code>http://localhost:3000/b/5yo96fq8xr1m</code></p>
+      {#each $globalStore.boards as board (board)} 
+        <div><a href="/b/{board}">{board}</a></div>
+      {/each}
     </div>
   </DiscussionLayout>
 </BoardWindowLayout>

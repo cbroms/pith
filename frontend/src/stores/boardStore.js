@@ -314,7 +314,7 @@ export const boardStore = createDerivedSocketStore(
         );
       };
     },
-    updateBoard: (boardId, userId, resolve, reject) => {
+    subscribeBoard: (resolve, reject) => {
       return (socket, update) => {
         socket.on(
           "update_board",
@@ -324,7 +324,6 @@ export const boardStore = createDerivedSocketStore(
               // success
               update((state) => {
                 let unitIds = [...state.unitIds];
-
                 unitIds = unitIds.filter((e) => !json.removed_ids.includes(e));
 
                 let updatedUnits = {};
@@ -334,17 +333,10 @@ export const boardStore = createDerivedSocketStore(
                   }
                   updatedUnits[unit.id] = unit;
                 }
-                // only remove deleted
 
                 // add changed elements, right overrides left if same key
                 let units = { ...state.units };
                 units = { ...units, ...updatedUnits };
-
-                console.log({
-                  ...state,
-                  unitIds: unitIds,
-                  units: units,
-                });
 
                 return {
                   ...state,
@@ -352,7 +344,6 @@ export const boardStore = createDerivedSocketStore(
                   units: units,
                 };
               });
-
               resolve();
             } else {
               errorHandler(json.error, json.error_meta, update);

@@ -1,12 +1,17 @@
 import asyncio
 from aiohttp import web
 from arq import create_pool
+from json import dumps
 from pymongo import MongoClient, ASCENDING
 import mongoengine
 import socketio
 
 import constants
-from utils import utils
+from utils.utils import (
+  get_time,
+  logger,
+  DictEncoder,
+)
 
 from models.board import Board
 from models.transclusion import Transclusion
@@ -15,21 +20,23 @@ from managers.board_manager import BoardManager
 from managers.discussion_manager import DiscussionManager
 
 
-def update_board_job(ctx, board_id):
+async def update_board_job(ctx):
 
   gm = ctx["manager"]
+  cursor = ctx["cursor"]
+  ctx["cursor"] = get_time()
 
-  # start cursor
-  if board_id not in ctx:
-    ctx["cursor"] = utils.get_time()
-  else:
-    # get old cursor, last pulled
-    cursor = ctx["cursor"]
+  logger.info("update_board_job {}".format(cursor))
+
+  boards = [b for b in gm.boards.find()]
+
+  for board in boards:
+    board_id = board["short_id"]
+
     # use cursor to get update
-    utils.logger.info("update_board_job {} {}".format(board_id, cursor))
-    result = gm.board_manager.update_board(board_id, cursor)
-    # save new cursor
-    ctx["cursor"] = utils.get_time()
+    product = gm.board_manager.update_board(board_id=board_id, cursor=cursor)
+    result = dumps(product, cls=DictEncoder)
+
     # emit to every user in board
     await gm.sio.emit(
       "update_board",
@@ -37,13 +44,6 @@ def update_board_job(ctx, board_id):
       room=board_id,
       namespace='/board'
     )
-
-  # setup first, next round 
-  await gm.redis_queue.enqueue_job(
-    "update_board_job", board_id, 
-    _defer_by=constants.BOARD_UPDATE_DURATION
-  ) 
-
 
 
 class GlobalManager:
@@ -59,14 +59,17 @@ class GlobalManager:
         self.aio_app = web.Application()
         self.sio.attach(self.aio_app)
 
-    def start(self):
+    def start(self, start_redis=False):
+        logger.info("Starting manager...")
 
         # mongo
+        logger.info("Connecting to mongo at {}...".format(constants.MONGODB_CONN))
         self.client = MongoClient(constants.MONGODB_CONN)
         mongoengine.connect(constants.MONGODB_NAME, host=constants.MONGODB_CONN)
         self.db = self.client["pith"]
 
         # collections
+        logger.info("Accessing collections...")
         self.boards = self.db["boards"]
         self.discussions = self.db["discussions"]
         self.users = self.db["users"]
@@ -76,13 +79,17 @@ class GlobalManager:
         self.unit_updates = self.db["unit_updates"]
 
         # set up index for search
+        logger.info("Creating index...")
         self.units.create_index([("pith", ASCENDING)])
 
         # redis
-        loop = asyncio.get_event_loop()
-        self.redis_queue = loop.run_until_complete(create_pool(constants.ARQ_REDIS))
+        if start_redis:
+          logger.info("Starting redis...")
+          loop = asyncio.get_event_loop()
+          self.redis_queue = loop.run_until_complete(create_pool(constants.ARQ_REDIS))
 
         # these get all the other variables
+          logger.info("Starting derivative managers...")
         self.discussion_manager = DiscussionManager(self)
         self.board_manager = BoardManager(self)
 
@@ -92,10 +99,6 @@ class GlobalManager:
         board.id = board_id
 
         self.boards.insert_one(board.to_mongo())
-
-        await self.redis_queue.enqueue_job(
-          "update_board_job", board_id
-        ) 
 
         return {"board_id": board_id}
 

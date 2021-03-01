@@ -19,12 +19,17 @@ export const globalStore = createDerivedSocketStore(
     create: (resolve, reject) => {
       return (socket, update) => {
         socket.emit(
-          "create",
+          "create_board",
+          {},
           (res) => {
+            console.log("create", res);
             const json = JSON.parse(res);
             if (!json.error) {
               update((state) => {
-                return { ...state, boards: [...self.boards, json.board_id] };
+                return { 
+                  ...state, 
+                  boards: [...state.boards, json.board_id] 
+                };
               });
               resolve();
             } else {
