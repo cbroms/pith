@@ -1,10 +1,19 @@
 <script>
   import { boardStore } from "../../stores/boardStore";
+
+  const onSearch = () => {
+    const query = "cat dog sydney";
+    boardStore.search(
+      $boardStore.boardId,
+      query
+    );  
+  }
 </script>
 
 <div class="layout board-layout">
   <div class="layout-header">
     <h2>Board</h2>
+    <button class="button-inline" on:click={onSearch}>Search</button>
     <button
       class="button-inline"
       on:click={() =>

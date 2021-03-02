@@ -18,6 +18,7 @@ schema_names = [
     "remove_link",
     "get_unit",
     "create_disc",
+    "search",
 ]
 
 

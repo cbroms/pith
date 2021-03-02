@@ -19,6 +19,7 @@ const defaultState = {
   // [opt] linksTo, [opt] linksFrom, [opt] discussions
   unitIds: [],
   units: {},
+  searchResults: [],
 };
 
 export const boardStore = createDerivedSocketStore(
@@ -313,6 +314,38 @@ export const boardStore = createDerivedSocketStore(
           }
         );
       };
+    },
+    search: (boardId, query, resolve, reject) => {
+        return (socket, update) => {
+            socket.emit(
+                "search",
+                { board_id: boardId, query: query },
+                (res) => {
+                    const json = JSON.parse(res);
+                    console.log("search", json.results);
+                    
+                    if (!json.error) {
+                        update((state) => {
+                            let units = {...state.units};
+                            let searchResults = [];
+                            for (const unit of json.results) {
+                              searchResults.push(unit.id);
+                              units[unit.id] = unit;
+                            }
+                    
+                            return {
+                                ...state,
+                                searchResults: searchResults,
+                                units: units,
+                            }
+                        });
+                        resolve();
+                    } else {
+                        errorHandler(json.error, json.error_meta, update);
+                    }
+                }
+            );
+      }
     },
     subscribeBoard: (resolve, reject) => {
       return (socket, update) => {

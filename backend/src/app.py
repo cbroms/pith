@@ -187,6 +187,14 @@ class BoardNamespace(AsyncNamespace):
         unit_id=request["unit_id"],
       )
 
+    @_process_responses("search")
+    @_validate_request("search")
+    async def on_search(self, sid, request):
+      return gm.board_manager.search(
+        board_id=request["board_id"],
+        query=request["query"],
+      )
+
 sio.register_namespace(BoardNamespace('/board'))
 
 class DiscussionNamespace(AsyncNamespace):

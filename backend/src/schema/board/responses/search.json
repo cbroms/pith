@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "results": {
+      "type": "array",
+      "item": {"$ref": "file:unit.json#/board"}
+    }
+  },
+  "required": ["results"]
+}

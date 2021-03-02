@@ -1,8 +1,9 @@
 from arq import create_pool
 from arq.connections import RedisSettings
-from utils import utils
 from json import dumps
+from pymongo import ASCENDING
 
+from utils import utils
 from models.discussion import Discussion
 from models.user import User
 from models.unit import Unit
@@ -152,3 +153,13 @@ class BoardManager:
       self.gm.discussions.insert_one(discussion.to_mongo())
       self._record_unit_update(board_id, unit_id)
       return {"discussion": self.gm._get_disc(board_id, discussion.short_id)}
+
+    @Checker._check_board_id
+    def search(self, board_id, query):
+      # query is OR-based      
+      results = [u["short_id"] for u in self.gm.units.find({
+        "board_id": board_id,
+        "chat": False,
+        "$text": {"$search": query}
+      }).sort([("created", ASCENDING)])]
+      return {"results": [self.gm._get_extended_unit(board_id, r) for r in results]}

@@ -1,9 +1,10 @@
 from error import Errors
+from pymongo import ASCENDING
+
 from utils.utils import (
   make_error,
   logger,
 )
-
 from models.unit import Unit
 
 from managers.checker import Checker
@@ -148,5 +149,5 @@ class DiscussionManager:
         "board_id": board_id,
         "short_id": {"$in": chat_ids},
         "$text": {"$search": query}
-      })]
+      }).sort([("created", ASCENDING)])]
       return {"results": [self.gm._get_chat_unit(board_id, r) for r in results]}

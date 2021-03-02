@@ -17,6 +17,7 @@ schema_names = [
     "remove_link",
     "get_unit",
     "create_disc",
+    "search",
 ]
 
 for schema_name in schema_names:
