@@ -1,18 +1,6 @@
 <script>
   import ServerConnection from "../../../components/banners/ServerConnection.svelte";
   import ServerError from "../../../components/banners/ServerError.svelte";
-  import BoardWindowLayout from "../../../components/layouts/BoardWindowLayout.svelte";
-
-  //   const periodUpdate = setInterval(() => {
-  //     //  every 30 seconds, fetch new board data
-  //     boardStore.updateBoard(id, $boardStore.userId);
-  //     console.log("updated");
-  //   }, 2000);
-
-  //   onDestroy(() => {
-  //     // clear the interval that fetches new content
-  //     clearInterval(periodUpdate);
-  //   });
 </script>
 
 <div class="wrapper">
@@ -22,9 +10,7 @@
   </div>
 
   <div class="content-wrapper">
-    <BoardWindowLayout>
-      <slot />
-    </BoardWindowLayout>
+    <slot />
   </div>
 </div>
 

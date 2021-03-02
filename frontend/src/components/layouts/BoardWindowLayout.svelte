@@ -7,6 +7,6 @@
     min-height: 100%;
     display: grid;
     grid-template-columns: 60vw 40vw;
-    grid-template-rows: 100vh;
+    grid-template-rows: 30vh 70vh;
   }
 </style>

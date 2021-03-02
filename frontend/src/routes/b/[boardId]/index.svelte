@@ -1,25 +1,24 @@
 <script context="module">
   export async function preload({ params, query }) {
-    console.log(query);
     return { id: params.boardId, dId: query.d };
   }
 </script>
 
 <script>
   import { goto } from "@sapper/app";
-  import { onMount, onDestroy } from "svelte";
+  import { onMount } from "svelte";
 
   import { parseTime } from "../../../utils/parseTime";
 
   import { boardStore } from "../../../stores/boardStore";
   import { boardDisplayContextStore } from "../../../stores/boardDisplayContextStore";
 
-  import BoardLayout from "../../../components/layouts/BoardLayout.svelte";
-  import DiscussionLayout from "../../../components/layouts/DiscussionLayout.svelte";
+  import BoardPageLayout from "../../../components/layouts/BoardPageLayout.svelte";
   import LinkedContentItemLayout from "../../../components/layouts/LinkedContentItemLayout.svelte";
   import LinkedContentLayout from "../../../components/layouts/LinkedContentLayout.svelte";
-  import Board from "../../../components/sections/Board.svelte";
+  import SectionLayout from "../../../components/layouts/SectionLayout.svelte";
 
+  import Board from "../../../components/sections/Board.svelte";
   import BoardUnit from "../../../components/unit/BoardUnit.svelte";
 
   export let id;
@@ -54,11 +53,8 @@
   };
 </script>
 
-<BoardLayout>
-  <Board {id} noControls />
-</BoardLayout>
-<DiscussionLayout>
-  <div class="board-info">
+<BoardPageLayout>
+  <div slot="info" class="section board-info">
     {#if $boardStore.isValidBoard}
       <h1>Welcome!</h1>
       {#if !$boardDisplayContextStore.id}
@@ -91,14 +87,24 @@
       <p>That board doesn't exist!</p>
     {/if}
   </div>
-</DiscussionLayout>
+
+  <div slot="board" class="section">
+    <SectionLayout sectionName="Board">
+      <Board {id} noControls />
+    </SectionLayout>
+  </div>
+</BoardPageLayout>
 
 <style>
-  .board-info {
-    grid-column: 1 / 2;
-    grid-row: 1 / 3;
+  .section {
+    height: 100%;
+    width: 100%;
+  }
 
-    padding: 10px;
+  .board-info {
+    max-width: 500px;
+    padding: 20px 0;
+    margin: 0 auto;
   }
 
   .discussion-listing {

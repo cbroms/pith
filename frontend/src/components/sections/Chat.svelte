@@ -15,6 +15,13 @@
   let loadingNext = false;
   let checkTimeout = null;
 
+  // for search...
+  //   discussionStore.search(
+  //       $boardStore.boardId,
+  //       $discussionStore.discussionId,
+  //       query
+  //     );
+
   let prevNumMessages = $discussionStore.chat.length;
   let missedMessages = 0;
 

@@ -3,14 +3,11 @@
 
   const onSearch = () => {
     const query = "cat dog sydney";
-    boardStore.search(
-      $boardStore.boardId,
-      query
-    );  
-  }
+    boardStore.search($boardStore.boardId, query);
+  };
 </script>
 
-<div class="layout board-layout">
+<div class="layout discussion-board-layout">
   <div class="layout-header">
     <h2>Board</h2>
     <button class="button-inline" on:click={onSearch}>Search</button>
@@ -27,9 +24,9 @@
 </div>
 
 <style>
-  .board-layout {
+  .discussion-board-layout {
     grid-column: 2 / 3;
-    grid-row: 1 / 2;
+    grid-row: 2 / 3;
   }
 
   .layout-header {

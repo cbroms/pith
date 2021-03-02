@@ -28,26 +28,6 @@ button:hover {
   padding: 0;
 }
 
-.layout {
-  padding: 15px;
-  display: grid;
-  grid-template-rows: auto 1fr;
-}
-
-.layout-overflow-container {
-  height: 100%;
-}
-
-.layout-overflow {
-  grid-row: 2/3;
-  overflow-y: scroll;
-}
-
-.layout-header {
-  width: 100%;
-  border-bottom: 1px solid;
-}
-
 input {
   width: 100%;
   padding: 10px;

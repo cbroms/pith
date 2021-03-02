@@ -13,19 +13,14 @@
   import { discussionStore } from "../../../../../stores/discussionStore";
   import { boardStore } from "../../../../../stores/boardStore";
 
-  import DiscussionLayout from "../../../../../components/layouts/DiscussionLayout.svelte";
-  import BoardLayout from "../../../../../components/layouts/BoardLayout.svelte";
-  import ChatLayout from "../../../../../components/layouts/ChatLayout.svelte";
-  import FocusLayout from "../../../../../components/layouts/FocusLayout.svelte";
-  import PinnedLayout from "../../../../../components/layouts/PinnedLayout.svelte";
+  import DiscussionPageLayout from "../../../../../components/layouts/DiscussionPageLayout.svelte";
+  import SectionLayout from "../../../../../components/layouts/SectionLayout.svelte";
 
   import Board from "../../../../../components/sections/Board.svelte";
   import Chat from "../../../../../components/sections/Chat.svelte";
 
   import BoardUnit from "../../../../../components/unit/BoardUnit.svelte";
   import ChatUnit from "../../../../../components/unit/ChatUnit.svelte";
-  import BoardWindowLayout from "../../../../../components/layouts/BoardWindowLayout.svelte";
-  import Index from "../../index.svelte";
 
   export let id;
   export let bId;
@@ -36,40 +31,85 @@
       goto(`/b/${bId}/?d=${id}`);
     } else {
       await discussionStore.joinDiscussion(bId, id, $boardStore.userId);
-      console.log("subscribing to disc");
       discussionStore.subscribeDiscussion();
-      console.log("subscribed to disc");
-
-      console.log($boardStore);
     }
   });
 
   const onLeave = () => {
-    console.log("onLeave");
     discussionStore.leaveDiscussion(bId, id, $boardStore.userId);
     goto(`/b/${bId}/`);
   };
 </script>
 
-<DiscussionLayout>
-  <ChatLayout {onLeave} numParticipants={$discussionStore.participants.length}>
-    <Chat {id} />
-  </ChatLayout>
-  <FocusLayout>
-    {#if $discussionStore.focused.length === 0}
-      <p>Select a unit from the board to focus your discussion.</p>
-    {/if}
-    {#each $discussionStore.focused as unitId}
-      <BoardUnit truncate unit={$boardStore.units[unitId]} unfocus />
-    {/each}
-  </FocusLayout>
-  <PinnedLayout>
-    {#each $discussionStore.pinned as unitId}
-      <ChatUnit truncate {...$discussionStore.units[unitId]} unpin />
-    {/each}
-  </PinnedLayout>
-</DiscussionLayout>
+<DiscussionPageLayout>
+  <div class="section" slot="chat">
+    <SectionLayout sectionName="Chat">
+      <div slot="header" class="header chat-controls">
+        <div>{$discussionStore.participants.length} here now</div>
+        <button on:click={onLeave} class="inline-button"
+          >Leave discussion</button
+        >
+      </div>
+      <Chat {id} />
+    </SectionLayout>
+  </div>
 
-<BoardLayout>
-  <Board id={bId} focus />
-</BoardLayout>
+  <div class="section" slot="pinned">
+    <SectionLayout sectionName="Summary">
+      {#each $discussionStore.pinned as unitId}
+        <ChatUnit truncate {...$discussionStore.units[unitId]} unpin />
+      {/each}
+    </SectionLayout>
+  </div>
+
+  <div class="section" slot="focus">
+    <SectionLayout sectionName="Focusing on">
+      {#if $discussionStore.focused.length === 0}
+        <p>Select a unit from the board to focus your discussion.</p>
+      {/if}
+      {#each $discussionStore.focused as unitId}
+        <BoardUnit truncate unit={$boardStore.units[unitId]} unfocus />
+      {/each}
+    </SectionLayout>
+  </div>
+
+  <div class="section" slot="board">
+    <SectionLayout sectionName="Board">
+      <div slot="header" class="header board-controls">
+        <button
+          class="button-inline"
+          on:click={() =>
+            boardStore.updateBoard($boardStore.boardId, $boardStore.userId)}
+          >Refresh Board</button
+        >
+      </div>
+      <Board id={bId} focus />
+    </SectionLayout>
+  </div>
+
+  <!-- <ChatLayout {onLeave} numParticipants={$discussionStore.participants.length}>
+    
+  </ChatLayout> -->
+</DiscussionPageLayout>
+
+<style>
+  .section {
+    height: 100%;
+    width: 100%;
+  }
+
+  .header {
+    display: flex;
+    margin-left: 15px;
+
+    width: 100%;
+  }
+
+  .chat-controls {
+    justify-content: space-between;
+  }
+
+  .board-controls {
+    justify-content: flex-end;
+  }
+</style>
