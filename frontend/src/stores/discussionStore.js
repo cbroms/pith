@@ -26,6 +26,7 @@ const defaultState = {
 
     participants: [],
     searchResults: [],
+    typers: [],
 };
 
 export const discussionStore = createDerivedSocketStore(
@@ -339,6 +340,58 @@ export const discussionStore = createDerivedSocketStore(
                                     ...state,
                                     searchResults: searchResults,
                                     units: units,
+                                }
+                            });
+                            resolve();
+                        } else {
+                            errorHandler(json.error, json.error_meta, update);
+                        }
+                    }
+                );
+          }
+        },
+        typingStart: (boardId, discussionId, userId, resolve, reject) => {
+            return (socket, update) => {
+                socket.emit(
+                    "typing_start",
+                    { board_id: boardId, discussion_id: discussionId, user_id: userId },
+                    (res) => {
+                        const json = JSON.parse(res);
+                        
+                        if (!json.error) {
+                            update((state) => {
+                                let typers = {...state.typers};
+                                typers.push(userId);
+                        
+                                return {
+                                    ...state,
+                                    typers: typers,
+                                }
+                            });
+                            resolve();
+                        } else {
+                            errorHandler(json.error, json.error_meta, update);
+                        }
+                    }
+                );
+          }
+        },
+        typingStop: (boardId, discussionId, userId, resolve, reject) => {
+            return (socket, update) => {
+                socket.emit(
+                    "typing_stop",
+                    { board_id: boardId, discussion_id: discussionId, user_id: userId },
+                    (res) => {
+                        const json = JSON.parse(res);
+                        
+                        if (!json.error) {
+                            update((state) => {
+                                let typers = {...state.typers};
+                                typers.filter((e) => { return e !== userId });
+                        
+                                return {
+                                    ...state,
+                                    typers: typers,
                                 }
                             });
                             resolve();

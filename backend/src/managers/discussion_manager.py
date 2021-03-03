@@ -3,7 +3,6 @@ from pymongo import ASCENDING
 
 from utils.utils import (
   make_error,
-  logger,
 )
 from models.unit import Unit
 
