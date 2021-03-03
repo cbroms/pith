@@ -75,14 +75,6 @@
 
   <div class="section" slot="board">
     <SectionLayout sectionName="Board">
-      <div slot="header" class="header board-controls">
-        <button
-          class="button-inline"
-          on:click={() =>
-            boardStore.updateBoard($boardStore.boardId, $boardStore.userId)}
-          >Refresh Board</button
-        >
-      </div>
       <Board id={bId} focus />
     </SectionLayout>
   </div>
@@ -107,9 +99,5 @@
 
   .chat-controls {
     justify-content: space-between;
-  }
-
-  .board-controls {
-    justify-content: flex-end;
   }
 </style>
