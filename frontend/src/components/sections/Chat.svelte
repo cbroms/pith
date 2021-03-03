@@ -3,10 +3,8 @@
 
   import { discussionStore } from "../../stores/discussionStore";
   import { boardStore } from "../../stores/boardStore";
-  import BoardLayout from "../layouts/BoardLayout.svelte";
 
   import ChatUnit from "../unit/ChatUnit.svelte";
-  import Board from "./Board.svelte";
 
   export let id;
 
