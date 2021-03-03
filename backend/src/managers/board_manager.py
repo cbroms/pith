@@ -76,9 +76,9 @@ class BoardManager:
       }
         
     @Checker._check_board_id
-    def add_unit(self, board_id, text):
+    def add_unit(self, board_id, text, beam=False, beam_purpose=""):
       pith, transclusions = self.gm._get_pith(board_id, text)
-      unit = Unit(board_id=board_id, pith=pith)
+      unit = Unit(board_id=board_id, pith=pith, beam=beam, beam_purpose=beam_purpose)
       unit.id = "{}:{}".format(unit.board_id, unit.short_id)
 
       self.gm.units.insert_one(unit.to_mongo())

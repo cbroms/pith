@@ -135,6 +135,8 @@ class BoardNamespace(AsyncNamespace):
       return gm.board_manager.add_unit(
         board_id=request["board_id"],
         text=request["text"],
+        beam=request["beam"],
+        beam_purpose=request["beam_purpose"]
       )
 
     @_process_responses("remove_unit")

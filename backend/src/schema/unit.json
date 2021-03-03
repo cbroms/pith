@@ -21,6 +21,7 @@
         "transclusions": {
           "type": "object"
         },
+        "beam": {"type": "boolean"},
         "links_to": {
           "type": "array",
           "items": {"$ref": "file:link.json#/link"}
@@ -32,8 +33,9 @@
         "discussions": {
           "type": "array",
           "items": {"$ref": "file:disc.json#/disc"}
-        }
+        },
+        "beam_purpose": {"type": "string"}
       },
-      "required": ["id", "pith", "transclusions"]
+      "required": ["id", "pith", "transclusions", "beam"]
   }
 }

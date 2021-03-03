@@ -219,7 +219,8 @@ class GlobalManager:
       return {
         "id": unit_id,
         "pith": unit["pith"],
-        "transclusions": self._get_transclusion_map(board_id, unit_id)
+        "transclusions": self._get_transclusion_map(board_id, unit_id),
+        "beam": unit["beam"]
       }      
 
     def _get_extended_unit(self, board_id, unit_id):
@@ -228,9 +229,11 @@ class GlobalManager:
         "id": unit_id,
         "pith": unit["pith"],
         "transclusions": self._get_transclusion_map(board_id, unit_id),
+        "beam": unit["beam"],
         "links_to": self._get_links_to(board_id, unit_id),
         "links_from": self._get_links_from(board_id, unit_id),
-        "discussions": self._get_discussions(board_id, unit_id)
+        "discussions": self._get_discussions(board_id, unit_id),
+        "beam_purpose": unit["beam_purpose"] # filled only if beam
       }
 
     def _get_participants(self, board_id, discussion_id):

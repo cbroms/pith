@@ -2,7 +2,9 @@
   "type": "object",
   "properties": {
     "board_id": {"type": "string"},
-    "text": {"type": "string"}
+    "text": {"type": "string"},
+    "beam": {"type": "boolean"},
+    "beam_purpose": {"type": "string"}
   },
   "required": ["board_id", "text"]
 }

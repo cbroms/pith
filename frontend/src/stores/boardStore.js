@@ -125,9 +125,11 @@ export const boardStore = createDerivedSocketStore(
         );
       };
     },
-    addUnit: (boardId, text, resolve, reject) => {
+    addUnit: (boardId, text, beam, beamPurpose, resolve, reject) => {
       return (socket, update) => {
-        socket.emit("add_unit", { board_id: boardId, text: text }, (res) => {
+        socket.emit("add_unit", 
+        { board_id: boardId, text: text, beam: beam, beam_purpose: beamPurpose }, 
+        (res) => {
           const json = JSON.parse(res);
           if (!json.error) {
             update((state) => {

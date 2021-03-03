@@ -74,4 +74,18 @@ class Unit(Document):
     :default: False
     """
 
+    beam = BooleanField(default=False)
+    """
+    :type: *bool*
+    :required: False
+    :default: False
+    """
+
+    beam_purpose = StringField(default=False)
+    """
+    :type: *str*
+    :required: False
+    :default: None
+    """
+
     id = StringField(default="", primary_key=True)
