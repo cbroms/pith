@@ -46,7 +46,7 @@ class BoardManager:
       user = self.gm.users.find_one({"short_id": user_id, "board_id": board_id})
 
       units = self.gm.units.find({"chat": False, "board_id": board_id})
-      units_output = [self.gm._get_basic_unit(board_id, unit["short_id"]) \
+      units_output = [self.gm._get_extended_unit(board_id, unit["short_id"]) \
         for unit in units if unit["hidden"] is False]
 
       return {"nickname": user["nickname"], "units": units_output}
@@ -85,7 +85,7 @@ class BoardManager:
       unit_id = unit.short_id
       self.gm._insert_transclusions(board_id, unit_id, transclusions)
       self._record_unit_update(board_id, unit_id)
-      return {"unit": self.gm._get_basic_unit(board_id, unit_id)}
+      return {"unit": self.gm._get_extended_unit(board_id, unit_id)}
 
     @Checker._check_board_id
     @Checker._check_unit_id
