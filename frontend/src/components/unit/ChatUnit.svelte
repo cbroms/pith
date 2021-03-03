@@ -18,6 +18,10 @@
   export let transclusions = null;
 
   export let truncate = false;
+  export let searchResult = false;
+  export let onClick = () => {
+    open = !open;
+  };
 
   // we use the previous unit to determine if we should display the author and time
   export let prev = null;
@@ -75,10 +79,6 @@
       id
     );
   };
-
-  const onClick = () => {
-    open = !open;
-  };
 </script>
 
 <div class="message" on:click={onClick}>
@@ -102,14 +102,16 @@
       <TruncateText active={truncate && !open}>
         {pith}
       </TruncateText>
-      <div class="message-pin">
-        <CopyContent {id} />
-        {#if pin && !unpin}
-          <button on:click={onPin}>Pin &rarr;</button>
-        {:else if unpin}
-          <button on:click={onUnpin}>Unpin</button>
-        {/if}
-      </div>
+      {#if !searchResult}
+        <div class="message-pin">
+          <CopyContent {id} />
+          {#if pin && !unpin}
+            <button on:click={onPin}>Pin &rarr;</button>
+          {:else if unpin}
+            <button on:click={onUnpin}>Unpin</button>
+          {/if}
+        </div>
+      {/if}
     </div>
   </div>
 </div>
