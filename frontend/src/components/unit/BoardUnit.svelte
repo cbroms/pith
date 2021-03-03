@@ -9,6 +9,7 @@
   import CopyContent from "../buttons/CopyContent.svelte";
   import TruncateText from "./TruncateText.svelte";
   import Transclusion from "./Transclusion.svelte";
+  import UnitEditor from "../inputs/UnitEditor.svelte";
 
   export let unit;
   export let focus = false;
@@ -22,7 +23,7 @@
 
   export let addLinkSource = false;
   export let addLinkTarget = false;
-  export let onAddLinkSource; // function from parent
+  export let onAddLinkSource;
   export let onAddLinkTarget;
 
   let linksOpen = false;
@@ -30,22 +31,18 @@
 
   let content = "";
 
-  const onSubmit = () => {
+  const onSubmit = (content) => {
     if (content !== "") {
       boardStore.editUnit($boardStore.boardId, unit.id, content);
-      content = "";
       editing = false;
     }
-  };
-
-  const onKeydown = (e) => {
-    if (e.key === "Enter") onSubmit();
   };
 
   const onEdit = () => {
     editing = !editing;
     content = unit.pith;
   };
+
   const onRemove = () => {
     boardStore.removeUnit($boardStore.boardId, unit.id);
     boardDisplayContextStore.set({ id: null });
@@ -67,24 +64,17 @@
     );
   };
   const onLinks = async () => {
-    linksOpen = !linksOpen;
+    if (!editing) {
+      linksOpen = !linksOpen;
 
-    if (linksOpen) {
-      await boardStore.getUnitFull($boardStore.boardId, unit.id);
+      if (linksOpen) {
+        await boardStore.getUnitFull($boardStore.boardId, unit.id);
+      }
+
+      // set the display context so we can render board info on the board
+      boardDisplayContextStore.set({ id: unit.id });
     }
-
-    // set the display context so we can render board info on the board
-    boardDisplayContextStore.set({ id: unit.id });
   };
-
-  //   const onUnitDiscussions = async () => {
-  //     await boardStore.getUnitFull($boardStore.boardId, unit.id);
-  //     onDiscussions(unit);
-  //   };
-
-  //   const onUnitClick = () =>  {
-  //     if (addLinkSource)
-  //   }
 
   const onRemoveLink = (linkId) => {
     boardStore.removeLink($boardStore.boardId, linkId);
@@ -94,13 +84,18 @@
 <div class="board-unit">
   <div class="unit-content" on:click={onLinks}>
     {#if editing}
-      <input
+      <UnitEditor
+        {content}
+        {onSubmit}
+        onCancel={onEdit}
         placeholder="type a pith..."
-        bind:value={content}
-        on:keydown={onKeydown}
+        noBorder
       />
     {:else}
-      <TruncateText active={truncate && !linksOpen}>{unit?.pith}</TruncateText>
+      <div class="text">
+        <TruncateText active={truncate && !linksOpen}>{unit?.pith}</TruncateText
+        >
+      </div>
     {/if}
   </div>
   {#if !noControls && (focus || unfocus || edit || links || addLinkSource || addLinkTarget)}
@@ -210,8 +205,8 @@
     padding: 10px;
   }
 
-  .links-header {
-    /* font-weight: bold; */
+  .text {
+    padding-bottom: 5px;
   }
 
   .solid-width {

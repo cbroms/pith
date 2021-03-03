@@ -1,6 +1,7 @@
 <script>
   import { unix } from "dayjs";
   import { boardStore } from "../../stores/boardStore";
+  import UnitEditor from "../inputs/UnitEditor.svelte";
 
   import BoardUnit from "../unit/BoardUnit.svelte";
 
@@ -12,17 +13,10 @@
   let linkSourceId = null;
   let linkTargetId = null;
 
-  let content = "";
-
-  const onSubmit = () => {
+  const onSubmit = (content) => {
     if (content !== "") {
       boardStore.addUnit(id, content);
-      content = "";
     }
-  };
-
-  const onKeydown = (e) => {
-    if (e.key === "Enter") onSubmit();
   };
 
   const onAddLinkSource = (id) => {
@@ -59,11 +53,5 @@
       addLinkTarget={linkSourceId && unitId !== linkSourceId}
     />
   {/each}
-  <!-- {#if !noControls} -->
-  <input
-    placeholder="type a pith..."
-    bind:value={content}
-    on:keydown={onKeydown}
-  />
-  <!-- {/if} -->
+  <UnitEditor {onSubmit} placeholder="type a pith..." />
 </div>

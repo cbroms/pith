@@ -1,10 +1,11 @@
 <script>
-  import { beforeUpdate, afterUpdate, onMount } from "svelte";
+  import { beforeUpdate, afterUpdate, onMount, onDestroy } from "svelte";
 
   import { discussionStore } from "../../stores/discussionStore";
   import { boardStore } from "../../stores/boardStore";
 
   import ChatUnit from "../unit/ChatUnit.svelte";
+  import UnitEditor from "../inputs/UnitEditor.svelte";
 
   export let id;
 
@@ -12,13 +13,13 @@
   let autoscroll;
   let loadingNext = false;
   let checkTimeout = null;
-  let makeSearchTimeout = null;
-  let query = "";
-  let justSearchedQuery = "";
-  let isSearching = false;
 
   let prevNumMessages = $discussionStore.chat.length;
   let missedMessages = 0;
+
+  onMount(() => {
+    prevNumMessages = $discussionStore.chat.length;
+  });
 
   beforeUpdate(() => {
     autoscroll =
@@ -37,33 +38,10 @@
       missedMessages += 1;
       prevNumMessages = $discussionStore.chat.length;
     }
-
-    // check for changed content and extract a query
-    const start = content.lastIndexOf("[[");
-    const end = content.lastIndexOf("]]");
-    if (start !== -1 && (end === -1 || start > end)) {
-      query = content.substring(start + 2).replace("]", "");
-
-      if (query === "") isSearching = true;
-
-      if (justSearchedQuery !== query) {
-        clearTimeout(makeSearchTimeout);
-        makeSearchTimeout = setTimeout(() => {
-          discussionStore.search(
-            $boardStore.boardId,
-            $discussionStore.discussionId,
-            query
-          );
-          justSearchedQuery = query;
-        }, 500);
-      }
-    } else if (isSearching) {
-      isSearching = false;
-    }
   });
 
-  onMount(() => {
-    prevNumMessages = $discussionStore.chat.length;
+  onDestroy(() => {
+    clearTimeout(checkTimeout);
   });
 
   const handleScroll = async () => {
@@ -87,9 +65,7 @@
     }
   };
 
-  let content = "";
-
-  const onSubmit = () => {
+  const onSubmit = (content) => {
     if (content !== "") {
       discussionStore.post(
         $boardStore.boardId,
@@ -98,17 +74,7 @@
         $boardStore.nickname,
         content
       );
-      content = "";
     }
-  };
-
-  const onKeydown = (e) => {
-    if (e.key === "Enter") onSubmit();
-  };
-
-  const selectedSearchResult = (id) => {
-    isSearching = false;
-    content = content.replace(query, id + "]]");
   };
 </script>
 
@@ -148,31 +114,7 @@
         Missed messages: {missedMessages}
       </div>
     {/if}
-
-    {#if isSearching}
-      <div class="chat-search-results">
-        <h3>Search Results</h3>
-        {#if justSearchedQuery !== query}
-          <p>Searching...</p>
-        {:else if $discussionStore.searchResults.length === 0}
-          <p>No results</p>
-        {:else}
-          {#each $discussionStore.searchResults as resultId (resultId)}
-            <ChatUnit
-              {...$discussionStore.units[resultId]}
-              searchResult
-              onClick={() => selectedSearchResult(resultId)}
-            />
-          {/each}
-        {/if}
-      </div>
-    {/if}
-
-    <input
-      placeholder="type a message..."
-      bind:value={content}
-      on:keydown={onKeydown}
-    />
+    <UnitEditor {onSubmit} placeholder="type a message..." />
   </div>
 </div>
 
@@ -192,10 +134,6 @@
     flex-wrap: wrap;
     align-content: flex-end;
     width: 100%;
-  }
-
-  .chat-search-results {
-    padding-bottom: 20px;
   }
 
   .chat-wrapper {

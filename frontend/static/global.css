@@ -29,6 +29,8 @@ button:hover {
 }
 
 input {
+  background-color: inherit;
+  font-size: 14px;
   width: 100%;
   padding: 10px;
   border: 1px solid;
