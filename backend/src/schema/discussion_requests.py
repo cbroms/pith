@@ -17,6 +17,8 @@ schema_names = [
     "add_focused",
     "remove_focused",
     "search",
+    "typing_start",
+    "typing_stop",
 ]
 
 for schema_name in schema_names:
