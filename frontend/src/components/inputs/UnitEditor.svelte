@@ -97,7 +97,7 @@
 
 <style>
   .slide {
-    border: 1px solid;
+    border-top: 1px solid;
     height: 300px;
     overflow-y: scroll;
   }

@@ -5,7 +5,6 @@ import { v4 as uuid } from "uuid";
 
 // snake-case
 const defaultState = {
-<<<<<<< HEAD
   discussionId: null,
   joinDiscussionError: null,
   // array of unit objects in rendering order with
@@ -27,30 +26,6 @@ const defaultState = {
   participants: [],
   searchResults: [],
   typers: [],
-=======
-    discussionId: null,
-    joinDiscussionError: null,
-    // array of unit objects in rendering order with
-    // id, pith, created, author, and a map of transclusion ids to piths
-    chat: [],
-    // index of unit at the end of most recent received page
-    endIndex: -1,
-    // array of temporary unit objects, which we render while a request to add a unit is pending
-    temporaryChat: [],
-    // array of unit objects in rendering order with
-    // id, pith, created, author, and a map of transclusion ids to piths
-    pinned: [],
-    // array of unit objects in rendering order with
-    // id, pith, and a map of transclusion ids to piths
-    focused: [],
-    // array of user objects in rendering order with
-    // id, nickname
-    units: {},
-
-    participants: [],
-    searchResults: [],
-    typers: [],
->>>>>>> b24ee9004a5ef88be888a8788e5f57eac5d18af4
 };
 
 export const discussionStore = createDerivedSocketStore(
