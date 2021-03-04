@@ -8,7 +8,9 @@
 
   export let onSubmit = () => {};
   export let onCancel = () => {};
+  export let onSearch = () => {};
   export let content = "";
+  export let noResults = true;
   export let placeholder = "type something...";
   export let noBorder = false;
 
@@ -35,11 +37,7 @@
       if (justSearchedQuery !== query) {
         clearTimeout(makeSearchTimeout);
         makeSearchTimeout = setTimeout(() => {
-          discussionStore.search(
-            $boardStore.boardId,
-            $discussionStore.discussionId,
-            query
-          );
+          onSearch(query);
           justSearchedQuery = query;
         }, 500);
       }
@@ -61,27 +59,22 @@
     }
   };
 
-  const selectedSearchResult = (id) => {
+  const onSelectResult = (id) => {
     isSearching = false;
     content = content.replace(query, id + "]]");
+    editorElement.focus();
   };
 </script>
 
 {#if isSearching}
-  <div class="chat-search-results">
+  <div class="search-results">
     <h3>Search Results</h3>
     {#if justSearchedQuery !== query}
       <p>Searching...</p>
-    {:else if $discussionStore.searchResults.length === 0}
+    {:else if noResults}
       <p>No results</p>
     {:else}
-      {#each $discussionStore.searchResults as resultId (resultId)}
-        <ChatUnit
-          {...$discussionStore.units[resultId]}
-          searchResult
-          onClick={() => selectedSearchResult(resultId)}
-        />
-      {/each}
+      <slot name="search-results" {onSelectResult} />
     {/if}
   </div>
 {/if}
@@ -95,7 +88,7 @@
 />
 
 <style>
-  .chat-search-results {
+  .search-results {
     padding-bottom: 20px;
   }
 

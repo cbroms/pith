@@ -4,6 +4,7 @@
   import UnitEditor from "../inputs/UnitEditor.svelte";
 
   import BoardUnit from "../unit/BoardUnit.svelte";
+  import BoardUnitEditor from "../unit/BoardUnitEditor.svelte";
 
   export let id;
   export let focus = false;
@@ -53,5 +54,5 @@
       addLinkTarget={linkSourceId && unitId !== linkSourceId}
     />
   {/each}
-  <UnitEditor {onSubmit} placeholder="type a pith..." />
+  <BoardUnitEditor {onSubmit} />
 </div>

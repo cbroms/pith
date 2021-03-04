@@ -10,6 +10,7 @@
   import TruncateText from "./TruncateText.svelte";
   import Transclusion from "./Transclusion.svelte";
   import UnitEditor from "../inputs/UnitEditor.svelte";
+  import BoardUnitEditor from "./BoardUnitEditor.svelte";
 
   export let unit;
   export let focus = false;
@@ -25,6 +26,17 @@
   export let addLinkTarget = false;
   export let onAddLinkSource;
   export let onAddLinkTarget;
+  export let onClick = async () => {
+    if (!editing) {
+      linksOpen = !linksOpen;
+
+      if (linksOpen) {
+        await boardStore.getUnitFull($boardStore.boardId, unit.id);
+      }
+      // set the display context so we can render board info on the board
+      boardDisplayContextStore.set({ id: unit.id });
+    }
+  };
 
   let linksOpen = false;
   let editing = false;
@@ -63,18 +75,6 @@
       unit.id
     );
   };
-  const onLinks = async () => {
-    if (!editing) {
-      linksOpen = !linksOpen;
-
-      if (linksOpen) {
-        await boardStore.getUnitFull($boardStore.boardId, unit.id);
-      }
-
-      // set the display context so we can render board info on the board
-      boardDisplayContextStore.set({ id: unit.id });
-    }
-  };
 
   const onRemoveLink = (linkId) => {
     boardStore.removeLink($boardStore.boardId, linkId);
@@ -82,15 +82,9 @@
 </script>
 
 <div class="board-unit">
-  <div class="unit-content" on:click={onLinks}>
+  <div class="unit-content" on:click={onClick}>
     {#if editing}
-      <UnitEditor
-        {content}
-        {onSubmit}
-        onCancel={onEdit}
-        placeholder="type a pith..."
-        noBorder
-      />
+      <BoardUnitEditor {content} {onSubmit} onCancel={onEdit} noBorder />
     {:else}
       <div class="text">
         <TruncateText active={truncate && !linksOpen}>{unit?.pith}</TruncateText

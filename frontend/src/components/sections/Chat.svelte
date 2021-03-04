@@ -5,7 +5,7 @@
   import { boardStore } from "../../stores/boardStore";
 
   import ChatUnit from "../unit/ChatUnit.svelte";
-  import UnitEditor from "../inputs/UnitEditor.svelte";
+  import ChatUnitEditor from "../unit/ChatUnitEditor.svelte";
 
   export let id;
 
@@ -114,7 +114,7 @@
         Missed messages: {missedMessages}
       </div>
     {/if}
-    <UnitEditor {onSubmit} placeholder="type a message..." />
+    <ChatUnitEditor {onSubmit} />
   </div>
 </div>
 
