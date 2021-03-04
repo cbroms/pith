@@ -23,15 +23,9 @@ const defaultState = {
   // array of user objects in rendering order with
   // id, nickname
   units: {},
-
-<<<<<<< HEAD
   participants: [],
   searchResults: [],
-=======
-    participants: [],
-    searchResults: [],
-    typers: [],
->>>>>>> backend draft of typing indicators
+  typers: [],
 };
 
 export const discussionStore = createDerivedSocketStore(
@@ -345,81 +339,6 @@ export const discussionStore = createDerivedSocketStore(
           (res) => {
             const json = JSON.parse(res);
             console.log("search", json.results);
-        },
-        typingStart: (boardId, discussionId, userId, resolve, reject) => {
-            return (socket, update) => {
-                socket.emit(
-                    "typing_start",
-                    { board_id: boardId, discussion_id: discussionId, user_id: userId },
-                    (res) => {
-                        const json = JSON.parse(res);
-                        
-                        if (!json.error) {
-                            update((state) => {
-                                let typers = {...state.typers};
-                                typers.push(userId);
-                        
-                                return {
-                                    ...state,
-                                    typers: typers,
-                                }
-                            });
-                            resolve();
-                        } else {
-                            errorHandler(json.error, json.error_meta, update);
-                        }
-                    }
-                );
-          }
-        },
-        typingStop: (boardId, discussionId, userId, resolve, reject) => {
-            return (socket, update) => {
-                socket.emit(
-                    "typing_stop",
-                    { board_id: boardId, discussion_id: discussionId, user_id: userId },
-                    (res) => {
-                        const json = JSON.parse(res);
-                        
-                        if (!json.error) {
-                            update((state) => {
-                                let typers = {...state.typers};
-                                typers.filter((e) => { return e !== userId });
-                        
-                                return {
-                                    ...state,
-                                    typers: typers,
-                                }
-                            });
-                            resolve();
-                        } else {
-                            errorHandler(json.error, json.error_meta, update);
-                        }
-                    }
-                );
-          }
-        },
-        // TODO do below need some ids for the board/room?
-        subscribeDiscussion: () => {
-            return (socket, update) => {
-                console.log("subscribe called")
-                socket.on(
-                    "join_disc",
-                    (res) => {
-                        console.log("joined")
-                        const json = JSON.parse(res);
-                        update((state) => {
-                            return {
-                                ...state,
-                                participants: [...state.participants, json.user],
-                            }
-                        });
-                    }
-                );
-                socket.on(
-                    "leave_disc",
-                    (res) => {
-                        console.log("left")
-
             if (!json.error) {
               update((state) => {
                 let units = { ...state.units };
@@ -441,6 +360,79 @@ export const discussionStore = createDerivedSocketStore(
             }
           }
         );
+      };
+    },
+    typingStart: (boardId, discussionId, userId, resolve, reject) => {
+      return (socket, update) => {
+        socket.emit(
+          "typing_start",
+          { board_id: boardId, discussion_id: discussionId, user_id: userId },
+          (res) => {
+            const json = JSON.parse(res);
+
+            if (!json.error) {
+              update((state) => {
+                let typers = [...state.typers];
+                typers.push(userId);
+
+                return {
+                  ...state,
+                  typers: typers,
+                };
+              });
+              resolve();
+            } else {
+              errorHandler(json.error, json.error_meta, update);
+            }
+          }
+        );
+      };
+    },
+    typingStop: (boardId, discussionId, userId, resolve, reject) => {
+      return (socket, update) => {
+        socket.emit(
+          "typing_stop",
+          { board_id: boardId, discussion_id: discussionId, user_id: userId },
+          (res) => {
+            const json = JSON.parse(res);
+
+            if (!json.error) {
+              update((state) => {
+                let typers = [...state.typers];
+                typers.filter((e) => {
+                  return e !== userId;
+                });
+
+                return {
+                  ...state,
+                  typers: typers,
+                };
+              });
+              resolve();
+            } else {
+              errorHandler(json.error, json.error_meta, update);
+            }
+          }
+        );
+      };
+    },
+    // TODO do below need some ids for the board/room?
+    subscribeDiscussion: () => {
+      return (socket, update) => {
+        console.log("subscribe called");
+        socket.on("join_disc", (res) => {
+          console.log("joined");
+          const json = JSON.parse(res);
+          update((state) => {
+            return {
+              ...state,
+              participants: [...state.participants, json.user],
+            };
+          });
+        });
+        socket.on("leave_disc", (res) => {
+          console.log("left");
+        });
       };
     },
     // TODO do below need some ids for the board/room?
