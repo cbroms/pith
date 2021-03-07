@@ -37,8 +37,10 @@ LOG_FILENAME = "app_log"
 #LINK_PATTERN = re.compile(r"<cite>([^<]*)<\/cite>")
 #LINK_WRAPPER = "<cite>{}</cite>"
 #DEAD_LINK = "<cite></cite>"
-LINK_PATTERN = re.compile(r"\[\[\s*(.*?)\s*\]\]")
+LINK_REGEX = r"\[\[\s*(.*?)\s*\]\]"
+LINK_PATTERN = re.compile(LINK_REGEX)
 LINK_WRAPPER = "[[{}]]"
+LINK_NULL = "[.]"
 
 CHAT_PAGE_SIZE = 25
 BOARD_UPDATE_DURATION = 10 # seconds

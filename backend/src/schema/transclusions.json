@@ -1,0 +1,15 @@
+{
+  "transclusions": {
+    "type": "object",
+    "properties": {
+      "map": {"type": "object"},
+      "list": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "pith": {"type": "string"}
+    },
+    "required": ["map", "list", "pith"]
+  }
+}
+

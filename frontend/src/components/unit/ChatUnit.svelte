@@ -34,29 +34,16 @@
   let open = false;
 
   let orderedTransclusions = [];
+  let mapTransclusions = {};
 
   const parseTransclusions = () => {
+    console.log("transclusions", transclusions);
     if (transclusions) {
-      orderedTransclusions = [];
-      let numMatched = 0;
-      const linkRegex = /\[\[\s*(.*?)\s*\]\]/g;
-
-      for (const id in transclusions) {
-        transclusions[id] = transclusions[id].replaceAll(linkRegex, "");
-      }
-      transclusions = transclusions;
-      // this is stupidly inefficient but will work until the transclusion shape is changed
-      ogPith = ogPith === null ? pith : ogPith;
-
-      // parse out the unit's tansclusions
-      pith = ogPith.replaceAll(linkRegex, (match) => {
-        numMatched++;
-        orderedTransclusions.push(
-          transclusions[match.replaceAll("[", "").replaceAll("]", "")]
-        );
-        return `[${numMatched}]`; // TODO put link here
+      orderedTransclusions = transclusions.list.map((e) => {
+        return transclusions.map[e];
       });
-      orderedTransclusions = orderedTransclusions;
+      ogPith = pith;
+      pith = transclusions.pith;
     }
   };
 

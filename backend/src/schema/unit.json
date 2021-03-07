@@ -7,9 +7,7 @@
         "created": {"type": "string"},
         "author_id": {"type": "string"},
         "author_name": {"type": "string"}, 
-        "transclusions": {
-          "type": "object"
-        }
+        "transclusions": {"$ref": "file:transclusions.json#/transclusions"}
       },
       "required": ["id", "pith", "created", "author_id", "author_name", "transclusions"]
   },
@@ -18,9 +16,7 @@
       "properties": {
         "id": {"type": "string"},
         "pith": {"type": "string"},
-        "transclusions": {
-          "type": "object"
-        },
+        "transclusions": {"$ref": "file:transclusions.json#/transclusions"},
         "links_to": {
           "type": "array",
           "items": {"$ref": "file:link.json#/link"}

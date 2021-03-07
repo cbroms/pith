@@ -4,6 +4,7 @@ from arq import create_pool
 from json import dumps
 from pymongo import MongoClient, TEXT
 import mongoengine
+import re
 import socketio
 
 import constants
@@ -104,7 +105,19 @@ class GlobalManager:
 
     #### HELPER FUNCTIONS ####
 
+    def _wipe_pith(self, pith):
+      return re.sub(constants.LINK_REGEX, constants.LINK_NULL, pith) 
+
     def _get_transclusion_map(self, board_id, unit_id):
+      """
+      1) Map of ids to piths. Piths should not have further transclusions. 
+      2) Ordered list of ids as presented in first pith, such that pith
+      has [n] for [[<id>]].
+      """
+      unit = self.units.find_one({"short_id": unit_id, "board_id": board_id})
+      pith = unit["pith"]
+
+      # map
       transclusions = self.transclusions.find(
         {"source": unit_id, "board_id": board_id}
       )
@@ -112,10 +125,26 @@ class GlobalManager:
 
       if len(target_ids) > 0:
         targets = self.units.find({"short_id": {"$in": target_ids}})
-        map_id_pith = {t["short_id"]:t["pith"] for t in targets}
+        map_id_pith = {t["short_id"]:self._wipe_pith(t["pith"]) for t in targets}
+
+        iterate = 0
+        def numerate(match):
+          nonlocal iterate
+          iterate += 1
+          return str(iterate)
+
+        transclusion_list = re.findall(constants.LINK_REGEX, pith)
+        trans_pith = re.sub(constants.LINK_REGEX, numerate, pith)
       else:
         map_id_pith = {}
-      return map_id_pith
+        transclusion_list = []
+        trans_pith = pith
+
+      return {
+        "map": map_id_pith,
+        "list": transclusion_list,
+        "pith": trans_pith
+      }
 
     def _get_links_to(self, board_id, unit_id):
       links = self.links.find(
