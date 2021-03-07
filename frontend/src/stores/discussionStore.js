@@ -376,15 +376,15 @@ export const discussionStore = createDerivedSocketStore(
             console.log("typing_start", json);
 
             if (!json.error) {
-              update((state) => {
-                let typers = [...state.typers];
-                typers.push(json.user_id);
-
-                return {
-                  ...state,
-                  typers: typers,
-                };
-              });
+//              update((state) => {
+//                let typers = [...state.typers];
+//                typers.push(json.user_id);
+//
+//                return {
+//                  ...state,
+//                  typers: typers,
+//                };
+//              });
               resolve();
             } else {
               errorHandler(json.error, json.error_meta, update);
@@ -404,19 +404,19 @@ export const discussionStore = createDerivedSocketStore(
             console.log("typing_stop", json);
 
             if (!json.error) {
-              update((state) => {
-                let typers = [...state.typers];
-                console.log("before", typers, userId);
-                typers = typers.filter((e) => {
-                  return e !== json.user_id;
-                });
-                console.log("after", typers);
-
-                return {
-                  ...state,
-                  typers: typers,
-                };
-              });
+//              update((state) => {
+//                let typers = [...state.typers];
+//                console.log("before", typers, userId);
+//                typers = typers.filter((e) => {
+//                  return e !== json.user_id;
+//                });
+//                console.log("after", typers);
+//
+//                return {
+//                  ...state,
+//                  typers: typers,
+//                };
+//              });
               resolve();
             } else {
               errorHandler(json.error, json.error_meta, update);
