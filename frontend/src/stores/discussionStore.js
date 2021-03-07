@@ -58,10 +58,13 @@ export const discussionStore = createDerivedSocketStore(
                 for (const unit of json.chat) {
                   units[unit.id] = unit;
                 }
+                for (const unit of json.pinned) {
+                  units[unit.id] = unit;
+                }
                 const chat = json.chat.map((e) => {
-                  return e.id;
+                    return e.id;
                 });
-                console.log("first_chat_page", json.end_index, chat);
+                console.log("chat", chat);
                 return {
                   ...state,
                   discussionId: discussionId,

@@ -269,16 +269,18 @@ class DiscussionNamespace(AsyncNamespace):
     async def on_join_disc(self, sid, request):
       board_id = request["board_id"]
       discussion_id = request["discussion_id"]
+      user_id = request["user_id"]
       result = gm.discussion_manager.join_disc(
         board_id=board_id,
         discussion_id=discussion_id,
-        user_id=request["user_id"],
+        user_id=user_id,
       )
 
       if not is_error(result):
         await self.save_session(sid, {
           "board_id": board_id,
           "discussion_id": discussion_id, 
+          "user_id": user_id,
         })
         self.enter_room(sid, get_room(board_id, discussion_id))
 
@@ -325,12 +327,14 @@ class DiscussionNamespace(AsyncNamespace):
     async def on_disconnect(self, sid):
       # leave discussion if we have joined one 
       session = await self.get_session(sid)
-      if "board_id" in session and "discussion_id" in session:
+      if "board_id" in session and "discussion_id" in session and "user_id" in session:
         board_id = session["board_id"]
         discussion_id = session["discussion_id"]
-        await self.on_leave(sid, {
+        user_id = session["user_id"]
+        await self.on_leave_disc(sid, {
           "board_id": board_id, 
-          "discussion_id": discussion_id
+          "discussion_id": discussion_id,
+          "user_id": user_id
         })
 
     @_process_responses("post", True)
