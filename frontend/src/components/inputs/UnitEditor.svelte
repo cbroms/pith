@@ -1,10 +1,12 @@
 <script>
-  import { discussionStore } from "../../stores/discussionStore";
-  import { boardStore } from "../../stores/boardStore";
+  import {
+    afterUpdate,
+    onDestroy,
+    onMount,
+    createEventDispatcher,
+  } from "svelte";
 
-  import { afterUpdate, onDestroy, onMount } from "svelte";
-
-  import ChatUnit from "../unit/ChatUnit.svelte";
+  import { slide } from "svelte/transition";
 
   export let onSubmit = () => {};
   export let onCancel = () => {};
@@ -13,8 +15,12 @@
   export let noResults = true;
   export let placeholder = "type something...";
   export let noBorder = false;
+  export let slideUp = false;
+
+  const dispatch = createEventDispatcher();
 
   let makeSearchTimeout = null;
+
   let query = "";
   let justSearchedQuery = "";
   let isSearching = false;
@@ -57,6 +63,8 @@
     } else if (e.key === "Escape") {
       onCancel();
     }
+
+    dispatch("typed", true);
   };
 
   const onSelectResult = (id) => {
@@ -67,7 +75,7 @@
 </script>
 
 {#if isSearching}
-  <div class="search-results">
+  <div class="search-results" class:slide={slideUp} transition:slide>
     <h3>Search Results</h3>
     {#if justSearchedQuery !== query}
       <p>Searching...</p>
@@ -88,6 +96,12 @@
 />
 
 <style>
+  .slide {
+    border-top: 1px solid;
+    height: 300px;
+    overflow-y: scroll;
+  }
+
   .search-results {
     padding-bottom: 20px;
   }
