@@ -26,8 +26,6 @@ async def update_board_job(ctx):
   cursor = ctx["cursor"]
   ctx["cursor"] = get_time()
 
-  logger.info("update_board_job {}".format(cursor))
-
   boards = [b for b in gm.boards.find()]
 
   for board in boards:
