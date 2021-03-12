@@ -196,13 +196,12 @@ export const boardStore = createDerivedSocketStore(
       return (socket, update) => {
         socket.emit(
           "add_link",
-          { board_id: boardId, source: source, target: target },
+          { board_id: boardId, pith, source: source, target: target },
           (res) => {
             const json = JSON.parse(res);
             if (!json.error) {
               update((state) => {
                 let units = { ...state.units };
-                // TODO, map returns new array
                 if (source in units) {
                   if (units[source].links_to)
                     units[source].links_to.push(json.link);

@@ -26,7 +26,8 @@
 
   const onAddLinkTarget = (id) => {
     linkTargetId = id;
-    boardStore.addLink($boardStore.boardId, linkSourceId, linkTargetId);
+    // TODO, "" is pith
+    boardStore.addLink($boardStore.boardId, "", linkSourceId, linkTargetId);
     // reset
     linkSourceId = null;
     linkTargetId = null;

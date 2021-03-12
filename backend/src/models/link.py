@@ -38,6 +38,13 @@ class Link(Document):
     :default: None
     """
 
+    pith = StringField(required=True)
+    """
+    :type: *str*
+    :required: True
+    :default: None
+    """
+
     source = StringField()
     """
     :type: *str*
