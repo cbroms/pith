@@ -9,6 +9,7 @@ import {
 
 // snake-case
 const defaultState = {
+  fullSize: null,
   boardId: null,
   isValidBoard: null,
   hasJoinedBoard: null,
@@ -107,6 +108,7 @@ export const boardStore = createDerivedSocketStore(
                 }
                 return {
                   ...state,
+                  fullSize: json.full_size,
                   boardId: boardId,
                   hasJoinedBoard: true,
                   userId: userId,
@@ -125,9 +127,11 @@ export const boardStore = createDerivedSocketStore(
         );
       };
     },
-    addUnit: (boardId, text, resolve, reject) => {
+    addUnit: (boardId, text, posX, posY, resolve, reject) => {
       return (socket, update) => {
-        socket.emit("add_unit", { board_id: boardId, text: text }, (res) => {
+        socket.emit("add_unit", 
+          { board_id: boardId, text: text, position: { x: posX, y: posY } }, 
+          (res) => {
           const json = JSON.parse(res);
           if (!json.error) {
             update((state) => {
@@ -190,6 +194,26 @@ export const boardStore = createDerivedSocketStore(
             }
           }
         );
+      };
+    },
+    moveUnit: (boardId, unitId, posX, posY, resolve, reject) => {
+      return (socket, update) => {
+        socket.emit("move_unit", 
+          { board_id: boardId, unit_id: unitId, position: { x: posX, y: posY } }, 
+          (res) => {
+          const json = JSON.parse(res);
+          if (!json.error) {
+            update((state) => {
+              return {
+                ...state,
+                units: { ...state.units, [json.unit.id]: json.unit }, // update
+              };
+            });
+            resolve();
+          } else {
+            errorHandler(json.error, json.error_meta, update);
+          }
+        });
       };
     },
     addLink: (boardId, source, target, resolve, reject) => {

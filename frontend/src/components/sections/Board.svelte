@@ -16,7 +16,8 @@
 
   const onSubmit = (content) => {
     if (content !== "") {
-      boardStore.addUnit(id, content);
+      // TODO: 0, 0 should be posx, posy
+      boardStore.addUnit(id, content, 0, 0);
     }
   };
 

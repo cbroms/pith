@@ -49,7 +49,11 @@ class BoardManager:
       units_output = [self.gm._get_extended_unit(board_id, unit["short_id"]) \
         for unit in units if unit["hidden"] is False]
 
-      return {"nickname": user["nickname"], "units": units_output}
+      return {
+        "nickname": user["nickname"], 
+        "units": units_output, 
+        "full_size": constants.FULL_SIZE
+    }
 
     @Checker._check_board_id
     def update_board(self, board_id, cursor):
@@ -76,9 +80,10 @@ class BoardManager:
       }
         
     @Checker._check_board_id
-    def add_unit(self, board_id, text):
+    def add_unit(self, board_id, text, position):
       pith, transclusions = self.gm._get_pith(board_id, text)
-      unit = Unit(board_id=board_id, pith=pith)
+      position = Position(x = position["x"], y = position["y"])
+      unit = Unit(board_id=board_id, pith=pith, position=position)
       unit.id = "{}:{}".format(unit.board_id, unit.short_id)
 
       self.gm.units.insert_one(unit.to_mongo())
@@ -115,6 +120,18 @@ class BoardManager:
       unit_id = unit["short_id"]
       self.gm._remove_transclusions(board_id, unit_id)
       self.gm._insert_transclusions(board_id, unit_id, transclusions)
+      self._record_unit_update(board_id, unit_id)
+      return {"unit": self.gm._get_extended_unit(board_id, unit_id)}
+
+    @Checker._check_board_id
+    @Checker._check_unit_id
+    def move_unit(self, board_id, unit_id, position):
+      self.gm.units.update_one(
+        {"short_id" : unit_id, "board_id": board_id},
+        {"$set": {"pith": pith}},
+        {"$set": {"position.x": position["x"]}},
+        {"$set": {"position.y": position["y"]}}
+      )
       self._record_unit_update(board_id, unit_id)
       return {"unit": self.gm._get_extended_unit(board_id, unit_id)}
 

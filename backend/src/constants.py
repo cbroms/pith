@@ -44,3 +44,6 @@ LINK_NULL = "[.]"
 
 CHAT_PAGE_SIZE = 25
 BOARD_UPDATE_DURATION = 10 # seconds
+
+# 2D board
+FULL_SIZE = 1500

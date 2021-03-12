@@ -17,6 +17,7 @@
         "id": {"type": "string"},
         "pith": {"type": "string"},
         "transclusions": {"$ref": "file:transclusions.json#/transclusions"},
+        "position": {"$ref": "file:position.json#/position"},
         "links_to": {
           "type": "array",
           "items": {"$ref": "file:link.json#/link"}

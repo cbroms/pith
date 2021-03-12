@@ -5,7 +5,8 @@
     "units": {
       "type": "array",
       "item": {"$ref": "file:unit.json#/board"}
-    }
+    },
+    "full_size": {"type": "number"}
   },
-  "required": ["nickname", "units"]
+  "required": ["nickname", "units", "full_size"]
 }
