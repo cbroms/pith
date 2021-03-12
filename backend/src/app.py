@@ -392,6 +392,18 @@ class DiscussionNamespace(AsyncNamespace):
         query=request["query"],
       )
 
+    @_process_responses("typing_start", True)
+    @_validate_request("typing_start")
+    async def on_typing_start(self, sid, request):
+      # we won't store this, just pass message along
+      return { "user_id": request["user_id"] }
+
+    @_process_responses("typing_stop", True)
+    @_validate_request("typing_stop")
+    async def on_typing_stop(self, sid, request):
+      # we won't store this, just pass message along
+      return { "user_id": request["user_id"] }
+
 sio.register_namespace(DiscussionNamespace('/discussion'))
 
 def main():

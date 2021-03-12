@@ -23,9 +23,9 @@ const defaultState = {
   // array of user objects in rendering order with
   // id, nickname
   units: {},
-
   participants: [],
   searchResults: [],
+  typers: [],
 };
 
 export const discussionStore = createDerivedSocketStore(
@@ -342,7 +342,6 @@ export const discussionStore = createDerivedSocketStore(
           (res) => {
             const json = JSON.parse(res);
             console.log("search", json.results);
-
             if (!json.error) {
               update((state) => {
                 let units = { ...state.units };
@@ -364,6 +363,85 @@ export const discussionStore = createDerivedSocketStore(
             }
           }
         );
+      };
+    },
+    typingStart: (boardId, discussionId, userId, resolve, reject) => {
+      return (socket, update) => {
+        console.log("typing start");
+        socket.emit(
+          "typing_start",
+          { board_id: boardId, discussion_id: discussionId, user_id: userId },
+          (res) => {
+            const json = JSON.parse(res);
+            console.log("typing_start", json);
+
+            if (!json.error) {
+//              update((state) => {
+//                let typers = [...state.typers];
+//                typers.push(json.user_id);
+//
+//                return {
+//                  ...state,
+//                  typers: typers,
+//                };
+//              });
+              resolve();
+            } else {
+              errorHandler(json.error, json.error_meta, update);
+            }
+          }
+        );
+      };
+    },
+    typingStop: (boardId, discussionId, userId, resolve, reject) => {
+      return (socket, update) => {
+        console.log("typing stop");
+        socket.emit(
+          "typing_stop",
+          { board_id: boardId, discussion_id: discussionId, user_id: userId },
+          (res) => {
+            const json = JSON.parse(res);
+            console.log("typing_stop", json);
+
+            if (!json.error) {
+//              update((state) => {
+//                let typers = [...state.typers];
+//                console.log("before", typers, userId);
+//                typers = typers.filter((e) => {
+//                  return e !== json.user_id;
+//                });
+//                console.log("after", typers);
+//
+//                return {
+//                  ...state,
+//                  typers: typers,
+//                };
+//              });
+              resolve();
+            } else {
+              errorHandler(json.error, json.error_meta, update);
+            }
+          }
+        );
+      };
+    },
+    // TODO do below need some ids for the board/room?
+    subscribeDiscussion: () => {
+      return (socket, update) => {
+        console.log("subscribe called");
+        socket.on("join_disc", (res) => {
+          console.log("joined");
+          const json = JSON.parse(res);
+          update((state) => {
+            return {
+              ...state,
+              participants: [...state.participants, json.user],
+            };
+          });
+        });
+        socket.on("leave_disc", (res) => {
+          console.log("left");
+        });
       };
     },
     // TODO do below need some ids for the board/room?
@@ -473,6 +551,39 @@ export const discussionStore = createDerivedSocketStore(
             };
           });
         });
+
+        socket.on("typing_start", (res) => {
+            console.log("typing_start");
+            const json = JSON.parse(res);
+
+            update((state) => {
+              let typers = [...state.typers];
+              typers.push(json.user_id);
+
+              return {
+                ...state,
+                typers: typers,
+              };
+            });
+          }
+        );
+        socket.on("typing_stop", (res) => {
+            console.log("typing_stop");
+            const json = JSON.parse(res);
+
+            update((state) => {
+              let typers = [...state.typers];
+              typers = typers.filter((e) => {
+                return e !== json.user_id;
+              });
+
+              return {
+                ...state,
+                typers: typers,
+              };
+            });
+          }
+        );
       };
     },
   },
