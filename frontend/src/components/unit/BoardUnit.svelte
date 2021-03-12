@@ -22,8 +22,10 @@
   export let noControls = false;
 
   export let addLinkSource = false;
+  export let cancelLink;
   export let addLinkTarget = false;
   export let onAddLinkSource;
+  export let onCancelLink;
   export let onAddLinkTarget;
   export let onClick = async () => {
     if (!editing) {
@@ -99,6 +101,8 @@
       <span class="controls-right">
         {#if addLinkSource}
           <button on:click={() => onAddLinkSource(unit.id)}>Add Link</button>
+        {:else if cancelLink}
+          <button on:click={() => onCancelLink()}>Cancel Link</button>
         {:else if addLinkTarget}
           <button on:click={() => onAddLinkTarget(unit.id)}
             >+ Finish Link</button

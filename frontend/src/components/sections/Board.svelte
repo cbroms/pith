@@ -24,6 +24,10 @@
     linkSourceId = id;
   };
 
+  const onCancelLink = () => {
+    linkSourceId = null;
+  };
+
   const onAddLinkTarget = (id) => {
     linkTargetId = id;
     // TODO, "" is pith
@@ -49,9 +53,10 @@
       links
       discussions
       {onAddLinkSource}
+      {onCancelLink}
       {onAddLinkTarget}
-      addLinkSource={(!linkSourceId && !linkTargetId) ||
-        (linkSourceId && unitId === linkSourceId)}
+      addLinkSource={(!linkSourceId && !linkTargetId)}
+      cancelLink={(linkSourceId && unitId === linkSourceId)}
       addLinkTarget={linkSourceId && unitId !== linkSourceId}
     />
   {/each}
