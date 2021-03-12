@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "board_id": {"type": "string"},
+    "discussion_id": {"type": "string"},
+    "unit_id": {"type": "string"}
+  },
+  "required": ["board_id", "discussion_id", "unit_id"]
+}

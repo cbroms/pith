@@ -192,7 +192,7 @@ export const boardStore = createDerivedSocketStore(
         );
       };
     },
-    addLink: (boardId, source, target, resolve, reject) => {
+    addLink: (boardId, pith, source, target, resolve, reject) => {
       return (socket, update) => {
         socket.emit(
           "add_link",
@@ -345,6 +345,29 @@ export const boardStore = createDerivedSocketStore(
                 }
             );
       }
+    },
+    publish: (boardId, discussionId, unitId, resolve, reject) => {
+      return (socket, update) => {
+        socket.emit(
+          "publish",
+          { board_id: boardId, discussion_id: discussionId, unit_id: unitId },
+          (res) => {
+            const json = JSON.parse(res);
+            if (!json.error) {
+              update((state) => {
+                return {
+                  ...state,
+                  unitIds: [...state.unitIds, json.unit.id],
+                  units: { ...state.units, [json.unit.id]: json.unit },
+                };
+              });
+              resolve();
+            } else {
+              errorHandler(json.error, json.error_meta, update);
+            }
+          }
+        );
+      };
     },
     subscribeBoard: (resolve, reject) => {
       return (socket, update) => {

@@ -66,6 +66,14 @@
       id
     );
   };
+
+  const onPublish = () => {
+    boardStore.publish(
+      $boardStore.boardId,
+      $discussionStore.discussionId,
+      id
+    );
+  };
 </script>
 
 <div class="message" on:click={onClick}>
@@ -97,6 +105,7 @@
           {:else if unpin}
             <button on:click={onUnpin}>Unpin</button>
           {/if}
+          <button on:click={onPublish}>Publish</button>
         </div>
       {/if}
     </div>

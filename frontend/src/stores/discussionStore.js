@@ -225,17 +225,14 @@ export const discussionStore = createDerivedSocketStore(
     },
     addPinned: (boardId, discussionId, unitId, resolve, reject) => {
       return (socket, update) => {
-        console.log(boardId, discussionId, unitId);
         socket.emit(
           "add_pinned",
           { board_id: boardId, discussion_id: discussionId, unit_id: unitId },
           (res) => {
             const json = JSON.parse(res);
-            console.log(json);
             if (!json.error) {
               update((state) => {
                 if (json.unit) {
-                  //(!state.pinned.some((e) => e === unitId)) {
                   return {
                     ...state,
                     pinned: [...state.pinned, json.unit.id],

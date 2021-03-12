@@ -163,3 +163,20 @@ class BoardManager:
         "$text": {"$search": query}
       }).sort([("created", ASCENDING)])]
       return {"results": [self.gm._get_extended_unit(board_id, r) for r in results]}
+
+    @Checker._check_board_id
+    @Checker._check_discussion_id
+    @Checker._check_unit_id
+    def publish(self, board_id, discussion_id, unit_id):
+      # make copy
+      orig_unit = self.gm.units.find_one({"short_id" : unit_id, "board_id": board_id})
+
+      pith, transclusions = self.gm._get_pith(board_id, orig_unit["pith"])
+      unit = Unit(board_id=board_id, pith=pith)
+      unit.id = "{}:{}".format(unit.board_id, unit.short_id)
+
+      self.gm.units.insert_one(unit.to_mongo())
+      unit_id = unit.short_id
+      self.gm._insert_transclusions(board_id, unit_id, transclusions)
+      self._record_unit_update(board_id, unit_id)
+      return {"unit": self.gm._get_extended_unit(board_id, unit_id)}

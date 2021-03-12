@@ -196,6 +196,15 @@ class BoardNamespace(AsyncNamespace):
         query=request["query"],
       )
 
+    @_process_responses("publish")
+    @_validate_request("publish")
+    async def on_publish(self, sid, request):
+      return gm.board_manager.publish(
+        board_id=request["board_id"],
+        discussion_id=request["discussion_id"],
+        unit_id=request["unit_id"],
+      )
+
 sio.register_namespace(BoardNamespace('/board'))
 
 class DiscussionNamespace(AsyncNamespace):
