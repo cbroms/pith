@@ -248,7 +248,7 @@ class GlobalManager:
       return {
         "id": unit_id,
         "pith": unit["pith"],
-        "position": {"x": unit.position.x, "y": unit.position.y}, 
+        "position": {"x": unit["position"]["x"], "y": unit["position"]["y"]}, 
         "transclusions": self._get_transclusion_map(board_id, unit_id)
       }      
 
@@ -258,7 +258,7 @@ class GlobalManager:
         "id": unit_id,
         "pith": unit["pith"],
         "transclusions": self._get_transclusion_map(board_id, unit_id),
-        "position": {"x": unit.position.x, "y": unit.position.y},
+        "position": {"x": unit["position"]["x"], "y": unit["position"]["y"]}, 
         "links_to": self._get_links_to(board_id, unit_id),
         "links_from": self._get_links_from(board_id, unit_id),
         "discussions": self._get_discussions(board_id, unit_id)

@@ -4,9 +4,14 @@ from json import dumps
 from pymongo import ASCENDING
 
 from utils import utils
+import constants
+
 from models.discussion import Discussion
 from models.user import User
-from models.unit import Unit
+from models.unit import (
+  Unit,
+  Position
+)
 from models.link import Link
 from models.unit_update import UnitUpdate
 

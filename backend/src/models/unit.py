@@ -3,13 +3,17 @@ Unit document.
 """
 from mongoengine import (
   Document,
+  EmbeddedDocument,
 )
 from mongoengine.fields import (
   BooleanField,
   StringField,
+IntField,
   EmbeddedDocumentField,
 )
+
 from utils import utils
+import constants
 
 
 class Position(EmbeddedDocument):
