@@ -16,7 +16,7 @@
   import DiscussionPageLayout from "../../../../../components/layouts/DiscussionPageLayout.svelte";
   import SectionLayout from "../../../../../components/layouts/SectionLayout.svelte";
 
-  import Board from "../../../../../components/sections/Board.svelte";
+  import CanvasBoard from "../../../../../components/sections/CanvasBoard.svelte";
   import Chat from "../../../../../components/sections/Chat.svelte";
 
   import BoardUnit from "../../../../../components/unit/BoardUnit.svelte";
@@ -75,7 +75,7 @@
 
   <div class="section" slot="board">
     <SectionLayout sectionName="Board">
-      <Board id={bId} focus />
+      <CanvasBoard id={bId} focus />
     </SectionLayout>
   </div>
 

@@ -1,7 +1,5 @@
 <script>
-  import { unix } from "dayjs";
   import { boardStore } from "../../stores/boardStore";
-  import UnitEditor from "../inputs/UnitEditor.svelte";
 
   import BoardUnit from "../unit/BoardUnit.svelte";
   import BoardUnitEditor from "../unit/BoardUnitEditor.svelte";
