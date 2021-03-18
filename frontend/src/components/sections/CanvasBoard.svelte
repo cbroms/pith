@@ -5,6 +5,7 @@
   let Canvas;
 
   onMount(async () => {
+    // dynamic import; only load the library once the component is mounted
     const module = await import("svelte-infinite-canvas");
     Canvas = module.default;
   });
@@ -56,7 +57,7 @@
 </script>
 
 {#if Canvas}
-  <Canvas {data} OuterComponent={CanvasBoardUnit} />
+  <Canvas {data} OuterComponent={CanvasBoardUnit} x={2000} y={2000} />
 {/if}
 
 <!--    on:linkstart={handleLinkStart}

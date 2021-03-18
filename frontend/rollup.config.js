@@ -6,7 +6,6 @@ import url from "@rollup/plugin-url";
 import svelte from "rollup-plugin-svelte";
 import babel from "@rollup/plugin-babel";
 import { terser } from "rollup-plugin-terser";
-import legacy from "@rollup/plugin-legacy";
 import config from "sapper/config/rollup.js";
 import pkg from "./package.json";
 
@@ -25,9 +24,6 @@ export default {
     input: config.client.input(),
     output: config.client.output(),
     plugins: [
-      legacy({
-        "node_modules/leader-line/leader-line.min.js": "LeaderLine",
-      }),
       replace({
         "process.browser": true,
         "process.env.NODE_ENV": JSON.stringify(mode),
@@ -86,9 +82,6 @@ export default {
     input: config.server.input(),
     output: config.server.output(),
     plugins: [
-      legacy({
-        "node_modules/leader-line/leader-line.min.js": "LeaderLine",
-      }),
       replace({
         "process.browser": false,
         "process.env.NODE_ENV": JSON.stringify(mode),

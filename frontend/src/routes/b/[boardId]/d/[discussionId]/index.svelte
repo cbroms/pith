@@ -8,8 +8,6 @@
   import { goto } from "@sapper/app";
   import { onMount } from "svelte";
 
-  // import Chat from "../../../../../components/chat/Chat.svelte"
-
   import { discussionStore } from "../../../../../stores/discussionStore";
   import { boardStore } from "../../../../../stores/boardStore";
 
@@ -25,6 +23,8 @@
   export let id;
   export let bId;
 
+  let boardMaximized = false;
+
   onMount(async () => {
     if ($boardStore.userId === null) {
       // if the user hasn't joined or loaded the board yet, redirect them up to do that
@@ -39,9 +39,13 @@
     discussionStore.leaveDiscussion(bId, id, $boardStore.userId);
     goto(`/b/${bId}/`);
   };
+
+  const onBoardSizeToggle = () => {
+    boardMaximized = !boardMaximized;
+  };
 </script>
 
-<DiscussionPageLayout>
+<DiscussionPageLayout {boardMaximized}>
   <div class="section" slot="chat">
     <SectionLayout sectionName="Chat">
       <div slot="header" class="header chat-controls">
@@ -75,13 +79,14 @@
 
   <div class="section" slot="board">
     <SectionLayout sectionName="Board">
+      <div slot="header" class="header board-controls">
+        <button on:click={onBoardSizeToggle} class="inline-button"
+          >{boardMaximized ? "Minimize Board" : "Maximize Board"}</button
+        >
+      </div>
       <CanvasBoard id={bId} focus />
     </SectionLayout>
   </div>
-
-  <!-- <ChatLayout {onLeave} numParticipants={$discussionStore.participants.length}>
-    
-  </ChatLayout> -->
 </DiscussionPageLayout>
 
 <style>
