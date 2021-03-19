@@ -13,11 +13,13 @@
 
   export let unit;
   export let focus = false;
-  export let edit = false;
-  export let remove = false;
-  export let unfocus = false;
+  export let edit = true;
+  export let remove = true;
+  export let unfocus = true;
   export let links = false;
   export let truncate = false;
+
+  export let isCanvasElement = false;
 
   export let noControls = false;
 
@@ -80,8 +82,12 @@
   };
 </script>
 
-<div class="board-unit">
-  <div class="unit-content" on:click={onClick}>
+<div class="board-unit" class:no-spacing={isCanvasElement}>
+  <div
+    class="unit-content"
+    class:no-spacing={isCanvasElement}
+    on:click={onClick}
+  >
     {#if editing}
       <BoardUnitEditor {content} {onSubmit} onCancel={onEdit} noBorder />
     {:else}
@@ -178,6 +184,12 @@
   .board-unit {
     border: 1px solid black;
     margin: 10px 0;
+  }
+
+  .no-spacing {
+    margin: 0;
+    padding: 0;
+    border: 0;
   }
 
   .board-unit:hover {

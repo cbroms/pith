@@ -19,7 +19,6 @@
   }
   .text {
     max-width: 300px;
-    padding: 10px;
   }
   .starter {
     height: 25px;
