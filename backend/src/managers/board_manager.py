@@ -133,9 +133,7 @@ class BoardManager:
     def move_unit(self, board_id, unit_id, position):
       self.gm.units.update_one(
         {"short_id" : unit_id, "board_id": board_id},
-        {"$set": {"pith": pith}},
-        {"$set": {"position.x": position["x"]}},
-        {"$set": {"position.y": position["y"]}}
+        {"$set": {"position.x": position["x"], "position.y": position["y"]}}
       )
       self._record_unit_update(board_id, unit_id)
       return {"unit": self.gm._get_extended_unit(board_id, unit_id)}

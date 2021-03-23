@@ -84,7 +84,7 @@
           >{boardMaximized ? "Minimize Board" : "Maximize Board"}</button
         >
       </div>
-      <CanvasBoard id={bId} focus />
+      <CanvasBoard />
     </SectionLayout>
   </div>
 </DiscussionPageLayout>
