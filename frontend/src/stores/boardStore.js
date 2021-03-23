@@ -129,23 +129,25 @@ export const boardStore = createDerivedSocketStore(
     },
     addUnit: (boardId, text, posX, posY, resolve, reject) => {
       return (socket, update) => {
-        socket.emit("add_unit", 
-          { board_id: boardId, text: text, position: { x: posX, y: posY } }, 
+        socket.emit(
+          "add_unit",
+          { board_id: boardId, text: text, position: { x: posX, y: posY } },
           (res) => {
-          const json = JSON.parse(res);
-          if (!json.error) {
-            update((state) => {
-              return {
-                ...state,
-                unitIds: [...state.unitIds, json.unit.id],
-                units: { ...state.units, [json.unit.id]: json.unit },
-              };
-            });
-            resolve();
-          } else {
-            errorHandler(json.error, json.error_meta, update);
+            const json = JSON.parse(res);
+            if (!json.error) {
+              update((state) => {
+                return {
+                  ...state,
+                  unitIds: [...state.unitIds, json.unit.id],
+                  units: { ...state.units, [json.unit.id]: json.unit },
+                };
+              });
+              resolve(json.unit.id);
+            } else {
+              errorHandler(json.error, json.error_meta, update);
+            }
           }
-        });
+        );
       };
     },
     removeUnit: (boardId, unitId, resolve, reject) => {
@@ -158,12 +160,15 @@ export const boardStore = createDerivedSocketStore(
             if (!json.error) {
               update((state) => {
                 let unitIds = [...state.unitIds];
+                const units = { ...state.units };
+                delete units[unitId];
                 unitIds = unitIds.filter((e) => {
                   return e !== unitId;
                 });
                 return {
                   ...state,
-                  unitIds: unitIds,
+                  unitIds,
+                  units,
                 };
               });
               resolve();
@@ -198,22 +203,28 @@ export const boardStore = createDerivedSocketStore(
     },
     moveUnit: (boardId, unitId, posX, posY, resolve, reject) => {
       return (socket, update) => {
-        socket.emit("move_unit", 
-          { board_id: boardId, unit_id: unitId, position: { x: posX, y: posY } }, 
+        socket.emit(
+          "move_unit",
+          {
+            board_id: boardId,
+            unit_id: unitId,
+            position: { x: posX, y: posY },
+          },
           (res) => {
-          const json = JSON.parse(res);
-          if (!json.error) {
-            update((state) => {
-              return {
-                ...state,
-                units: { ...state.units, [json.unit.id]: json.unit }, // update
-              };
-            });
-            resolve();
-          } else {
-            errorHandler(json.error, json.error_meta, update);
+            const json = JSON.parse(res);
+            if (!json.error) {
+              update((state) => {
+                return {
+                  ...state,
+                  units: { ...state.units, [json.unit.id]: json.unit }, // update
+                };
+              });
+              resolve();
+            } else {
+              errorHandler(json.error, json.error_meta, update);
+            }
           }
-        });
+        );
       };
     },
     addLink: (boardId, source, target, resolve, reject) => {
@@ -340,73 +351,66 @@ export const boardStore = createDerivedSocketStore(
       };
     },
     search: (boardId, query, resolve, reject) => {
-        return (socket, update) => {
-            socket.emit(
-                "search",
-                { board_id: boardId, query: query },
-                (res) => {
-                    const json = JSON.parse(res);
-                    console.log("search", json.results);
-                    
-                    if (!json.error) {
-                        update((state) => {
-                            let units = {...state.units};
-                            let searchResults = [];
-                            for (const unit of json.results) {
-                              searchResults.push(unit.id);
-                              units[unit.id] = unit;
-                            }
-                    
-                            return {
-                                ...state,
-                                searchResults: searchResults,
-                                units: units,
-                            }
-                        });
-                        resolve();
-                    } else {
-                        errorHandler(json.error, json.error_meta, update);
-                    }
-                }
-            );
-      }
+      return (socket, update) => {
+        socket.emit("search", { board_id: boardId, query: query }, (res) => {
+          const json = JSON.parse(res);
+          console.log("search", json.results);
+
+          if (!json.error) {
+            update((state) => {
+              let units = { ...state.units };
+              let searchResults = [];
+              for (const unit of json.results) {
+                searchResults.push(unit.id);
+                units[unit.id] = unit;
+              }
+
+              return {
+                ...state,
+                searchResults: searchResults,
+                units: units,
+              };
+            });
+            resolve();
+          } else {
+            errorHandler(json.error, json.error_meta, update);
+          }
+        });
+      };
     },
     subscribeBoard: (resolve, reject) => {
       return (socket, update) => {
-        socket.on(
-          "update_board",
-          (res) => {
-            const json = JSON.parse(res);
-            if (!json.error) {
-              // success
-              update((state) => {
-                let unitIds = [...state.unitIds];
-                unitIds = unitIds.filter((e) => !json.removed_ids.includes(e));
+        socket.on("update_board", (res) => {
+          const json = JSON.parse(res);
+          if (!json.error) {
+            // success
+            update((state) => {
+              let unitIds = [...state.unitIds];
+              unitIds = unitIds.filter((e) => !json.removed_ids.includes(e));
 
-                let updatedUnits = {};
-                for (const unit of json.updated_units) {
-                  if (!unitIds.includes(unit.id)) {
-                    unitIds.push(unit.id);
-                  }
-                  updatedUnits[unit.id] = unit;
+              let updatedUnits = {};
+              for (const unit of json.updated_units) {
+                if (!unitIds.includes(unit.id)) {
+                  unitIds.push(unit.id);
                 }
+                updatedUnits[unit.id] = unit;
+              }
 
-                // add changed elements, right overrides left if same key
-                let units = { ...state.units };
-                units = { ...units, ...updatedUnits };
+              // add changed elements, right overrides left if same key
+              let units = { ...state.units };
+              units = { ...units, ...updatedUnits };
 
-                return {
-                  ...state,
-                  unitIds: unitIds,
-                  units: units,
-                };
-              });
-              resolve();
-            } else {
-              errorHandler(json.error, json.error_meta, update);
-            }
+              return {
+                ...state,
+                unitIds: unitIds,
+                units: units,
+              };
+            });
+            resolve();
+          } else {
+            errorHandler(json.error, json.error_meta, update);
           }
-        );
+        });
       };
     },
   },

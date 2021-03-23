@@ -48,6 +48,11 @@
     if (content !== "") {
       boardStore.editUnit($boardStore.boardId, unit.id, content);
       editing = false;
+      if ($boardDisplayContextStore.focused === unit.id) {
+        boardDisplayContextStore.update((s) => {
+          return { ...s, focused: null };
+        });
+      }
     }
   };
 
@@ -80,6 +85,12 @@
   const onRemoveLink = (linkId) => {
     boardStore.removeLink($boardStore.boardId, linkId);
   };
+
+  $: {
+    if (unit) {
+      editing = $boardDisplayContextStore.focused === unit.id;
+    }
+  }
 </script>
 
 <div class="board-unit" class:no-spacing={isCanvasElement}>
@@ -123,27 +134,18 @@
         {/if}
       </span>
     </div>
-    {#if linksOpen}
+    {#if linksOpen && (unit.links_to.length > 0 || unit.links_from.length > 0)}
       <div class="links">
-        <div class="links-header">Links</div>
         {#if !unit.links_to}
           <div>Loading...</div>
-        {:else if unit.links_to.length == 0}
-          <LinkedContentLayout top>
-            <LinkedContentItemLayout>
-              <button
-                class="button-inline"
-                on:click={() => onAddLinkSource(unit.id)}>Add a Link</button
-              >
-            </LinkedContentItemLayout>
-          </LinkedContentLayout>
-        {:else}
+        {:else if unit.links_to.length > 0}
+          <div class="links-header">Links</div>
           <LinkedContentLayout top>
             {#each unit.links_to as link (link.id)}
               <LinkedContentItemLayout>
                 <div class="link-text">
                   <Transclusion
-                    transclusion={$boardStore.units[link.target].pith}
+                    transclusion={$boardStore.units[link.target]?.pith}
                   />
                   <button
                     class="button-inline solid-width"

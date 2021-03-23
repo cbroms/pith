@@ -1,6 +1,7 @@
 <script>
   import { afterUpdate, onMount } from "svelte";
   import { boardStore } from "../../stores/boardStore";
+  import { boardDisplayContextStore } from "../../stores/boardDisplayContextStore";
   import BoardUnitConnection from "../unit/BoardUnitConnection.svelte";
   import BoardUnitHandle from "../unit/BoardUnitHandle.svelte";
   import BoardUnit from "../unit/BoardUnit.svelte";
@@ -36,18 +37,19 @@
         x: $boardStore.units[id].position.x,
         y: $boardStore.units[id].position.y,
         props: {
+          focus: true,
           isCanvasElement: true,
           unit: { ...$boardStore.units[id] },
         },
-        links: [],
+        links: $boardStore.units[id].links_to.map((link) => {
+          return { id: link.target };
+        }),
       });
     }
-
     data = [...tempData];
   }
 
   const handleDragEnd = async (e) => {
-    console.log(e.detail);
     await boardStore.moveUnit(
       $boardStore.boardId,
       e.detail.id,
@@ -58,6 +60,7 @@
 
   const handleLinkEnd = (e) => {
     console.log(e.detail);
+    boardStore.addLink($boardStore.boardId, e.detail.from, e.detail.to);
   };
 
   const handleOffsetChange = (e) => {
@@ -66,7 +69,15 @@
   };
 
   const handleCreateUnit = async () => {
-    await boardStore.addUnit($boardStore.boardId, "new unit", centerX, centerY);
+    const newId = await boardStore.addUnit(
+      $boardStore.boardId,
+      "",
+      centerX,
+      centerY
+    );
+    boardDisplayContextStore.update((s) => {
+      return { ...s, focused: newId };
+    });
     console.log("added unit");
   };
 </script>
