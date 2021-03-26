@@ -1,3 +1,3 @@
-import { writable } from 'svelte/store';
+import { writable } from "svelte/store";
 
-export const boardDisplayContextStore = writable({id: null});
+export const boardDisplayContextStore = writable({ id: null, focused: null });

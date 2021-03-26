@@ -135,6 +135,7 @@ class BoardNamespace(AsyncNamespace):
       return gm.board_manager.add_unit(
         board_id=request["board_id"],
         text=request["text"],
+        position=request["position"],
       )
 
     @_process_responses("remove_unit")
@@ -152,6 +153,15 @@ class BoardNamespace(AsyncNamespace):
         board_id=request["board_id"],
         unit_id=request["unit_id"],
         text=request["text"],
+      )
+
+    @_process_responses("move_unit")
+    @_validate_request("move_unit")
+    async def on_move_unit(self, sid, request):
+      return gm.board_manager.move_unit(
+        board_id=request["board_id"],
+        unit_id=request["unit_id"],
+        position=request["position"],
       )
 
     @_process_responses("add_link")

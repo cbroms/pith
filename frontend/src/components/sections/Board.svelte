@@ -1,7 +1,5 @@
 <script>
-  import { unix } from "dayjs";
   import { boardStore } from "../../stores/boardStore";
-  import UnitEditor from "../inputs/UnitEditor.svelte";
 
   import BoardUnit from "../unit/BoardUnit.svelte";
   import BoardUnitEditor from "../unit/BoardUnitEditor.svelte";
@@ -16,7 +14,8 @@
 
   const onSubmit = (content) => {
     if (content !== "") {
-      boardStore.addUnit(id, content);
+      // TODO: 0, 0 should be posx, posy
+      boardStore.addUnit(id, content, 0, 0);
     }
   };
 

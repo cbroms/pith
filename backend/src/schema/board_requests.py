@@ -14,6 +14,7 @@ schema_names = [
     "add_unit",
     "remove_unit",
     "edit_unit",
+    "move_unit",
     "add_link",
     "remove_link",
     "get_unit",

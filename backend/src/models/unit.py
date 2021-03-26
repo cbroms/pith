@@ -3,12 +3,24 @@ Unit document.
 """
 from mongoengine import (
   Document,
+  EmbeddedDocument,
 )
 from mongoengine.fields import (
   BooleanField,
   StringField,
+IntField,
+  EmbeddedDocumentField,
 )
+
 from utils import utils
+import constants
+
+
+class Position(EmbeddedDocument):
+    x = IntField(min_value=0, max_value=constants.FULL_SIZE)
+
+    y = IntField(min_value=0, max_value=constants.FULL_SIZE)
+
 
 class Unit(Document):
     """
@@ -45,6 +57,8 @@ class Unit(Document):
     :required: True
     :default: None
     """
+
+    position = EmbeddedDocumentField(Position)
 
     chat = BooleanField(default=False) # versus in document
     """

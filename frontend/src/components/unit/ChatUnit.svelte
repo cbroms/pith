@@ -37,7 +37,6 @@
   let mapTransclusions = {};
 
   const parseTransclusions = () => {
-    console.log("transclusions", transclusions);
     if (transclusions) {
       orderedTransclusions = transclusions.list.map((e) => {
         return transclusions.map[e];
