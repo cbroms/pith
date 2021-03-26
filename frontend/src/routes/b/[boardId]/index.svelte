@@ -18,7 +18,7 @@
   import LinkedContentLayout from "../../../components/layouts/LinkedContentLayout.svelte";
   import SectionLayout from "../../../components/layouts/SectionLayout.svelte";
 
-  import Board from "../../../components/sections/Board.svelte";
+  import CanvasBoard from "../../../components/sections/CanvasBoard.svelte";
   import BoardUnit from "../../../components/unit/BoardUnit.svelte";
 
   export let id;
@@ -90,7 +90,7 @@
 
   <div slot="board" class="section">
     <SectionLayout sectionName="Board">
-      <Board {id} noControls />
+      <CanvasBoard />
     </SectionLayout>
   </div>
 </BoardPageLayout>

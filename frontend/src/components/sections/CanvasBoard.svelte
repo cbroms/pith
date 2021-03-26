@@ -98,14 +98,10 @@
       />
     </div>
     <div class="board-controls">
-      <button class="button-inline" on:click={handleCreateUnit}
-        >Create new unit</button
-      >
+      <button class="button-inline" on:click={null}>Create new unit</button>
       <div>
         <button on:click={handleCreateUnit}>+ Zoom in</button>
-        <button class="button-inline" on:click={handleCreateUnit}
-          >- Zoom out</button
-        >
+        <button class="button-inline" on:click={null}>- Zoom out</button>
       </div>
     </div>
   </div>
@@ -124,6 +120,8 @@
   .board {
     overflow: scroll;
     grid-row: 1 / 2;
+    border: 1px solid;
+    border-top: none;
   }
 
   .board-controls {

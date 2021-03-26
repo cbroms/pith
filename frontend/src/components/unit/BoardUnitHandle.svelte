@@ -18,7 +18,7 @@
     /* padding: 10px; */
   }
   .text {
-    max-width: 300px;
+    width: 300px;
   }
   .starter {
     height: 25px;

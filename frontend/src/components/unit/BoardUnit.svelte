@@ -3,19 +3,16 @@
   import { discussionStore } from "../../stores/discussionStore";
   import { boardDisplayContextStore } from "../../stores/boardDisplayContextStore";
 
-  import LinkedContentLayout from "../layouts/LinkedContentLayout.svelte";
-  import LinkedContentItemLayout from "../layouts/LinkedContentItemLayout.svelte";
-
   import CopyContent from "../buttons/CopyContent.svelte";
   import TruncateText from "./TruncateText.svelte";
-  import Transclusion from "./Transclusion.svelte";
   import BoardUnitEditor from "./BoardUnitEditor.svelte";
+  import BoardUnitLinkList from "./BoardUnitLinkList.svelte";
 
   export let unit;
   export let focus = false;
   export let edit = true;
   export let remove = true;
-  export let unfocus = true;
+  export let unfocus = false;
   export let links = false;
   export let truncate = false;
 
@@ -108,6 +105,25 @@
       </div>
     {/if}
   </div>
+  {#if linksOpen && (unit.links_to.length > 0 || unit.links_from.length > 0)}
+    {#if unit.links_to.length > 0}
+      <BoardUnitLinkList
+        links={unit.links_to}
+        {onRemoveLink}
+        key="target"
+        title="Links"
+      />
+    {/if}
+    {#if unit.links_from.length > 0}
+      <BoardUnitLinkList
+        links={unit.links_from}
+        {onRemoveLink}
+        key="source"
+        title="Backlinks"
+      />
+    {/if}
+  {/if}
+
   {#if !noControls && (focus || unfocus || edit || links || addLinkSource || addLinkTarget)}
     <div class="unit-controls">
       <span class="controls-left">
@@ -134,51 +150,6 @@
         {/if}
       </span>
     </div>
-    {#if linksOpen && (unit.links_to.length > 0 || unit.links_from.length > 0)}
-      <div class="links">
-        {#if !unit.links_to}
-          <div>Loading...</div>
-        {:else if unit.links_to.length > 0}
-          <div class="links-header">Links</div>
-          <LinkedContentLayout top>
-            {#each unit.links_to as link (link.id)}
-              <LinkedContentItemLayout>
-                <div class="link-text">
-                  <Transclusion
-                    transclusion={$boardStore.units[link.target]?.pith}
-                  />
-                  <button
-                    class="button-inline solid-width"
-                    on:click={() => onRemoveLink(link.id)}>Remove link</button
-                  >
-                </div>
-              </LinkedContentItemLayout>
-            {/each}
-          </LinkedContentLayout>
-        {/if}
-      </div>
-      {#if unit.links_from && unit.links_from.length > 0}
-        <div class="links">
-          <div class="links-header">Backlinks</div>
-          <LinkedContentLayout top>
-            {#each unit.links_from as link (link.id)}
-              <LinkedContentItemLayout>
-                <div class="link-text">
-                  <Transclusion
-                    transclusion={$boardStore.units[link.source].pith}
-                  />
-                  <button
-                    class="button-inline solid-width"
-                    on:click={() => onRemoveLink(link.id)}
-                    >Remove backlink</button
-                  >
-                </div>
-              </LinkedContentItemLayout>
-            {/each}
-          </LinkedContentLayout>
-        </div>
-      {/if}
-    {/if}
   {/if}
 </div>
 
@@ -208,21 +179,7 @@
     justify-content: space-between;
   }
 
-  .links {
-    padding: 10px;
-  }
-
   .text {
     padding-bottom: 5px;
-  }
-
-  .solid-width {
-    text-align: right;
-    min-width: 90px;
-  }
-
-  .link-text {
-    display: flex;
-    justify-content: space-between;
   }
 </style>
