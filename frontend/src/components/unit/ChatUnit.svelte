@@ -30,19 +30,15 @@
   export let pin = true;
   export let unpin = false;
 
-  let ogPith = null;
-
   let open = false;
 
   let orderedTransclusions = [];
-  let mapTransclusions = {};
 
   const parseTransclusions = () => {
     if (transclusions) {
       orderedTransclusions = transclusions.list.map((e) => {
         return transclusions.map[e];
       });
-      ogPith = pith;
       pith = transclusions.pith;
     }
   };

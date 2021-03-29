@@ -26,6 +26,7 @@
   <div slot="search-results" let:onSelectResult>
     {#each $boardStore.searchResults as resultId (resultId)}
       <BoardUnit
+        noControls
         unit={$boardStore.units[resultId]}
         onClick={() => onSelectResult(resultId)}
       />

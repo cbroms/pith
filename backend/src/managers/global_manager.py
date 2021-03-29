@@ -129,7 +129,7 @@ class GlobalManager:
         def numerate(match):
           nonlocal iterate
           iterate += 1
-          return str(iterate)
+          return "[" + str(iterate) + "]"
 
         transclusion_list = re.findall(constants.LINK_REGEX, pith)
         trans_pith = re.sub(constants.LINK_REGEX, numerate, pith)

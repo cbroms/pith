@@ -1,10 +1,15 @@
 <script>
+  import { afterUpdate } from "svelte";
   import { boardStore } from "../../stores/boardStore";
   import { discussionStore } from "../../stores/discussionStore";
   import { boardDisplayContextStore } from "../../stores/boardDisplayContextStore";
 
+  import LinkedContentLayout from "../layouts/LinkedContentLayout.svelte";
+  import LinkedContentItemLayout from "../layouts/LinkedContentItemLayout.svelte";
   import CopyContent from "../buttons/CopyContent.svelte";
   import TruncateText from "./TruncateText.svelte";
+  import Transclusion from "./Transclusion.svelte";
+
   import BoardUnitEditor from "./BoardUnitEditor.svelte";
   import BoardUnitLinkList from "./BoardUnitLinkList.svelte";
 
@@ -41,7 +46,24 @@
   let linksOpen = false;
   let editing = false;
 
+  let pith = unit.pith || "";
+
   let content = "";
+
+  let orderedTransclusions = [];
+
+  const parseTransclusions = () => {
+    if (unit.transclusions) {
+      orderedTransclusions = unit.transclusions.list.map((e) => {
+        return unit.transclusions.map[e];
+      });
+      pith = unit.transclusions.pith;
+    }
+  };
+
+  afterUpdate(() => {
+    parseTransclusions();
+  });
 
   const onSubmit = (content) => {
     if (content !== "") {
@@ -102,9 +124,17 @@
     {#if editing}
       <BoardUnitEditor {content} {onSubmit} onCancel={onEdit} noBorder />
     {:else}
+      {#if orderedTransclusions.length > 0}
+        <LinkedContentLayout>
+          {#each orderedTransclusions as transclusion}
+            <LinkedContentItemLayout>
+              <Transclusion {transclusion} truncate />
+            </LinkedContentItemLayout>
+          {/each}
+        </LinkedContentLayout>
+      {/if}
       <div class="text">
-        <TruncateText active={truncate && !linksOpen}>{unit?.pith}</TruncateText
-        >
+        <TruncateText active={truncate && !linksOpen}>{pith}</TruncateText>
       </div>
     {/if}
   </div>
