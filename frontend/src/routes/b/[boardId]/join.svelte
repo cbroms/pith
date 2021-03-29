@@ -14,7 +14,8 @@
   export let dId;
 
   let name = "";
-  let error = false;
+  let nickNameError = false;
+  let emptyNameError = false;
 
   onMount(async () => {
     if ($boardStore.isValidBoard === null) {
@@ -31,16 +32,21 @@
       },
       (msg) => {
         // the nickname was taken, try again
-        error = true;
+        nickNameError = true;
         console.info(msg);
       }
     );
   };
 
   const onSubmit = () => {
-    submitNickname(name);
-    name = "";
-    error = false;
+    const cleanName = name.trim();
+    if (cleanName === "") emptyNameError = true;
+    else {
+      submitNickname(cleanName);
+      name = "";
+      nickNameError = false;
+      emptyNameError = false;
+    }
   };
 
   const onKeydown = (e) => {
@@ -49,7 +55,7 @@
 </script>
 
 {#if $boardStore.isValidBoard}
-  <div>
+  <div class="nickname-wrapper">
     <h1>Create a nickname</h1>
     <p>
       Your nickname will be used to identify your contributions in the board.
@@ -59,12 +65,28 @@
       bind:value={name}
       on:keydown={onKeydown}
     />
-    <button on:click={onSubmit}>Join Board</button>
-
-    {#if error}
-      <div>{$boardStore.nickname} is already taken</div>
+    {#if nickNameError}
+      <div class="msg error-text">{$boardStore.nickname} is already taken</div>
+    {:else if emptyNameError}
+      <div class="msg error-text">Please enter a name!</div>
     {:else if $boardStore.nickname !== null && $boardStore.userId === null}
-      <div>Joining as {$boardStore.nickname}...</div>
+      <div class="msg">Joining as {$boardStore.nickname}...</div>
     {/if}
+    <button class="button-big" on:click={onSubmit}>Join Board</button>
   </div>
 {/if}
+
+<style>
+  .nickname-wrapper {
+    padding: 40px;
+    max-width: 500px;
+  }
+
+  button {
+    margin-top: 20px;
+  }
+
+  .msg {
+    margin-top: 5px;
+  }
+</style>

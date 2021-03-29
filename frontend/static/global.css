@@ -12,6 +12,7 @@ body {
 }
 
 button {
+  font-size: 14px;
   padding: 5px 10px;
   background-color: inherit;
   outline: none;
@@ -24,10 +25,27 @@ button:hover {
   text-decoration: underline;
 }
 
-.button-inline {
+button.button-inline {
   padding: 0;
 }
 
+button.button-big {
+  margin: 10px 0;
+  border: 1px solid;
+}
+
+button.button-big:hover {
+  background-color: rgb(238, 238, 238);
+  text-decoration: none;
+}
+
+button.primary {
+  border: 3px double;
+}
+
+.error-text {
+  color: indianred;
+}
 input {
   background-color: inherit;
   font-size: 14px;

@@ -103,12 +103,12 @@
       />
     </div>
     <div class="board-controls">
-      <button class="button-inline" on:click={handleCreateUnit}
+      <button class="button-big primary" on:click={handleCreateUnit}
         >Create new unit</button
       >
       <div>
-        <button on:click={null}>+ Zoom in</button>
-        <button class="button-inline" on:click={null}>- Zoom out</button>
+        <button class="button-big" on:click={null}>+ Zoom in</button>
+        <button class="button-big" on:click={null}>- Zoom out</button>
       </div>
     </div>
   </div>

@@ -187,12 +187,13 @@ class BoardManager:
     @Checker._check_board_id
     @Checker._check_discussion_id
     @Checker._check_unit_id
-    def publish(self, board_id, discussion_id, unit_id):
+    def publish(self, board_id, discussion_id, unit_id, position):
       # make copy
       orig_unit = self.gm.units.find_one({"short_id" : unit_id, "board_id": board_id})
+      position = Position(x = position["x"], y = position["y"])
 
       pith, transclusions = self.gm._get_pith(board_id, orig_unit["pith"])
-      unit = Unit(board_id=board_id, pith=pith)
+      unit = Unit(board_id=board_id, pith=pith, position=position)
       unit.id = "{}:{}".format(unit.board_id, unit.short_id)
 
       self.gm.units.insert_one(unit.to_mongo())

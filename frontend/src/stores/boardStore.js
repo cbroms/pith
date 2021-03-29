@@ -378,11 +378,16 @@ export const boardStore = createDerivedSocketStore(
         });
       };
     },
-    publish: (boardId, discussionId, unitId, resolve, reject) => {
+    publish: (boardId, discussionId, unitId, posX, posY, resolve, reject) => {
       return (socket, update) => {
         socket.emit(
           "publish",
-          { board_id: boardId, discussion_id: discussionId, unit_id: unitId },
+          {
+            board_id: boardId,
+            discussion_id: discussionId,
+            unit_id: unitId,
+            position: { x: posX, y: posY },
+          },
           (res) => {
             const json = JSON.parse(res);
             if (!json.error) {

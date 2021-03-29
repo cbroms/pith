@@ -48,15 +48,16 @@
       boardStore.editUnit($boardStore.boardId, unit.id, content);
       editing = false;
       if ($boardDisplayContextStore.focused === unit.id) {
-        boardDisplayContextStore.update((s) => {
-          return { ...s, focused: null };
-        });
+        boardDisplayContextStore.set({ focused: null });
       }
     }
   };
 
   const onEdit = () => {
     editing = !editing;
+    if (editing) {
+      boardDisplayContextStore.set({ focused: unit.id });
+    }
     content = unit.pith;
   };
 

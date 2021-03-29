@@ -61,7 +61,7 @@
   <div class="section" slot="pinned">
     <SectionLayout sectionName="Summary">
       {#each $discussionStore.pinned as unitId}
-        <ChatUnit truncate {...$discussionStore.units[unitId]} unpin />
+        <ChatUnit publish truncate {...$discussionStore.units[unitId]} unpin />
       {/each}
     </SectionLayout>
   </div>

@@ -19,6 +19,7 @@
 
   export let truncate = false;
   export let searchResult = false;
+  export let publish = false;
   export let onClick = () => {
     open = !open;
   };
@@ -66,11 +67,13 @@
     );
   };
 
-  const onPublish = () => {
+  const onPublish = (posX, posY) => {
     boardStore.publish(
       $boardStore.boardId,
       $discussionStore.discussionId,
-      id
+      id,
+      posX,
+      posY
     );
   };
 </script>
@@ -104,7 +107,9 @@
           {:else if unpin}
             <button on:click={onUnpin}>Unpin</button>
           {/if}
-          <button on:click={onPublish}>Publish</button>
+          {#if publish}
+            <button on:click={onPublish}>Publish</button>
+          {/if}
         </div>
       {/if}
     </div>
