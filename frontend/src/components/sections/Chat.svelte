@@ -144,6 +144,6 @@
 
   .chat-base {
     grid-row: 2 / 3;
-    margin-top: 20px;
+    margin-top: 10px;
   }
 </style>
