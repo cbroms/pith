@@ -150,6 +150,7 @@ class GlobalManager:
       )
       link_list = [{
         "id": l["short_id"],
+        "pith": l["pith"],
         "source": l["source"],
         "target": l["target"],
       } for l in links]
@@ -161,6 +162,7 @@ class GlobalManager:
       )
       link_list = [{
         "id": l["short_id"],
+        "pith": l["pith"],
         "source": l["source"],
         "target": l["target"],
       } for l in links]
@@ -227,6 +229,7 @@ class GlobalManager:
       link = self.links.find_one({"short_id": link_id, "board_id": board_id})
       return {
         "id": link_id,
+        "pith": link["pith"],
         "source": link["source"],
         "target": link["target"],
       }

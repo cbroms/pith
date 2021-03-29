@@ -140,8 +140,8 @@ class BoardManager:
 
     @Checker._check_board_id
     @Checker._check_unit_id
-    def add_link(self, board_id, source, target):
-      link = Link(board_id=board_id, source=source, target=target)
+    def add_link(self, board_id, pith, source, target):
+      link = Link(board_id=board_id, pith=pith, source=source, target=target)
       link.id = "{}:{}".format(link.board_id, link.short_id)
 
       self.gm.links.insert_one(link.to_mongo())
