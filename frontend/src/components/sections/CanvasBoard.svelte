@@ -60,7 +60,12 @@
 
   const handleLinkEnd = (e) => {
     console.log(e.detail);
-    boardStore.addLink($boardStore.boardId, e.detail.from, e.detail.to);
+    boardStore.addLink(
+      $boardStore.boardId,
+      "link pith",
+      e.detail.from,
+      e.detail.to
+    );
   };
 
   const handleOffsetChange = (e) => {
@@ -98,9 +103,11 @@
       />
     </div>
     <div class="board-controls">
-      <button class="button-inline" on:click={null}>Create new unit</button>
+      <button class="button-inline" on:click={handleCreateUnit}
+        >Create new unit</button
+      >
       <div>
-        <button on:click={handleCreateUnit}>+ Zoom in</button>
+        <button on:click={null}>+ Zoom in</button>
         <button class="button-inline" on:click={null}>- Zoom out</button>
       </div>
     </div>

@@ -168,7 +168,7 @@ class BoardNamespace(AsyncNamespace):
     @_validate_request("add_link")
     async def on_add_link(self, sid, request):
       return gm.board_manager.add_link(
-        board_id=request["board_id"],
+        board_id=request["board_id"], 
         pith=request["pith"],
         source=request["source"],
         target=request["target"],

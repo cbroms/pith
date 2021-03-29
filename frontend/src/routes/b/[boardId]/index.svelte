@@ -103,7 +103,7 @@
 
   .board-info {
     max-width: 500px;
-    padding: 20px 0;
+    padding: 20px;
     margin: 0 auto;
   }
 

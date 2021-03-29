@@ -10,7 +10,7 @@
 <style>
   .board-page-layout {
     display: grid;
-    grid-template-columns: 50vw 50vw;
+    grid-template-columns: 30vw 70vw;
     grid-template-rows: 100vh;
   }
 

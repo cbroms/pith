@@ -129,6 +129,7 @@ export const boardStore = createDerivedSocketStore(
     },
     addUnit: (boardId, text, posX, posY, resolve, reject) => {
       return (socket, update) => {
+        console.log("adding at", posX, posY);
         socket.emit(
           "add_unit",
           { board_id: boardId, text: text, position: { x: posX, y: posY } },
@@ -201,9 +202,6 @@ export const boardStore = createDerivedSocketStore(
         );
       };
     },
-<<<<<<< HEAD
-    addLink: (boardId, pith, source, target, resolve, reject) => {
-=======
     moveUnit: (boardId, unitId, posX, posY, resolve, reject) => {
       return (socket, update) => {
         socket.emit(
@@ -230,12 +228,11 @@ export const boardStore = createDerivedSocketStore(
         );
       };
     },
-    addLink: (boardId, source, target, resolve, reject) => {
->>>>>>> 2d_board
+    addLink: (boardId, pith, source, target, resolve, reject) => {
       return (socket, update) => {
         socket.emit(
           "add_link",
-          { board_id: boardId, pith, source: source, target: target },
+          { board_id: boardId, pith, source, target },
           (res) => {
             const json = JSON.parse(res);
             if (!json.error) {
