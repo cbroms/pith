@@ -1,6 +1,8 @@
 <script>
   import { boardStore } from "../../stores/boardStore";
 
+  import { boardDisplayContextStore } from "../../stores/boardDisplayContextStore";
+
   import UnitEditor from "../inputs/UnitEditor.svelte";
   import BoardUnit from "./BoardUnit.svelte";
 
@@ -25,11 +27,13 @@
 >
   <div slot="search-results" let:onSelectResult>
     {#each $boardStore.searchResults as resultId (resultId)}
-      <BoardUnit
-        noControls
-        unit={$boardStore.units[resultId]}
-        onClick={() => onSelectResult(resultId)}
-      />
+      {#if resultId !== $boardDisplayContextStore.focused}
+        <BoardUnit
+          noControls
+          unit={$boardStore.units[resultId]}
+          onClick={() => onSelectResult(resultId)}
+        />
+      {/if}
     {/each}
   </div>
 </UnitEditor>

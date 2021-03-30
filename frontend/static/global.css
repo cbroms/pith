@@ -12,7 +12,7 @@ body {
 }
 
 button {
-  font-size: 14px;
+  font-size: 12px;
   padding: 5px 10px;
   background-color: inherit;
   outline: none;
@@ -30,7 +30,7 @@ button.button-inline {
 }
 
 button.button-big {
-  margin: 10px 0;
+  /* margin: 10px 0; */
   border: 1px solid;
 }
 

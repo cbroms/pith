@@ -25,17 +25,13 @@
     display: inline-block;
   }
 
-  /* .layout-overflow-container {
-    height: 100%;
-  } */
-
   .layout-overflow {
     grid-row: 2/3;
     overflow-y: scroll;
   }
 
   .layout-header {
-    padding: 20px 0;
+    padding-bottom: 10px;
     width: 100%;
     border-bottom: 1px solid;
     display: flex;

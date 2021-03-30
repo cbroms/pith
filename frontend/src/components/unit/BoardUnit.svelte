@@ -110,7 +110,7 @@
 
   $: {
     if (unit) {
-      editing = $boardDisplayContextStore.focused === unit.id;
+      editing = $boardDisplayContextStore.focused === unit.id && edit;
     }
   }
 </script>

@@ -72,7 +72,13 @@
         <p>Select a unit from the board to focus your discussion.</p>
       {/if}
       {#each $discussionStore.focused as unitId}
-        <BoardUnit truncate unit={$boardStore.units[unitId]} unfocus />
+        <BoardUnit
+          truncate
+          unit={$boardStore.units[unitId]}
+          unfocus
+          edit={false}
+          remove={false}
+        />
       {/each}
     </SectionLayout>
   </div>

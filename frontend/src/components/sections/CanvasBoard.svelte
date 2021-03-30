@@ -5,10 +5,12 @@
   import BoardUnitConnection from "../unit/BoardUnitConnection.svelte";
   import BoardUnitHandle from "../unit/BoardUnitHandle.svelte";
   import BoardUnit from "../unit/BoardUnit.svelte";
+  import { discussionStore } from "../../stores/discussionStore";
 
   let data = [];
   let Canvas;
   let areaElt = null;
+  let panzoomInstance;
 
   let bounds = { width: 0, height: 0 };
   let centerX;
@@ -37,7 +39,14 @@
         x: $boardStore.units[id].position.x,
         y: $boardStore.units[id].position.y,
         props: {
-          focus: true,
+          focus:
+            ($discussionStore.discussionId &&
+              !$discussionStore.focused.includes(id)) ||
+            false,
+          unfocus:
+            ($discussionStore.discussionId &&
+              $discussionStore.focused.includes(id)) ||
+            false,
           isCanvasElement: true,
           unit: { ...$boardStore.units[id] },
         },
@@ -85,32 +94,38 @@
     });
     console.log("added unit");
   };
+
+  const zoomIn = () => {
+    panzoomInstance.smoothZoom(centerX, centerY, 1.1);
+  };
+
+  const zoomOut = () => {
+    panzoomInstance.smoothZoom(centerX, centerY, 0.9);
+  };
 </script>
 
 {#if Canvas}
   <div class="board-wrapper" bind:this={areaElt}>
-    <div class="board">
-      <Canvas
-        {data}
-        OuterComponent={BoardUnitHandle}
-        InnerComponent={BoardUnit}
-        LineComponent={BoardUnitConnection}
-        on:dragend={handleDragEnd}
-        on:linkend={handleLinkEnd}
-        on:offsetchange={handleOffsetChange}
-        x={2000}
-        y={2000}
-      />
-    </div>
-    <div class="board-controls">
-      <button class="button-big primary" on:click={handleCreateUnit}
-        >Create new unit</button
-      >
-      <div>
-        <button class="button-big" on:click={null}>+ Zoom in</button>
-        <button class="button-big" on:click={null}>- Zoom out</button>
+    <Canvas
+      {data}
+      OuterComponent={BoardUnitHandle}
+      InnerComponent={BoardUnit}
+      LineComponent={BoardUnitConnection}
+      on:dragend={handleDragEnd}
+      on:linkend={handleLinkEnd}
+      on:offsetchange={handleOffsetChange}
+      bind:panzoomInstance
+      x={2000}
+      y={2000}
+    >
+      <div class="board-controls" slot="controls">
+        <button on:click={handleCreateUnit}>Create new unit</button>
+        <div>
+          <button on:click={zoomIn}>+ Zoom in</button>
+          <button on:click={zoomOut}>- Zoom out</button>
+        </div>
       </div>
-    </div>
+    </Canvas>
   </div>
 {/if}
 
@@ -119,21 +134,17 @@
     height: 100%;
     width: 100%;
     overflow: hidden;
-    display: grid;
-    grid-template-columns: 100%;
-    grid-template-rows: 1fr auto;
-  }
-
-  .board {
-    overflow: scroll;
-    grid-row: 1 / 2;
     border: 1px solid;
     border-top: none;
   }
 
   .board-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px;
     display: flex;
     justify-content: space-between;
-    grid-row: 2 / 3;
   }
 </style>
