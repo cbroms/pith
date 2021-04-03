@@ -35,7 +35,7 @@
     "sapper": "^0.28.0",
     "svelte": "^3.17.3",
     "svelte-dnd-action": "^0.7.0",
-    "svelte-infinite-canvas": "^0.1.5",
+    "svelte-infinite-canvas": "^0.1.6",
     "svelte-inline-markdown-editor": "^0.1.0"
   }
 }

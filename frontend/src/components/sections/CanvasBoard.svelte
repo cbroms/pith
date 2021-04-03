@@ -13,8 +13,9 @@
   let panzoomInstance;
 
   let bounds = { width: 0, height: 0 };
-  let centerX;
-  let centerY;
+  let offsetX = 0;
+  let offsetY = 0;
+  let scale = 1;
 
   onMount(async () => {
     // dynamic import; only load the library once the component is mounted
@@ -78,16 +79,20 @@
   };
 
   const handleOffsetChange = (e) => {
-    centerX = e.detail.x + bounds.width / 2 - 100;
-    centerY = e.detail.y + bounds.height / 2 - 100;
+    offsetX = e.detail.x;
+    offsetY = e.detail.y;
+  };
+
+  const handleScaleChange = (e) => {
+    scale = e.detail.scale;
   };
 
   const handleCreateUnit = async () => {
     const newId = await boardStore.addUnit(
       $boardStore.boardId,
       "",
-      centerX,
-      centerY
+      (offsetX + bounds.width / 2) / scale,
+      (offsetY + bounds.height / 2) / scale
     );
     boardDisplayContextStore.update((s) => {
       return { ...s, focused: newId };
@@ -95,12 +100,56 @@
     console.log("added unit");
   };
 
+  const setBounds = () => {
+    panzoomInstance.zoomTo(0, 0, 1); // upper-left corner
+    panzoomInstance.showRectangle({
+      top: 0,
+      bottom: 2000,
+      left: 0,
+      right: 2000,
+    });
+  };
+
   const zoomIn = () => {
-    panzoomInstance.smoothZoom(centerX, centerY, 1.1);
+    // unit space
+    const centerX = (offsetX + bounds.width / 2) / scale;
+    const centerY = (offsetY + bounds.height / 2) / scale;
+    const dX = bounds.width / 2 / scale;
+    const dY = bounds.height / 2 / scale;
+    const top = centerY - dY * 0.8;
+    const bottom = centerY + dY * 0.8;
+    const left = centerX - dX * 0.8;
+    const right = centerX + dX * 0.8;
+    // HACK: to cancel animation
+    panzoomInstance.zoomTo(centerX, centerY, 1.25); // upper-left corner
+    // relative to original
+    panzoomInstance.showRectangle({
+      top: top,
+      bottom: bottom,
+      left: left,
+      right: right,
+    });
   };
 
   const zoomOut = () => {
-    panzoomInstance.smoothZoom(centerX, centerY, 0.9);
+    // unit space
+    const centerX = (offsetX + bounds.width / 2) / scale;
+    const centerY = (offsetY + bounds.height / 2) / scale;
+    const dX = bounds.width / 2 / scale;
+    const dY = bounds.height / 2 / scale;
+    const top = centerY - dY * 1.25;
+    const bottom = centerY + dY * 1.25;
+    const left = centerX - dX * 1.25;
+    const right = centerX + dX * 1.25;
+    // HACK: to cancel animation
+    panzoomInstance.zoomTo(centerX, centerY, 0.8); // upper-left corner
+    // relative to original
+    panzoomInstance.showRectangle({
+      top: top,
+      bottom: bottom,
+      left: left,
+      right: right,
+    });
   };
 </script>
 
@@ -114,13 +163,16 @@
       on:dragend={handleDragEnd}
       on:linkend={handleLinkEnd}
       on:offsetchange={handleOffsetChange}
+      on:scalechange={handleScaleChange}
       bind:panzoomInstance
       x={2000}
       y={2000}
     >
       <div class="board-controls" slot="controls">
         <button on:click={handleCreateUnit}>Create new unit</button>
+
         <div>
+          <button on:click={setBounds}>Show Full board</button>
           <button on:click={zoomIn}>+ Zoom in</button>
           <button on:click={zoomOut}>- Zoom out</button>
         </div>
