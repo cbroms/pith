@@ -64,6 +64,7 @@
   };
 
   const onPublish = (posX, posY) => {
+    //  TODO: figure out the best way to give this a real posX and posY
     boardStore.publish(
       $boardStore.boardId,
       $discussionStore.discussionId,
@@ -145,7 +146,7 @@
   }
 
   .message-pin {
-    min-width: 85px;
+    min-width: 90px;
     visibility: hidden;
   }
 </style>
