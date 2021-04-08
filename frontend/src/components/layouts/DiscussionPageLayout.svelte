@@ -20,8 +20,8 @@
 <style>
   .discussion-page-layout {
     display: grid;
-    grid-template-columns: 30vw 30vw 40vw;
-    grid-template-rows: 30vh 70vh;
+    grid-template-columns: 50vw 50vw;
+    grid-template-rows: calc(30vh - 46px) calc(70vh - 46px);
   }
 
   .discussion-page-chat {
