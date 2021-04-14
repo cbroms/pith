@@ -4,7 +4,10 @@
       "properties": {
         "id": {"type": "string"},
         "pith": {"type": "string"},
-        "flairs": {"type": "string"},
+        "flairs": {
+            "type": "array",
+            "items": {"type": "string"}
+        },
         "created": {"type": "string"},
         "author_id": {"type": "string"},
         "author_name": {"type": "string"}, 

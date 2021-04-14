@@ -49,7 +49,12 @@
   <div class="section" slot="chat">
     <SectionLayout sectionName="Chat">
       <div slot="header" class="header chat-controls">
-        <div>{$discussionStore.participants.length} here now</div>
+        <details>
+          <summary>{$discussionStore.participants.length} here now</summary>
+          {#each $discussionStore.participants as participant (participant.id)}
+            <div><strong>{participant.nickname}</strong></div>
+          {/each}
+        </details>
         <button on:click={onLeave} class="inline-button"
           >Leave discussion</button
         >
@@ -112,6 +117,11 @@
   }
 
   .chat-controls {
+    align-items: flex-start;
     justify-content: space-between;
+  }
+
+  details > div {
+    margin-left: 15px;
   }
 </style>

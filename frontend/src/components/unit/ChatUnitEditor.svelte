@@ -115,6 +115,7 @@
     border: 1px solid;
     margin-top: 10px;
     margin-right: 5px;
+    padding: 2px 5px;
     text-decoration: none;
   }
 
