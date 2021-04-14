@@ -219,7 +219,6 @@ export const discussionStore = createDerivedSocketStore(
                     return post.id !== tempId;
                   }
                 );
-                console.log("post", json.unit.flairs);
 
                 return {
                   ...state,

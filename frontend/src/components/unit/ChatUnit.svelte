@@ -46,7 +46,6 @@
 
   afterUpdate(() => {
     parseTransclusions();
-    console.log(flairs);
   });
 
   const onPin = () => {
@@ -96,10 +95,10 @@
     {/if}
     <div class="message-line">
       <TruncateText active={truncate && !open}>
-        {pith}
         {#each flairs as flair (flair)}
-          {flair}
+          <div class="flair">{flair}</div>
         {/each}
+        {pith}
       </TruncateText>
       {#if !searchResult}
         <div class="message-pin">
@@ -153,5 +152,13 @@
   .message-pin {
     min-width: 90px;
     visibility: hidden;
+  }
+
+  .flair {
+    font-size: 12px;
+    border: 1px solid;
+    padding: 0 5px;
+    margin-right: 5px;
+    display: inline-block;
   }
 </style>
