@@ -93,9 +93,8 @@ class DiscussionManager:
             {"$addToSet": {"pinned": unit_id}}
         )
 
-        user = self.gm.users.find_one({"short_id": user_id, "board_id": board_id})
-        message = "{} pinned \"{}\"".format(user["nickname"], unit["pith"])
-        notice_unit = self.gm.create_notice_unit(board_id, discussion_id, message)
+        message = "pinned \"{}\"".format(unit["pith"])
+        notice_unit = self.gm.create_notice_unit(board_id, discussion_id, message, user_id)
 
         return {
           "unit": self.gm._get_chat_unit(board_id, unit_id),
@@ -114,9 +113,8 @@ class DiscussionManager:
       )
 
       unit = self.gm.units.find_one({"short_id": unit_id, "board_id": board_id})
-      user = self.gm.users.find_one({"short_id": user_id, "board_id": board_id})
-      message = "{} unpinned \"{}\"".format(user["nickname"], unit["pith"])
-      notice_unit = self.gm.create_notice_unit(board_id, discussion_id, message)
+      message = "unpinned \"{}\"".format(unit["pith"])
+      notice_unit = self.gm.create_notice_unit(board_id, discussion_id, message, user_id)
 
       return {
         "unit_id": unit_id,

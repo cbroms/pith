@@ -47,8 +47,3 @@ BOARD_UPDATE_DURATION = 10 # seconds
 
 # 2D board
 FULL_SIZE = 1500
-
-# special users
-_META = "_meta"
-_META_AUTHOR_ID = ""
-_META_AUTHOR_NAME = ""
