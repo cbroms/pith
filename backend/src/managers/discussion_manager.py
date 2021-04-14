@@ -59,11 +59,11 @@ class DiscussionManager:
     @Checker._check_board_id
     @Checker._check_discussion_id
     @Checker._check_user_id
-    def post(self, board_id, discussion_id, user_id, text):
+    def post(self, board_id, discussion_id, user_id, text, flairs):
       pith, transclusions = self.gm._get_pith(board_id, text)
       user = self.gm.users.find_one({"board_id": board_id, "short_id": user_id})
       unit = Unit(board_id=board_id, pith=pith, chat=True, 
-        author=user_id, author_name=user["nickname"])
+        author=user_id, author_name=user["nickname"], flairs=flairs)
       unit.id = "{}:{}".format(unit.board_id, unit.short_id)
 
       self.gm.units.insert_one(unit.to_mongo())

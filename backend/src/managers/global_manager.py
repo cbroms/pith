@@ -243,6 +243,7 @@ class GlobalManager:
         "created": unit["created"],
         "author_id": user["short_id"],
         "author_name": user["nickname"],
+        "flairs": unit["flairs"],
         "transclusions": self._get_transclusion_map(board_id, unit_id)
       }      
 

@@ -8,7 +8,7 @@ from mongoengine import (
 from mongoengine.fields import (
   BooleanField,
   StringField,
-IntField,
+  IntField,
   EmbeddedDocumentField,
 )
 
@@ -79,6 +79,13 @@ class Unit(Document):
     :type: *str*
     :required: False
     :default: None
+    """
+
+    flairs = ListField(StringField(), default=[])
+    """
+    :type:
+    :required: False
+    :default: []
     """
 
     hidden = BooleanField(default=False)

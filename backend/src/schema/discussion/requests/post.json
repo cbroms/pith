@@ -4,7 +4,11 @@
     "board_id": {"type": "string"},
     "discussion_id": {"type": "string"},
     "user_id": {"type": "string"},
-    "text": {"type": "string"}
+    "text": {"type": "string"},
+    "flairs": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
   },
-  "required": ["board_id", "discussion_id", "user_id", "text"]
+  "required": ["board_id", "discussion_id", "user_id", "text", "flairs"]
 }

@@ -365,6 +365,7 @@ class DiscussionNamespace(AsyncNamespace):
         discussion_id=request["discussion_id"],
         user_id=request["user_id"],
         text=request["text"],
+        flairs=request["flairs"],
       )
 
     @_process_responses("add_pinned", True)
