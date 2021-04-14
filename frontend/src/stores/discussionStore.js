@@ -53,6 +53,7 @@ export const discussionStore = createDerivedSocketStore(
           { board_id: boardId, discussion_id: discussionId },
           (res) => {
             const json = JSON.parse(res);
+            console.log("load", json);
             if (!json.error) {
               update((state) => {
                 let units = {};
@@ -170,8 +171,6 @@ export const discussionStore = createDerivedSocketStore(
       reject
     ) => {
       return (socket, update) => {
-        console.log("posted", socket.id);
-
         const tempId = uuid();
 
         // add the post temporarily

@@ -237,13 +237,19 @@ class GlobalManager:
 
     def _get_chat_unit(self, board_id, unit_id):
       unit = self.units.find_one({"short_id": unit_id, "board_id": board_id})
-      user = self.users.find_one({"short_id": unit["author"], "board_id": board_id})
+      if user == constants._META_AUTHOR_ID:
+        author_id = constants._META_AUTHOR_ID
+        author_name = constants._META_AUTHOR_NAME
+      else:
+        user = self.users.find_one({"short_id": unit["author"], "board_id": board_id})
+        author_id = user["short_id"]
+        author_name = user["nickname"]
       return {
         "id": unit_id,
         "pith": unit["pith"],
         "created": unit["created"],
-        "author_id": user["short_id"],
-        "author_name": user["nickname"],
+        "author_id": author_id,
+        "author_name": author_name,
         "flairs": unit["flairs"],
         "transclusions": self._get_transclusion_map(board_id, unit_id)
       }      
@@ -296,9 +302,11 @@ class GlobalManager:
         author_name=constants._META_AUTHOR_NAME, 
         flairs=[constants._META]
       )
-      self.gm.units.insert_one(unit.to_mongo())
+      unit.id = "{}:{}".format(unit.board_id, unit.short_id)
+
+      self.units.insert_one(unit.to_mongo())
       unit_id = unit.short_id
-      self.gm.discussions.update_one(
+      self.discussions.update_one(
         {"short_id" : discussion_id, "board_id": board_id},
         {"$push": {"chat": unit_id}}
       )

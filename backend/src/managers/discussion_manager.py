@@ -62,6 +62,7 @@ class DiscussionManager:
     def post(self, board_id, discussion_id, user_id, text, flairs):
       pith, transclusions = self.gm._get_pith(board_id, text)
       user = self.gm.users.find_one({"board_id": board_id, "short_id": user_id})
+
       unit = Unit(board_id=board_id, pith=pith, chat=True, 
         author=user_id, author_name=user["nickname"], flairs=flairs)
       unit.id = "{}:{}".format(unit.board_id, unit.short_id)
@@ -98,7 +99,7 @@ class DiscussionManager:
 
         return {
           "unit": self.gm._get_chat_unit(board_id, unit_id),
-          "notice_unit": self.gm._get_chat_unit(board_id, notice_unit_id)
+          "notice_unit": self.gm._get_chat_unit(board_id, notice_unit.short_id)
         }
       else:
         return {}
