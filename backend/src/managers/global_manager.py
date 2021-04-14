@@ -294,6 +294,9 @@ class GlobalManager:
       return (chat, start_index)
 
     def create_notice_unit(self, board_id, discussion_id, message, user_id):
+      # clean it of transclusions
+      message = self._wipe_pith(message)
+
       user = self.users.find_one({"short_id": user_id, "board_id": board_id})
       unit = Unit(board_id=board_id, pith=message, chat=True, 
         author=user_id,

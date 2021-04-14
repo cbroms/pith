@@ -17,6 +17,16 @@
   let prevNumMessages = $discussionStore.chat.length;
   let missedMessages = 0;
 
+  const adjustScrollPosition = () => {
+    if (autoscroll) {
+      div.scrollTo(0, div.scrollHeight);
+      // do it again 500 ms later in case the dom has not finished updating
+      checkTimeout = setTimeout(() => {
+        if (autoscroll) div.scrollTo(0, div.scrollHeight);
+      }, 500);
+    }
+  };
+
   onMount(() => {
     prevNumMessages = $discussionStore.chat.length;
   });
@@ -24,25 +34,35 @@
   beforeUpdate(() => {
     autoscroll =
       div && div.offsetHeight + div.scrollTop > div.scrollHeight - 20;
-  });
-
-  afterUpdate(() => {
-    if (autoscroll) {
-      div.scrollTo(0, div.scrollHeight);
-      // do it again 500 ms later in case the dom has not finished updating
-      checkTimeout = setTimeout(() => {
-        if (autoscroll) div.scrollTo(0, div.scrollHeight);
-      }, 500);
-    } else if (prevNumMessages < $discussionStore.chat.length) {
+    if (!autoscroll && prevNumMessages < $discussionStore.chat.length) {
       // add an indication that a message was missed
       missedMessages += 1;
       prevNumMessages = $discussionStore.chat.length;
     }
   });
 
+  afterUpdate(() => {
+    adjustScrollPosition();
+  });
+
   onDestroy(() => {
     clearTimeout(checkTimeout);
   });
+
+  $: {
+    // if (chatHeight !== prevChatHeight && div) {
+    //   console.log(chatHeight, prevChatHeight);
+    //   // TODO: don't force the chat to the bottom when adjusting the size
+    //   //  do it more intelligently and keep the position if necessary otherwise
+    //   // scroll to the bottom (this happens when searching or looking at participants)
+    //   div.scrollTo(0, div.scrollHeight);
+    //   prevChatHeight = chatHeight;
+    //   //   autoscroll =
+    //   //     div && div.offsetHeight + div.scrollTop > div.scrollHeight - 25;
+    //   //   console.log(autoscroll);
+    //   //   adjustScrollPosition();
+    // }
+  }
 
   const handleScroll = async () => {
     if (
@@ -111,9 +131,12 @@
 
   <div class="chat-base">
     {#if missedMessages > 0}
-      <div class="chat-missed-messages">
-        Missed messages: {missedMessages}
-      </div>
+      <button
+        on:click={() => {
+          div.scrollTo(0, div.scrollHeight);
+        }}
+        class="chat-missed-messages">&darr;</button
+      >
     {/if}
     <ChatUnitEditor {onSubmit} />
   </div>
@@ -125,6 +148,16 @@
     overflow-y: auto;
     position: relative;
     grid-row: 1 / 2;
+  }
+
+  .chat-missed-messages {
+    position: absolute;
+    top: -45px;
+    right: 0px;
+    background-color: black;
+    color: white;
+    text-decoration: none;
+    padding: 10px;
   }
 
   .chat {
@@ -146,5 +179,6 @@
   .chat-base {
     grid-row: 2 / 3;
     margin-top: 10px;
+    position: relative;
   }
 </style>
