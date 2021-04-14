@@ -65,7 +65,7 @@
     }
   };
 
-  const onSubmit = (content) => {
+  const onSubmit = (content, flairs) => {
     if (content !== "") {
       discussionStore.post(
         $boardStore.boardId,

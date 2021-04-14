@@ -26,6 +26,7 @@ const defaultState = {
   participants: [],
   searchResults: [],
   typers: [],
+  flairs: ["Question", "Suggestion", "Meta"],
 };
 
 export const discussionStore = createDerivedSocketStore(
@@ -62,7 +63,7 @@ export const discussionStore = createDerivedSocketStore(
                   units[unit.id] = unit;
                 }
                 const chat = json.chat.map((e) => {
-                    return e.id;
+                  return e.id;
                 });
                 console.log("chat", chat);
                 return {
@@ -373,15 +374,15 @@ export const discussionStore = createDerivedSocketStore(
             console.log("typing_start", json);
 
             if (!json.error) {
-//              update((state) => {
-//                let typers = [...state.typers];
-//                typers.push(json.user_id);
-//
-//                return {
-//                  ...state,
-//                  typers: typers,
-//                };
-//              });
+              //              update((state) => {
+              //                let typers = [...state.typers];
+              //                typers.push(json.user_id);
+              //
+              //                return {
+              //                  ...state,
+              //                  typers: typers,
+              //                };
+              //              });
               resolve();
             } else {
               errorHandler(json.error, json.error_meta, update);
@@ -401,19 +402,19 @@ export const discussionStore = createDerivedSocketStore(
             console.log("typing_stop", json);
 
             if (!json.error) {
-//              update((state) => {
-//                let typers = [...state.typers];
-//                console.log("before", typers, userId);
-//                typers = typers.filter((e) => {
-//                  return e !== json.user_id;
-//                });
-//                console.log("after", typers);
-//
-//                return {
-//                  ...state,
-//                  typers: typers,
-//                };
-//              });
+              //              update((state) => {
+              //                let typers = [...state.typers];
+              //                console.log("before", typers, userId);
+              //                typers = typers.filter((e) => {
+              //                  return e !== json.user_id;
+              //                });
+              //                console.log("after", typers);
+              //
+              //                return {
+              //                  ...state,
+              //                  typers: typers,
+              //                };
+              //              });
               resolve();
             } else {
               errorHandler(json.error, json.error_meta, update);
@@ -550,37 +551,35 @@ export const discussionStore = createDerivedSocketStore(
         });
 
         socket.on("typing_start", (res) => {
-            console.log("typing_start");
-            const json = JSON.parse(res);
+          console.log("typing_start");
+          const json = JSON.parse(res);
 
-            update((state) => {
-              let typers = [...state.typers];
-              typers.push(json.user_id);
+          update((state) => {
+            let typers = [...state.typers];
+            typers.push(json.user_id);
 
-              return {
-                ...state,
-                typers: typers,
-              };
-            });
-          }
-        );
+            return {
+              ...state,
+              typers: typers,
+            };
+          });
+        });
         socket.on("typing_stop", (res) => {
-            console.log("typing_stop");
-            const json = JSON.parse(res);
+          console.log("typing_stop");
+          const json = JSON.parse(res);
 
-            update((state) => {
-              let typers = [...state.typers];
-              typers = typers.filter((e) => {
-                return e !== json.user_id;
-              });
-
-              return {
-                ...state,
-                typers: typers,
-              };
+          update((state) => {
+            let typers = [...state.typers];
+            typers = typers.filter((e) => {
+              return e !== json.user_id;
             });
-          }
-        );
+
+            return {
+              ...state,
+              typers: typers,
+            };
+          });
+        });
       };
     },
   },
