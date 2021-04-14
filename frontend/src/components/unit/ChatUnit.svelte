@@ -16,6 +16,7 @@
   export let author_id = null;
   export let created = null;
   export let transclusions = null;
+  export let flairs = [];
 
   export let truncate = false;
   export let searchResult = false;
@@ -45,6 +46,7 @@
 
   afterUpdate(() => {
     parseTransclusions();
+    console.log(flairs);
   });
 
   const onPin = () => {
@@ -95,6 +97,9 @@
     <div class="message-line">
       <TruncateText active={truncate && !open}>
         {pith}
+        {#each flairs as flair (flair)}
+          {flair}
+        {/each}
       </TruncateText>
       {#if !searchResult}
         <div class="message-pin">
