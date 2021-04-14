@@ -78,9 +78,8 @@ class DiscussionManager:
     @Checker._check_board_id
     @Checker._check_discussion_id
     @Checker._check_unit_id
-    def add_pinned(self, board_id, discussion_id, unit_id):
+    def add_pinned(self, board_id, discussion_id, unit_id, user_id):
       unit = self.gm.units.find_one({"short_id": unit_id, "board_id": board_id})
-
       if unit["chat"] is False:
         return make_error(Errors.NOT_CHAT, 
           error_meta={"unit_id": unit_id}
@@ -92,19 +91,36 @@ class DiscussionManager:
             {"short_id" : discussion_id, "board_id": board_id},
             {"$addToSet": {"pinned": unit_id}}
         )
-        return {"unit": self.gm._get_chat_unit(board_id, unit_id)}
+
+        user = self.gm.users.find_one({"short_id": user_id, "board_id": board_id})
+        message = "{} pinned \"{}\"".format(user["nickname"], unit["pith"])
+        notice_unit = self.gm.create_notice_unit(board_id, discussion_id, message)
+
+        return {
+          "unit": self.gm._get_chat_unit(board_id, unit_id),
+          "notice_unit": self.gm._get_chat_unit(board_id, notice_unit_id)
+        }
       else:
         return {}
 
     @Checker._check_board_id
     @Checker._check_discussion_id
     @Checker._check_unit_id
-    def remove_pinned(self, board_id, discussion_id, unit_id):
+    def remove_pinned(self, board_id, discussion_id, unit_id, user_id):
       self.gm.discussions.update_one(
         {"short_id" : discussion_id, "board_id": board_id},
         {"$pull": {"pinned": unit_id}}
       )
-      return {"unit_id": unit_id}
+
+      unit = self.gm.units.find_one({"short_id": unit_id, "board_id": board_id})
+      user = self.gm.users.find_one({"short_id": user_id, "board_id": board_id})
+      message = "{} unpinned \"{}\"".format(user["nickname"], unit["pith"])
+      notice_unit = self.gm.create_notice_unit(board_id, discussion_id, message)
+
+      return {
+        "unit_id": unit_id,
+        "notice_unit": self.gm._get_chat_unit(board_id, notice_unit.short_id)
+      }
 
     @Checker._check_board_id
     @Checker._check_discussion_id

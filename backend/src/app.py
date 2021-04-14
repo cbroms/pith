@@ -375,6 +375,7 @@ class DiscussionNamespace(AsyncNamespace):
         board_id=request["board_id"],
         discussion_id=request["discussion_id"],
         unit_id=request["unit_id"],
+        user_id=request["user_id"],
       )
 
     @_process_responses("remove_pinned", True)
@@ -384,6 +385,7 @@ class DiscussionNamespace(AsyncNamespace):
         board_id=request["board_id"],
         discussion_id=request["discussion_id"],
         unit_id=request["unit_id"],
+        user_id=request["user_id"],
       )
 
     @_process_responses("add_focused", True)

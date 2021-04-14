@@ -53,7 +53,8 @@
     discussionStore.addPinned(
       $boardStore.boardId,
       $discussionStore.discussionId,
-      id
+      id,
+      $boardStore.userId
     );
   };
 
@@ -61,7 +62,8 @@
     discussionStore.removePinned(
       $boardStore.boardId,
       $discussionStore.discussionId,
-      id
+      id,
+      $boardStore.userId
     );
   };
 

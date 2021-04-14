@@ -236,11 +236,11 @@ export const discussionStore = createDerivedSocketStore(
         );
       };
     },
-    addPinned: (boardId, discussionId, unitId, resolve, reject) => {
+    addPinned: (boardId, discussionId, unitId, userId, resolve, reject) => {
       return (socket, update) => {
         socket.emit(
           "add_pinned",
-          { board_id: boardId, discussion_id: discussionId, unit_id: unitId },
+          { board_id: boardId, discussion_id: discussionId, unit_id: unitId, user_id: userId },
           (res) => {
             const json = JSON.parse(res);
             if (!json.error) {
@@ -248,6 +248,8 @@ export const discussionStore = createDerivedSocketStore(
                 if (json.unit) {
                   return {
                     ...state,
+                    chat: [...state.chat, json.notice_unit.id],
+                    units: { ...state.units, [json.notice_unit.id]: json.notice_unit },
                     pinned: [...state.pinned, json.unit.id],
                   };
                 } else {
@@ -262,11 +264,11 @@ export const discussionStore = createDerivedSocketStore(
         );
       };
     },
-    removePinned: (boardId, discussionId, unitId, resolve, reject) => {
+    removePinned: (boardId, discussionId, unitId, userId, resolve, reject) => {
       return (socket, update) => {
         socket.emit(
           "remove_pinned",
-          { board_id: boardId, discussion_id: discussionId, unit_id: unitId },
+          { board_id: boardId, discussion_id: discussionId, unit_id: unitId, user_id: userId },
           (res) => {
             const json = JSON.parse(res);
             if (!json.error) {
@@ -278,6 +280,8 @@ export const discussionStore = createDerivedSocketStore(
                 });
                 return {
                   ...state,
+                  chat: [...state.chat, json.notice_unit.id],
+                  units: { ...state.units, [json.notice_unit.id]: json.notice_unit },
                   pinned: pinned,
                 };
               });

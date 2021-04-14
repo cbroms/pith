@@ -14,6 +14,7 @@ from utils.utils import (
   DictEncoder,
 )
 
+from models.unit import Unit
 from models.board import Board
 from models.transclusion import Transclusion
 
@@ -288,3 +289,17 @@ class GlobalManager:
       for u in discussion["chat"][start_index:end_index]:
         chat.append(self._get_chat_unit(board_id, u))
       return (chat, start_index)
+
+    def create_notice_unit(self, board_id, discussion_id, message):
+      unit = Unit(board_id=board_id, pith=message, chat=True, 
+        author=constants._META_AUTHOR_ID, 
+        author_name=constants._META_AUTHOR_NAME, 
+        flairs=[constants._META]
+      )
+      self.gm.units.insert_one(unit.to_mongo())
+      unit_id = unit.short_id
+      self.gm.discussions.update_one(
+        {"short_id" : discussion_id, "board_id": board_id},
+        {"$push": {"chat": unit_id}}
+      )
+      return unit
