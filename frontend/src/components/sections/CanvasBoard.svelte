@@ -24,9 +24,9 @@
 
   afterUpdate(() => {
     if (areaElt) {
-      console.log("updating");
       // TODO improve performance by only calling this when the area elt changes
       const eltBounds = areaElt.getBoundingClientRect();
+      console.log("updating", eltBounds.width, eltBounds.height);
       bounds = { width: eltBounds.width, height: eltBounds.height };
     }
   });
@@ -78,8 +78,9 @@
   };
 
   const handleOffsetChange = (e) => {
-    centerX = e.detail.x + bounds.width / 2 - 100;
-    centerY = e.detail.y + bounds.height / 2 - 100;
+    centerX = e.detail.x + bounds.width / 2;
+    centerY = e.detail.y + bounds.height / 2;
+    console.log("offset", centerX, centerY);
   };
 
   const handleCreateUnit = async () => {
@@ -96,10 +97,15 @@
   };
 
   const zoomIn = () => {
+    // bounding box in units, scale, center in units
+    // bounding box in pixels (bounding box in units * scale)
+    // center in pixels (center in units * scale)
+    console.log("zoom in", centerX, centerY);
     panzoomInstance.smoothZoom(centerX, centerY, 1.1);
   };
 
   const zoomOut = () => {
+    console.log("zoom out", centerX, centerY);
     panzoomInstance.smoothZoom(centerX, centerY, 0.9);
   };
 </script>

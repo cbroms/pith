@@ -2,7 +2,7 @@ from collections import Counter, defaultdict
 import datetime
 from functools import reduce
 from json import JSONEncoder, dumps
-from nltk.stem import PorterStemmer
+# from nltk.stem import PorterStemmer
 from operator import or_
 import string
 import secrets
@@ -72,7 +72,7 @@ def make_error(err, error_meta={}):
   logger.exception(exp)
   return dumps(exp, cls=ErrorEncoder)
 
-
+"""
 ps = PorterStemmer()
 table = str.maketrans(string.punctuation, ' '*len(string.punctuation))
 
@@ -95,3 +95,4 @@ def make_freq_dict(text: str) -> Dict[str, int]:
 def sum_dicts(dL: List[Dict[Any, Any]]) -> Dict[Any, Any]:
   keys = reduce(or_, [set(d) for d in dL])
   return defaultdict(lambda:0, {k:sum([d.get(k,0) for d in dL]) for k in keys})
+"""
