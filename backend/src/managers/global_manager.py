@@ -14,6 +14,7 @@ from utils.utils import (
   DictEncoder,
 )
 
+from models.unit import Unit
 from models.board import Board
 from models.transclusion import Transclusion
 
@@ -237,13 +238,17 @@ class GlobalManager:
     def _get_chat_unit(self, board_id, unit_id):
       unit = self.units.find_one({"short_id": unit_id, "board_id": board_id})
       user = self.users.find_one({"short_id": unit["author"], "board_id": board_id})
+      author_id = user["short_id"]
+      author_name = user["nickname"]
       return {
         "id": unit_id,
         "pith": unit["pith"],
         "created": unit["created"],
-        "author_id": user["short_id"],
-        "author_name": user["nickname"],
-        "transclusions": self._get_transclusion_map(board_id, unit_id)
+        "author_id": author_id,
+        "author_name": author_name,
+        "flairs": unit["flairs"],
+        "transclusions": self._get_transclusion_map(board_id, unit_id),
+        "notice": unit["notice"],
       }      
 
     def _get_basic_unit(self, board_id, unit_id):
@@ -287,3 +292,24 @@ class GlobalManager:
       for u in discussion["chat"][start_index:end_index]:
         chat.append(self._get_chat_unit(board_id, u))
       return (chat, start_index)
+
+    def create_notice_unit(self, board_id, discussion_id, message, user_id):
+      # clean it of transclusions
+      message = self._wipe_pith(message)
+
+      user = self.users.find_one({"short_id": user_id, "board_id": board_id})
+      unit = Unit(board_id=board_id, pith=message, chat=True, 
+        author=user_id,
+        author_name=user["nickname"],
+        flairs=[],
+        notice=True
+      )
+      unit.id = "{}:{}".format(unit.board_id, unit.short_id)
+
+      self.units.insert_one(unit.to_mongo())
+      unit_id = unit.short_id
+      self.discussions.update_one(
+        {"short_id" : discussion_id, "board_id": board_id},
+        {"$push": {"chat": unit_id}}
+      )
+      return unit

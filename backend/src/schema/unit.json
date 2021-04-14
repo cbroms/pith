@@ -4,12 +4,17 @@
       "properties": {
         "id": {"type": "string"},
         "pith": {"type": "string"},
+        "flairs": {
+            "type": "array",
+            "items": {"type": "string"}
+        },
         "created": {"type": "string"},
         "author_id": {"type": "string"},
         "author_name": {"type": "string"}, 
-        "transclusions": {"$ref": "file:transclusions.json#/transclusions"}
+        "transclusions": {"$ref": "file:transclusions.json#/transclusions"},
+        "notice": {"type": "boolean"}
       },
-      "required": ["id", "pith", "created", "author_id", "author_name", "transclusions"]
+      "required": ["id", "pith", "flairs", "created", "author_id", "author_name", "transclusions", "notice"]
   },
   "board": {
       "type": "object",

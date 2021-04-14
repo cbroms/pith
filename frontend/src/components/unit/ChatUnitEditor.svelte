@@ -12,6 +12,7 @@
   export let noBorder = false;
 
   let typingDetectionTimeout = null;
+  let flairs = [];
 
   const onSearch = (query) => {
     discussionStore.search(
@@ -19,6 +20,16 @@
       $discussionStore.discussionId,
       query
     );
+  };
+
+  const toggleFlair = (flair) => {
+    if (flairs.includes(flair)) {
+      flairs = flairs.filter((f) => {
+        return f !== flair;
+      });
+    } else {
+      flairs = [...flairs, flair];
+    }
   };
 
   const stopTyping = () => {
@@ -60,13 +71,17 @@
           <div class="ball" />
         </div>
       {/each}
+      <div class="typing-indicator-text">
+        {$discussionStore.typers.length} typing...
+      </div>
     </div>
   {/if}
 </div>
 <UnitEditor
   onSubmit={(e) => {
     stopTyping();
-    onSubmit(e);
+    onSubmit(e, flairs);
+    flairs = [];
   }}
   {onCancel}
   {noBorder}
@@ -86,11 +101,34 @@
     {/each}
   </div>
 </UnitEditor>
+{#each $discussionStore.flairs as flair (flair)}
+  <button
+    class:flair-selected={flairs.includes(flair)}
+    on:click={() => toggleFlair(flair)}>{flair}</button
+  >
+{/each}
 
 <style>
   .typing-indicator {
     height: 20px;
     margin-bottom: 5px;
+  }
+
+  .typing-indicator-text {
+    display: inline-block;
+  }
+
+  button {
+    border: 1px solid;
+    margin-top: 10px;
+    margin-right: 5px;
+    padding: 2px 5px;
+    text-decoration: none;
+  }
+
+  .flair-selected {
+    background-color: black;
+    color: white;
   }
 
   /* .typing-text {
@@ -100,6 +138,7 @@
 
   .bouncing-ball {
     height: 15px;
+    width: 10px;
     font-size: 20px;
     position: relative;
     display: inline-block;

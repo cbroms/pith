@@ -1,3 +1,4 @@
+"""
 import math
 import nltk
 from nltk import pos_tag
@@ -60,3 +61,4 @@ def basic_search(query: str, blocks: List[Block]) -> List[str]:
     block_ids = [b for f, t, b in blocks_order if f > 0]
 
     return block_ids
+"""

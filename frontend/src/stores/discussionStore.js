@@ -26,6 +26,7 @@ const defaultState = {
   participants: [],
   searchResults: [],
   typers: [],
+  flairs: ["Question", "Suggestion", "Meta"],
 };
 
 export const discussionStore = createDerivedSocketStore(
@@ -52,6 +53,7 @@ export const discussionStore = createDerivedSocketStore(
           { board_id: boardId, discussion_id: discussionId },
           (res) => {
             const json = JSON.parse(res);
+            console.log("load", json);
             if (!json.error) {
               update((state) => {
                 let units = {};
@@ -62,7 +64,7 @@ export const discussionStore = createDerivedSocketStore(
                   units[unit.id] = unit;
                 }
                 const chat = json.chat.map((e) => {
-                    return e.id;
+                  return e.id;
                 });
                 console.log("chat", chat);
                 return {
@@ -158,16 +160,24 @@ export const discussionStore = createDerivedSocketStore(
         }
       };
     },
-    post: (boardId, discussionId, userId, nickname, text, resolve, reject) => {
+    post: (
+      boardId,
+      discussionId,
+      userId,
+      nickname,
+      text,
+      flairs,
+      resolve,
+      reject
+    ) => {
       return (socket, update) => {
-        console.log("posted", socket.id);
-
         const tempId = uuid();
 
         // add the post temporarily
         const newPost = {
           id: tempId,
           pith: text,
+          flairs,
           author_name: nickname,
           author_id: userId,
           created: new Date().toISOString(),
@@ -195,6 +205,7 @@ export const discussionStore = createDerivedSocketStore(
             discussion_id: discussionId,
             user_id: userId,
             text: text,
+            flairs,
           },
           (res) => {
             const json = JSON.parse(res);
@@ -223,11 +234,11 @@ export const discussionStore = createDerivedSocketStore(
         );
       };
     },
-    addPinned: (boardId, discussionId, unitId, resolve, reject) => {
+    addPinned: (boardId, discussionId, unitId, userId, resolve, reject) => {
       return (socket, update) => {
         socket.emit(
           "add_pinned",
-          { board_id: boardId, discussion_id: discussionId, unit_id: unitId },
+          { board_id: boardId, discussion_id: discussionId, unit_id: unitId, user_id: userId },
           (res) => {
             const json = JSON.parse(res);
             if (!json.error) {
@@ -235,6 +246,8 @@ export const discussionStore = createDerivedSocketStore(
                 if (json.unit) {
                   return {
                     ...state,
+                    chat: [...state.chat, json.notice_unit.id],
+                    units: { ...state.units, [json.notice_unit.id]: json.notice_unit },
                     pinned: [...state.pinned, json.unit.id],
                   };
                 } else {
@@ -249,11 +262,11 @@ export const discussionStore = createDerivedSocketStore(
         );
       };
     },
-    removePinned: (boardId, discussionId, unitId, resolve, reject) => {
+    removePinned: (boardId, discussionId, unitId, userId, resolve, reject) => {
       return (socket, update) => {
         socket.emit(
           "remove_pinned",
-          { board_id: boardId, discussion_id: discussionId, unit_id: unitId },
+          { board_id: boardId, discussion_id: discussionId, unit_id: unitId, user_id: userId },
           (res) => {
             const json = JSON.parse(res);
             if (!json.error) {
@@ -265,6 +278,8 @@ export const discussionStore = createDerivedSocketStore(
                 });
                 return {
                   ...state,
+                  chat: [...state.chat, json.notice_unit.id],
+                  units: { ...state.units, [json.notice_unit.id]: json.notice_unit },
                   pinned: pinned,
                 };
               });
@@ -373,15 +388,15 @@ export const discussionStore = createDerivedSocketStore(
             console.log("typing_start", json);
 
             if (!json.error) {
-//              update((state) => {
-//                let typers = [...state.typers];
-//                typers.push(json.user_id);
-//
-//                return {
-//                  ...state,
-//                  typers: typers,
-//                };
-//              });
+              //              update((state) => {
+              //                let typers = [...state.typers];
+              //                typers.push(json.user_id);
+              //
+              //                return {
+              //                  ...state,
+              //                  typers: typers,
+              //                };
+              //              });
               resolve();
             } else {
               errorHandler(json.error, json.error_meta, update);
@@ -401,19 +416,19 @@ export const discussionStore = createDerivedSocketStore(
             console.log("typing_stop", json);
 
             if (!json.error) {
-//              update((state) => {
-//                let typers = [...state.typers];
-//                console.log("before", typers, userId);
-//                typers = typers.filter((e) => {
-//                  return e !== json.user_id;
-//                });
-//                console.log("after", typers);
-//
-//                return {
-//                  ...state,
-//                  typers: typers,
-//                };
-//              });
+              //              update((state) => {
+              //                let typers = [...state.typers];
+              //                console.log("before", typers, userId);
+              //                typers = typers.filter((e) => {
+              //                  return e !== json.user_id;
+              //                });
+              //                console.log("after", typers);
+              //
+              //                return {
+              //                  ...state,
+              //                  typers: typers,
+              //                };
+              //              });
               resolve();
             } else {
               errorHandler(json.error, json.error_meta, update);
@@ -550,37 +565,35 @@ export const discussionStore = createDerivedSocketStore(
         });
 
         socket.on("typing_start", (res) => {
-            console.log("typing_start");
-            const json = JSON.parse(res);
+          console.log("typing_start");
+          const json = JSON.parse(res);
 
-            update((state) => {
-              let typers = [...state.typers];
-              typers.push(json.user_id);
+          update((state) => {
+            let typers = [...state.typers];
+            typers.push(json.user_id);
 
-              return {
-                ...state,
-                typers: typers,
-              };
-            });
-          }
-        );
+            return {
+              ...state,
+              typers: typers,
+            };
+          });
+        });
         socket.on("typing_stop", (res) => {
-            console.log("typing_stop");
-            const json = JSON.parse(res);
+          console.log("typing_stop");
+          const json = JSON.parse(res);
 
-            update((state) => {
-              let typers = [...state.typers];
-              typers = typers.filter((e) => {
-                return e !== json.user_id;
-              });
-
-              return {
-                ...state,
-                typers: typers,
-              };
+          update((state) => {
+            let typers = [...state.typers];
+            typers = typers.filter((e) => {
+              return e !== json.user_id;
             });
-          }
-        );
+
+            return {
+              ...state,
+              typers: typers,
+            };
+          });
+        });
       };
     },
   },

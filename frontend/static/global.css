@@ -54,3 +54,7 @@ input {
   border: 1px solid;
   outline: none;
 }
+
+summary {
+  cursor: pointer;
+}

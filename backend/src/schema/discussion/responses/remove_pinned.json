@@ -1,7 +1,8 @@
 {
   "type": "object",
   "properties": {
-    "unit_id": {"type": "string"}
+    "unit_id": {"type": "string"},
+    "notice_unit": {"$ref": "file:unit.json#/chat"}
   },
-  "required": ["unit_id"]
+  "required": ["unit_id", "notice_unit"]
 }

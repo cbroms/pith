@@ -25,9 +25,9 @@
 
   afterUpdate(() => {
     if (areaElt) {
-      console.log("updating");
       // TODO improve performance by only calling this when the area elt changes
       const eltBounds = areaElt.getBoundingClientRect();
+      console.log("updating", eltBounds.width, eltBounds.height);
       bounds = { width: eltBounds.width, height: eltBounds.height };
     }
   });

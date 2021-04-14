@@ -16,6 +16,8 @@
   export let author_id = null;
   export let created = null;
   export let transclusions = null;
+  export let flairs = [];
+  export let notice = false;
 
   export let truncate = false;
   export let searchResult = false;
@@ -51,7 +53,8 @@
     discussionStore.addPinned(
       $boardStore.boardId,
       $discussionStore.discussionId,
-      id
+      id,
+      $boardStore.userId
     );
   };
 
@@ -59,7 +62,8 @@
     discussionStore.removePinned(
       $boardStore.boardId,
       $discussionStore.discussionId,
-      id
+      id,
+      $boardStore.userId
     );
   };
 
@@ -75,43 +79,60 @@
   };
 </script>
 
-<div class="message" on:click={onClick}>
-  {#if prev === null || !(prev.author_id === author_id && Math.floor((Date.parse(created) - Date.parse(prev.created)) / 1000 / 60) < 30)}
-    <div class="message-title">
-      <span class="message-author">{author_name}</span>
-      <span class="message-time">{parseTime(created)}</span>
-    </div>
-  {/if}
-  <div class="message-content">
-    {#if orderedTransclusions.length > 0}
-      <LinkedContentLayout>
-        {#each orderedTransclusions as transclusion}
-          <LinkedContentItemLayout>
-            <Transclusion {transclusion} truncate />
-          </LinkedContentItemLayout>
-        {/each}
-      </LinkedContentLayout>
-    {/if}
-    <div class="message-line">
-      <TruncateText active={truncate && !open}>
-        {pith}
-      </TruncateText>
-      {#if !searchResult}
-        <div class="message-pin">
-          <CopyContent {id} />
-          {#if pin && !unpin}
-            <button on:click={onPin}>Pin &rarr;</button>
-          {:else if unpin}
-            <button on:click={onUnpin}>Unpin</button>
-          {/if}
-          {#if publish}
-            <button on:click={onPublish}>Publish</button>
-          {/if}
-        </div>
-      {/if}
+{#if notice}
+  <div class="message">
+    <div class="message-content greyed">
+      <div class="message-line">
+        <TruncateText active={truncate && !open}>
+          <span class="system-event-text"
+            ><span class="message-author">{author_name}</span>{pith}</span
+          >
+        </TruncateText>
+      </div>
     </div>
   </div>
-</div>
+{:else}
+  <div class="message" on:click={onClick}>
+    {#if prev?.notice || prev === null || !(prev.author_id === author_id && Math.floor((Date.parse(created) - Date.parse(prev.created)) / 1000 / 60) < 30)}
+      <div class="message-title">
+        <span class="message-author">{author_name}</span>
+        <span class="message-time">{parseTime(created)}</span>
+      </div>
+    {/if}
+    <div class="message-content">
+      {#if orderedTransclusions.length > 0}
+        <LinkedContentLayout>
+          {#each orderedTransclusions as transclusion}
+            <LinkedContentItemLayout>
+              <Transclusion {transclusion} truncate />
+            </LinkedContentItemLayout>
+          {/each}
+        </LinkedContentLayout>
+      {/if}
+      <div class="message-line">
+        <TruncateText active={truncate && !open}>
+          {#each flairs as flair (flair)}
+            <div class="flair">{flair}</div>
+          {/each}
+          {pith}
+        </TruncateText>
+        {#if !searchResult}
+          <div class="message-pin">
+            <CopyContent {id} />
+            {#if pin && !unpin}
+              <button on:click={onPin}>Pin &rarr;</button>
+            {:else if unpin}
+              <button on:click={onUnpin}>Unpin</button>
+            {/if}
+            {#if publish}
+              <button on:click={onPublish}>Publish</button>
+            {/if}
+          </div>
+        {/if}
+      </div>
+    </div>
+  </div>
+{/if}
 
 <style>
   .message {
@@ -145,8 +166,23 @@
     visibility: visible;
   }
 
+  .greyed {
+    background-color: rgb(240, 240, 240);
+  }
+
   .message-pin {
     min-width: 90px;
     visibility: hidden;
+  }
+
+  .flair {
+    font-size: 12px;
+    border: 1px solid;
+    padding: 0 5px;
+    margin-right: 5px;
+    display: inline-block;
+  }
+  .system-event-text {
+    font-size: 12px;
   }
 </style>

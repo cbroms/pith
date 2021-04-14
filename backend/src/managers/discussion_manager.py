@@ -59,11 +59,12 @@ class DiscussionManager:
     @Checker._check_board_id
     @Checker._check_discussion_id
     @Checker._check_user_id
-    def post(self, board_id, discussion_id, user_id, text):
+    def post(self, board_id, discussion_id, user_id, text, flairs):
       pith, transclusions = self.gm._get_pith(board_id, text)
       user = self.gm.users.find_one({"board_id": board_id, "short_id": user_id})
+
       unit = Unit(board_id=board_id, pith=pith, chat=True, 
-        author=user_id, author_name=user["nickname"])
+        author=user_id, author_name=user["nickname"], flairs=flairs)
       unit.id = "{}:{}".format(unit.board_id, unit.short_id)
 
       self.gm.units.insert_one(unit.to_mongo())
@@ -78,9 +79,8 @@ class DiscussionManager:
     @Checker._check_board_id
     @Checker._check_discussion_id
     @Checker._check_unit_id
-    def add_pinned(self, board_id, discussion_id, unit_id):
+    def add_pinned(self, board_id, discussion_id, unit_id, user_id):
       unit = self.gm.units.find_one({"short_id": unit_id, "board_id": board_id})
-
       if unit["chat"] is False:
         return make_error(Errors.NOT_CHAT, 
           error_meta={"unit_id": unit_id}
@@ -92,19 +92,34 @@ class DiscussionManager:
             {"short_id" : discussion_id, "board_id": board_id},
             {"$addToSet": {"pinned": unit_id}}
         )
-        return {"unit": self.gm._get_chat_unit(board_id, unit_id)}
+
+        message = "pinned \"{}\"".format(unit["pith"])
+        notice_unit = self.gm.create_notice_unit(board_id, discussion_id, message, user_id)
+
+        return {
+          "unit": self.gm._get_chat_unit(board_id, unit_id),
+          "notice_unit": self.gm._get_chat_unit(board_id, notice_unit.short_id)
+        }
       else:
         return {}
 
     @Checker._check_board_id
     @Checker._check_discussion_id
     @Checker._check_unit_id
-    def remove_pinned(self, board_id, discussion_id, unit_id):
+    def remove_pinned(self, board_id, discussion_id, unit_id, user_id):
       self.gm.discussions.update_one(
         {"short_id" : discussion_id, "board_id": board_id},
         {"$pull": {"pinned": unit_id}}
       )
-      return {"unit_id": unit_id}
+
+      unit = self.gm.units.find_one({"short_id": unit_id, "board_id": board_id})
+      message = "unpinned \"{}\"".format(unit["pith"])
+      notice_unit = self.gm.create_notice_unit(board_id, discussion_id, message, user_id)
+
+      return {
+        "unit_id": unit_id,
+        "notice_unit": self.gm._get_chat_unit(board_id, notice_unit.short_id)
+      }
 
     @Checker._check_board_id
     @Checker._check_discussion_id
