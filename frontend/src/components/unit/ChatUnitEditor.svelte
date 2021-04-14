@@ -12,6 +12,7 @@
   export let noBorder = false;
 
   let typingDetectionTimeout = null;
+  let flairs = [];
 
   const onSearch = (query) => {
     discussionStore.search(
@@ -19,6 +20,16 @@
       $discussionStore.discussionId,
       query
     );
+  };
+
+  const toggleFlair = (flair) => {
+    if (flairs.includes(flair)) {
+      flairs = flairs.filter((f) => {
+        return f !== flair;
+      });
+    } else {
+      flairs = [...flairs, flair];
+    }
   };
 
   const stopTyping = () => {
@@ -66,7 +77,8 @@
 <UnitEditor
   onSubmit={(e) => {
     stopTyping();
-    onSubmit(e);
+    onSubmit(e, flairs);
+    flairs = [];
   }}
   {onCancel}
   {noBorder}
@@ -86,14 +98,29 @@
     {/each}
   </div>
 </UnitEditor>
-{#each $discussionStore.flares as flare (flare)}
-  <div>{flare}</div>
+{#each $discussionStore.flairs as flair (flair)}
+  <button
+    class:flair-selected={flairs.includes(flair)}
+    on:click={() => toggleFlair(flair)}>{flair}</button
+  >
 {/each}
 
 <style>
   .typing-indicator {
     height: 20px;
     margin-bottom: 5px;
+  }
+
+  button {
+    border: 1px solid;
+    margin-top: 10px;
+    margin-right: 5px;
+    text-decoration: none;
+  }
+
+  .flair-selected {
+    background-color: black;
+    color: white;
   }
 
   /* .typing-text {

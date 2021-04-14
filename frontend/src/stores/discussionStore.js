@@ -26,7 +26,7 @@ const defaultState = {
   participants: [],
   searchResults: [],
   typers: [],
-  flares: ["Question", "Suggestion", "Meta"],
+  flairs: ["Question", "Suggestion", "Meta"],
 };
 
 export const discussionStore = createDerivedSocketStore(
