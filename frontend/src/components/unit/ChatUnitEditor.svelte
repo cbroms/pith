@@ -71,6 +71,9 @@
           <div class="ball" />
         </div>
       {/each}
+      <div class="typing-indicator-text">
+        {$discussionStore.typers.length} typing...
+      </div>
     </div>
   {/if}
 </div>
@@ -111,6 +114,10 @@
     margin-bottom: 5px;
   }
 
+  .typing-indicator-text {
+    display: inline-block;
+  }
+
   button {
     border: 1px solid;
     margin-top: 10px;
@@ -131,6 +138,7 @@
 
   .bouncing-ball {
     height: 15px;
+    width: 10px;
     font-size: 20px;
     position: relative;
     display: inline-block;
