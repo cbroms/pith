@@ -15,6 +15,7 @@
   export let noResults = true;
   export let placeholder = "type something...";
   export let noBorder = false;
+  export let submitOnClickOff = false;
   export let slideUp = false;
 
   const dispatch = createEventDispatcher();
@@ -72,6 +73,12 @@
     content = content.replace(query, id + "]]");
     editorElement.focus();
   };
+
+  const onBlur = () => {
+    if (submitOnClickOff) {
+      onSubmit(content);
+    }
+  };
 </script>
 
 {#if isSearching}
@@ -91,6 +98,7 @@
   class:borderless={noBorder}
   {placeholder}
   bind:value={content}
+  on:blur={onBlur}
   on:keydown={onKeydown}
   bind:this={editorElement}
 />

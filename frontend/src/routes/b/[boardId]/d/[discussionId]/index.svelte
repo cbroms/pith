@@ -60,8 +60,11 @@
 
   <div class="section" slot="pinned">
     <SectionLayout sectionName="Summary">
+      {#if $discussionStore.pinned.length === 0}
+        <p>Pin a message from the chat to start your discussion's summary.</p>
+      {/if}
       {#each $discussionStore.pinned as unitId}
-        <ChatUnit publish truncate {...$discussionStore.units[unitId]} unpin />
+        <ChatUnit {...$discussionStore.units[unitId]} unpin />
       {/each}
     </SectionLayout>
   </div>

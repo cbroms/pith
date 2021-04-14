@@ -22,6 +22,7 @@
   {onCancel}
   {noBorder}
   {content}
+  submitOnClickOff
   noResults={$boardStore.searchResults.length === 0}
   placeholder="type a pith..."
 >
