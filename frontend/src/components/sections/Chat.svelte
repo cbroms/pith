@@ -72,7 +72,8 @@
         id,
         $boardStore.userId,
         $boardStore.nickname,
-        content
+        content,
+        flairs
       );
     }
   };

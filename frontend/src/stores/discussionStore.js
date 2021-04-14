@@ -159,7 +159,16 @@ export const discussionStore = createDerivedSocketStore(
         }
       };
     },
-    post: (boardId, discussionId, userId, nickname, text, resolve, reject) => {
+    post: (
+      boardId,
+      discussionId,
+      userId,
+      nickname,
+      text,
+      flairs,
+      resolve,
+      reject
+    ) => {
       return (socket, update) => {
         console.log("posted", socket.id);
 
@@ -169,6 +178,7 @@ export const discussionStore = createDerivedSocketStore(
         const newPost = {
           id: tempId,
           pith: text,
+          flairs,
           author_name: nickname,
           author_id: userId,
           created: new Date().toISOString(),
@@ -196,6 +206,7 @@ export const discussionStore = createDerivedSocketStore(
             discussion_id: discussionId,
             user_id: userId,
             text: text,
+            flairs,
           },
           (res) => {
             const json = JSON.parse(res);
@@ -208,6 +219,7 @@ export const discussionStore = createDerivedSocketStore(
                     return post.id !== tempId;
                   }
                 );
+                console.log("post", json.unit.flairs);
 
                 return {
                   ...state,

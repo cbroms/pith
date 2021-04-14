@@ -1,7 +1,7 @@
 {
   "type": "object",
   "properties": {
-    "unit": {"$ref": "file:unit.json#/chat"}
+      "unit": {"$ref": "file:unit.json#/chat"}
   },
   "required": ["unit"]
 }
