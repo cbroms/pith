@@ -86,6 +86,9 @@
     {/each}
   </div>
 </UnitEditor>
+{#each $discussionStore.flares as flare (flare)}
+  <div>{flare}</div>
+{/each}
 
 <style>
   .typing-indicator {
