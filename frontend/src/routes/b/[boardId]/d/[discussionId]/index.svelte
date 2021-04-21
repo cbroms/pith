@@ -63,7 +63,7 @@
     </SectionLayout>
   </div>
 
-  <div class="section" slot="pinned">
+  <!-- <div class="section" slot="pinned">
     <SectionLayout sectionName="Summary">
       {#if $discussionStore.pinned.length === 0}
         <p>Pin a message from the chat to start your discussion's summary.</p>
@@ -72,7 +72,7 @@
         <ChatUnit {...$discussionStore.units[unitId]} unpin />
       {/each}
     </SectionLayout>
-  </div>
+  </div> -->
 
   <!-- <div class="section" slot="focus">
     <SectionLayout sectionName="Focusing on">

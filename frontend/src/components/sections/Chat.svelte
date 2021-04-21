@@ -110,6 +110,7 @@
       {/if}
       {#each $discussionStore.chat as unitId, i (unitId)}
         <ChatUnit
+          pin={false}
           {...$discussionStore.units[unitId]}
           prev={i > 0
             ? $discussionStore.units[$discussionStore.chat[i - 1]]
@@ -118,6 +119,7 @@
       {/each}
       {#each $discussionStore.temporaryChat as message, i}
         <ChatUnit
+          pin={false}
           {...message}
           prev={i > 0
             ? $discussionStore.temporaryChat[i - 1]
