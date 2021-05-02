@@ -226,7 +226,7 @@ export const discussionStore = createDerivedSocketStore(
                   temporaryChat: newTemporaryChat,
                 };
               });
-              resolve();
+              resolve(json.unit.id); // give id
             } else {
               errorHandler(json.error, json.error_meta, update);
             }

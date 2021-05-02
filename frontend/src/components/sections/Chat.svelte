@@ -65,9 +65,9 @@
     }
   };
 
-  const onSubmit = (content, flairs) => {
+  const onSubmit = async (content, flairs) => {
     if (content !== "") {
-      discussionStore.post(
+      const unitId = await discussionStore.post(
         $boardStore.boardId,
         id,
         $boardStore.userId,
@@ -75,6 +75,14 @@
         content,
         flairs
       );
+      if (flairs.length > 0) {
+        await discussionStore.addPinned(
+          $boardStore.boardId,
+          id,
+          unitId, // of posted
+          $boardStore.userId
+        );
+      }
     }
   };
 </script>
