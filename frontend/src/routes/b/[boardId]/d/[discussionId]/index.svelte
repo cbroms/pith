@@ -55,9 +55,9 @@
             <div><strong>{participant.nickname}</strong></div>
           {/each}
         </details>
-        <button on:click={onLeave} class="inline-button"
+        <!-- <button on:click={onLeave} class="inline-button"
           >Leave discussion</button
-        >
+        >  -->
       </div>
       <Chat {id} />
     </SectionLayout>
@@ -74,7 +74,7 @@
     </SectionLayout>
   </div>
 
-  <div class="section" slot="focus">
+  <!-- <div class="section" slot="focus">
     <SectionLayout sectionName="Focusing on">
       {#if $discussionStore.focused.length === 0}
         <p>Select a unit from the board to focus your discussion.</p>
@@ -89,9 +89,9 @@
         />
       {/each}
     </SectionLayout>
-  </div>
+  </div> -->
 
-  <div class="section" slot="board">
+  <!-- <div class="section" slot="board">
     <SectionLayout sectionName="Board">
       <div slot="header" class="header board-controls">
         <button on:click={onBoardSizeToggle} class="inline-button"
@@ -100,7 +100,7 @@
       </div>
       <CanvasBoard />
     </SectionLayout>
-  </div>
+  </div> -->
 </DiscussionPageLayout>
 
 <style>

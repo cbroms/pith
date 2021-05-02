@@ -11,7 +11,7 @@
   .board-page-layout {
     display: grid;
     grid-template-columns: 30vw 70vw;
-    grid-template-rows: 100vh;
+    grid-template-rows: calc(100vh - 72px);
   }
 
   .board-page-info {
